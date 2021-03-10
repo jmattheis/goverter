@@ -1,0 +1,161 @@
+package comments
+
+import (
+	"bufio"
+	"fmt"
+	"go/ast"
+	"strings"
+
+	"golang.org/x/tools/go/packages"
+)
+
+const (
+	prefix          = "genconv"
+	delimter        = ":"
+	converterMarker = prefix + delimter + "converter"
+)
+
+type Mapping map[string]Converter
+type MethodMapping map[string]Method
+
+type Converter struct {
+	Config  ConverterConfig
+	Methods MethodMapping
+}
+type ConverterConfig struct {
+	Name string
+}
+
+type Method struct {
+}
+
+func ParseDocs(pattern string) (Mapping, error) {
+	pkgs, err := packages.Load(&packages.Config{Mode: packages.LoadAllSyntax}, pattern)
+	if err != nil {
+		return nil, err
+	}
+	mapping := Mapping{}
+	for _, pkg := range pkgs {
+		for _, file := range pkg.Syntax {
+			for _, decl := range file.Decls {
+				if genDecl, ok := decl.(*ast.GenDecl); ok {
+					if err := parseGenDecl(mapping, genDecl); err != nil {
+						return mapping, fmt.Errorf("%s: %s", pkg.Fset.Position(genDecl.Pos()), err)
+					}
+				}
+			}
+		}
+	}
+	return mapping, nil
+}
+
+func parseGenDecl(mapping Mapping, decl *ast.GenDecl) error {
+	declDocs := decl.Doc.Text()
+
+	if strings.Contains(declDocs, converterMarker) {
+		if len(decl.Specs) != 1 {
+			return fmt.Errorf("found %s on type but it has multiple interfaces inside", converterMarker)
+		}
+		typeSpec, ok := decl.Specs[0].(*ast.TypeSpec)
+		if !ok {
+			return fmt.Errorf("%s may only be applied to type declarations ", converterMarker)
+		}
+		interfaceType, ok := typeSpec.Type.(*ast.InterfaceType)
+		if !ok {
+			return fmt.Errorf("%s may only be applied to type interface declarations ", converterMarker)
+		}
+		typeName := typeSpec.Name.String()
+		config, err := parseConverterComment(declDocs, ConverterConfig{Name: typeName})
+		if err != nil {
+			return fmt.Errorf("type %s: %s", typeName, err)
+		}
+		methods, err := parseInterface(interfaceType)
+		if err != nil {
+			return fmt.Errorf("type %s: %s", typeName, err)
+		}
+		mapping[typeName] = Converter{
+			Methods: methods,
+			Config:  config,
+		}
+	}
+
+	for _, spec := range decl.Specs {
+		if typeSpec, ok := spec.(*ast.TypeSpec); ok && strings.Contains(typeSpec.Doc.Text(), converterMarker) {
+			interfaceType, ok := typeSpec.Type.(*ast.InterfaceType)
+			if !ok {
+				return fmt.Errorf("%s may only be applied to type interface declarations ", converterMarker)
+			}
+			typeName := typeSpec.Name.String()
+			config, err := parseConverterComment(typeSpec.Doc.Text(), ConverterConfig{Name: typeName})
+			if err != nil {
+				return fmt.Errorf("type %s: %s", typeName, err)
+			}
+			methods, err := parseInterface(interfaceType)
+			if err != nil {
+				return fmt.Errorf("type %s: %s", typeName, err)
+			}
+			mapping[typeName] = Converter{
+				Methods: methods,
+				Config:  config,
+			}
+		}
+	}
+
+	return nil
+}
+
+func parseInterface(inter *ast.InterfaceType) (MethodMapping, error) {
+	result := MethodMapping{}
+	for _, method := range inter.Methods.List {
+		if len(method.Names) != 1 {
+			return result, fmt.Errorf("method must have one name")
+		}
+		name := method.Names[0].String()
+
+		parsed, err := parseMethodComment(method.Doc.Text())
+		if err != nil {
+			return result, fmt.Errorf("parsing method %s: %s", name, err)
+		}
+
+		result[name] = parsed
+	}
+	return result, nil
+}
+
+func parseConverterComment(comment string, config ConverterConfig) (ConverterConfig, error) {
+	scanner := bufio.NewScanner(strings.NewReader(comment))
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if strings.HasPrefix(line, prefix+delimter) {
+			cmd := strings.TrimPrefix(line, prefix+delimter)
+			if cmd == "" {
+				return config, fmt.Errorf("unknown %s comment: %s", prefix, line)
+			}
+			fields := strings.Fields(cmd)
+			switch fields[0] {
+			case "converter":
+				// only a marker interface
+				continue
+			case "name":
+				if len(fields) != 2 {
+					return config, fmt.Errorf("invalid %s:name must have one parameter", prefix)
+				}
+				config.Name = fields[1]
+				continue
+			}
+			return config, fmt.Errorf("unknown %s comment: %s", prefix, line)
+		}
+	}
+	return config, nil
+}
+
+func parseMethodComment(comment string) (Method, error) {
+	scanner := bufio.NewScanner(strings.NewReader(comment))
+	for scanner.Scan() {
+		line := strings.TrimSpace(scanner.Text())
+		if strings.HasPrefix(line, prefix+delimter) {
+			return Method{}, fmt.Errorf("unknown %s comment: %s", prefix, line)
+		}
+	}
+	return Method{}, nil
+}
