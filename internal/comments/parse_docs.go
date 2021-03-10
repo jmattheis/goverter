@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"go/ast"
+	"sort"
 	"strings"
 
 	"golang.org/x/tools/go/packages"
@@ -15,10 +16,10 @@ const (
 	converterMarker = prefix + delimter + "converter"
 )
 
-type Mapping map[string]Converter
 type MethodMapping map[string]Method
 
 type Converter struct {
+	Name    string
 	Config  ConverterConfig
 	Methods MethodMapping
 }
@@ -29,79 +30,86 @@ type ConverterConfig struct {
 type Method struct {
 }
 
-func ParseDocs(pattern string) (Mapping, error) {
+func ParseDocs(pattern string) ([]Converter, error) {
 	pkgs, err := packages.Load(&packages.Config{Mode: packages.LoadAllSyntax}, pattern)
 	if err != nil {
 		return nil, err
 	}
-	mapping := Mapping{}
+	mapping := []Converter{}
 	for _, pkg := range pkgs {
 		for _, file := range pkg.Syntax {
 			for _, decl := range file.Decls {
 				if genDecl, ok := decl.(*ast.GenDecl); ok {
-					if err := parseGenDecl(mapping, genDecl); err != nil {
+					var err error
+					if mapping, err = parseGenDecl(mapping, genDecl); err != nil {
 						return mapping, fmt.Errorf("%s: %s", pkg.Fset.Position(genDecl.Pos()), err)
 					}
 				}
 			}
 		}
 	}
+	sort.Slice(mapping, func(i, j int) bool {
+		return mapping[i].Config.Name < mapping[j].Config.Name
+	})
 	return mapping, nil
 }
 
-func parseGenDecl(mapping Mapping, decl *ast.GenDecl) error {
+func parseGenDecl(mapping []Converter, decl *ast.GenDecl) ([]Converter, error) {
 	declDocs := decl.Doc.Text()
 
 	if strings.Contains(declDocs, converterMarker) {
 		if len(decl.Specs) != 1 {
-			return fmt.Errorf("found %s on type but it has multiple interfaces inside", converterMarker)
+			return mapping, fmt.Errorf("found %s on type but it has multiple interfaces inside", converterMarker)
 		}
 		typeSpec, ok := decl.Specs[0].(*ast.TypeSpec)
 		if !ok {
-			return fmt.Errorf("%s may only be applied to type declarations ", converterMarker)
+			return mapping, fmt.Errorf("%s may only be applied to type declarations ", converterMarker)
 		}
 		interfaceType, ok := typeSpec.Type.(*ast.InterfaceType)
 		if !ok {
-			return fmt.Errorf("%s may only be applied to type interface declarations ", converterMarker)
+			return mapping, fmt.Errorf("%s may only be applied to type interface declarations ", converterMarker)
 		}
 		typeName := typeSpec.Name.String()
 		config, err := parseConverterComment(declDocs, ConverterConfig{Name: typeName})
 		if err != nil {
-			return fmt.Errorf("type %s: %s", typeName, err)
+			return mapping, fmt.Errorf("type %s: %s", typeName, err)
 		}
 		methods, err := parseInterface(interfaceType)
 		if err != nil {
-			return fmt.Errorf("type %s: %s", typeName, err)
+			return mapping, fmt.Errorf("type %s: %s", typeName, err)
 		}
-		mapping[typeName] = Converter{
+		mapping = append(mapping, Converter{
+			Name:    typeName,
 			Methods: methods,
 			Config:  config,
-		}
+		})
+		return mapping, nil
 	}
 
 	for _, spec := range decl.Specs {
 		if typeSpec, ok := spec.(*ast.TypeSpec); ok && strings.Contains(typeSpec.Doc.Text(), converterMarker) {
 			interfaceType, ok := typeSpec.Type.(*ast.InterfaceType)
 			if !ok {
-				return fmt.Errorf("%s may only be applied to type interface declarations ", converterMarker)
+				return mapping, fmt.Errorf("%s may only be applied to type interface declarations ", converterMarker)
 			}
 			typeName := typeSpec.Name.String()
 			config, err := parseConverterComment(typeSpec.Doc.Text(), ConverterConfig{Name: typeName})
 			if err != nil {
-				return fmt.Errorf("type %s: %s", typeName, err)
+				return mapping, fmt.Errorf("type %s: %s", typeName, err)
 			}
 			methods, err := parseInterface(interfaceType)
 			if err != nil {
-				return fmt.Errorf("type %s: %s", typeName, err)
+				return mapping, fmt.Errorf("type %s: %s", typeName, err)
 			}
-			mapping[typeName] = Converter{
+			mapping = append(mapping, Converter{
+				Name:    typeName,
 				Methods: methods,
 				Config:  config,
-			}
+			})
 		}
 	}
 
-	return nil
+	return mapping, nil
 }
 
 func parseInterface(inter *ast.InterfaceType) (MethodMapping, error) {

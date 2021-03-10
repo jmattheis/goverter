@@ -8,12 +8,6 @@ func (c *Converter) ConvertString(source string) string {
 	return source
 }
 
-type RenamedConverter struct{}
-
-func (c *RenamedConverter) ConvertString(source string) string {
-	return source
-}
-
 type Converter3 struct{}
 
 func (c *Converter3) ConvertString(source string) string {
@@ -23,5 +17,11 @@ func (c *Converter3) ConvertString(source string) string {
 type Converter4 struct{}
 
 func (c *Converter4) ConvertString(source string) string {
+	return source
+}
+
+type RenamedConverter struct{}
+
+func (c *RenamedConverter) ConvertString(source string) string {
 	return source
 }
