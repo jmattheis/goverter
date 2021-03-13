@@ -7,8 +7,8 @@ import simple "github.com/jmattheis/go-genconv/example/simple"
 type Converter struct{}
 
 func (c *Converter) ConvertModel(source simple.DBModel) simple.ExternalModel {
-	var target simple.ExternalModel
-	target.Name = source.Name
-	target.Age = source.Age
-	return target
+	var externalModel simple.ExternalModel
+	externalModel.Name = source.Name
+	externalModel.Age = source.Age
+	return externalModel
 }
