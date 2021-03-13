@@ -49,8 +49,8 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID JenID, source, 
 				Prefix:     ".",
 				SourceID:   sourceField.Name(),
 				TargetID:   targetField.Name(),
-				TargetType: sourceField.Type().String(),
-				SourceType: targetField.Type().String(),
+				TargetType: targetField.Type().String(),
+				SourceType: sourceField.Type().String(),
 			})
 		}
 		stmt = append(stmt, fieldStmt...)

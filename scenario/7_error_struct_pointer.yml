@@ -22,12 +22,12 @@ error: |
     |
     |     | github.com/jmattheis/go-genconv/execution.Input
     |     |
-    |     | | int64
+    |     | | int
     |     | |
     source*.Age
     target*.Age
     |     | |
-    |     | | int
+    |     | | int64
     |     |
     |     | github.com/jmattheis/go-genconv/execution.Output
     |

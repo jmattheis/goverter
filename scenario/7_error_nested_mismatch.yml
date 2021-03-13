@@ -36,32 +36,32 @@ error: |
 
     | github.com/jmattheis/go-genconv/execution.Input
     |
-    |      | github.com/jmattheis/go-genconv/execution.Output2
+    |      | github.com/jmattheis/go-genconv/execution.Input2
     |      |
-    |      |     | []github.com/jmattheis/go-genconv/execution.Output3
+    |      |     | []github.com/jmattheis/go-genconv/execution.Input3
     |      |     |
     |      |     |     | github.com/jmattheis/go-genconv/execution.Input3
     |      |     |     |
-    |      |     |     |  | map[string]github.com/jmattheis/go-genconv/execution.Output4
+    |      |     |     |  | map[string]github.com/jmattheis/go-genconv/execution.Input4
     |      |     |     |  |
     |      |     |     |  |    | <mapvalue> github.com/jmattheis/go-genconv/execution.Input4
     |      |     |     |  |    |
-    |      |     |     |  |    |  | int
+    |      |     |     |  |    |  | string
     |      |     |     |  |    |  |
     source.First.Second[].Third[].Value
     target.First.Second[].Third[].Value
     |      |     |     |  |    |  |
-    |      |     |     |  |    |  | string
+    |      |     |     |  |    |  | int
     |      |     |     |  |    |
     |      |     |     |  |    | <mapvalue> github.com/jmattheis/go-genconv/execution.Output4
     |      |     |     |  |
-    |      |     |     |  | map[string]github.com/jmattheis/go-genconv/execution.Input4
+    |      |     |     |  | map[string]github.com/jmattheis/go-genconv/execution.Output4
     |      |     |     |
     |      |     |     | github.com/jmattheis/go-genconv/execution.Output3
     |      |     |
-    |      |     | []github.com/jmattheis/go-genconv/execution.Input3
+    |      |     | []github.com/jmattheis/go-genconv/execution.Output3
     |      |
-    |      | github.com/jmattheis/go-genconv/execution.Input2
+    |      | github.com/jmattheis/go-genconv/execution.Output2
     |
     | github.com/jmattheis/go-genconv/execution.Output
 
