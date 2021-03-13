@@ -1,15 +1,15 @@
-package test
+package genconv
 
 import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path"
 	"path/filepath"
 	"runtime"
 	"testing"
 
-	"github.com/jmattheis/go-genconv"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
@@ -25,9 +25,8 @@ func TestScenario(t *testing.T) {
 	require.NoError(t, clearDir(execDir))
 
 	for _, file := range files {
-		clearDir(execDir)
-
 		require.False(t, file.IsDir(), "should not be a directory")
+
 		t.Run(file.Name(), func(t *testing.T) {
 			scenarioFileName := path.Join(scenarios, file.Name())
 			scenarioBytes, err := ioutil.ReadFile(scenarioFileName)
@@ -40,17 +39,21 @@ func TestScenario(t *testing.T) {
 				err = ioutil.WriteFile(path.Join(execDir, name), []byte(content), 0644)
 				require.NoError(t, err)
 			}
+			genFile := path.Join(execDir, "generated", "generated.go")
 
-			body, err := genconv.Generate(genconv.GenerateConfig{
-				PackageName: "generated",
-				ScanDir:     "github.com/jmattheis/go-genconv/test/execution",
-			})
+			err = GenerateConverterFile(
+				genFile,
+				GenerateConfig{
+					PackageName: "generated",
+					ScanDir:     "github.com/jmattheis/go-genconv/execution",
+				})
+
+			body, _ := ioutil.ReadFile(genFile)
 
 			if os.Getenv("UPDATE_SCENARIO") == "true" {
-				fmt.Println("UPDATING ", file.Name())
 				if err != nil {
 					scenario.Success = ""
-					scenario.Error = err.Error()
+					scenario.Error = fmt.Sprint(err)
 				} else {
 					scenario.Success = string(body)
 					scenario.Error = ""
@@ -68,10 +71,23 @@ func TestScenario(t *testing.T) {
 				require.NoError(t, err)
 				require.NotEmpty(t, scenario.Success, "scenario.Success may not be empty")
 				require.Equal(t, scenario.Success, string(body))
+				require.NoError(t, compile(genFile), "generated converter doesn't build")
 			}
 		})
 		clearDir(execDir)
 	}
+}
+
+func compile(file string) error {
+	cmd := exec.Command("go", "build", "")
+	cmd.Dir = filepath.Dir(file)
+	_, err := cmd.Output()
+	if err != nil {
+		if exit, ok := err.(*exec.ExitError); ok {
+			return fmt.Errorf("Process exited with %d:\n%s", exit.ExitCode(), string(exit.Stderr))
+		}
+	}
+	return err
 }
 
 type Scenario struct {
