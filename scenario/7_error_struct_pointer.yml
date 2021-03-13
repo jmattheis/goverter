@@ -1,0 +1,36 @@
+input:
+    input.go: |
+        package structs
+
+        // genconv:converter
+        type Converter interface {
+            Convert(source Input) *Output
+        }
+
+        type Input struct {
+            Name string
+            Age int
+        }
+        type Output struct {
+            Name string
+            Age int64
+        }
+error: |
+    Error while creating converter method: (github.com/jmattheis/go-genconv/execution.Converter).Convert
+
+    | github.com/jmattheis/go-genconv/execution.Input
+    |
+    |     | github.com/jmattheis/go-genconv/execution.Input
+    |     |
+    |     | | int64
+    |     | |
+    source*.Age
+    target*.Age
+    |     | |
+    |     | | int
+    |     |
+    |     | github.com/jmattheis/go-genconv/execution.Output
+    |
+    | *github.com/jmattheis/go-genconv/execution.Output
+
+    TypeMismatch: Cannot convert int to int64
