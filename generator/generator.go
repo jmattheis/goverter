@@ -16,6 +16,16 @@ type Config struct {
 	Name string
 }
 
+var BuildSteps = []builder.Builder{
+	&builder.BasicTargetPointerRule{},
+	&builder.Pointer{},
+	&builder.TargetPointer{},
+	&builder.Basic{},
+	&builder.Struct{},
+	&builder.List{},
+	&builder.Map{},
+}
+
 func Generate(pattern string, mapping []comments.Converter, config Config) (*jen.File, error) {
 	sources, err := importer.For("source", nil).Import(pattern)
 	if err != nil {
@@ -38,15 +48,6 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 			name:       converter.Config.Name,
 			lookup:     map[GeneratedMethodSignature]*GenerateMethod{},
 			lookupName: map[string]*GenerateMethod{},
-			rules: []builder.Builder{
-				&builder.BasicTargetPointerRule{},
-				&builder.Pointer{},
-				&builder.TargetPointer{},
-				&builder.Basic{},
-				&builder.Struct{},
-				&builder.List{},
-				&builder.Map{},
-			},
 		}
 
 		// we checked in comments, that it is an interface
@@ -82,10 +83,8 @@ type GeneratedMethodSignature struct {
 type generator struct {
 	name       string
 	file       *jen.File
-	rules      []builder.Builder
 	lookup     map[GeneratedMethodSignature]*GenerateMethod
 	lookupName map[string]*GenerateMethod
-	// source type to target type string
 }
 
 func (g *generator) registerMethod(method *types.Func) error {
@@ -159,7 +158,7 @@ func (g *generator) addMethod(name string, source, target types.Type) *builder.E
 }
 
 func (g *generator) BuildNoLookup(ctx *builder.MethodContext, sourceID *builder.JenID, source, target *builder.Type) ([]jen.Code, *builder.JenID, *builder.Error) {
-	for _, rule := range g.rules {
+	for _, rule := range BuildSteps {
 		if rule.Matches(source, target) {
 			return rule.Build(g, ctx, sourceID, source, target)
 		}
@@ -203,7 +202,7 @@ func (g *generator) Build(ctx *builder.MethodContext, sourceID *builder.JenID, s
 		return g.Build(ctx, sourceID, source, target)
 	}
 
-	for _, rule := range g.rules {
+	for _, rule := range BuildSteps {
 		if rule.Matches(source, target) {
 			return rule.Build(g, ctx, sourceID, source, target)
 		}
