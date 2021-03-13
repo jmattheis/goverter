@@ -4,6 +4,7 @@ input:
 
         // genconv:converter
         type Converter interface {
+            // genconv:map First FirstAABBCC
             Convert(source Input) Output
         }
 
@@ -20,7 +21,7 @@ input:
             Value string
         }
         type Output struct {
-            First Output2
+            FirstAABBCC Output2
         }
         type Output2 struct {
             Second []Output3
@@ -38,28 +39,28 @@ error: |
     |
     |      | github.com/jmattheis/go-genconv/execution.Input2
     |      |
-    |      |     | []github.com/jmattheis/go-genconv/execution.Input3
-    |      |     |
-    |      |     |     | github.com/jmattheis/go-genconv/execution.Input3
-    |      |     |     |
-    |      |     |     |  | map[string]github.com/jmattheis/go-genconv/execution.Input4
-    |      |     |     |  |
-    |      |     |     |  |    | <mapvalue> github.com/jmattheis/go-genconv/execution.Input4
-    |      |     |     |  |    |
-    |      |     |     |  |    |  | string
-    |      |     |     |  |    |  |
-    source.First.Second[].Third[].Value
-    target.First.Second[].Third[].Value
-    |      |     |     |  |    |  |
-    |      |     |     |  |    |  | int
-    |      |     |     |  |    |
-    |      |     |     |  |    | <mapvalue> github.com/jmattheis/go-genconv/execution.Output4
-    |      |     |     |  |
-    |      |     |     |  | map[string]github.com/jmattheis/go-genconv/execution.Output4
-    |      |     |     |
-    |      |     |     | github.com/jmattheis/go-genconv/execution.Output3
-    |      |     |
-    |      |     | []github.com/jmattheis/go-genconv/execution.Output3
+    |      |           | []github.com/jmattheis/go-genconv/execution.Input3
+    |      |           |
+    |      |           |     | github.com/jmattheis/go-genconv/execution.Input3
+    |      |           |     |
+    |      |           |     |  | map[string]github.com/jmattheis/go-genconv/execution.Input4
+    |      |           |     |  |
+    |      |           |     |  |    | <mapvalue> github.com/jmattheis/go-genconv/execution.Input4
+    |      |           |     |  |    |
+    |      |           |     |  |    |  | string
+    |      |           |     |  |    |  |
+    source.First      .Second[].Third[].Value
+    target.FirstAABBCC.Second[].Third[].Value
+    |      |           |     |  |    |  |
+    |      |           |     |  |    |  | int
+    |      |           |     |  |    |
+    |      |           |     |  |    | <mapvalue> github.com/jmattheis/go-genconv/execution.Output4
+    |      |           |     |  |
+    |      |           |     |  | map[string]github.com/jmattheis/go-genconv/execution.Output4
+    |      |           |     |
+    |      |           |     | github.com/jmattheis/go-genconv/execution.Output3
+    |      |           |
+    |      |           | []github.com/jmattheis/go-genconv/execution.Output3
     |      |
     |      | github.com/jmattheis/go-genconv/execution.Output2
     |

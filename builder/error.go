@@ -3,6 +3,7 @@ package builder
 import (
 	"bytes"
 	"fmt"
+	"math"
 	"strings"
 )
 
@@ -45,6 +46,7 @@ func ToString(err *Error) string {
 
 	for i := 0; i < len(err.Path); i++ {
 		path := err.Path[i]
+		padding := int(math.Max(float64(len(path.SourceID)), float64(len(path.TargetID))))
 
 		sourceIdx := i * 2
 		if path.SourceType != "" {
@@ -55,18 +57,20 @@ func ToString(err *Error) string {
 			for j := sourceIdx + 1; j < sourcePath; j++ {
 				matrix[j] = append(matrix[j], []rune(strings.Repeat(" ", len(path.Prefix)))...)
 				matrix[j] = append(matrix[j], pipe)
-				matrix[j] = append(matrix[j], []rune(strings.Repeat(" ", len(path.SourceID)-1))...)
+				matrix[j] = append(matrix[j], []rune(strings.Repeat(" ", padding-1))...)
 			}
 		} else {
 			for j := sourceIdx + 1; j < sourcePath; j++ {
-				matrix[j] = append(matrix[j], []rune(strings.Repeat(" ", len(path.SourceID)+len(path.Prefix)))...)
+				matrix[j] = append(matrix[j], []rune(strings.Repeat(" ", padding+len(path.Prefix)))...)
 			}
 		}
 
 		matrix[sourcePath] = append(matrix[sourcePath], []rune(path.Prefix)...)
 		matrix[sourcePath] = append(matrix[sourcePath], []rune(path.SourceID)...)
+		matrix[sourcePath] = append(matrix[sourcePath], []rune(strings.Repeat(" ", padding-len(path.SourceID)))...)
 		matrix[targetPath] = append(matrix[targetPath], []rune(path.Prefix)...)
 		matrix[targetPath] = append(matrix[targetPath], []rune(path.TargetID)...)
+		matrix[targetPath] = append(matrix[targetPath], []rune(strings.Repeat(" ", padding-len(path.TargetID)))...)
 
 		targetIdx := end - (i * 2)
 		if path.TargetType != "" {
@@ -77,11 +81,11 @@ func ToString(err *Error) string {
 			for j := targetIdx - 1; j > targetPath; j-- {
 				matrix[j] = append(matrix[j], []rune(strings.Repeat(" ", len(path.Prefix)))...)
 				matrix[j] = append(matrix[j], pipe)
-				matrix[j] = append(matrix[j], []rune(strings.Repeat(" ", len(path.TargetID)-1))...)
+				matrix[j] = append(matrix[j], []rune(strings.Repeat(" ", padding-1))...)
 			}
 		} else {
 			for j := targetIdx - 1; j > targetPath; j-- {
-				matrix[j] = append(matrix[j], []rune(strings.Repeat(" ", len(path.TargetID)+len(path.Prefix)))...)
+				matrix[j] = append(matrix[j], []rune(strings.Repeat(" ", padding+len(path.Prefix)))...)
 			}
 		}
 	}
