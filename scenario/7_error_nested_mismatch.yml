@@ -1,0 +1,68 @@
+input:
+    input.go: |
+        package err
+
+        // genconv:converter
+        type Converter interface {
+            Convert(source Input) Output
+        }
+
+        type Input struct {
+            First Input2
+        }
+        type Input2 struct {
+            Second []Input3
+        }
+        type Input3 struct {
+            Third map[string]Input4
+        }
+        type Input4 struct {
+            Value string
+        }
+        type Output struct {
+            First Output2
+        }
+        type Output2 struct {
+            Second []Output3
+        }
+        type Output3 struct {
+            Third map[string]Output4
+        }
+        type Output4 struct {
+            Value int
+        }
+error: |
+    Error while creating converter method: (github.com/jmattheis/go-genconv/execution.Converter).Convert
+
+    | github.com/jmattheis/go-genconv/execution.Input
+    |
+    |      | github.com/jmattheis/go-genconv/execution.Output2
+    |      |
+    |      |     | []github.com/jmattheis/go-genconv/execution.Output3
+    |      |     |
+    |      |     |     | github.com/jmattheis/go-genconv/execution.Input3
+    |      |     |     |
+    |      |     |     |  | map[string]github.com/jmattheis/go-genconv/execution.Output4
+    |      |     |     |  |
+    |      |     |     |  |    | <mapvalue> github.com/jmattheis/go-genconv/execution.Input4
+    |      |     |     |  |    |
+    |      |     |     |  |    |  | int
+    |      |     |     |  |    |  |
+    source.First.Second[].Third[].Value
+    target.First.Second[].Third[].Value
+    |      |     |     |  |    |  |
+    |      |     |     |  |    |  | string
+    |      |     |     |  |    |
+    |      |     |     |  |    | <mapvalue> github.com/jmattheis/go-genconv/execution.Output4
+    |      |     |     |  |
+    |      |     |     |  | map[string]github.com/jmattheis/go-genconv/execution.Input4
+    |      |     |     |
+    |      |     |     | github.com/jmattheis/go-genconv/execution.Output3
+    |      |     |
+    |      |     | []github.com/jmattheis/go-genconv/execution.Input3
+    |      |
+    |      | github.com/jmattheis/go-genconv/execution.Input2
+    |
+    | github.com/jmattheis/go-genconv/execution.Output
+
+    TypeMismatch: Cannot convert string to int

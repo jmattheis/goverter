@@ -1,0 +1,31 @@
+input:
+    input.go: |
+        package structs
+
+        // genconv:converter
+        type Converter interface {
+            Convert(source Input) Output
+        }
+
+        type Input struct {
+            Name string
+        }
+        type Output struct {
+            Name string
+            Age int
+        }
+error: |
+    Error while creating converter method: (github.com/jmattheis/go-genconv/execution.Converter).Convert
+
+    | github.com/jmattheis/go-genconv/execution.Input
+    |
+    |
+    |
+    source.???
+    target.Age
+    |      |
+    |      | int
+    |
+    | github.com/jmattheis/go-genconv/execution.Output
+
+    Cannot set value for field Age because no it does not exist on the source entry

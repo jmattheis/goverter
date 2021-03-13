@@ -1,0 +1,23 @@
+input:
+    input.go: |
+        package err
+
+        // genconv:converter
+        type Converter interface {
+            Convert(source *int) *string
+        }
+error: |
+    Error while creating converter method: (github.com/jmattheis/go-genconv/execution.Converter).Convert
+
+    | *int
+    |
+    |     | int
+    |     |
+    source*
+    target*
+    |     |
+    |     | string
+    |
+    | *string
+
+    TypeMismatch: Cannot convert int to string

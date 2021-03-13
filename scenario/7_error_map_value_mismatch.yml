@@ -1,0 +1,23 @@
+input:
+    input.go: |
+        package err
+
+        // genconv:converter
+        type Converter interface {
+            Convert(source map[int]int) map[int]int64
+        }
+error: |
+    Error while creating converter method: (github.com/jmattheis/go-genconv/execution.Converter).Convert
+
+    | map[int]int
+    |
+    |     | <mapvalue> int
+    |     |
+    source[]
+    target[]
+    |     |
+    |     | <mapvalue> int64
+    |
+    | map[int]int64
+
+    TypeMismatch: Cannot convert int to int64

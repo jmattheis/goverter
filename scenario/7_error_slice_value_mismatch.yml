@@ -1,0 +1,23 @@
+input:
+    input.go: |
+        package primitive
+
+        // genconv:converter
+        type Converter interface {
+            Convert(source []int16) []int8
+        }
+error: |
+    Error while creating converter method: (github.com/jmattheis/go-genconv/execution.Converter).Convert
+
+    | []int16
+    |
+    |     | int16
+    |     |
+    source[]
+    target[]
+    |     |
+    |     | int8
+    |
+    | []int8
+
+    TypeMismatch: Cannot convert int16 to int8

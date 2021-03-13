@@ -1,0 +1,23 @@
+input:
+    input.go: |
+        package err
+
+        // genconv:converter
+        type Converter interface {
+            Convert(source map[string]int) map[int]int
+        }
+error: |
+    Error while creating converter method: (github.com/jmattheis/go-genconv/execution.Converter).Convert
+
+    | map[string]int
+    |
+    |     | <mapkey> string
+    |     |
+    source[]
+    target[]
+    |     |
+    |     | <mapkey> int
+    |
+    | map[int]int
+
+    TypeMismatch: Cannot convert string to int
