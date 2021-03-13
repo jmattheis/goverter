@@ -54,7 +54,8 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 		interf := obj.Type().Underlying().(*types.Interface)
 		for i := 0; i < interf.NumMethods(); i++ {
 			method := interf.Method(i)
-			if err := gen.registerMethod(method); err != nil {
+			converterMethod, _ := converter.Methods[method.Name()]
+			if err := gen.registerMethod(sources, method, converterMethod); err != nil {
 				return nil, fmt.Errorf(`Error while creating converter method: %s
 
 %s`, method.FullName(), err)
@@ -69,10 +70,11 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 }
 
 type GenerateMethod struct {
-	ID     string
-	Name   string
-	Source types.Type
-	Target types.Type
+	ID       string
+	Name     string
+	Source   types.Type
+	Target   types.Type
+	Delegate *types.Func
 }
 
 type GeneratedMethodSignature struct {
@@ -87,7 +89,7 @@ type generator struct {
 	lookupName map[string]*GenerateMethod
 }
 
-func (g *generator) registerMethod(method *types.Func) error {
+func (g *generator) registerMethod(sources *types.Package, method *types.Func, methodComments comments.Method) error {
 	signature, ok := method.Type().(*types.Signature)
 	if !ok {
 		return fmt.Errorf("expected signature %#v", method.Type())
@@ -109,6 +111,19 @@ func (g *generator) registerMethod(method *types.Func) error {
 		Source: source,
 		Target: target,
 	}
+
+	if methodComments.Delegate != "" {
+		delegate := sources.Scope().Lookup(methodComments.Delegate)
+		if delegate == nil {
+			return fmt.Errorf("delegate %s does not exist", methodComments.Delegate)
+		}
+		if f, ok := delegate.(*types.Func); ok {
+			m.Delegate = f
+		} else {
+			return fmt.Errorf("delegate %s does is not a function", methodComments.Delegate)
+		}
+	}
+
 	g.lookup[GeneratedMethodSignature{
 		Source: source.String(),
 		Target: target.String(),
@@ -125,7 +140,7 @@ func (g *generator) createMethods() error {
 		return methods[i].Name < methods[j].Name
 	})
 	for _, method := range methods {
-		err := g.addMethod(method.Name, method.Source, method.Target)
+		err := g.addMethod(method)
 		if err != nil {
 			err = err.Lift(&builder.Path{
 				SourceID:   "source",
@@ -139,19 +154,26 @@ func (g *generator) createMethods() error {
 	return nil
 }
 
-func (g *generator) addMethod(name string, source, target types.Type) *builder.Error {
+func (g *generator) addMethod(method *GenerateMethod) *builder.Error {
 	sourceID := jen.Id("source")
-	ruleSource := builder.TypeOf(source)
-	ruleTarget := builder.TypeOf(target)
+	source := builder.TypeOf(method.Source)
+	target := builder.TypeOf(method.Target)
 
-	stmt, newID, err := g.BuildNoLookup(&builder.MethodContext{Namer: builder.NewNamer()}, builder.VariableID(sourceID.Clone()), builder.TypeOf(source), builder.TypeOf(target))
+	if method.Delegate != nil {
+		g.file.Func().Params(jen.Id("c").Op("*").Id(g.name)).Id(method.Name).
+			Params(jen.Id("source").Add(source.TypeAsJen())).Params(target.TypeAsJen()).
+			Block(jen.Return(jen.Qual(method.Delegate.Pkg().Path(), method.Delegate.Name())).Call(jen.Id("c"), sourceID))
+		return nil
+	}
+
+	stmt, newID, err := g.BuildNoLookup(&builder.MethodContext{Namer: builder.NewNamer()}, builder.VariableID(sourceID.Clone()), source, target)
 	if err != nil {
 		return err
 	}
 
 	stmt = append(stmt, jen.Return().Add(newID.Code))
-	g.file.Func().Params(jen.Id("c").Op("*").Id(g.name)).Id(name).
-		Params(jen.Id("source").Add(ruleSource.TypeAsJen())).Params(ruleTarget.TypeAsJen()).
+	g.file.Func().Params(jen.Id("c").Op("*").Id(g.name)).Id(method.Name).
+		Params(jen.Id("source").Add(source.TypeAsJen())).Params(target.TypeAsJen()).
 		Block(stmt...)
 
 	return nil
@@ -195,7 +217,7 @@ func (g *generator) Build(ctx *builder.MethodContext, sourceID *builder.JenID, s
 		}
 		g.lookup[GeneratedMethodSignature{Source: source.T.String(), Target: target.T.String()}] = method
 		g.lookupName[method.Name] = method
-		if err := g.addMethod(method.Name, method.Source, method.Target); err != nil {
+		if err := g.addMethod(method); err != nil {
 			return nil, nil, err
 		}
 		// try again to trigger the found method thingy above

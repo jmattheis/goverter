@@ -29,6 +29,7 @@ type ConverterConfig struct {
 }
 
 type Method struct {
+	Delegate string
 }
 
 func ParseDocs(pattern string) ([]Converter, error) {
@@ -163,11 +164,25 @@ func parseConverterComment(comment string, config ConverterConfig) (ConverterCon
 
 func parseMethodComment(comment string) (Method, error) {
 	scanner := bufio.NewScanner(strings.NewReader(comment))
+	m := Method{}
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
 		if strings.HasPrefix(line, prefix+delimter) {
-			return Method{}, fmt.Errorf("unknown %s comment: %s", prefix, line)
+			cmd := strings.TrimPrefix(line, prefix+delimter)
+			if cmd == "" {
+				return m, fmt.Errorf("unknown %s comment: %s", prefix, line)
+			}
+			fields := strings.Fields(cmd)
+			switch fields[0] {
+			case "delegate":
+				if len(fields) != 2 {
+					return m, fmt.Errorf("invalid %s:delegate must have one parameter", prefix)
+				}
+				m.Delegate = fields[1]
+				continue
+			}
+			return m, fmt.Errorf("unknown %s comment: %s", prefix, line)
 		}
 	}
-	return Method{}, nil
+	return m, nil
 }
