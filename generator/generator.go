@@ -74,6 +74,7 @@ type GenerateMethod struct {
 	Name          string
 	Source        types.Type
 	Target        types.Type
+	Mapping       map[string]string
 	IgnoredFields map[string]struct{}
 	Delegate      *types.Func
 }
@@ -111,6 +112,7 @@ func (g *generator) registerMethod(sources *types.Package, method *types.Func, m
 		Name:          method.Name(),
 		Source:        source,
 		Target:        target,
+		Mapping:       methodComments.NameMapping,
 		IgnoredFields: methodComments.IgnoredFields,
 	}
 
@@ -170,6 +172,8 @@ func (g *generator) addMethod(method *GenerateMethod) *builder.Error {
 
 	stmt, newID, err := g.BuildNoLookup(&builder.MethodContext{
 		Namer:         builder.NewNamer(),
+		MappingBaseID: target.T.String(),
+		Mapping:       method.Mapping,
 		IgnoredFields: method.IgnoredFields,
 	}, builder.VariableID(sourceID.Clone()), source, target)
 	if err != nil {
@@ -219,6 +223,7 @@ func (g *generator) Build(ctx *builder.MethodContext, sourceID *builder.JenID, s
 			Name:          name,
 			Source:        source.T,
 			Target:        target.T,
+			Mapping:       map[string]string{},
 			IgnoredFields: map[string]struct{}{},
 		}
 		g.lookup[GeneratedMethodSignature{Source: source.T.String(), Target: target.T.String()}] = method

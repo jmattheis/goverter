@@ -30,6 +30,9 @@ type ConverterConfig struct {
 
 type Method struct {
 	Delegate      string
+	IgnoredFields map[string]struct{}
+	NameMapping   map[string]string
+	// target to source
 }
 
 func ParseDocs(pattern string) ([]Converter, error) {
@@ -165,6 +168,7 @@ func parseConverterComment(comment string, config ConverterConfig) (ConverterCon
 func parseMethodComment(comment string) (Method, error) {
 	scanner := bufio.NewScanner(strings.NewReader(comment))
 	m := Method{
+		NameMapping:   map[string]string{},
 		IgnoredFields: map[string]struct{}{},
 	}
 	for scanner.Scan() {
@@ -181,6 +185,12 @@ func parseMethodComment(comment string) (Method, error) {
 					return m, fmt.Errorf("invalid %s:delegate must have one parameter", prefix)
 				}
 				m.Delegate = fields[1]
+				continue
+			case "map":
+				if len(fields) != 3 {
+					return m, fmt.Errorf("invalid %s:map must have two parameter", prefix)
+				}
+				m.NameMapping[fields[2]] = fields[1]
 				continue
 			case "ignore":
 				if len(fields) != 2 {

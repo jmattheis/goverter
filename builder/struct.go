@@ -30,10 +30,17 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *JenID, source,
 
 	for i := 0; i < targetStruct.NumFields(); i++ {
 		targetField := targetStruct.Field(i)
-		sourceField, ok := sourceMethods[targetField.Name()]
 		if _, ignore := ctx.IgnoredFields[targetField.Name()]; ignore {
 			continue
 		}
+
+		sourceName := targetField.Name()
+		if ctx.MappingBaseID == target.T.String() {
+			if override, ok := ctx.Mapping[targetField.Name()]; ok {
+				sourceName = override
+			}
+		}
+		sourceField, ok := sourceMethods[sourceName]
 		if !ok {
 			cause := fmt.Sprintf("Cannot set value for field %s because no it does not exist on the source entry", targetField.Name())
 			return nil, nil, NewError(cause).Lift(&Path{
