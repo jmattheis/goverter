@@ -133,7 +133,7 @@ func (g *generator) addMethod(name string, source, target types.Type) *builder.E
 	ruleSource := builder.TypeOf(source)
 	ruleTarget := builder.TypeOf(target)
 
-	stmt, newID, err := g.Build(&builder.MethodContext{Namer: builder.NewNamer()}, sourceID.Clone(), builder.TypeOf(source), builder.TypeOf(target))
+	stmt, newID, err := g.BuildNoLookup(&builder.MethodContext{Namer: builder.NewNamer()}, sourceID.Clone(), builder.TypeOf(source), builder.TypeOf(target))
 	if err != nil {
 		return err.Lift(&builder.Path{
 			SourceID:   "source",
@@ -151,7 +151,24 @@ func (g *generator) addMethod(name string, source, target types.Type) *builder.E
 	return nil
 }
 
+func (g *generator) BuildNoLookup(ctx *builder.MethodContext, sourceID builder.JenID, source, target *builder.Type) ([]jen.Code, builder.JenID, *builder.Error) {
+	for _, rule := range g.rules {
+		if rule.Matches(source, target) {
+			return rule.Build(g, ctx, sourceID, source, target)
+		}
+	}
+	return nil, nil, builder.NewError(fmt.Sprintf("TypeMismatch: Cannot convert %s to %s", source.T, target.T))
+}
+
 func (g *generator) Build(ctx *builder.MethodContext, sourceID builder.JenID, source, target *builder.Type) ([]jen.Code, builder.JenID, *builder.Error) {
+	if inner, ok := g.lookup[source.T.String()]; ok {
+		if method, ok := inner[target.T.String()]; ok {
+			name := ctx.Name("retVal")
+			stmt := []jen.Code{jen.Id(name).Op(":=").Id("c").Dot(method.Name).Call(sourceID)}
+			return stmt, jen.Id(name), nil
+		}
+	}
+
 	for _, rule := range g.rules {
 		if rule.Matches(source, target) {
 			return rule.Build(g, ctx, sourceID, source, target)

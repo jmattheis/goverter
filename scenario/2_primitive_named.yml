@@ -24,7 +24,8 @@ success: |
     	return execution.OtherID(source)
     }
     func (c *Converter) Convert2(source execution.ID) *execution.OtherID {
-    	ref := execution.OtherID(source)
+    	retVal := c.Convert(source)
+    	ref := retVal
     	return &ref
     }
     func (c *Converter) Convert3(source int) *execution.OtherID {
