@@ -14,9 +14,9 @@ success: |
     type Converter struct{}
 
     func (c *Converter) Convert(source map[string]int) map[string]int {
-    	targetMap := make(map[string]int, len(source))
+    	mapStringInt := make(map[string]int, len(source))
     	for key, value := range source {
-    		targetMap[key] = value
+    		mapStringInt[key] = value
     	}
-    	return targetMap
+    	return mapStringInt
     }

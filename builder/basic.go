@@ -25,7 +25,7 @@ func (*BasicTargetPointerRule) Matches(source, target *Type) bool {
 }
 
 func (*BasicTargetPointerRule) Build(gen Generator, ctx *MethodContext, sourceID *JenID, source, target *Type) ([]jen.Code, *JenID, *Error) {
-	name := ctx.Name("ref")
+	name := ctx.Name(target.ID())
 
 	stmt, id, err := gen.Build(ctx, sourceID, source, target.PointerInner)
 	if err != nil {

@@ -15,22 +15,22 @@ success: |
     type Converter struct{}
 
     func (c *Converter) Convert(source map[string]int) map[string]*int {
-    	targetMap := make(map[string]*int, len(source))
+    	mapStringPInt := make(map[string]*int, len(source))
     	for key, value := range source {
-    		ref := value
-    		targetMap[key] = &ref
+    		pInt := value
+    		mapStringPInt[key] = &pInt
     	}
-    	return targetMap
+    	return mapStringPInt
     }
     func (c *Converter) Convert2(source map[string]*int) map[string]*int {
-    	targetMap := make(map[string]*int, len(source))
+    	mapStringPInt := make(map[string]*int, len(source))
     	for key, value := range source {
-    		var outer *int
+    		var pInt *int
     		if value != nil {
-    			temp := *value
-    			outer = &temp
+    			xint := *value
+    			pInt = &xint
     		}
-    		targetMap[key] = outer
+    		mapStringPInt[key] = pInt
     	}
-    	return targetMap
+    	return mapStringPInt
     }

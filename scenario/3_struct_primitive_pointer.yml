@@ -29,16 +29,16 @@ success: |
     type Converter struct{}
 
     func (c *Converter) Convert(source execution.Input) execution.Output {
-    	var output execution.Output
-    	ref := execution.ID(source.ID)
-    	output.ID = &ref
-    	ref2 := source.Name
-    	output.Name = &ref2
-    	var outer *int
+    	var structsOutput execution.Output
+    	pStructsID := execution.ID(source.ID)
+    	structsOutput.ID = &pStructsID
+    	pString := source.Name
+    	structsOutput.Name = &pString
+    	var pInt *int
     	if source.Age != nil {
-    		temp := *source.Age
-    		outer = &temp
+    		xint := *source.Age
+    		pInt = &xint
     	}
-    	output.Age = outer
-    	return output
+    	structsOutput.Age = pInt
+    	return structsOutput
     }

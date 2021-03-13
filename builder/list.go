@@ -9,7 +9,7 @@ func (*List) Matches(source, target *Type) bool {
 }
 
 func (*List) Build(gen Generator, ctx *MethodContext, sourceID *JenID, source, target *Type) ([]jen.Code, *JenID, *Error) {
-	targetSlice := ctx.Name("targetSlice")
+	targetSlice := ctx.Name(target.ID())
 	index := ctx.Index()
 
 	indexedSource := VariableID(sourceID.Code.Clone().Index(jen.Id(index)))

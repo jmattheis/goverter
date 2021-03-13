@@ -14,9 +14,9 @@ success: |
     type Converter struct{}
 
     func (c *Converter) Convert(source []int) []int {
-    	targetSlice := make([]int, len(source))
+    	intList := make([]int, len(source))
     	for i := 0; i < len(source); i++ {
-    		targetSlice[i] = source[i]
+    		intList[i] = source[i]
     	}
-    	return targetSlice
+    	return intList
     }

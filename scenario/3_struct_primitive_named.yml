@@ -30,16 +30,16 @@ success: |
     type Converter struct{}
 
     func (c *Converter) Convert(source execution.Input) execution.Output {
-    	var output execution.Output
-    	output.ID = execution.ID(source.ID)
-    	output.Name = source.Name
-    	output.Age = source.Age
-    	return output
+    	var structsOutput execution.Output
+    	structsOutput.ID = execution.ID(source.ID)
+    	structsOutput.Name = source.Name
+    	structsOutput.Age = source.Age
+    	return structsOutput
     }
     func (c *Converter) ConvertBack(source execution.Output) execution.Input {
-    	var input execution.Input
-    	input.ID = string(source.ID)
-    	input.Name = source.Name
-    	input.Age = source.Age
-    	return input
+    	var structsInput execution.Input
+    	structsInput.ID = string(source.ID)
+    	structsInput.Name = source.Name
+    	structsInput.Age = source.Age
+    	return structsInput
     }

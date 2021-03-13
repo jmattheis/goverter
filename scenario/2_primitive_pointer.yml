@@ -15,14 +15,14 @@ success: |
     type Converter struct{}
 
     func (c *Converter) ConvertPPString(source *string) *string {
-    	var outer *string
+    	var pString *string
     	if source != nil {
-    		temp := *source
-    		outer = &temp
+    		xstring := *source
+    		pString = &xstring
     	}
-    	return outer
+    	return pString
     }
     func (c *Converter) ConvertPString(source string) *string {
-    	ref := source
-    	return &ref
+    	pString := source
+    	return &pString
     }

@@ -26,31 +26,31 @@ success: |
     type Converter struct{}
 
     func (c *Converter) slicesInputToSlicesOutput(source execution.Input) execution.Output {
-    	var output execution.Output
-    	output.Name = source.Name
-    	output.Age = source.Age
-    	return output
+    	var slicesOutput execution.Output
+    	slicesOutput.Name = source.Name
+    	slicesOutput.Age = source.Age
+    	return slicesOutput
     }
-    func (c *Converter) slicesInputToPslicesOutput(source execution.Input) *execution.Output {
-    	temp := c.slicesInputToSlicesOutput(source)
-    	return &temp
+    func (c *Converter) slicesInputToPSlicesOutput(source execution.Input) *execution.Output {
+    	slicesOutput := c.slicesInputToSlicesOutput(source)
+    	return &slicesOutput
     }
     func (c *Converter) ConvertP(source []execution.Input) []*execution.Output {
-    	targetSlice := make([]*execution.Output, len(source))
+    	pSlicesOutputList := make([]*execution.Output, len(source))
     	for i := 0; i < len(source); i++ {
-    		targetSlice[i] = c.slicesInputToPslicesOutput(source[i])
+    		pSlicesOutputList[i] = c.slicesInputToPSlicesOutput(source[i])
     	}
-    	return targetSlice
+    	return pSlicesOutputList
     }
     func (c *Converter) ConvertPToP(source []*execution.Input) []*execution.Output {
-    	targetSlice := make([]*execution.Output, len(source))
+    	pSlicesOutputList := make([]*execution.Output, len(source))
     	for i := 0; i < len(source); i++ {
-    		var outer *execution.Output
+    		var pSlicesOutput *execution.Output
     		if source[i] != nil {
-    			temp := c.slicesInputToSlicesOutput(*source[i])
-    			outer = &temp
+    			slicesOutput := c.slicesInputToSlicesOutput(*source[i])
+    			pSlicesOutput = &slicesOutput
     		}
-    		targetSlice[i] = outer
+    		pSlicesOutputList[i] = pSlicesOutput
     	}
-    	return targetSlice
+    	return pSlicesOutputList
     }

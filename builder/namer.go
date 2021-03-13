@@ -2,7 +2,6 @@ package builder
 
 import (
 	"fmt"
-	"unicode"
 )
 
 func NewNamer() *Namer {
@@ -53,15 +52,6 @@ func (m *Namer) register(name string) bool {
 		return true
 	}
 	return false
-}
-
-func (m *Namer) Of(t *Type, fallback string) string {
-	if t.Named {
-		temp := []rune(t.NamedType.Obj().Name())
-		temp[0] = unicode.ToLower(temp[0])
-		return m.Name(string(temp))
-	}
-	return m.Name(fallback)
 }
 
 func (m *Namer) Name(name string) string {

@@ -15,22 +15,22 @@ success: |
     type Converter struct{}
 
     func (c *Converter) ConvertPToP(source []*int) []*int {
-    	targetSlice := make([]*int, len(source))
+    	pIntList := make([]*int, len(source))
     	for i := 0; i < len(source); i++ {
-    		var outer *int
+    		var pInt *int
     		if source[i] != nil {
-    			temp := *source[i]
-    			outer = &temp
+    			xint := *source[i]
+    			pInt = &xint
     		}
-    		targetSlice[i] = outer
+    		pIntList[i] = pInt
     	}
-    	return targetSlice
+    	return pIntList
     }
     func (c *Converter) ConvertToP(source []int) []*int {
-    	targetSlice := make([]*int, len(source))
+    	pIntList := make([]*int, len(source))
     	for i := 0; i < len(source); i++ {
-    		ref := source[i]
-    		targetSlice[i] = &ref
+    		pInt := source[i]
+    		pIntList[i] = &pInt
     	}
-    	return targetSlice
+    	return pIntList
     }

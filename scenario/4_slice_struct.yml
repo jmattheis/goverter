@@ -25,15 +25,15 @@ success: |
     type Converter struct{}
 
     func (c *Converter) slicesInputToSlicesOutput(source execution.Input) execution.Output {
-    	var output execution.Output
-    	output.Name = source.Name
-    	output.Age = source.Age
-    	return output
+    	var slicesOutput execution.Output
+    	slicesOutput.Name = source.Name
+    	slicesOutput.Age = source.Age
+    	return slicesOutput
     }
     func (c *Converter) Convert(source []execution.Input) []execution.Output {
-    	targetSlice := make([]execution.Output, len(source))
+    	slicesOutputList := make([]execution.Output, len(source))
     	for i := 0; i < len(source); i++ {
-    		targetSlice[i] = c.slicesInputToSlicesOutput(source[i])
+    		slicesOutputList[i] = c.slicesInputToSlicesOutput(source[i])
     	}
-    	return targetSlice
+    	return slicesOutputList
     }

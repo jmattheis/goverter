@@ -14,7 +14,7 @@ func (*Struct) Matches(source, target *Type) bool {
 }
 
 func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *JenID, source, target *Type) ([]jen.Code, *JenID, *Error) {
-	name := ctx.Of(target, "structTarget")
+	name := ctx.Name(target.ID())
 	stmt := []jen.Code{
 		jen.Var().Id(name).Add(target.TypeAsJen()),
 	}

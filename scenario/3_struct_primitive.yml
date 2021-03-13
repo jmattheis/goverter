@@ -25,8 +25,8 @@ success: |
     type Converter struct{}
 
     func (c *Converter) Convert(source execution.Input) execution.Output {
-    	var output execution.Output
-    	output.Name = source.Name
-    	output.Age = source.Age
-    	return output
+    	var structsOutput execution.Output
+    	structsOutput.Name = source.Name
+    	structsOutput.Age = source.Age
+    	return structsOutput
     }

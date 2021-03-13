@@ -14,17 +14,17 @@ success: |
     type Converter struct{}
 
     func (c *Converter) Convert(source map[string]map[uint]map[bool]string) map[string]map[uint]map[bool]string {
-    	targetMap := make(map[string]map[uint]map[bool]string, len(source))
+    	mapStringMapUintMapBoolString := make(map[string]map[uint]map[bool]string, len(source))
     	for key, value := range source {
-    		targetMap2 := make(map[uint]map[bool]string, len(value))
+    		mapUintMapBoolString := make(map[uint]map[bool]string, len(value))
     		for key2, value2 := range value {
-    			targetMap3 := make(map[bool]string, len(value2))
+    			mapBoolString := make(map[bool]string, len(value2))
     			for key3, value3 := range value2 {
-    				targetMap3[key3] = value3
+    				mapBoolString[key3] = value3
     			}
-    			targetMap2[key2] = targetMap3
+    			mapUintMapBoolString[key2] = mapBoolString
     		}
-    		targetMap[key] = targetMap2
+    		mapStringMapUintMapBoolString[key] = mapUintMapBoolString
     	}
-    	return targetMap
+    	return mapStringMapUintMapBoolString
     }

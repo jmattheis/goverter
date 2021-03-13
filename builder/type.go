@@ -2,6 +2,7 @@ package builder
 
 import (
 	"go/types"
+	"strings"
 
 	"github.com/dave/jennifer/jen"
 )
@@ -87,13 +88,10 @@ func (t *Type) asID(seeNamed, escapeReserved bool) string {
 	if seeNamed && t.Named {
 		pkgName := t.NamedType.Obj().Pkg().Name()
 		name := pkgName + t.NamedType.Obj().Name()
-		if t.List {
-			name += "List"
-		}
 		return name
 	}
 	if t.List {
-		return "List"
+		return t.ListInner.asID(true, false) + "List"
 	}
 	if t.Basic {
 		if escapeReserved {
@@ -102,10 +100,10 @@ func (t *Type) asID(seeNamed, escapeReserved bool) string {
 		return t.BasicType.String()
 	}
 	if t.Pointer {
-		return "p" + t.PointerInner.asID(true, false)
+		return "p" + strings.Title(t.PointerInner.asID(true, false))
 	}
 	if t.Map {
-		return "m" + t.MapKey.asID(true, false) + t.MapValue.asID(true, false)
+		return "map" + strings.Title(t.MapKey.asID(true, false)+strings.Title(t.MapValue.asID(true, false)))
 	}
 	if t.Struct {
 		if escapeReserved {

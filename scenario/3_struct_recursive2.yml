@@ -36,32 +36,32 @@ success: |
     type Converter struct{}
 
     func (c *Converter) structsInputBToStructsOutputB(source execution.InputB) execution.OutputB {
-    	var outputB execution.OutputB
-    	var outer *execution.OutputA
+    	var structsOutputB execution.OutputB
+    	var pStructsOutputA *execution.OutputA
     	if source.Value != nil {
-    		temp := c.structsInputAToStructsOutputA(*source.Value)
-    		outer = &temp
+    		structsOutputA := c.structsInputAToStructsOutputA(*source.Value)
+    		pStructsOutputA = &structsOutputA
     	}
-    	outputB.Value = outer
-    	return outputB
+    	structsOutputB.Value = pStructsOutputA
+    	return structsOutputB
     }
     func (c *Converter) structsInputAToStructsOutputA(source execution.InputA) execution.OutputA {
-    	var outputA execution.OutputA
-    	var outer *execution.OutputB
+    	var structsOutputA execution.OutputA
+    	var pStructsOutputB *execution.OutputB
     	if source.Value != nil {
-    		temp := c.structsInputBToStructsOutputB(*source.Value)
-    		outer = &temp
+    		structsOutputB := c.structsInputBToStructsOutputB(*source.Value)
+    		pStructsOutputB = &structsOutputB
     	}
-    	outputA.Value = outer
-    	return outputA
+    	structsOutputA.Value = pStructsOutputB
+    	return structsOutputA
     }
     func (c *Converter) Convert(source execution.Input) execution.Output {
-    	var output execution.Output
-    	var outer *execution.OutputA
+    	var structsOutput execution.Output
+    	var pStructsOutputA *execution.OutputA
     	if source.Value != nil {
-    		temp := c.structsInputAToStructsOutputA(*source.Value)
-    		outer = &temp
+    		structsOutputA := c.structsInputAToStructsOutputA(*source.Value)
+    		pStructsOutputA = &structsOutputA
     	}
-    	output.Value = outer
-    	return output
+    	structsOutput.Value = pStructsOutputA
+    	return structsOutput
     }

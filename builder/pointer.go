@@ -9,7 +9,7 @@ func (*Pointer) Matches(source, target *Type) bool {
 }
 
 func (*Pointer) Build(gen Generator, ctx *MethodContext, sourceID *JenID, source, target *Type) ([]jen.Code, *JenID, *Error) {
-	outerVar := ctx.Of(target, "outer")
+	outerVar := ctx.Name(target.ID())
 
 	nextBlock, id, err := gen.Build(ctx, OtherID(jen.Op("*").Add(sourceID.Code.Clone())), source.PointerInner, target.PointerInner)
 	if err != nil {
@@ -25,7 +25,7 @@ func (*Pointer) Build(gen Generator, ctx *MethodContext, sourceID *JenID, source
 	if id.Variable {
 		ifBlock = append(ifBlock, jen.Id(outerVar).Op("=").Op("&").Add(id.Code.Clone()))
 	} else {
-		tempName := ctx.Name("temp")
+		tempName := ctx.Name(target.PointerInner.ID())
 		ifBlock = append(ifBlock, jen.Id(tempName).Op(":=").Add(id.Code.Clone()))
 		ifBlock = append(ifBlock, jen.Id(outerVar).Op("=").Op("&").Id(tempName))
 	}
@@ -56,7 +56,7 @@ func (*TargetPointer) Build(gen Generator, ctx *MethodContext, sourceID *JenID, 
 	if id.Variable {
 		return stmt, OtherID(jen.Op("&").Add(id.Code)), nil
 	}
-	tempName := ctx.Name("temp")
+	tempName := ctx.Name(target.PointerInner.ID())
 	stmt = append(stmt, jen.Id(tempName).Op(":=").Add(id.Code))
 	return stmt, OtherID(jen.Op("&").Id(tempName)), nil
 }

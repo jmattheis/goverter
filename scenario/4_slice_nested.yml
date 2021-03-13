@@ -14,17 +14,17 @@ success: |
     type Converter struct{}
 
     func (c *Converter) Convert(source [][][]int) [][][]int {
-    	targetSlice := make([][][]int, len(source))
+    	intListListList := make([][][]int, len(source))
     	for i := 0; i < len(source); i++ {
-    		targetSlice2 := make([][]int, len(source[i]))
+    		intListList := make([][]int, len(source[i]))
     		for j := 0; j < len(source[i]); j++ {
-    			targetSlice3 := make([]int, len(source[i][j]))
+    			intList := make([]int, len(source[i][j]))
     			for k := 0; k < len(source[i][j]); k++ {
-    				targetSlice3[k] = source[i][j][k]
+    				intList[k] = source[i][j][k]
     			}
-    			targetSlice2[j] = targetSlice3
+    			intListList[j] = intList
     		}
-    		targetSlice[i] = targetSlice2
+    		intListListList[i] = intListList
     	}
-    	return targetSlice
+    	return intListListList
     }

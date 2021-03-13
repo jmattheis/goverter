@@ -9,7 +9,7 @@ func (*Map) Matches(source, target *Type) bool {
 }
 
 func (*Map) Build(gen Generator, ctx *MethodContext, sourceID *JenID, source, target *Type) ([]jen.Code, *JenID, *Error) {
-	targetMap := ctx.Of(source, "targetMap")
+	targetMap := ctx.Name(target.ID())
 	key, value := ctx.Map()
 
 	block, newKey, err := gen.Build(ctx, VariableID(jen.Id(key)), source.MapKey, target.MapKey)

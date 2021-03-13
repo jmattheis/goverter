@@ -24,12 +24,12 @@ success: |
     	return execution.OtherID(source)
     }
     func (c *Converter) Convert2(source execution.ID) *execution.OtherID {
-    	ref := c.Convert(source)
-    	return &ref
+    	pPrimitiveOtherID := c.Convert(source)
+    	return &pPrimitiveOtherID
     }
     func (c *Converter) Convert3(source int) *execution.OtherID {
-    	ref := execution.OtherID(source)
-    	return &ref
+    	pPrimitiveOtherID := execution.OtherID(source)
+    	return &pPrimitiveOtherID
     }
     func (c *Converter) Convert4(source execution.ID) int {
     	return int(source)

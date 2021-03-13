@@ -27,14 +27,14 @@ success: |
     type Converter struct{}
 
     func (c *Converter) Convert(source execution.Input) execution.Output {
-    	var output execution.Output
-    	output.Name = source.Name
-    	output.Age = source.Age
-    	var outer *execution.Output
+    	var structsOutput execution.Output
+    	structsOutput.Name = source.Name
+    	structsOutput.Age = source.Age
+    	var pStructsOutput *execution.Output
     	if source.Value != nil {
-    		temp := c.Convert(*source.Value)
-    		outer = &temp
+    		structsOutput2 := c.Convert(*source.Value)
+    		pStructsOutput = &structsOutput2
     	}
-    	output.Value = outer
-    	return output
+    	structsOutput.Value = pStructsOutput
+    	return structsOutput
     }
