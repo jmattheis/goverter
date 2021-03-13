@@ -3,9 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
-	"path"
 
 	"github.com/jmattheis/go-genconv"
 )
@@ -18,20 +16,17 @@ func main() {
 
 	args := flag.Args()
 	if len(args) != 1 {
-		fmt.Println("expected one argument")
+		_, _ = fmt.Fprintln(os.Stderr, "expected one argument")
 		return
 	}
 	pattern := args[0]
 
-	file, err := genconv.Generate(genconv.GenerateConfig{
+	err := genconv.GenerateConverterFile(output, genconv.GenerateConfig{
 		PackageName: packageName,
 		ScanDir:     pattern,
 	})
-	os.MkdirAll(path.Dir(output), 0755)
-
-	err = ioutil.WriteFile(output, file, 0755)
 	if err != nil {
-		fmt.Println(err)
+		_, _ = fmt.Fprintln(os.Stderr, err)
 		return
 	}
 }
