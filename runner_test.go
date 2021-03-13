@@ -8,6 +8,7 @@ import (
 	"path"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -53,7 +54,7 @@ func TestScenario(t *testing.T) {
 			if os.Getenv("UPDATE_SCENARIO") == "true" {
 				if err != nil {
 					scenario.Success = ""
-					scenario.Error = fmt.Sprint(err)
+					scenario.Error = replaceAbsolutePath(fmt.Sprint(err))
 				} else {
 					scenario.Success = string(body)
 					scenario.Error = ""
@@ -66,7 +67,7 @@ func TestScenario(t *testing.T) {
 
 			if scenario.Error != "" {
 				require.Error(t, err)
-				require.EqualError(t, err, scenario.Error)
+				require.Equal(t, replaceAbsolutePath(fmt.Sprint(err)), scenario.Error)
 			} else {
 				require.NoError(t, err)
 				require.NotEmpty(t, scenario.Success, "scenario.Success may not be empty")
@@ -76,6 +77,10 @@ func TestScenario(t *testing.T) {
 		})
 		clearDir(execDir)
 	}
+}
+
+func replaceAbsolutePath(body string) string {
+	return strings.ReplaceAll(body, getCurrentPath(), "/ABSOLUTE")
 }
 
 func compile(file string) error {

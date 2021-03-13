@@ -1,0 +1,9 @@
+input:
+    input.go: |
+        package structs
+
+        // genconv:converter
+        // genconv:not_existing
+        type Converter interface {
+        }
+error: '/ABSOLUTE/execution/input.go:5:1: type Converter: unknown genconv comment: genconv:not_existing'

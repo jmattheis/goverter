@@ -1,0 +1,7 @@
+input:
+    input.go: |
+        package err
+
+        // genconv:converter
+        type Converter struct {}
+error: '/ABSOLUTE/execution/input.go:4:1: genconv:converter may only be applied to type interface declarations '

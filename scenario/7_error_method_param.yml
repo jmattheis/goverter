@@ -1,0 +1,10 @@
+input:
+    input.go: |
+        package err
+
+        // genconv:converter
+        type Converter interface {
+            // genconv:oops
+            ConvertString(source string) string
+        }
+error: '/ABSOLUTE/execution/input.go:4:1: type Converter: parsing method ConvertString: unknown genconv comment: genconv:oops'

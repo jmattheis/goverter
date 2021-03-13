@@ -1,0 +1,9 @@
+input:
+    input.go: |
+        package err
+
+        // genconv:converter
+        type Converter interface {
+        }
+        oops
+error: '/ABSOLUTE/execution/input.go:6:1: expected declaration, found oops'

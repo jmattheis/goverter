@@ -1,0 +1,7 @@
+input:
+    input.go: |
+        package err
+
+        // genconv:converter
+        const x = 5
+error: '/ABSOLUTE/execution/input.go:4:1: genconv:converter may only be applied to type declarations '
