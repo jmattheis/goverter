@@ -15,4 +15,5 @@ type Generator interface {
 
 type MethodContext struct {
 	*Namer
+	IgnoredFields map[string]struct{}
 }

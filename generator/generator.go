@@ -70,11 +70,12 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 }
 
 type GenerateMethod struct {
-	ID       string
-	Name     string
-	Source   types.Type
-	Target   types.Type
-	Delegate *types.Func
+	ID            string
+	Name          string
+	Source        types.Type
+	Target        types.Type
+	IgnoredFields map[string]struct{}
+	Delegate      *types.Func
 }
 
 type GeneratedMethodSignature struct {
@@ -106,10 +107,11 @@ func (g *generator) registerMethod(sources *types.Package, method *types.Func, m
 	target := result.At(0).Type()
 
 	m := &GenerateMethod{
-		ID:     method.FullName(),
-		Name:   method.Name(),
-		Source: source,
-		Target: target,
+		ID:            method.FullName(),
+		Name:          method.Name(),
+		Source:        source,
+		Target:        target,
+		IgnoredFields: methodComments.IgnoredFields,
 	}
 
 	if methodComments.Delegate != "" {
@@ -166,7 +168,10 @@ func (g *generator) addMethod(method *GenerateMethod) *builder.Error {
 		return nil
 	}
 
-	stmt, newID, err := g.BuildNoLookup(&builder.MethodContext{Namer: builder.NewNamer()}, builder.VariableID(sourceID.Clone()), source, target)
+	stmt, newID, err := g.BuildNoLookup(&builder.MethodContext{
+		Namer:         builder.NewNamer(),
+		IgnoredFields: method.IgnoredFields,
+	}, builder.VariableID(sourceID.Clone()), source, target)
 	if err != nil {
 		return err
 	}
@@ -210,10 +215,11 @@ func (g *generator) Build(ctx *builder.MethodContext, sourceID *builder.JenID, s
 		}
 
 		method := &GenerateMethod{
-			ID:     name,
-			Name:   name,
-			Source: source.T,
-			Target: target.T,
+			ID:            name,
+			Name:          name,
+			Source:        source.T,
+			Target:        target.T,
+			IgnoredFields: map[string]struct{}{},
 		}
 		g.lookup[GeneratedMethodSignature{Source: source.T.String(), Target: target.T.String()}] = method
 		g.lookupName[method.Name] = method
