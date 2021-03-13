@@ -8,11 +8,11 @@ func (*List) Matches(source, target *Type) bool {
 	return source.List && target.List && !target.ListFixed
 }
 
-func (*List) Build(gen Generator, ctx *MethodContext, sourceID JenID, source, target *Type) ([]jen.Code, JenID, *Error) {
+func (*List) Build(gen Generator, ctx *MethodContext, sourceID *JenID, source, target *Type) ([]jen.Code, *JenID, *Error) {
 	targetSlice := ctx.Name("targetSlice")
 	index := ctx.Index()
 
-	indexedSource := sourceID.Clone().Index(jen.Id(index))
+	indexedSource := VariableID(sourceID.Code.Clone().Index(jen.Id(index)))
 
 	newStmt, newId, err := gen.Build(ctx, indexedSource, source.ListInner, target.ListInner)
 	if err != nil {
@@ -23,13 +23,13 @@ func (*List) Build(gen Generator, ctx *MethodContext, sourceID JenID, source, ta
 			TargetType: target.ListInner.T.String(),
 		})
 	}
-	newStmt = append(newStmt, jen.Id(targetSlice).Index(jen.Id(index)).Op("=").Add(newId))
+	newStmt = append(newStmt, jen.Id(targetSlice).Index(jen.Id(index)).Op("=").Add(newId.Code))
 
 	stmt := []jen.Code{
-		jen.Id(targetSlice).Op(":=").Make(target.TypeAsJen(), jen.Len(sourceID.Clone())),
-		jen.For(jen.Id(index).Op(":=").Lit(0), jen.Id(index).Op("<").Len(sourceID.Clone()), jen.Id(index).Op("++")).
+		jen.Id(targetSlice).Op(":=").Make(target.TypeAsJen(), jen.Len(sourceID.Code.Clone())),
+		jen.For(jen.Id(index).Op(":=").Lit(0), jen.Id(index).Op("<").Len(sourceID.Code.Clone()), jen.Id(index).Op("++")).
 			Block(newStmt...),
 	}
 
-	return stmt, jen.Id(targetSlice), nil
+	return stmt, VariableID(jen.Id(targetSlice)), nil
 }

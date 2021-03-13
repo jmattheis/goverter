@@ -31,15 +31,18 @@ success: |
 
     type Converter struct{}
 
+    func (c *Converter) structsDBInnerToStructsApiInner(source execution.DBInner) execution.ApiInner {
+    	var apiInner execution.ApiInner
+    	apiInner.Name = source.Name
+    	apiInner.Value = source.Value
+    	return apiInner
+    }
     func (c *Converter) Convert(source execution.DBModel) execution.ApiModel {
     	var apiModel execution.ApiModel
     	var outer *execution.ApiInner
     	if source.Inner != nil {
-    		deref := *source.Inner
-    		var apiInner execution.ApiInner
-    		apiInner.Name = deref.Name
-    		apiInner.Value = deref.Value
-    		outer = &apiInner
+    		temp := c.structsDBInnerToStructsApiInner(*source.Inner)
+    		outer = &temp
     	}
     	apiModel.Inner = outer
     	return apiModel

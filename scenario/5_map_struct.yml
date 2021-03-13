@@ -25,26 +25,29 @@ success: |
 
     type Converter struct{}
 
+    func (c *Converter) slicesInputToSlicesOutput(source execution.Input) execution.Output {
+    	var output execution.Output
+    	output.Name = source.Name
+    	output.Age = source.Age
+    	return output
+    }
     func (c *Converter) Convert(source map[string]execution.Input) map[string]execution.Output {
     	targetMap := make(map[string]execution.Output, len(source))
     	for key, value := range source {
-    		var output execution.Output
-    		output.Name = value.Name
-    		output.Age = value.Age
-    		targetMap[key] = output
+    		targetMap[key] = c.slicesInputToSlicesOutput(value)
     	}
     	return targetMap
+    }
+    func (c *Converter) slicesOutputToSlicesInput(source execution.Output) execution.Input {
+    	var input execution.Input
+    	input.Name = source.Name
+    	input.Age = source.Age
+    	return input
     }
     func (c *Converter) Convert2(source map[execution.Output]execution.Input) map[execution.Input]execution.Output {
     	targetMap := make(map[execution.Input]execution.Output, len(source))
     	for key, value := range source {
-    		var input execution.Input
-    		input.Name = key.Name
-    		input.Age = key.Age
-    		var output execution.Output
-    		output.Name = value.Name
-    		output.Age = value.Age
-    		targetMap[input] = output
+    		targetMap[c.slicesOutputToSlicesInput(key)] = c.slicesInputToSlicesOutput(value)
     	}
     	return targetMap
     }

@@ -5,6 +5,7 @@ import (
 	"go/importer"
 	"go/types"
 	"sort"
+	"strings"
 
 	"github.com/dave/jennifer/jen"
 	"github.com/jmattheis/go-genconv/builder"
@@ -33,9 +34,10 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 		file.Type().Id(converter.Config.Name).Struct()
 
 		gen := generator{
-			file:   file,
-			name:   converter.Config.Name,
-			lookup: map[string]map[string]GenerateMethod{},
+			file:       file,
+			name:       converter.Config.Name,
+			lookup:     map[GeneratedMethodSignature]*GenerateMethod{},
+			lookupName: map[string]*GenerateMethod{},
 			rules: []builder.Builder{
 				&builder.BasicTargetPointerRule{},
 				&builder.Pointer{},
@@ -72,11 +74,17 @@ type GenerateMethod struct {
 	Target types.Type
 }
 
+type GeneratedMethodSignature struct {
+	Source string
+	Target string
+}
+
 type generator struct {
-	name   string
-	file   *jen.File
-	rules  []builder.Builder
-	lookup map[string]map[string]GenerateMethod
+	name       string
+	file       *jen.File
+	rules      []builder.Builder
+	lookup     map[GeneratedMethodSignature]*GenerateMethod
+	lookupName map[string]*GenerateMethod
 	// source type to target type string
 }
 
@@ -96,25 +104,23 @@ func (g *generator) registerMethod(method *types.Func) error {
 	source := params.At(0).Type()
 	target := result.At(0).Type()
 
-	inner, _ := g.lookup[source.String()]
-	if inner == nil {
-		inner = map[string]GenerateMethod{}
-		g.lookup[source.String()] = inner
-	}
-	inner[target.String()] = GenerateMethod{
+	m := &GenerateMethod{
 		ID:     method.FullName(),
 		Name:   method.Name(),
 		Source: source,
 		Target: target,
 	}
+	g.lookup[GeneratedMethodSignature{
+		Source: source.String(),
+		Target: target.String(),
+	}] = m
+	g.lookupName[m.Name] = m
 	return nil
 }
 func (g *generator) createMethods() error {
-	methods := []GenerateMethod{}
-	for _, inner := range g.lookup {
-		for _, method := range inner {
-			methods = append(methods, method)
-		}
+	methods := []*GenerateMethod{}
+	for _, method := range g.lookup {
+		methods = append(methods, method)
 	}
 	sort.Slice(methods, func(i, j int) bool {
 		return methods[i].Name < methods[j].Name
@@ -122,6 +128,12 @@ func (g *generator) createMethods() error {
 	for _, method := range methods {
 		err := g.addMethod(method.Name, method.Source, method.Target)
 		if err != nil {
+			err = err.Lift(&builder.Path{
+				SourceID:   "source",
+				TargetID:   "target",
+				SourceType: method.Source.String(),
+				TargetType: method.Target.String(),
+			})
 			return fmt.Errorf("Error while creating converter method: %s\n\n%s", method.ID, builder.ToString(err))
 		}
 	}
@@ -133,17 +145,12 @@ func (g *generator) addMethod(name string, source, target types.Type) *builder.E
 	ruleSource := builder.TypeOf(source)
 	ruleTarget := builder.TypeOf(target)
 
-	stmt, newID, err := g.BuildNoLookup(&builder.MethodContext{Namer: builder.NewNamer()}, sourceID.Clone(), builder.TypeOf(source), builder.TypeOf(target))
+	stmt, newID, err := g.BuildNoLookup(&builder.MethodContext{Namer: builder.NewNamer()}, builder.VariableID(sourceID.Clone()), builder.TypeOf(source), builder.TypeOf(target))
 	if err != nil {
-		return err.Lift(&builder.Path{
-			SourceID:   "source",
-			TargetID:   "target",
-			SourceType: source.String(),
-			TargetType: target.String(),
-		})
+		return err
 	}
 
-	stmt = append(stmt, jen.Return().Add(newID))
+	stmt = append(stmt, jen.Return().Add(newID.Code))
 	g.file.Func().Params(jen.Id("c").Op("*").Id(g.name)).Id(name).
 		Params(jen.Id("source").Add(ruleSource.TypeAsJen())).Params(ruleTarget.TypeAsJen()).
 		Block(stmt...)
@@ -151,7 +158,7 @@ func (g *generator) addMethod(name string, source, target types.Type) *builder.E
 	return nil
 }
 
-func (g *generator) BuildNoLookup(ctx *builder.MethodContext, sourceID builder.JenID, source, target *builder.Type) ([]jen.Code, builder.JenID, *builder.Error) {
+func (g *generator) BuildNoLookup(ctx *builder.MethodContext, sourceID *builder.JenID, source, target *builder.Type) ([]jen.Code, *builder.JenID, *builder.Error) {
 	for _, rule := range g.rules {
 		if rule.Matches(source, target) {
 			return rule.Build(g, ctx, sourceID, source, target)
@@ -160,13 +167,40 @@ func (g *generator) BuildNoLookup(ctx *builder.MethodContext, sourceID builder.J
 	return nil, nil, builder.NewError(fmt.Sprintf("TypeMismatch: Cannot convert %s to %s", source.T, target.T))
 }
 
-func (g *generator) Build(ctx *builder.MethodContext, sourceID builder.JenID, source, target *builder.Type) ([]jen.Code, builder.JenID, *builder.Error) {
-	if inner, ok := g.lookup[source.T.String()]; ok {
-		if method, ok := inner[target.T.String()]; ok {
-			name := ctx.Name("retVal")
-			stmt := []jen.Code{jen.Id(name).Op(":=").Id("c").Dot(method.Name).Call(sourceID)}
-			return stmt, jen.Id(name), nil
+func (g *generator) Build(ctx *builder.MethodContext, sourceID *builder.JenID, source, target *builder.Type) ([]jen.Code, *builder.JenID, *builder.Error) {
+	if method, ok := g.lookup[GeneratedMethodSignature{Source: source.T.String(), Target: target.T.String()}]; ok {
+		id := builder.OtherID(jen.Id("c").Dot(method.Name).Call(sourceID.Code))
+		return nil, id, nil
+	}
+
+	if (source.Named && !source.Basic) || (target.Named && !target.Basic) {
+
+		name := source.UnescapedID() + "To" + strings.Title(target.UnescapedID())
+		for i := 1; ; i++ {
+			tempName := name
+			if i > 1 {
+				tempName += fmt.Sprint(i)
+			}
+			_, ok := g.lookupName[tempName]
+			if !ok {
+				name = tempName
+				break
+			}
 		}
+
+		method := &GenerateMethod{
+			ID:     name,
+			Name:   name,
+			Source: source.T,
+			Target: target.T,
+		}
+		g.lookup[GeneratedMethodSignature{Source: source.T.String(), Target: target.T.String()}] = method
+		g.lookupName[method.Name] = method
+		if err := g.addMethod(method.Name, method.Source, method.Target); err != nil {
+			return nil, nil, err
+		}
+		// try again to trigger the found method thingy above
+		return g.Build(ctx, sourceID, source, target)
 	}
 
 	for _, rule := range g.rules {

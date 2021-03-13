@@ -24,13 +24,16 @@ success: |
 
     type Converter struct{}
 
+    func (c *Converter) slicesInputToSlicesOutput(source execution.Input) execution.Output {
+    	var output execution.Output
+    	output.Name = source.Name
+    	output.Age = source.Age
+    	return output
+    }
     func (c *Converter) Convert(source []execution.Input) []execution.Output {
     	targetSlice := make([]execution.Output, len(source))
     	for i := 0; i < len(source); i++ {
-    		var output execution.Output
-    		output.Name = source[i].Name
-    		output.Age = source[i].Age
-    		targetSlice[i] = output
+    		targetSlice[i] = c.slicesInputToSlicesOutput(source[i])
     	}
     	return targetSlice
     }

@@ -13,7 +13,7 @@ func (*Struct) Matches(source, target *Type) bool {
 	return source.Struct && target.Struct
 }
 
-func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID JenID, source, target *Type) ([]jen.Code, JenID, *Error) {
+func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *JenID, source, target *Type) ([]jen.Code, *JenID, *Error) {
 	name := ctx.Of(target, "structTarget")
 	stmt := []jen.Code{
 		jen.Var().Id(name).Add(target.TypeAsJen()),
@@ -41,9 +41,9 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID JenID, source, 
 			})
 		}
 
-		fieldSourceId := sourceID.Clone().Dot(sourceField.Name())
+		fieldSourceId := sourceID.Code.Clone().Dot(sourceField.Name())
 
-		fieldStmt, fieldID, err := gen.Build(ctx, fieldSourceId, TypeOf(sourceField.Type()), TypeOf(targetField.Type()))
+		fieldStmt, fieldID, err := gen.Build(ctx, VariableID(fieldSourceId), TypeOf(sourceField.Type()), TypeOf(targetField.Type()))
 		if err != nil {
 			return nil, nil, err.Lift(&Path{
 				Prefix:     ".",
@@ -54,8 +54,8 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID JenID, source, 
 			})
 		}
 		stmt = append(stmt, fieldStmt...)
-		stmt = append(stmt, jen.Id(name).Dot(targetField.Name()).Op("=").Add(fieldID))
+		stmt = append(stmt, jen.Id(name).Dot(targetField.Name()).Op("=").Add(fieldID.Code))
 	}
 
-	return stmt, jen.Id(name), nil
+	return stmt, VariableID(jen.Id(name)), nil
 }

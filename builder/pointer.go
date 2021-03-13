@@ -8,11 +8,10 @@ func (*Pointer) Matches(source, target *Type) bool {
 	return source.Pointer && target.Pointer
 }
 
-func (*Pointer) Build(gen Generator, ctx *MethodContext, sourceID JenID, source, target *Type) ([]jen.Code, JenID, *Error) {
+func (*Pointer) Build(gen Generator, ctx *MethodContext, sourceID *JenID, source, target *Type) ([]jen.Code, *JenID, *Error) {
 	outerVar := ctx.Of(target, "outer")
-	deref := ctx.Name("deref")
 
-	nextBlock, id, err := gen.Build(ctx, jen.Id(deref), source.PointerInner, target.PointerInner)
+	nextBlock, id, err := gen.Build(ctx, OtherID(jen.Op("*").Add(sourceID.Code.Clone())), source.PointerInner, target.PointerInner)
 	if err != nil {
 		return nil, nil, err.Lift(&Path{
 			SourceID:   "*",
@@ -22,17 +21,20 @@ func (*Pointer) Build(gen Generator, ctx *MethodContext, sourceID JenID, source,
 		})
 	}
 
-	ifBlock := []jen.Code{
-		jen.Id(deref).Op(":=").Op("*").Add(sourceID.Clone()),
+	ifBlock := nextBlock
+	if id.Variable {
+		ifBlock = append(ifBlock, jen.Id(outerVar).Op("=").Op("&").Add(id.Code.Clone()))
+	} else {
+		tempName := ctx.Name("temp")
+		ifBlock = append(ifBlock, jen.Id(tempName).Op(":=").Add(id.Code.Clone()))
+		ifBlock = append(ifBlock, jen.Id(outerVar).Op("=").Op("&").Id(tempName))
 	}
-	ifBlock = append(ifBlock, nextBlock...)
-	ifBlock = append(ifBlock, jen.Id(outerVar).Op("=").Op("&").Add(id))
 
 	stmt := []jen.Code{
 		jen.Var().Id(outerVar).Add(target.TypeAsJen()),
-		jen.If(sourceID.Clone().Op("!=").Nil()).Block(ifBlock...),
+		jen.If(sourceID.Code.Clone().Op("!=").Nil()).Block(ifBlock...),
 	}
-	return stmt, jen.Id(outerVar), err
+	return stmt, VariableID(jen.Id(outerVar)), err
 }
 
 type TargetPointer struct{}
@@ -41,7 +43,7 @@ func (*TargetPointer) Matches(source, target *Type) bool {
 	return !source.Pointer && target.Pointer
 }
 
-func (*TargetPointer) Build(gen Generator, ctx *MethodContext, sourceID JenID, source, target *Type) ([]jen.Code, JenID, *Error) {
+func (*TargetPointer) Build(gen Generator, ctx *MethodContext, sourceID *JenID, source, target *Type) ([]jen.Code, *JenID, *Error) {
 	stmt, id, err := gen.Build(ctx, sourceID, source, target.PointerInner)
 	if err != nil {
 		return nil, nil, err.Lift(&Path{
@@ -51,6 +53,10 @@ func (*TargetPointer) Build(gen Generator, ctx *MethodContext, sourceID JenID, s
 			TargetType: target.PointerInner.T.String(),
 		})
 	}
-	newId := jen.Op("&").Add(id)
-	return stmt, newId, nil
+	if id.Variable {
+		return stmt, OtherID(jen.Op("&").Add(id.Code)), nil
+	}
+	tempName := ctx.Name("temp")
+	stmt = append(stmt, jen.Id(tempName).Op(":=").Add(id.Code))
+	return stmt, OtherID(jen.Op("&").Id(tempName)), nil
 }

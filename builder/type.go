@@ -26,7 +26,17 @@ type Type struct {
 	BasicType    *types.Basic
 }
 
-type JenID = *jen.Statement
+type JenID struct {
+	Code     *jen.Statement
+	Variable bool
+}
+
+func VariableID(code *jen.Statement) *JenID {
+	return &JenID{Code: code, Variable: true}
+}
+func OtherID(code *jen.Statement) *JenID {
+	return &JenID{Code: code, Variable: false}
+}
 
 func TypeOf(t types.Type) *Type {
 	rt := &Type{}
@@ -64,6 +74,46 @@ func TypeOf(t types.Type) *Type {
 		panic("unknown types.Type " + t.String())
 	}
 	return rt
+}
+
+func (t *Type) ID() string {
+	return t.asID(true, true)
+}
+func (t *Type) UnescapedID() string {
+	return t.asID(true, false)
+}
+
+func (t *Type) asID(seeNamed, escapeReserved bool) string {
+	if seeNamed && t.Named {
+		pkgName := t.NamedType.Obj().Pkg().Name()
+		name := pkgName + t.NamedType.Obj().Name()
+		if t.List {
+			name += "List"
+		}
+		return name
+	}
+	if t.List {
+		return "List"
+	}
+	if t.Basic {
+		if escapeReserved {
+			return "x" + t.BasicType.String()
+		}
+		return t.BasicType.String()
+	}
+	if t.Pointer {
+		return "p" + t.PointerInner.asID(true, false)
+	}
+	if t.Map {
+		return "m" + t.MapKey.asID(true, false) + t.MapValue.asID(true, false)
+	}
+	if t.Struct {
+		if escapeReserved {
+			return "xstruct"
+		}
+		return "struct"
+	}
+	return "unknown"
 }
 
 func (t Type) TypeAsJen() *jen.Statement {

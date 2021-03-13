@@ -36,8 +36,8 @@ success: |
     	output.Name = &ref2
     	var outer *int
     	if source.Age != nil {
-    		deref := *source.Age
-    		outer = &deref
+    		temp := *source.Age
+    		outer = &temp
     	}
     	output.Age = outer
     	return output

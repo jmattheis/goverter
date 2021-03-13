@@ -6,11 +6,11 @@ import (
 
 type Builder interface {
 	Matches(source, target *Type) bool
-	Build(gen Generator, ctx *MethodContext, sourceID JenID, source, target *Type) ([]jen.Code, JenID, *Error)
+	Build(gen Generator, ctx *MethodContext, sourceID *JenID, source, target *Type) ([]jen.Code, *JenID, *Error)
 }
 
 type Generator interface {
-	Build(ctx *MethodContext, sourceID JenID, source, target *Type) ([]jen.Code, JenID, *Error)
+	Build(ctx *MethodContext, sourceID *JenID, source, target *Type) ([]jen.Code, *JenID, *Error)
 }
 
 type MethodContext struct {

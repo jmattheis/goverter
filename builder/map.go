@@ -8,11 +8,11 @@ func (*Map) Matches(source, target *Type) bool {
 	return source.Map && target.Map
 }
 
-func (*Map) Build(gen Generator, ctx *MethodContext, sourceID JenID, source, target *Type) ([]jen.Code, JenID, *Error) {
+func (*Map) Build(gen Generator, ctx *MethodContext, sourceID *JenID, source, target *Type) ([]jen.Code, *JenID, *Error) {
 	targetMap := ctx.Of(source, "targetMap")
 	key, value := ctx.Map()
 
-	block, newKey, err := gen.Build(ctx, jen.Id(key), source.MapKey, target.MapKey)
+	block, newKey, err := gen.Build(ctx, VariableID(jen.Id(key)), source.MapKey, target.MapKey)
 	if err != nil {
 		return nil, nil, err.Lift(&Path{
 			SourceID:   "[]",
@@ -21,7 +21,7 @@ func (*Map) Build(gen Generator, ctx *MethodContext, sourceID JenID, source, tar
 			TargetType: "<mapkey> " + target.MapKey.T.String(),
 		})
 	}
-	valueStmt, valueKey, err := gen.Build(ctx, jen.Id(value), source.MapValue, target.MapValue)
+	valueStmt, valueKey, err := gen.Build(ctx, VariableID(jen.Id(value)), source.MapValue, target.MapValue)
 	if err != nil {
 		return nil, nil, err.Lift(&Path{
 			SourceID:   "[]",
@@ -31,13 +31,13 @@ func (*Map) Build(gen Generator, ctx *MethodContext, sourceID JenID, source, tar
 		})
 	}
 	block = append(block, valueStmt...)
-	block = append(block, jen.Id(targetMap).Index(newKey).Op("=").Add(valueKey))
+	block = append(block, jen.Id(targetMap).Index(newKey.Code).Op("=").Add(valueKey.Code))
 
 	stmt := []jen.Code{
-		jen.Id(targetMap).Op(":=").Make(target.TypeAsJen(), jen.Len(sourceID.Clone())),
-		jen.For(jen.List(jen.Id(key), jen.Id(value)).Op(":=").Range().Add(sourceID)).
+		jen.Id(targetMap).Op(":=").Make(target.TypeAsJen(), jen.Len(sourceID.Code.Clone())),
+		jen.For(jen.List(jen.Id(key), jen.Id(value)).Op(":=").Range().Add(sourceID.Code)).
 			Block(block...),
 	}
 
-	return stmt, jen.Id(targetMap), nil
+	return stmt, VariableID(jen.Id(targetMap)), nil
 }

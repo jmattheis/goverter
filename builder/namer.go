@@ -6,7 +6,7 @@ import (
 )
 
 func NewNamer() *Namer {
-	return &Namer{lookup: map[string]struct{}{}}
+	return &Namer{lookup: map[string]struct{}{"c": {}}}
 }
 
 type Namer struct {

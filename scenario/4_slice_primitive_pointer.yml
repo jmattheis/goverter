@@ -19,8 +19,8 @@ success: |
     	for i := 0; i < len(source); i++ {
     		var outer *int
     		if source[i] != nil {
-    			deref := *source[i]
-    			outer = &deref
+    			temp := *source[i]
+    			outer = &temp
     		}
     		targetSlice[i] = outer
     	}

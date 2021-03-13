@@ -17,8 +17,8 @@ success: |
     func (c *Converter) ConvertPPString(source *string) *string {
     	var outer *string
     	if source != nil {
-    		deref := *source
-    		outer = &deref
+    		temp := *source
+    		outer = &temp
     	}
     	return outer
     }

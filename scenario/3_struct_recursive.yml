@@ -32,9 +32,8 @@ success: |
     	output.Age = source.Age
     	var outer *execution.Output
     	if source.Value != nil {
-    		deref := *source.Value
-    		retVal := c.Convert(deref)
-    		outer = &retVal
+    		temp := c.Convert(*source.Value)
+    		outer = &temp
     	}
     	output.Value = outer
     	return output

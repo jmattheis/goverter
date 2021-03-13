@@ -27,8 +27,8 @@ success: |
     	for key, value := range source {
     		var outer *int
     		if value != nil {
-    			deref := *value
-    			outer = &deref
+    			temp := *value
+    			outer = &temp
     		}
     		targetMap[key] = outer
     	}

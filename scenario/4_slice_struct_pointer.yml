@@ -25,13 +25,20 @@ success: |
 
     type Converter struct{}
 
+    func (c *Converter) slicesInputToSlicesOutput(source execution.Input) execution.Output {
+    	var output execution.Output
+    	output.Name = source.Name
+    	output.Age = source.Age
+    	return output
+    }
+    func (c *Converter) slicesInputToPslicesOutput(source execution.Input) *execution.Output {
+    	temp := c.slicesInputToSlicesOutput(source)
+    	return &temp
+    }
     func (c *Converter) ConvertP(source []execution.Input) []*execution.Output {
     	targetSlice := make([]*execution.Output, len(source))
     	for i := 0; i < len(source); i++ {
-    		var output execution.Output
-    		output.Name = source[i].Name
-    		output.Age = source[i].Age
-    		targetSlice[i] = &output
+    		targetSlice[i] = c.slicesInputToPslicesOutput(source[i])
     	}
     	return targetSlice
     }
@@ -40,11 +47,8 @@ success: |
     	for i := 0; i < len(source); i++ {
     		var outer *execution.Output
     		if source[i] != nil {
-    			deref := *source[i]
-    			var output execution.Output
-    			output.Name = deref.Name
-    			output.Age = deref.Age
-    			outer = &output
+    			temp := c.slicesInputToSlicesOutput(*source[i])
+    			outer = &temp
     		}
     		targetSlice[i] = outer
     	}
