@@ -1,0 +1,12 @@
+input:
+    input.go: |
+        package err
+
+        // genconv:converter
+        type Converter interface {
+            Convert() map[string]int
+        }
+error: |-
+    Error while creating converter method: (github.com/jmattheis/go-genconv/execution.Converter).Convert
+
+    expected signature to have only one parameter
