@@ -4,12 +4,11 @@ import (
 	"fmt"
 	"go/importer"
 	"go/types"
-
+	"sort"
 
 	"github.com/dave/jennifer/jen"
 	"github.com/jmattheis/go-genconv/builder"
 	"github.com/jmattheis/go-genconv/comments"
-	"golang.org/x/tools/go/ssa/interp/testdata/src/errors"
 )
 
 type Config struct {
@@ -52,17 +51,22 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 		interf := obj.Type().Underlying().(*types.Interface)
 		for i := 0; i < interf.NumMethods(); i++ {
 			method := interf.Method(i)
-			if err := gen.addOuterMethod(method); err != nil {
+			if err := gen.registerMethod(method); err != nil {
 				return nil, fmt.Errorf(`Error while creating converter method: %s
 
 %s`, method.FullName(), err)
 			}
+
+		}
+		if err := gen.createMethods(); err != nil {
+			return nil, err
 		}
 	}
 	return file, nil
 }
 
 type GenerateMethod struct {
+	ID     string
 	Name   string
 	Source types.Type
 	Target types.Type
@@ -76,7 +80,7 @@ type generator struct {
 	// source type to target type string
 }
 
-func (g *generator) addOuterMethod(method *types.Func) error {
+func (g *generator) registerMethod(method *types.Func) error {
 	signature, ok := method.Type().(*types.Signature)
 	if !ok {
 		return fmt.Errorf("expected signature %#v", method.Type())
@@ -92,11 +96,36 @@ func (g *generator) addOuterMethod(method *types.Func) error {
 	source := params.At(0).Type()
 	target := result.At(0).Type()
 
-	err := g.addMethod(method.Name(), source, target)
-	if err == nil {
-		return nil
+	inner, _ := g.lookup[source.String()]
+	if inner == nil {
+		inner = map[string]GenerateMethod{}
+		g.lookup[source.String()] = inner
 	}
-	return errors.New(builder.ToString(err))
+	inner[target.String()] = GenerateMethod{
+		ID:     method.FullName(),
+		Name:   method.Name(),
+		Source: source,
+		Target: target,
+	}
+	return nil
+}
+func (g *generator) createMethods() error {
+	methods := []GenerateMethod{}
+	for _, inner := range g.lookup {
+		for _, method := range inner {
+			methods = append(methods, method)
+		}
+	}
+	sort.Slice(methods, func(i, j int) bool {
+		return methods[i].Name < methods[j].Name
+	})
+	for _, method := range methods {
+		err := g.addMethod(method.Name, method.Source, method.Target)
+		if err != nil {
+			return fmt.Errorf("Error while creating converter method: %s\n\n%s", method.ID, builder.ToString(err))
+		}
+	}
+	return nil
 }
 
 func (g *generator) addMethod(name string, source, target types.Type) *builder.Error {
