@@ -23,6 +23,7 @@ type Converter struct {
 	Config  ConverterConfig
 	Methods MethodMapping
 }
+
 type ConverterConfig struct {
 	Name string
 }
@@ -37,6 +38,9 @@ func ParseDocs(pattern string) ([]Converter, error) {
 	}
 	mapping := []Converter{}
 	for _, pkg := range pkgs {
+		if len(pkg.Errors) > 0 {
+			return nil, pkg.Errors[0]
+		}
 		for _, file := range pkg.Syntax {
 			for _, decl := range file.Decls {
 				if genDecl, ok := decl.(*ast.GenDecl); ok {
