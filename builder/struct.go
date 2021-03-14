@@ -4,16 +4,18 @@ import (
 	"fmt"
 	"go/types"
 
+	"github.com/jmattheis/go-genconv/xtype"
+
 	"github.com/dave/jennifer/jen"
 )
 
 type Struct struct{}
 
-func (*Struct) Matches(source, target *Type) bool {
+func (*Struct) Matches(source, target *xtype.Type) bool {
 	return source.Struct && target.Struct
 }
 
-func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *JenID, source, target *Type) ([]jen.Code, *JenID, *Error) {
+func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *Error) {
 	name := ctx.Name(target.ID())
 	stmt := []jen.Code{
 		jen.Var().Id(name).Add(target.TypeAsJen()),
@@ -53,7 +55,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *JenID, source,
 
 		fieldSourceId := sourceID.Code.Clone().Dot(sourceField.Name())
 
-		fieldStmt, fieldID, err := gen.Build(ctx, VariableID(fieldSourceId), TypeOf(sourceField.Type()), TypeOf(targetField.Type()))
+		fieldStmt, fieldID, err := gen.Build(ctx, xtype.VariableID(fieldSourceId), xtype.TypeOf(sourceField.Type()), xtype.TypeOf(targetField.Type()))
 		if err != nil {
 			return nil, nil, err.Lift(&Path{
 				Prefix:     ".",
@@ -67,5 +69,5 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *JenID, source,
 		stmt = append(stmt, jen.Id(name).Dot(targetField.Name()).Op("=").Add(fieldID.Code))
 	}
 
-	return stmt, VariableID(jen.Id(name)), nil
+	return stmt, xtype.VariableID(jen.Id(name)), nil
 }

@@ -1,18 +1,21 @@
 package builder
 
-import "github.com/dave/jennifer/jen"
+import (
+	"github.com/dave/jennifer/jen"
+	"github.com/jmattheis/go-genconv/xtype"
+)
 
 type Map struct{}
 
-func (*Map) Matches(source, target *Type) bool {
+func (*Map) Matches(source, target *xtype.Type) bool {
 	return source.Map && target.Map
 }
 
-func (*Map) Build(gen Generator, ctx *MethodContext, sourceID *JenID, source, target *Type) ([]jen.Code, *JenID, *Error) {
+func (*Map) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *Error) {
 	targetMap := ctx.Name(target.ID())
 	key, value := ctx.Map()
 
-	block, newKey, err := gen.Build(ctx, VariableID(jen.Id(key)), source.MapKey, target.MapKey)
+	block, newKey, err := gen.Build(ctx, xtype.VariableID(jen.Id(key)), source.MapKey, target.MapKey)
 	if err != nil {
 		return nil, nil, err.Lift(&Path{
 			SourceID:   "[]",
@@ -21,7 +24,7 @@ func (*Map) Build(gen Generator, ctx *MethodContext, sourceID *JenID, source, ta
 			TargetType: "<mapkey> " + target.MapKey.T.String(),
 		})
 	}
-	valueStmt, valueKey, err := gen.Build(ctx, VariableID(jen.Id(value)), source.MapValue, target.MapValue)
+	valueStmt, valueKey, err := gen.Build(ctx, xtype.VariableID(jen.Id(value)), source.MapValue, target.MapValue)
 	if err != nil {
 		return nil, nil, err.Lift(&Path{
 			SourceID:   "[]",
@@ -39,5 +42,5 @@ func (*Map) Build(gen Generator, ctx *MethodContext, sourceID *JenID, source, ta
 			Block(block...),
 	}
 
-	return stmt, VariableID(jen.Id(targetMap)), nil
+	return stmt, xtype.VariableID(jen.Id(targetMap)), nil
 }

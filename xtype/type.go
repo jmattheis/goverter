@@ -1,4 +1,4 @@
-package builder
+package xtype
 
 import (
 	"go/types"

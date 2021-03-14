@@ -1,18 +1,21 @@
 package builder
 
-import "github.com/dave/jennifer/jen"
+import (
+	"github.com/dave/jennifer/jen"
+	"github.com/jmattheis/go-genconv/xtype"
+)
 
 type List struct{}
 
-func (*List) Matches(source, target *Type) bool {
+func (*List) Matches(source, target *xtype.Type) bool {
 	return source.List && target.List && !target.ListFixed
 }
 
-func (*List) Build(gen Generator, ctx *MethodContext, sourceID *JenID, source, target *Type) ([]jen.Code, *JenID, *Error) {
+func (*List) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *Error) {
 	targetSlice := ctx.Name(target.ID())
 	index := ctx.Index()
 
-	indexedSource := VariableID(sourceID.Code.Clone().Index(jen.Id(index)))
+	indexedSource := xtype.VariableID(sourceID.Code.Clone().Index(jen.Id(index)))
 
 	newStmt, newId, err := gen.Build(ctx, indexedSource, source.ListInner, target.ListInner)
 	if err != nil {
@@ -31,5 +34,5 @@ func (*List) Build(gen Generator, ctx *MethodContext, sourceID *JenID, source, t
 			Block(newStmt...),
 	}
 
-	return stmt, VariableID(jen.Id(targetSlice)), nil
+	return stmt, xtype.VariableID(jen.Id(targetSlice)), nil
 }

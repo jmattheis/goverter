@@ -1,17 +1,20 @@
 package builder
 
-import "github.com/dave/jennifer/jen"
+import (
+	"github.com/dave/jennifer/jen"
+	"github.com/jmattheis/go-genconv/xtype"
+)
 
 type Basic struct{}
 
-func (*Basic) Matches(source, target *Type) bool {
+func (*Basic) Matches(source, target *xtype.Type) bool {
 	return source.Basic && target.Basic &&
 		source.BasicType.Kind() == target.BasicType.Kind()
 }
 
-func (*Basic) Build(_ Generator, _ *MethodContext, sourceID *JenID, source, target *Type) ([]jen.Code, *JenID, *Error) {
+func (*Basic) Build(_ Generator, _ *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *Error) {
 	if target.Named || (!target.Named && source.Named) {
-		return nil, OtherID(target.TypeAsJen().Call(sourceID.Code)), nil
+		return nil, xtype.OtherID(target.TypeAsJen().Call(sourceID.Code)), nil
 	}
 	return nil, sourceID, nil
 }
@@ -20,11 +23,11 @@ type BasicTargetPointerRule struct {
 	basic Basic
 }
 
-func (*BasicTargetPointerRule) Matches(source, target *Type) bool {
+func (*BasicTargetPointerRule) Matches(source, target *xtype.Type) bool {
 	return source.Basic && target.Pointer && target.PointerInner.Basic
 }
 
-func (*BasicTargetPointerRule) Build(gen Generator, ctx *MethodContext, sourceID *JenID, source, target *Type) ([]jen.Code, *JenID, *Error) {
+func (*BasicTargetPointerRule) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *Error) {
 	name := ctx.Name(target.ID())
 
 	stmt, id, err := gen.Build(ctx, sourceID, source, target.PointerInner)
@@ -39,5 +42,5 @@ func (*BasicTargetPointerRule) Build(gen Generator, ctx *MethodContext, sourceID
 	stmt = append(stmt, jen.Id(name).Op(":=").Add(id.Code))
 	newId := jen.Op("&").Id(name)
 
-	return stmt, OtherID(newId), err
+	return stmt, xtype.OtherID(newId), err
 }

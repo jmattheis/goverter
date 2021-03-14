@@ -6,6 +6,8 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/jmattheis/go-genconv/xtype"
+
 	"github.com/dave/jennifer/jen"
 	"github.com/jmattheis/go-genconv/builder"
 	"github.com/jmattheis/go-genconv/comments"
@@ -17,8 +19,8 @@ type Method struct {
 	Explicit      bool
 	Name          string
 	Call          *jen.Statement
-	Source        *builder.Type
-	Target        *builder.Type
+	Source        *xtype.Type
+	Target        *xtype.Type
 	Mapping       map[string]string
 	IgnoredFields map[string]struct{}
 
@@ -34,8 +36,8 @@ type Generator struct {
 	namer  *namer.Namer
 	name   string
 	file   *jen.File
-	lookup map[builder.Signature]*Method
-	extend map[builder.Signature]*Method
+	lookup map[xtype.Signature]*Method
+	extend map[xtype.Signature]*Method
 }
 
 func (g *Generator) registerMethod(method *types.Func, methodComments comments.Method) error {
@@ -70,15 +72,15 @@ func (g *Generator) registerMethod(method *types.Func, methodComments comments.M
 		ID:               method.String(),
 		Explicit:         true,
 		Name:             method.Name(),
-		Source:           builder.TypeOf(source),
-		Target:           builder.TypeOf(target),
+		Source:           xtype.TypeOf(source),
+		Target:           xtype.TypeOf(target),
 		Mapping:          methodComments.NameMapping,
 		IgnoredFields:    methodComments.IgnoredFields,
 		ReturnError:      returnError,
 		ReturnTypeOrigin: method.FullName(),
 	}
 
-	g.lookup[builder.Signature{
+	g.lookup[xtype.Signature{
 		Source: source.String(),
 		Target: target.String(),
 	}] = m
@@ -129,13 +131,13 @@ func (g *Generator) parseExtend(targetInterface types.Type, scope *types.Scope, 
 			}
 		}
 
-		g.extend[builder.Signature{Source: source.String(), Target: target.String()}] = &Method{
+		g.extend[xtype.Signature{Source: source.String(), Target: target.String()}] = &Method{
 			ID:               fn.String(),
 			Explicit:         true,
 			Call:             jen.Qual(fn.Pkg().Path(), fn.Name()),
 			Name:             fn.Name(),
-			Source:           builder.TypeOf(source),
-			Target:           builder.TypeOf(target),
+			Source:           xtype.TypeOf(source),
+			Target:           xtype.TypeOf(target),
 			SelfAsFirstParam: selfAsFirstParameter,
 			ReturnError:      returnError,
 			ReturnTypeOrigin: fn.String(),
@@ -206,9 +208,9 @@ func (g *Generator) buildMethod(method *Method) *builder.Error {
 		MappingBaseID: target.T.String(),
 		Mapping:       method.Mapping,
 		IgnoredFields: method.IgnoredFields,
-		Signature:     builder.Signature{Source: method.Source.T.String(), Target: method.Target.T.String()},
+		Signature:     xtype.Signature{Source: method.Source.T.String(), Target: method.Target.T.String()},
 	}
-	stmt, newID, err := g.BuildNoLookup(ctx, builder.VariableID(sourceID.Clone()), source, target)
+	stmt, newID, err := g.BuildNoLookup(ctx, xtype.VariableID(sourceID.Clone()), source, target)
 	if err != nil {
 		return err
 	}
@@ -227,7 +229,7 @@ func (g *Generator) buildMethod(method *Method) *builder.Error {
 	return nil
 }
 
-func (g *Generator) BuildNoLookup(ctx *builder.MethodContext, sourceID *builder.JenID, source, target *builder.Type) ([]jen.Code, *builder.JenID, *builder.Error) {
+func (g *Generator) BuildNoLookup(ctx *builder.MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *builder.Error) {
 	for _, rule := range BuildSteps {
 		if rule.Matches(source, target) {
 			return rule.Build(g, ctx, sourceID, source, target)
@@ -236,11 +238,11 @@ func (g *Generator) BuildNoLookup(ctx *builder.MethodContext, sourceID *builder.
 	return nil, nil, builder.NewError(fmt.Sprintf("TypeMismatch: Cannot convert %s to %s", source.T, target.T))
 }
 
-func (g *Generator) Build(ctx *builder.MethodContext, sourceID *builder.JenID, source, target *builder.Type) ([]jen.Code, *builder.JenID, *builder.Error) {
+func (g *Generator) Build(ctx *builder.MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *builder.Error) {
 
-	method, ok := g.extend[builder.Signature{Source: source.T.String(), Target: target.T.String()}]
+	method, ok := g.extend[xtype.Signature{Source: source.T.String(), Target: target.T.String()}]
 	if !ok {
-		method, ok = g.lookup[builder.Signature{Source: source.T.String(), Target: target.T.String()}]
+		method, ok = g.lookup[xtype.Signature{Source: source.T.String(), Target: target.T.String()}]
 	}
 
 	if ok {
@@ -265,9 +267,9 @@ func (g *Generator) Build(ctx *builder.MethodContext, sourceID *builder.JenID, s
 				jen.List(jen.Id(name), jen.Id("err")).Op(":=").Add(method.Call.Clone().Call(params...)),
 				jen.If(jen.Id("err").Op("!=").Nil()).Block(jen.Return(jen.Id(ctx.Namer.First), jen.Id("err"))),
 			}
-			return stmt, builder.VariableID(jen.Id(name)), nil
+			return stmt, xtype.VariableID(jen.Id(name)), nil
 		}
-		id := builder.OtherID(method.Call.Clone().Call(params...))
+		id := xtype.OtherID(method.Call.Clone().Call(params...))
 		return nil, id, nil
 	}
 
@@ -277,13 +279,13 @@ func (g *Generator) Build(ctx *builder.MethodContext, sourceID *builder.JenID, s
 		method := &Method{
 			ID:            name,
 			Name:          name,
-			Source:        builder.TypeOf(source.T),
-			Target:        builder.TypeOf(target.T),
+			Source:        xtype.TypeOf(source.T),
+			Target:        xtype.TypeOf(target.T),
 			Mapping:       map[string]string{},
 			IgnoredFields: map[string]struct{}{},
 			Call:          jen.Id("c").Dot(name),
 		}
-		g.lookup[builder.Signature{Source: source.T.String(), Target: target.T.String()}] = method
+		g.lookup[xtype.Signature{Source: source.T.String(), Target: target.T.String()}] = method
 		g.namer.Register(method.Name)
 		if err := g.buildMethod(method); err != nil {
 			return nil, nil, err

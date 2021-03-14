@@ -5,6 +5,8 @@ import (
 	"go/importer"
 	"go/types"
 
+	"github.com/jmattheis/go-genconv/xtype"
+
 	"github.com/dave/jennifer/jen"
 	"github.com/jmattheis/go-genconv/builder"
 	"github.com/jmattheis/go-genconv/comments"
@@ -46,8 +48,8 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 			namer:  namer.New(),
 			file:   file,
 			name:   converter.Config.Name,
-			lookup: map[builder.Signature]*Method{},
-			extend: map[builder.Signature]*Method{},
+			lookup: map[xtype.Signature]*Method{},
+			extend: map[xtype.Signature]*Method{},
 		}
 		interf := obj.Type().Underlying().(*types.Interface)
 
