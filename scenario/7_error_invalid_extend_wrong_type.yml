@@ -1,0 +1,10 @@
+input:
+    input.go: |
+        package structs
+
+        // genconv:converter
+        // genconv:extend HelloWorld
+        type Converter interface {
+        }
+        const HelloWorld = 5
+error: 'Error while parsing extend methods: HelloWorld is not a function'

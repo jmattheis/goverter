@@ -1,0 +1,11 @@
+input:
+    input.go: |
+        package structs
+
+        // genconv:converter
+        // genconv:extend HelloWorld
+        type Converter interface {
+        }
+        func HelloWorld(int) {
+        }
+error: 'Error while parsing extend methods: HelloWorld has no or too many returns'

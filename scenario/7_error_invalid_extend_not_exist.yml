@@ -1,0 +1,9 @@
+input:
+    input.go: |
+        package structs
+
+        // genconv:converter
+        // genconv:extend HelloWorld
+        type Converter interface {
+        }
+error: 'Error while parsing extend methods: HelloWorld does not exist in scope'

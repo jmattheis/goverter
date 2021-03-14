@@ -10,4 +10,4 @@ error: |-
     Error while creating converter method:
         func (github.com/jmattheis/go-genconv/execution.Converter).Convert(map[string]int)
 
-    return type must have at least one parameter
+    return has no or too many parameters

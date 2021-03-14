@@ -50,11 +50,8 @@ func (g *Generator) registerMethod(method *types.Func, methodComments comments.M
 		return fmt.Errorf("expected signature to have only one parameter")
 	}
 	result := signature.Results()
-	if result.Len() < 1 {
-		return fmt.Errorf("return type must have at least one parameter")
-	}
-	if result.Len() > 2 {
-		return fmt.Errorf("return type must have at max two parameter (target struct and error)")
+	if result.Len() < 1 || result.Len() > 2 {
+		return fmt.Errorf("return has no or too many parameters")
 	}
 	source := params.At(0).Type()
 	target := result.At(0).Type()

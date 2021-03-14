@@ -1,0 +1,12 @@
+input:
+    input.go: |
+        package structs
+
+        // genconv:converter
+        // genconv:extend HelloWorld
+        type Converter interface {
+        }
+        func HelloWorld(int) (int, int) {
+            return 0, 0
+        }
+error: 'Error while parsing extend methods: second return parameter must have type error but had: int'

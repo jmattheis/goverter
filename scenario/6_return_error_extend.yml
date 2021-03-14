@@ -1,0 +1,49 @@
+input:
+    input.go: |
+        package slices
+
+        // genconv:converter
+        // genconv:extend ZeroConvert EmptyConverter
+        type Converter interface {
+            Convert(source Input) Output
+        }
+
+        func ZeroConvert(*int) (int, error) {
+            return 0, nil
+        }
+        func EmptyConverter(Converter, *string) string {
+            return ""
+        }
+
+        type Input struct {
+            Name *string
+            Age *int
+        }
+        type Output struct {
+            Name string
+            Age int
+        }
+error: |
+    Error while creating converter method:
+        func (github.com/jmattheis/go-genconv/execution.Converter).Convert(source github.com/jmattheis/go-genconv/execution.Input) github.com/jmattheis/go-genconv/execution.Output
+
+    | github.com/jmattheis/go-genconv/execution.Input
+    |
+    |      | *int
+    |      |
+    source.Age
+    target.Age
+    |      |
+    |      | int
+    |
+    | github.com/jmattheis/go-genconv/execution.Output
+
+    ReturnTypeMismatch: Cannot use
+
+        func github.com/jmattheis/go-genconv/execution.ZeroConvert(*int) (int, error)
+
+    in
+
+        func (github.com/jmattheis/go-genconv/execution.Converter).Convert(source github.com/jmattheis/go-genconv/execution.Input) github.com/jmattheis/go-genconv/execution.Output
+
+    because no error is returned as second parameter
