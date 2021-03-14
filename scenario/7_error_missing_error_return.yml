@@ -1,0 +1,42 @@
+input:
+    input.go: |
+        package slices
+
+        // genconv:converter
+        type Converter interface {
+            Convert(source []Input) []Output
+            ConvertX(string) (string, error)
+        }
+
+        type Input struct {
+            Name string
+            Age int
+        }
+        type Output struct {
+            Name string
+            Age int
+        }
+error: |
+    Error while creating converter method:
+        func (github.com/jmattheis/go-genconv/execution.Converter).Convert(source []github.com/jmattheis/go-genconv/execution.Input) []github.com/jmattheis/go-genconv/execution.Output
+
+    | []github.com/jmattheis/go-genconv/execution.Input
+    |
+    |     | github.com/jmattheis/go-genconv/execution.Input
+    |     |
+    source[]
+    target[]
+    |     |
+    |     | github.com/jmattheis/go-genconv/execution.Output
+    |
+    | []github.com/jmattheis/go-genconv/execution.Output
+
+    ReturnTypeMismatch: Cannot use
+
+        func (github.com/jmattheis/go-genconv/execution.Converter).ConvertX(string) (string, error)
+
+    in
+
+        func (github.com/jmattheis/go-genconv/execution.Converter).Convert(source []github.com/jmattheis/go-genconv/execution.Input) []github.com/jmattheis/go-genconv/execution.Output
+
+    because no error is returned as second parameter

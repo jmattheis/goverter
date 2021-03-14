@@ -14,7 +14,7 @@ import (
 
 type Method struct {
 	ID               string
-	Immutable        bool
+	Explicit         bool
 	Name             string
 	Source           *builder.Type
 	Target           *builder.Type
@@ -25,8 +25,9 @@ type Method struct {
 
 	Jen jen.Code
 
-	ReturnError bool
-	Dirty       bool
+	ReturnError      bool
+	ReturnTypeOrigin string
+	Dirty            bool
 }
 
 type Generator struct {
@@ -64,14 +65,15 @@ func (g *Generator) registerMethod(sources *types.Package, method *types.Func, m
 	}
 
 	m := &Method{
-		Immutable:     true,
-		Name:          method.Name(),
-		Source:        builder.TypeOf(source),
-		Target:        builder.TypeOf(target),
-		Mapping:       methodComments.NameMapping,
-		IgnoredFields: methodComments.IgnoredFields,
-		ReturnError:   returnError,
 		ID:               method.String(),
+		Explicit:         true,
+		Name:             method.Name(),
+		Source:           builder.TypeOf(source),
+		Target:           builder.TypeOf(target),
+		Mapping:          methodComments.NameMapping,
+		IgnoredFields:    methodComments.IgnoredFields,
+		ReturnError:      returnError,
+		ReturnTypeOrigin: method.FullName(),
 	}
 
 	if methodComments.Delegate != "" {
@@ -197,7 +199,11 @@ func (g *Generator) Build(ctx *builder.MethodContext, sourceID *builder.JenID, s
 		if method.ReturnError {
 			current := g.lookup[ctx.Signature]
 			if !current.ReturnError {
+				if current.Explicit {
+					return nil, nil, builder.NewError(fmt.Sprintf("ReturnTypeMismatch: Cannot use\n\n    %s\n\nin\n\n    %s\n\nbecause no error is returned as second parameter", method.ReturnTypeOrigin, current.ID))
+				}
 				current.ReturnError = true
+				current.ReturnTypeOrigin = method.ID
 				current.Dirty = true
 			}
 
