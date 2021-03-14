@@ -17,7 +17,7 @@ func (*List) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, sou
 
 	indexedSource := xtype.VariableID(sourceID.Code.Clone().Index(jen.Id(index)))
 
-	newStmt, newId, err := gen.Build(ctx, indexedSource, source.ListInner, target.ListInner)
+	newStmt, newID, err := gen.Build(ctx, indexedSource, source.ListInner, target.ListInner)
 	if err != nil {
 		return nil, nil, err.Lift(&Path{
 			SourceID:   "[]",
@@ -26,7 +26,7 @@ func (*List) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, sou
 			TargetType: target.ListInner.T.String(),
 		})
 	}
-	newStmt = append(newStmt, jen.Id(targetSlice).Index(jen.Id(index)).Op("=").Add(newId.Code))
+	newStmt = append(newStmt, jen.Id(targetSlice).Index(jen.Id(index)).Op("=").Add(newID.Code))
 
 	stmt := []jen.Code{
 		jen.Id(targetSlice).Op(":=").Make(target.TypeAsJen(), jen.Len(sourceID.Code.Clone())),

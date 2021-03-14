@@ -138,7 +138,6 @@ func (g *Generator) parseExtend(targetInterface types.Type, scope *types.Scope, 
 			ReturnError:      returnError,
 			ReturnTypeOrigin: fn.String(),
 		}
-
 	}
 	return nil
 }
@@ -234,7 +233,6 @@ func (g *Generator) BuildNoLookup(ctx *builder.MethodContext, sourceID *xtype.Je
 }
 
 func (g *Generator) Build(ctx *builder.MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *builder.Error) {
-
 	method, ok := g.extend[xtype.Signature{Source: source.T.String(), Target: target.T.String()}]
 	if !ok {
 		method, ok = g.lookup[xtype.Signature{Source: source.T.String(), Target: target.T.String()}]

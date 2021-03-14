@@ -19,9 +19,7 @@ func (*Basic) Build(_ Generator, _ *MethodContext, sourceID *xtype.JenID, source
 	return nil, sourceID, nil
 }
 
-type BasicTargetPointerRule struct {
-	basic Basic
-}
+type BasicTargetPointerRule struct{}
 
 func (*BasicTargetPointerRule) Matches(source, target *xtype.Type) bool {
 	return source.Basic && target.Pointer && target.PointerInner.Basic
@@ -40,7 +38,7 @@ func (*BasicTargetPointerRule) Build(gen Generator, ctx *MethodContext, sourceID
 		})
 	}
 	stmt = append(stmt, jen.Id(name).Op(":=").Add(id.Code))
-	newId := jen.Op("&").Id(name)
+	newID := jen.Op("&").Id(name)
 
-	return stmt, xtype.OtherID(newId), err
+	return stmt, xtype.OtherID(newID), err
 }

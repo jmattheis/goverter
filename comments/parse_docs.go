@@ -36,7 +36,9 @@ type Method struct {
 }
 
 func ParseDocs(pattern string) ([]Converter, error) {
-	pkgs, err := packages.Load(&packages.Config{Mode: packages.LoadAllSyntax}, pattern)
+	pkgs, err := packages.Load(&packages.Config{
+		Mode: packages.NeedSyntax | packages.NeedCompiledGoFiles | packages.NeedTypes | packages.NeedModule | packages.NeedFiles | packages.NeedName,
+	}, pattern)
 	if err != nil {
 		return nil, err
 	}

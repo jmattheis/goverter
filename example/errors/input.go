@@ -21,12 +21,14 @@ func ConvertDBPerson(value DBPerson) APIPerson {
 		FullName: fmt.Sprintf("%s %s", value.FirstName, value.LastName),
 	}
 }
+
 func ToAPIPerson(value DBPerson) APIPerson {
 	return APIPerson{
 		ID:       value.ID,
 		FullName: fmt.Sprintf("%s %s", value.FirstName, value.LastName),
 	}
 }
+
 func ToDBPerson(value APIPerson) (DBPerson, error) {
 	names := strings.Fields(value.FullName)
 	if len(names) != 2 {
@@ -44,6 +46,7 @@ type DBApartment struct {
 	Position uint
 	Owner    DBPerson
 }
+
 type DBPerson struct {
 	ID        int
 	FirstName string
@@ -54,6 +57,7 @@ type APIApartment struct {
 	Position uint
 	Owner    APIPerson
 }
+
 type APIPerson struct {
 	ID       int
 	FullName string

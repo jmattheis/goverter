@@ -3,14 +3,14 @@ package generator
 import (
 	"fmt"
 	"go/importer"
+	"go/token"
 	"go/types"
-
-	"github.com/jmattheis/goverter/xtype"
 
 	"github.com/dave/jennifer/jen"
 	"github.com/jmattheis/goverter/builder"
 	"github.com/jmattheis/goverter/comments"
 	"github.com/jmattheis/goverter/namer"
+	"github.com/jmattheis/goverter/xtype"
 )
 
 type Config struct {
@@ -28,7 +28,7 @@ var BuildSteps = []builder.Builder{
 }
 
 func Generate(pattern string, mapping []comments.Converter, config Config) (*jen.File, error) {
-	sources, err := importer.For("source", nil).Import(pattern)
+	sources, err := importer.ForCompiler(token.NewFileSet(), "source", nil).Import(pattern)
 	if err != nil {
 		return nil, err
 	}
@@ -60,7 +60,11 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 		// we checked in comments, that it is an interface
 		for i := 0; i < interf.NumMethods(); i++ {
 			method := interf.Method(i)
-			converterMethod, _ := converter.Methods[method.Name()]
+			converterMethod := comments.Method{}
+
+			if m, ok := converter.Methods[method.Name()]; ok {
+				converterMethod = m
+			}
 			if err := gen.registerMethod(method, converterMethod); err != nil {
 				return nil, fmt.Errorf("Error while creating converter method:\n    %s\n\n%s", method.String(), err)
 			}

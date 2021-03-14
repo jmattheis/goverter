@@ -10,6 +10,7 @@ type Input struct {
 	Name string
 	Age  int
 }
+
 type Output struct {
 	Name string
 	Age  int

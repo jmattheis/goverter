@@ -26,11 +26,13 @@ type DBHouse struct {
 	Address    string
 	Apartments map[int]DBApartment
 }
+
 type DBApartment struct {
 	Position   uint
 	Owner      DBPerson
 	CoResident []DBPerson
 }
+
 type DBPerson struct {
 	ID         int
 	Name       string
@@ -49,6 +51,7 @@ type APIApartment struct {
 	Owner      APIPerson
 	CoResident []APIPerson
 }
+
 type APIPerson struct {
 	ID         int
 	MiddleName *string

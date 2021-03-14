@@ -4,9 +4,8 @@ import (
 	"fmt"
 	"go/types"
 
-	"github.com/jmattheis/goverter/xtype"
-
 	"github.com/dave/jennifer/jen"
+	"github.com/jmattheis/goverter/xtype"
 )
 
 type Struct struct{}
@@ -53,9 +52,9 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 			})
 		}
 
-		fieldSourceId := sourceID.Code.Clone().Dot(sourceField.Name())
+		fieldSourceID := sourceID.Code.Clone().Dot(sourceField.Name())
 
-		fieldStmt, fieldID, err := gen.Build(ctx, xtype.VariableID(fieldSourceId), xtype.TypeOf(sourceField.Type()), xtype.TypeOf(targetField.Type()))
+		fieldStmt, fieldID, err := gen.Build(ctx, xtype.VariableID(fieldSourceID), xtype.TypeOf(sourceField.Type()), xtype.TypeOf(targetField.Type()))
 		if err != nil {
 			return nil, nil, err.Lift(&Path{
 				Prefix:     ".",

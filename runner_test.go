@@ -31,6 +31,7 @@ func TestScenario(t *testing.T) {
 		t.Run(file.Name(), func(t *testing.T) {
 			scenarioFileName := path.Join(scenarios, file.Name())
 			scenarioBytes, err := ioutil.ReadFile(scenarioFileName)
+			require.NoError(t, err)
 
 			scenario := Scenario{}
 			err = yaml.Unmarshal(scenarioBytes, &scenario)

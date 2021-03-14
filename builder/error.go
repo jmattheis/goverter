@@ -90,5 +90,5 @@ func ToString(err *Error) string {
 	}
 	fmt.Fprintln(&buf)
 	fmt.Fprintln(&buf, err.Cause)
-	return string(buf.Bytes())
+	return buf.String()
 }
