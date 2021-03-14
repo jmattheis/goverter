@@ -7,6 +7,8 @@ import (
 	"github.com/dave/jennifer/jen"
 )
 
+const ThisVar = "c"
+
 type Signature struct {
 	Source string
 	Target string

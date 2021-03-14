@@ -2,10 +2,12 @@ package namer
 
 import (
 	"fmt"
+
+	"github.com/jmattheis/go-genconv/xtype"
 )
 
 func New() *Namer {
-	return &Namer{lookup: map[string]struct{}{"c": {}}}
+	return &Namer{lookup: map[string]struct{}{xtype.ThisVar: {}}}
 }
 
 type Namer struct {

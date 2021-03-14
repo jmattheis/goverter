@@ -68,7 +68,7 @@ func (g *Generator) registerMethod(method *types.Func, methodComments comments.M
 	}
 
 	m := &Method{
-		Call:             jen.Id("c").Dot(method.Name()),
+		Call:             jen.Id(xtype.ThisVar).Dot(method.Name()),
 		ID:               method.String(),
 		Explicit:         true,
 		Name:             method.Name(),
@@ -221,7 +221,7 @@ func (g *Generator) buildMethod(method *Method) *builder.Error {
 
 	stmt = append(stmt, jen.Return(ret...))
 
-	method.Jen = jen.Func().Params(jen.Id("c").Op("*").Id(g.name)).Id(method.Name).
+	method.Jen = jen.Func().Params(jen.Id(xtype.ThisVar).Op("*").Id(g.name)).Id(method.Name).
 		Params(jen.Id("source").Add(source.TypeAsJen())).Params(returns...).
 		Block(stmt...)
 
@@ -247,7 +247,7 @@ func (g *Generator) Build(ctx *builder.MethodContext, sourceID *xtype.JenID, sou
 	if ok {
 		params := []jen.Code{}
 		if method.SelfAsFirstParam {
-			params = append(params, jen.Id("c"))
+			params = append(params, jen.Id(xtype.ThisVar))
 		}
 		params = append(params, sourceID.Code.Clone())
 		if method.ReturnError {
@@ -282,7 +282,7 @@ func (g *Generator) Build(ctx *builder.MethodContext, sourceID *xtype.JenID, sou
 			Target:        xtype.TypeOf(target.T),
 			Mapping:       map[string]string{},
 			IgnoredFields: map[string]struct{}{},
-			Call:          jen.Id("c").Dot(name),
+			Call:          jen.Id(xtype.ThisVar).Dot(name),
 		}
 		g.lookup[xtype.Signature{Source: source.T.String(), Target: target.T.String()}] = method
 		g.namer.Register(method.Name)
