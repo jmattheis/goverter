@@ -4,6 +4,20 @@
 
 <h1 align="center">goverter</h1>
 <p align="center"><i>a "type-safe Go converters" generator</i></p>
+<p align="center">
+    <a href="https://github.com/jmattheis/goverter/actions/workflows/build.yml">
+        <img alt="Build Status" src="https://github.com/jmattheis/goverter/actions/workflows/build.yml/badge.svg">
+    </a>
+     <a href="https://codecov.io/gh/jmattheis/goverter">
+        <img alt="codecov" src="https://codecov.io/gh/jmattheis/goverter/branch/main/graph/badge.svg">
+    </a>
+    <a href="https://goreportcard.com/report/github.com/jmattheis/goverter">
+        <img alt="Go Report Card" src="https://goreportcard.com/badge/github.com/jmattheis/goverter">
+    </a>
+    <a href="https://github.com/jmattheis/goverter/releases/latest">
+        <img alt="latest release" src="https://img.shields.io/github/release/jmattheis/goverter.svg">
+    </a>
+</p>
 
 goverter is a tool for creating type-safe converters. All you have to
 do is create an interface and execute goverter. The project is meant as
