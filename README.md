@@ -1,8 +1,13 @@
-# go-genconv
+<p align="center">
+    <img width="300" src=".github/logo.svg" />
+</p>
+
+<h1 align="center">go-genconv</h1>
+<p align="center"><i>golang converter generator</i></p>
 
 ## Features
 
-* Automatic conversion of basic types
+* Automatic conversion of builtin types
   ([`house` example](https://github.com/jmattheis/go-genconv/blob/main/example/house)), this includes:
     * slices, maps, named types, primitive types, pointers
     * structs with same fields
@@ -56,3 +61,5 @@ func (c *ConverterImpl) simpleInputToSimpleOutput(source simple.Input) simple.Ou
   return simpleOutput
 }
 ```
+
+*Logo by [MariaLetta](https://github.com/MariaLetta])*
