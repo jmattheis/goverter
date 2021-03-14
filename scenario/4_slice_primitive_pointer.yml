@@ -12,9 +12,9 @@ success: |
 
     package generated
 
-    type Converter struct{}
+    type ConverterImpl struct{}
 
-    func (c *Converter) ConvertPToP(source []*int) []*int {
+    func (c *ConverterImpl) ConvertPToP(source []*int) []*int {
     	pIntList := make([]*int, len(source))
     	for i := 0; i < len(source); i++ {
     		var pInt *int
@@ -26,7 +26,7 @@ success: |
     	}
     	return pIntList
     }
-    func (c *Converter) ConvertToP(source []int) []*int {
+    func (c *ConverterImpl) ConvertToP(source []int) []*int {
     	pIntList := make([]*int, len(source))
     	for i := 0; i < len(source); i++ {
     		pInt := source[i]

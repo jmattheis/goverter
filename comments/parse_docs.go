@@ -78,7 +78,7 @@ func parseGenDecl(mapping []Converter, decl *ast.GenDecl) ([]Converter, error) {
 			return mapping, fmt.Errorf("%s may only be applied to type interface declarations ", converterMarker)
 		}
 		typeName := typeSpec.Name.String()
-		config, err := parseConverterComment(declDocs, ConverterConfig{Name: typeName})
+		config, err := parseConverterComment(declDocs, ConverterConfig{Name: typeName + "Impl"})
 		if err != nil {
 			return mapping, fmt.Errorf("type %s: %s", typeName, err)
 		}
@@ -101,7 +101,7 @@ func parseGenDecl(mapping []Converter, decl *ast.GenDecl) ([]Converter, error) {
 				return mapping, fmt.Errorf("%s may only be applied to type interface declarations ", converterMarker)
 			}
 			typeName := typeSpec.Name.String()
-			config, err := parseConverterComment(typeSpec.Doc.Text(), ConverterConfig{Name: typeName})
+			config, err := parseConverterComment(typeSpec.Doc.Text(), ConverterConfig{Name: typeName + "Impl"})
 			if err != nil {
 				return mapping, fmt.Errorf("type %s: %s", typeName, err)
 			}

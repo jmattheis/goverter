@@ -33,19 +33,19 @@ success: |
 
     import execution "github.com/jmattheis/go-genconv/execution"
 
-    type Converter struct{}
+    type ConverterImpl struct{}
 
-    func (c *Converter) structsInputBToStructsOutputB(source execution.InputB) execution.OutputB {
-    	var structsOutputB execution.OutputB
+    func (c *ConverterImpl) Convert(source execution.Input) execution.Output {
+    	var structsOutput execution.Output
     	var pStructsOutputA *execution.OutputA
     	if source.Value != nil {
     		structsOutputA := c.structsInputAToStructsOutputA(*source.Value)
     		pStructsOutputA = &structsOutputA
     	}
-    	structsOutputB.Value = pStructsOutputA
-    	return structsOutputB
+    	structsOutput.Value = pStructsOutputA
+    	return structsOutput
     }
-    func (c *Converter) structsInputAToStructsOutputA(source execution.InputA) execution.OutputA {
+    func (c *ConverterImpl) structsInputAToStructsOutputA(source execution.InputA) execution.OutputA {
     	var structsOutputA execution.OutputA
     	var pStructsOutputB *execution.OutputB
     	if source.Value != nil {
@@ -55,13 +55,13 @@ success: |
     	structsOutputA.Value = pStructsOutputB
     	return structsOutputA
     }
-    func (c *Converter) Convert(source execution.Input) execution.Output {
-    	var structsOutput execution.Output
+    func (c *ConverterImpl) structsInputBToStructsOutputB(source execution.InputB) execution.OutputB {
+    	var structsOutputB execution.OutputB
     	var pStructsOutputA *execution.OutputA
     	if source.Value != nil {
     		structsOutputA := c.structsInputAToStructsOutputA(*source.Value)
     		pStructsOutputA = &structsOutputA
     	}
-    	structsOutput.Value = pStructsOutputA
-    	return structsOutput
+    	structsOutputB.Value = pStructsOutputA
+    	return structsOutputB
     }

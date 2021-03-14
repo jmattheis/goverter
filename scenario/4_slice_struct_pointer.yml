@@ -23,26 +23,16 @@ success: |
 
     import execution "github.com/jmattheis/go-genconv/execution"
 
-    type Converter struct{}
+    type ConverterImpl struct{}
 
-    func (c *Converter) slicesInputToSlicesOutput(source execution.Input) execution.Output {
-    	var slicesOutput execution.Output
-    	slicesOutput.Name = source.Name
-    	slicesOutput.Age = source.Age
-    	return slicesOutput
-    }
-    func (c *Converter) slicesInputToPSlicesOutput(source execution.Input) *execution.Output {
-    	slicesOutput := c.slicesInputToSlicesOutput(source)
-    	return &slicesOutput
-    }
-    func (c *Converter) ConvertP(source []execution.Input) []*execution.Output {
+    func (c *ConverterImpl) ConvertP(source []execution.Input) []*execution.Output {
     	pSlicesOutputList := make([]*execution.Output, len(source))
     	for i := 0; i < len(source); i++ {
     		pSlicesOutputList[i] = c.slicesInputToPSlicesOutput(source[i])
     	}
     	return pSlicesOutputList
     }
-    func (c *Converter) ConvertPToP(source []*execution.Input) []*execution.Output {
+    func (c *ConverterImpl) ConvertPToP(source []*execution.Input) []*execution.Output {
     	pSlicesOutputList := make([]*execution.Output, len(source))
     	for i := 0; i < len(source); i++ {
     		var pSlicesOutput *execution.Output
@@ -53,4 +43,14 @@ success: |
     		pSlicesOutputList[i] = pSlicesOutput
     	}
     	return pSlicesOutputList
+    }
+    func (c *ConverterImpl) slicesInputToPSlicesOutput(source execution.Input) *execution.Output {
+    	slicesOutput := c.slicesInputToSlicesOutput(source)
+    	return &slicesOutput
+    }
+    func (c *ConverterImpl) slicesInputToSlicesOutput(source execution.Input) execution.Output {
+    	var slicesOutput execution.Output
+    	slicesOutput.Name = source.Name
+    	slicesOutput.Age = source.Age
+    	return slicesOutput
     }

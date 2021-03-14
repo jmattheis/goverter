@@ -27,16 +27,16 @@ success: |
 
     import execution "github.com/jmattheis/go-genconv/execution"
 
-    type Converter struct{}
+    type ConverterImpl struct{}
 
-    func (c *Converter) Convert(source execution.Input) execution.Output {
+    func (c *ConverterImpl) Convert(source execution.Input) execution.Output {
     	var structsOutput execution.Output
     	structsOutput.ID = execution.ID(source.ID)
     	structsOutput.Name = source.Name
     	structsOutput.Age = source.Age
     	return structsOutput
     }
-    func (c *Converter) ConvertBack(source execution.Output) execution.Input {
+    func (c *ConverterImpl) ConvertBack(source execution.Output) execution.Input {
     	var structsInput execution.Input
     	structsInput.ID = string(source.ID)
     	structsInput.Name = source.Name

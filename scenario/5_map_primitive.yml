@@ -11,9 +11,9 @@ success: |
 
     package generated
 
-    type Converter struct{}
+    type ConverterImpl struct{}
 
-    func (c *Converter) Convert(source map[string]int) map[string]int {
+    func (c *ConverterImpl) Convert(source map[string]int) map[string]int {
     	mapStringInt := make(map[string]int, len(source))
     	for key, value := range source {
     		mapStringInt[key] = value

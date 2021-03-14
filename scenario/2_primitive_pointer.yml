@@ -12,9 +12,9 @@ success: |
 
     package generated
 
-    type Converter struct{}
+    type ConverterImpl struct{}
 
-    func (c *Converter) ConvertPPString(source *string) *string {
+    func (c *ConverterImpl) ConvertPPString(source *string) *string {
     	var pString *string
     	if source != nil {
     		xstring := *source
@@ -22,7 +22,7 @@ success: |
     	}
     	return pString
     }
-    func (c *Converter) ConvertPString(source string) *string {
+    func (c *ConverterImpl) ConvertPString(source string) *string {
     	pString := source
     	return &pString
     }

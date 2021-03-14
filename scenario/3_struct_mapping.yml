@@ -23,9 +23,9 @@ success: |
 
     import execution "github.com/jmattheis/go-genconv/execution"
 
-    type Converter struct{}
+    type ConverterImpl struct{}
 
-    func (c *Converter) Convert(source execution.Input) execution.Output {
+    func (c *ConverterImpl) Convert(source execution.Input) execution.Output {
     	var structsOutput execution.Output
     	structsOutput.Name2 = source.Name
     	structsOutput.Age = source.Age

@@ -28,7 +28,7 @@ success: |
 
     package generated
 
-    type Converter struct{}
-    type Converter3 struct{}
-    type Converter4 struct{}
+    type Converter3Impl struct{}
+    type Converter4Impl struct{}
+    type ConverterImpl struct{}
     type RenamedConverter struct{}

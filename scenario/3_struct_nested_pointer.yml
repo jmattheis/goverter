@@ -29,20 +29,20 @@ success: |
 
     import execution "github.com/jmattheis/go-genconv/execution"
 
-    type Converter struct{}
+    type ConverterImpl struct{}
 
-    func (c *Converter) structsDBInnerToStructsApiInner(source execution.DBInner) execution.ApiInner {
+    func (c *ConverterImpl) Convert(source execution.DBModel) execution.ApiModel {
+    	var structsApiModel execution.ApiModel
+    	structsApiModel.Inner = c.structsDBInnerToPStructsApiInner(source.Inner)
+    	return structsApiModel
+    }
+    func (c *ConverterImpl) structsDBInnerToPStructsApiInner(source execution.DBInner) *execution.ApiInner {
+    	structsApiInner := c.structsDBInnerToStructsApiInner(source)
+    	return &structsApiInner
+    }
+    func (c *ConverterImpl) structsDBInnerToStructsApiInner(source execution.DBInner) execution.ApiInner {
     	var structsApiInner execution.ApiInner
     	structsApiInner.Name = source.Name
     	structsApiInner.Value = source.Value
     	return structsApiInner
-    }
-    func (c *Converter) structsDBInnerToPStructsApiInner(source execution.DBInner) *execution.ApiInner {
-    	structsApiInner := c.structsDBInnerToStructsApiInner(source)
-    	return &structsApiInner
-    }
-    func (c *Converter) Convert(source execution.DBModel) execution.ApiModel {
-    	var structsApiModel execution.ApiModel
-    	structsApiModel.Inner = c.structsDBInnerToPStructsApiInner(source.Inner)
-    	return structsApiModel
     }

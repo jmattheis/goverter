@@ -18,8 +18,8 @@ success: |
 
     import execution "github.com/jmattheis/go-genconv/execution"
 
-    type Delegate struct{}
+    type DelegateImpl struct{}
 
-    func (c *Delegate) ConvertCustom(source *int) int {
+    func (c *DelegateImpl) ConvertCustom(source *int) int {
     	return execution.ConvertInt(c, source)
     }

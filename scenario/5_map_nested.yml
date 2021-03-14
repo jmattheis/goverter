@@ -11,9 +11,9 @@ success: |
 
     package generated
 
-    type Converter struct{}
+    type ConverterImpl struct{}
 
-    func (c *Converter) Convert(source map[string]map[uint]map[bool]string) map[string]map[uint]map[bool]string {
+    func (c *ConverterImpl) Convert(source map[string]map[uint]map[bool]string) map[string]map[uint]map[bool]string {
     	mapStringMapUintMapBoolString := make(map[string]map[uint]map[bool]string, len(source))
     	for key, value := range source {
     		mapUintMapBoolString := make(map[uint]map[bool]string, len(value))

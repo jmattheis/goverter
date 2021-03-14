@@ -11,9 +11,9 @@ success: |
 
     package generated
 
-    type Converter struct{}
+    type ConverterImpl struct{}
 
-    func (c *Converter) Convert(source [5]int) []int {
+    func (c *ConverterImpl) Convert(source [5]int) []int {
     	intList := make([]int, len(source))
     	for i := 0; i < len(source); i++ {
     		intList[i] = source[i]

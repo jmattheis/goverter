@@ -4,11 +4,11 @@ package generated
 
 import simple "github.com/jmattheis/go-genconv/example/simple"
 
-type Converter struct{}
+type ConverterImpl struct{}
 
-func (c *Converter) ConvertModel(source simple.DBModel) simple.ExternalModel {
-	var externalModel simple.ExternalModel
-	externalModel.Name = source.Name
-	externalModel.Age = source.Age
-	return externalModel
+func (c *ConverterImpl) ConvertModel(source simple.DBModel) simple.ExternalModel {
+	var simpleExternalModel simple.ExternalModel
+	simpleExternalModel.Name = source.Name
+	simpleExternalModel.Age = source.Age
+	return simpleExternalModel
 }
