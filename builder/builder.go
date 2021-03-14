@@ -19,4 +19,5 @@ type MethodContext struct {
 	MappingBaseID string
 	Mapping       map[string]string
 	IgnoredFields map[string]struct{}
+	Signature     Signature
 }

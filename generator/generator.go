@@ -31,7 +31,7 @@ type Generator struct {
 	namer  *namer.Namer
 	name   string
 	file   *jen.File
-	lookup map[Signature]*Method
+	lookup map[builder.Signature]*Method
 }
 
 func (g *Generator) registerMethod(sources *types.Package, method *types.Func, methodComments comments.Method) error {
@@ -71,7 +71,7 @@ func (g *Generator) registerMethod(sources *types.Package, method *types.Func, m
 		}
 	}
 
-	g.lookup[Signature{
+	g.lookup[builder.Signature{
 		Source: source.String(),
 		Target: target.String(),
 	}] = m
@@ -120,6 +120,7 @@ func (g *Generator) addMethod(method *Method) *builder.Error {
 		Mapping:       method.Mapping,
 		IgnoredFields: method.IgnoredFields,
 	}, builder.VariableID(sourceID.Clone()), source, target)
+		Signature:     builder.Signature{Source: method.Source.T.String(), Target: method.Target.T.String()},
 	if err != nil {
 		return err
 	}
@@ -158,7 +159,7 @@ func (g *Generator) Build(ctx *builder.MethodContext, sourceID *builder.JenID, s
 			Mapping:       map[string]string{},
 			IgnoredFields: map[string]struct{}{},
 		}
-		g.lookup[Signature{Source: source.T.String(), Target: target.T.String()}] = method
+		g.lookup[builder.Signature{Source: source.T.String(), Target: target.T.String()}] = method
 		g.namer.Register(method.Name)
 		if err := g.addMethod(method); err != nil {
 			return nil, nil, err

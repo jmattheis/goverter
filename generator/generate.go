@@ -46,7 +46,7 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 			namer:  namer.New(),
 			file:   file,
 			name:   converter.Config.Name,
-			lookup: map[Signature]*Method{},
+			lookup: map[builder.Signature]*Method{},
 		}
 
 		// we checked in comments, that it is an interface
