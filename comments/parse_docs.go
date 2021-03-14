@@ -11,7 +11,7 @@ import (
 )
 
 const (
-	prefix          = "genconv"
+	prefix          = "goverter"
 	delimter        = ":"
 	converterMarker = prefix + delimter + "converter"
 )

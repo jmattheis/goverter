@@ -2,13 +2,13 @@ input:
     input.go: |
         package primitive
 
-        // genconv:converter
+        // goverter:converter
         type Converter interface {
             Convert(source []int16) int8
         }
 error: |
     Error while creating converter method:
-        func (github.com/jmattheis/go-genconv/execution.Converter).Convert(source []int16) int8
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source []int16) int8
 
     | []int16
     |

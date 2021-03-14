@@ -3,7 +3,7 @@ package namer
 import (
 	"fmt"
 
-	"github.com/jmattheis/go-genconv/xtype"
+	"github.com/jmattheis/goverter/xtype"
 )
 
 func New() *Namer {

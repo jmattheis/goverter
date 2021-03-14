@@ -2,7 +2,7 @@ input:
     input.go: |
         package structs
 
-        // genconv:converter
+        // goverter:converter
         type (
             Converter interface {
 
@@ -11,4 +11,4 @@ input:
 
             }
         )
-error: '/ABSOLUTE/execution/input.go:4:1: found genconv:converter on type but it has multiple interfaces inside'
+error: '/ABSOLUTE/execution/input.go:4:1: found goverter:converter on type but it has multiple interfaces inside'

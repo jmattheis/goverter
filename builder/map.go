@@ -2,7 +2,7 @@ package builder
 
 import (
 	"github.com/dave/jennifer/jen"
-	"github.com/jmattheis/go-genconv/xtype"
+	"github.com/jmattheis/goverter/xtype"
 )
 
 type Map struct{}

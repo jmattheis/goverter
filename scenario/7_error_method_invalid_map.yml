@@ -3,10 +3,10 @@ input:
         package err
 
         type (
-            // genconv:converter
+            // goverter:converter
             Converter interface {
-                // genconv:map a b c
+                // goverter:map a b c
                 ConvertString(source string) string
             }
         )
-error: '/ABSOLUTE/execution/input.go:3:1: type Converter: parsing method ConvertString: invalid genconv:map must have two parameter'
+error: '/ABSOLUTE/execution/input.go:3:1: type Converter: parsing method ConvertString: invalid goverter:map must have two parameter'

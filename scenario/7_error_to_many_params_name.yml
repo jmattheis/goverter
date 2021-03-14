@@ -2,8 +2,8 @@ input:
     input.go: |
         package err
 
-        // genconv:converter
-        // genconv:name a b
+        // goverter:converter
+        // goverter:name a b
         type Converter interface {
         }
-error: '/ABSOLUTE/execution/input.go:5:1: type Converter: invalid genconv:name must have one parameter'
+error: '/ABSOLUTE/execution/input.go:5:1: type Converter: invalid goverter:name must have one parameter'

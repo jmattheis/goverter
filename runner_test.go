@@ -1,4 +1,4 @@
-package genconv
+package goverter
 
 import (
 	"fmt"
@@ -46,7 +46,7 @@ func TestScenario(t *testing.T) {
 				genFile,
 				GenerateConfig{
 					PackageName: "generated",
-					ScanDir:     "github.com/jmattheis/go-genconv/execution",
+					ScanDir:     "github.com/jmattheis/goverter/execution",
 				})
 
 			body, _ := ioutil.ReadFile(genFile)

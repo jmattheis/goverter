@@ -3,10 +3,10 @@ input:
         package err
 
         type (
-            // genconv:converter
+            // goverter:converter
             Converter interface {
-                // genconv:
+                // goverter:
                 ConvertString(source string) string
             }
         )
-error: '/ABSOLUTE/execution/input.go:3:1: type Converter: parsing method ConvertString: unknown genconv comment: genconv:'
+error: '/ABSOLUTE/execution/input.go:3:1: type Converter: parsing method ConvertString: unknown goverter comment: goverter:'

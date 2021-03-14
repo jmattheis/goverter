@@ -3,7 +3,7 @@ input:
         package err
 
         type (
-            // genconv:converter
+            // goverter:converter
             Converter struct {}
         )
-error: '/ABSOLUTE/execution/input.go:3:1: genconv:converter may only be applied to type interface declarations '
+error: '/ABSOLUTE/execution/input.go:3:1: goverter:converter may only be applied to type interface declarations '

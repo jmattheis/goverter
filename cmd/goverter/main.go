@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/jmattheis/go-genconv"
+	goverter "github.com/jmattheis/goverter"
 )
 
 func main() {
@@ -21,7 +21,7 @@ func main() {
 	}
 	pattern := args[0]
 
-	err := genconv.GenerateConverterFile(*output, genconv.GenerateConfig{
+	err := goverter.GenerateConverterFile(*output, goverter.GenerateConfig{
 		PackageName: *packageName,
 		ScanDir:     pattern,
 	})

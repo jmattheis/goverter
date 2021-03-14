@@ -1,4 +1,4 @@
-//go:generate go run github.com/jmattheis/go-genconv/cmd/go-genconv github.com/jmattheis/go-genconv/example/errors
+//go:generate go run github.com/jmattheis/goverter/cmd/goverter github.com/jmattheis/goverter/example/errors
 package errors
 
 import (
@@ -6,10 +6,10 @@ import (
 	"strings"
 )
 
-// This example illustrates, that go-genconv automatically handles errors in sub converters
+// This example illustrates, that goverter automatically handles errors in sub converters
 
-// genconv:converter
-// genconv:extend ToDBPerson ToAPIPerson
+// goverter:converter
+// goverter:extend ToDBPerson ToAPIPerson
 type Converter interface {
 	ToAPIApartment(source DBApartment) APIApartment
 	ToDBApartment(source APIApartment) (DBApartment, error)

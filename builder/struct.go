@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"go/types"
 
-	"github.com/jmattheis/go-genconv/xtype"
+	"github.com/jmattheis/goverter/xtype"
 
 	"github.com/dave/jennifer/jen"
 )

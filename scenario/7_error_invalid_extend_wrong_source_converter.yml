@@ -2,11 +2,11 @@ input:
     input.go: |
         package structs
 
-        // genconv:converter
-        // genconv:extend HelloWorld
+        // goverter:converter
+        // goverter:extend HelloWorld
         type Converter interface {
         }
         func HelloWorld(int, int) int {
             return 0
         }
-error: 'Error while parsing extend methods: the first parameter must be of type github.com/jmattheis/go-genconv/execution.Converter'
+error: 'Error while parsing extend methods: the first parameter must be of type github.com/jmattheis/goverter/execution.Converter'

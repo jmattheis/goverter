@@ -2,8 +2,8 @@ package builder
 
 import (
 	"github.com/dave/jennifer/jen"
-	"github.com/jmattheis/go-genconv/namer"
-	"github.com/jmattheis/go-genconv/xtype"
+	"github.com/jmattheis/goverter/namer"
+	"github.com/jmattheis/goverter/xtype"
 )
 
 type Builder interface {

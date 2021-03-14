@@ -2,8 +2,8 @@ input:
     input.go: |
         package structs
 
-        // genconv:converter
-        // genconv:extend HelloWorld
+        // goverter:converter
+        // goverter:extend HelloWorld
         type Converter interface {
         }
         func HelloWorld(int) {

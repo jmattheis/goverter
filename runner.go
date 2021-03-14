@@ -1,4 +1,4 @@
-package genconv
+package goverter
 
 import (
 	"bytes"
@@ -6,8 +6,8 @@ import (
 	"os"
 	"path"
 
-	"github.com/jmattheis/go-genconv/comments"
-	"github.com/jmattheis/go-genconv/generator"
+	"github.com/jmattheis/goverter/comments"
+	"github.com/jmattheis/goverter/generator"
 )
 
 type GenerateConfig struct {

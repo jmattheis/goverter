@@ -1,4 +1,4 @@
-module github.com/jmattheis/go-genconv
+module github.com/jmattheis/goverter
 
 go 1.16
 

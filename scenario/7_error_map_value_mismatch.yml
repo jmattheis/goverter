@@ -2,13 +2,13 @@ input:
     input.go: |
         package err
 
-        // genconv:converter
+        // goverter:converter
         type Converter interface {
             Convert(source map[int]int) map[int]int64
         }
 error: |
     Error while creating converter method:
-        func (github.com/jmattheis/go-genconv/execution.Converter).Convert(source map[int]int) map[int]int64
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source map[int]int) map[int]int64
 
     | map[int]int
     |

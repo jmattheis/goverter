@@ -2,7 +2,7 @@ input:
     input.go: |
         package structs
 
-        // genconv:converter
+        // goverter:converter
         type Converter interface {
             Convert(source Input) Output
         }
@@ -16,9 +16,9 @@ input:
         }
 error: |
     Error while creating converter method:
-        func (github.com/jmattheis/go-genconv/execution.Converter).Convert(source github.com/jmattheis/go-genconv/execution.Input) github.com/jmattheis/go-genconv/execution.Output
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
 
-    | github.com/jmattheis/go-genconv/execution.Input
+    | github.com/jmattheis/goverter/execution.Input
     |
     |
     |
@@ -27,6 +27,6 @@ error: |
     |      |
     |      | int
     |
-    | github.com/jmattheis/go-genconv/execution.Output
+    | github.com/jmattheis/goverter/execution.Output
 
     Cannot set value for field Age because no it does not exist on the source entry

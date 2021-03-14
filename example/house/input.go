@@ -1,17 +1,17 @@
-//go:generate go run github.com/jmattheis/go-genconv/cmd/go-genconv github.com/jmattheis/go-genconv/example/house
+//go:generate go run github.com/jmattheis/goverter/cmd/goverter github.com/jmattheis/goverter/example/house
 package house
 
 import (
 	"database/sql"
 )
 
-// genconv:converter
-// genconv:extend SQLStringToPString
+// goverter:converter
+// goverter:extend SQLStringToPString
 type Converter interface {
 	ConvertHouse(source DBHouse) APIHouse
 	ConvertApartments(source []DBApartment) []APIApartment
-	// genconv:map Name FirstName
-	// genconv:ignore Age
+	// goverter:map Name FirstName
+	// goverter:ignore Age
 	ConvertPerson(source DBPerson) APIPerson
 }
 

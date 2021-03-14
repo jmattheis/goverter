@@ -6,12 +6,11 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/jmattheis/go-genconv/xtype"
-
 	"github.com/dave/jennifer/jen"
-	"github.com/jmattheis/go-genconv/builder"
-	"github.com/jmattheis/go-genconv/comments"
-	"github.com/jmattheis/go-genconv/namer"
+	"github.com/jmattheis/goverter/builder"
+	"github.com/jmattheis/goverter/comments"
+	"github.com/jmattheis/goverter/namer"
+	"github.com/jmattheis/goverter/xtype"
 )
 
 type Method struct {

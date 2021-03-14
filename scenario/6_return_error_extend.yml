@@ -2,8 +2,8 @@ input:
     input.go: |
         package slices
 
-        // genconv:converter
-        // genconv:extend ZeroConvert EmptyConverter
+        // goverter:converter
+        // goverter:extend ZeroConvert EmptyConverter
         type Converter interface {
             Convert(source Input) Output
         }
@@ -25,9 +25,9 @@ input:
         }
 error: |
     Error while creating converter method:
-        func (github.com/jmattheis/go-genconv/execution.Converter).Convert(source github.com/jmattheis/go-genconv/execution.Input) github.com/jmattheis/go-genconv/execution.Output
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
 
-    | github.com/jmattheis/go-genconv/execution.Input
+    | github.com/jmattheis/goverter/execution.Input
     |
     |      | *int
     |      |
@@ -36,14 +36,14 @@ error: |
     |      |
     |      | int
     |
-    | github.com/jmattheis/go-genconv/execution.Output
+    | github.com/jmattheis/goverter/execution.Output
 
     ReturnTypeMismatch: Cannot use
 
-        func github.com/jmattheis/go-genconv/execution.ZeroConvert(*int) (int, error)
+        func github.com/jmattheis/goverter/execution.ZeroConvert(*int) (int, error)
 
     in
 
-        func (github.com/jmattheis/go-genconv/execution.Converter).Convert(source github.com/jmattheis/go-genconv/execution.Input) github.com/jmattheis/go-genconv/execution.Output
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
 
     because no error is returned as second parameter

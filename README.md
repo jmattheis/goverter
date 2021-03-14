@@ -2,22 +2,22 @@
     <img width="300" src=".github/logo.svg" />
 </p>
 
-<h1 align="center">go-genconv</h1>
+<h1 align="center">goverter</h1>
 <p align="center"><i>golang converter generator</i></p>
 
 ## Features
 
 * Automatic conversion of builtin types
-  ([`house` example](https://github.com/jmattheis/go-genconv/blob/main/example/house)), this includes:
+  ([`house` example](https://github.com/jmattheis/goverter/blob/main/example/house)), this includes:
     * slices, maps, named types, primitive types, pointers
     * structs with same fields
 * Extend parts of the conversion with your own
-  func: [`house` example sql.NullString](https://github.com/jmattheis/go-genconv/blob/main/example/house/input.go#L9)
-* Optional return of an error: [`errors` example](https://github.com/jmattheis/go-genconv/tree/main/example/errors)
+  func: [`house` example sql.NullString](https://github.com/jmattheis/goverter/blob/main/example/house/input.go#L9)
+* Optional return of an error: [`errors` example](https://github.com/jmattheis/goverter/tree/main/example/errors)
 * Awesome error
-  messages: [mismatch type test](https://github.com/jmattheis/go-genconv/blob/main/scenario/7_error_nested_mismatch.yml)
-* Helper tags like `genconv:map` for converting a struct with same field types but different
-  names: [`house` example](https://github.com/jmattheis/go-genconv/blob/main/example/house/input.go#L13)
+  messages: [mismatch type test](https://github.com/jmattheis/goverter/blob/main/scenario/7_error_nested_mismatch.yml)
+* Helper tags like `goverter:map` for converting a struct with same field types but different
+  names: [`house` example](https://github.com/jmattheis/goverter/blob/main/example/house/input.go#L13)
 
 ## Example
 
@@ -25,7 +25,7 @@
 ```go
 package example
 
-// genconv:converter
+// goverter:converter
 type Converter interface {
   Convert(source []Input) []Output
 }
@@ -43,7 +43,7 @@ type Output struct {
 ```go
 package generated
 
-import simple "github.com/jmattheis/go-genconv/example/simple"
+import simple "github.com/jmattheis/goverter/example/simple"
 
 type ConverterImpl struct{}
 
