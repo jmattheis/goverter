@@ -14,23 +14,25 @@ type Signature struct {
 }
 
 type Type struct {
-	T            types.Type
-	Struct       bool
-	StructType   *types.Struct
-	Named        bool
-	NamedType    *types.Named
-	Pointer      bool
-	PointerType  *types.Pointer
-	PointerInner *Type
-	List         bool
-	ListFixed    bool
-	ListInner    *Type
-	Map          bool
-	MapType      *types.Map
-	MapKey       *Type
-	MapValue     *Type
-	Basic        bool
-	BasicType    *types.Basic
+	T             types.Type
+	Interface     bool
+	InterfaceType *types.Interface
+	Struct        bool
+	StructType    *types.Struct
+	Named         bool
+	NamedType     *types.Named
+	Pointer       bool
+	PointerType   *types.Pointer
+	PointerInner  *Type
+	List          bool
+	ListFixed     bool
+	ListInner     *Type
+	Map           bool
+	MapType       *types.Map
+	MapKey        *Type
+	MapValue      *Type
+	Basic         bool
+	BasicType     *types.Basic
 }
 
 type JenID struct {
@@ -78,6 +80,9 @@ func TypeOf(t types.Type) *Type {
 	case *types.Struct:
 		rt.Struct = true
 		rt.StructType = value
+	case *types.Interface:
+		rt.Interface = true
+		rt.InterfaceType = value
 	default:
 		panic("unknown types.Type " + t.String())
 	}
