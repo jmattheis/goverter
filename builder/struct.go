@@ -37,7 +37,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 		}
 
 		sourceName := targetField.Name()
-		if ctx.MappingBaseID == target.T.String() {
+		if ctx.Signature.Target == target.T.String() {
 			if override, ok := ctx.Mapping[targetField.Name()]; ok {
 				sourceName = override
 			}

@@ -205,7 +205,6 @@ func (g *Generator) buildMethod(method *Method) *builder.Error {
 
 	ctx := &builder.MethodContext{
 		Namer:         namer.New(),
-		MappingBaseID: target.T.String(),
 		Mapping:       method.Mapping,
 		IgnoredFields: method.IgnoredFields,
 		Signature:     xtype.Signature{Source: method.Source.T.String(), Target: method.Target.T.String()},
