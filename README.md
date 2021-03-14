@@ -49,12 +49,6 @@ use reflection.
    $ go get github.com/jmattheis/goverter`
    ```
 
-   Or install the cli globally with:
-
-   ```bash
-   $ go install github.com/jmattheis/goverter/cmd/goverter`
-   ```
-
 1. Create your converter interface and mark it with a comment containing `goverter:converter`
 
    `input.go`
@@ -83,12 +77,6 @@ use reflection.
    $ go run github.com/jmattheis/goverter/cmd/goverter module-name-in-full
    # example
    $ go run github.com/jmattheis/goverter/cmd/goverter github.com/jmattheis/goverter/example/simple
-   ```
-
-   If you `go install`'ed, then execute it like this:
-
-   ```
-   $ goverter module-name-in-full
    ```
 
 1. goverter created a file at `./generated/generated.go`, it may look like this:
