@@ -190,10 +190,9 @@ func parseMethodComment(comment string) (Method, error) {
 				m.NameMapping[fields[2]] = fields[1]
 				continue
 			case "ignore":
-				if len(fields) != 2 {
-					return m, fmt.Errorf("invalid %s:ignore must have two parameter", prefix)
+				for _, f := range fields[1:] {
+					m.IgnoredFields[f] = struct{}{}
 				}
-				m.IgnoredFields[fields[1]] = struct{}{}
 				continue
 			}
 			return m, fmt.Errorf("unknown %s comment: %s", prefix, line)
