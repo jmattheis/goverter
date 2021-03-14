@@ -9,4 +9,4 @@ input:
 error: |-
     Error while creating converter method: (github.com/jmattheis/go-genconv/execution.Converter).Convert
 
-    expected signature to have only one parameter
+    return type must have at least one parameter
