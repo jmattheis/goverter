@@ -3,63 +3,106 @@
 </p>
 
 <h1 align="center">goverter</h1>
-<p align="center"><i>golang converter generator</i></p>
+<p align="center"><i>a "type-safe Go converters" generator</i></p>
+
+goverter is a tool for creating type-safe converters. All you have to
+do is create an interface and execute goverter. The project is meant as
+alternative to [jinzhu/copier](https://github.com/jinzhu/copier) that doesn't
+use reflection.
 
 ## Features
 
-* Automatic conversion of builtin types
+- Automatic conversion of builtin types
   ([`house` example](https://github.com/jmattheis/goverter/blob/main/example/house)), this includes:
-    * slices, maps, named types, primitive types, pointers
-    * structs with same fields
-* Extend parts of the conversion with your own
-  func: [`house` example sql.NullString](https://github.com/jmattheis/goverter/blob/main/example/house/input.go#L9)
-* Optional return of an error: [`errors` example](https://github.com/jmattheis/goverter/tree/main/example/errors)
-* Awesome error
+  - slices, maps, named types, primitive types, pointers
+  - structs with same fields
+- Extend parts of the conversion with your own
+  function: [`house` example sql.NullString](https://github.com/jmattheis/goverter/blob/main/example/house/input.go#L9)
+- Optional return of an error: [`errors` example](https://github.com/jmattheis/goverter/tree/main/example/errors)
+- Awesome error
   messages: [mismatch type test](https://github.com/jmattheis/goverter/blob/main/scenario/7_error_nested_mismatch.yml)
-* Helper tags like `goverter:map` for converting a struct with same field types but different
-  names: [`house` example](https://github.com/jmattheis/goverter/blob/main/example/house/input.go#L13)
+- No reflection in the generated code
 
-## Example
+## Usage
 
-`input.go`
-```go
-package example
+1. Create a go modules project if you haven't done so already
+   ```bash
+   $ go mod init module-name
+   ```
+1. Add `goverter` as dependency to your project
 
-// goverter:converter
-type Converter interface {
-  Convert(source []Input) []Output
-}
+   ```bash
+   $ go get github.com/jmattheis/goverter`
+   ```
 
-type Input struct {
-  Name string
-  Age int
-}
-type Output struct {
-  Name string
-  Age int
-}
-```
-`generated/generted.go`
-```go
-package generated
+   Or install the cli globally with:
 
-import simple "github.com/jmattheis/goverter/example/simple"
+   ```bash
+   $ go install github.com/jmattheis/goverter/cmd/goverter`
+   ```
 
-type ConverterImpl struct{}
+1. Create your converter interface and mark it with a comment containing `goverter:converter`
 
-func (c *ConverterImpl) Convert(source []simple.Input) []simple.Output {
-  simpleOutputList := make([]simple.Output, len(source))
-  for i := 0; i < len(source); i++ {
-    simpleOutputList[i] = c.simpleInputToSimpleOutput(source[i])
-  }
-  return simpleOutputList
-}
-func (c *ConverterImpl) simpleInputToSimpleOutput(source simple.Input) simple.Output {
-  var simpleOutput simple.Output
-  simpleOutput.Name = source.Name
-  simpleOutput.Age = source.Age
-  return simpleOutput
-}
-```
+   `input.go`
 
-*Logo by [MariaLetta](https://github.com/MariaLetta])*
+   ```go
+   package example
+
+   // goverter:converter
+   type Converter interface {
+     Convert(source []Input) []Output
+   }
+
+   type Input struct {
+     Name string
+     Age int
+   }
+   type Output struct {
+     Name string
+     Age int
+   }
+   ```
+
+1. Run `goverter`:
+
+   ```
+   $ go run github.com/jmattheis/goverter/cmd/goverter module-name-in-full
+   # example
+   $ go run github.com/jmattheis/goverter/cmd/goverter github.com/jmattheis/goverter/example/simple
+   ```
+
+   If you `go install`'ed, then execute it like this:
+
+   ```
+   $ goverter module-name-in-full
+   ```
+
+1. goverter created a file at `./generated/generated.go`, it may look like this:
+
+   ```go
+   package generated
+
+   import simple "github.com/jmattheis/goverter/example/simple"
+
+   type ConverterImpl struct{}
+
+   func (c *ConverterImpl) Convert(source []simple.Input) []simple.Output {
+     simpleOutputList := make([]simple.Output, len(source))
+     for i := 0; i < len(source); i++ {
+       simpleOutputList[i] = c.simpleInputToSimpleOutput(source[i])
+     }
+     return simpleOutputList
+   }
+   func (c *ConverterImpl) simpleInputToSimpleOutput(source simple.Input) simple.Output {
+     var simpleOutput simple.Output
+     simpleOutput.Name = source.Name
+     simpleOutput.Age = source.Age
+     return simpleOutput
+   }
+   ```
+
+## Docs
+
+tbd
+
+_Logo by [MariaLetta](https://github.com/MariaLetta)_
