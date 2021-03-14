@@ -30,9 +30,9 @@ use reflection.
   ([`house` example](https://github.com/jmattheis/goverter/blob/main/example/house)), this includes:
   - slices, maps, named types, primitive types, pointers
   - structs with same fields
-- Extend parts of the conversion with your own implementation: [`house` example
-  sql.NullString](https://github.com/jmattheis/goverter/blob/main/example/house/input.go#L9)
-- Optional return of an error: [`errors` example](https://github.com/jmattheis/goverter/tree/main/example/errors)
+- Extend parts of the conversion with your own implementation:
+  [Docs](#extend-with-custom-implementation)
+- Optional return of an error: [Docs](#errors)
 - Awesome error
   messages: [mismatch type test](https://github.com/jmattheis/goverter/blob/main/scenario/7_error_nested_mismatch.yml)
 - No reflection in the generated code
