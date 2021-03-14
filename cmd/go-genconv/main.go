@@ -9,8 +9,8 @@ import (
 )
 
 func main() {
-	packageName := *flag.String("packageName", "generated", "")
-	output := *flag.String("output", "./generated/generated.go", "")
+	packageName := flag.String("packageName", "generated", "")
+	output := flag.String("output", "./generated/generated.go", "")
 
 	flag.Parse()
 
@@ -21,8 +21,8 @@ func main() {
 	}
 	pattern := args[0]
 
-	err := genconv.GenerateConverterFile(output, genconv.GenerateConfig{
-		PackageName: packageName,
+	err := genconv.GenerateConverterFile(*output, genconv.GenerateConfig{
+		PackageName: *packageName,
 		ScanDir:     pattern,
 	})
 	if err != nil {
