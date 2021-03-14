@@ -73,20 +73,14 @@ func ToString(err *Error) string {
 		matrix[targetPath] = append(matrix[targetPath], []rune(strings.Repeat(" ", padding-len(path.TargetID)))...)
 
 		targetIdx := end - (i * 2)
-		if path.TargetType != "" {
-			matrix[targetIdx] = append(matrix[targetIdx], []rune(strings.Repeat(" ", len(path.Prefix)))...)
-			matrix[targetIdx] = append(matrix[targetIdx], pipe, ' ')
-			matrix[targetIdx] = append(matrix[targetIdx], []rune(path.TargetType)...)
+		matrix[targetIdx] = append(matrix[targetIdx], []rune(strings.Repeat(" ", len(path.Prefix)))...)
+		matrix[targetIdx] = append(matrix[targetIdx], pipe, ' ')
+		matrix[targetIdx] = append(matrix[targetIdx], []rune(path.TargetType)...)
 
-			for j := targetIdx - 1; j > targetPath; j-- {
-				matrix[j] = append(matrix[j], []rune(strings.Repeat(" ", len(path.Prefix)))...)
-				matrix[j] = append(matrix[j], pipe)
-				matrix[j] = append(matrix[j], []rune(strings.Repeat(" ", padding-1))...)
-			}
-		} else {
-			for j := targetIdx - 1; j > targetPath; j-- {
-				matrix[j] = append(matrix[j], []rune(strings.Repeat(" ", padding+len(path.Prefix)))...)
-			}
+		for j := targetIdx - 1; j > targetPath; j-- {
+			matrix[j] = append(matrix[j], []rune(strings.Repeat(" ", len(path.Prefix)))...)
+			matrix[j] = append(matrix[j], pipe)
+			matrix[j] = append(matrix[j], []rune(strings.Repeat(" ", padding-1))...)
 		}
 	}
 
