@@ -6,13 +6,6 @@ import house "github.com/jmattheis/goverter/example/house"
 
 type ConverterImpl struct{}
 
-func (c *ConverterImpl) ConvertApartments(source []house.DBApartment) []house.APIApartment {
-	houseAPIApartmentList := make([]house.APIApartment, len(source))
-	for i := 0; i < len(source); i++ {
-		houseAPIApartmentList[i] = c.houseDBApartmentToHouseAPIApartment(source[i])
-	}
-	return houseAPIApartmentList
-}
 func (c *ConverterImpl) ConvertHouse(source house.DBHouse) house.APIHouse {
 	var houseAPIHouse house.APIHouse
 	houseAPIHouse.Address = source.Address

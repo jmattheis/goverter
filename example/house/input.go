@@ -9,7 +9,6 @@ import (
 // goverter:extend SQLStringToPString
 type Converter interface {
 	ConvertHouse(source DBHouse) APIHouse
-	ConvertApartments(source []DBApartment) []APIApartment
 	// goverter:map Name FirstName
 	// goverter:ignore Age
 	ConvertPerson(source DBPerson) APIPerson

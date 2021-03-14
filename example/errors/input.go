@@ -37,7 +37,7 @@ func ToDBPerson(value APIPerson) (DBPerson, error) {
 	person := DBPerson{
 		ID:        value.ID,
 		FirstName: names[0],
-		LastName:  names[2],
+		LastName:  names[1],
 	}
 	return person, nil
 }
