@@ -3,7 +3,7 @@
 </p>
 
 <h1 align="center">goverter</h1>
-<p align="center"><i>a "type-safe Go converters" generator</i></p>
+<p align="center"><i>a "type-safe Go converter" generator</i></p>
 <p align="center">
     <a href="https://github.com/jmattheis/goverter/actions/workflows/build.yml">
         <img alt="Build Status" src="https://github.com/jmattheis/goverter/actions/workflows/build.yml/badge.svg">
@@ -46,7 +46,7 @@ use reflection.
 1. Add `goverter` as dependency to your project
 
    ```bash
-   $ go get github.com/jmattheis/goverter`
+   $ go get github.com/jmattheis/goverter
    ```
 
 1. Create your converter interface and mark it with a comment containing `goverter:converter`
