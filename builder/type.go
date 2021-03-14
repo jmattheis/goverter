@@ -35,6 +35,7 @@ type JenID struct {
 func VariableID(code *jen.Statement) *JenID {
 	return &JenID{Code: code, Variable: true}
 }
+
 func OtherID(code *jen.Statement) *JenID {
 	return &JenID{Code: code, Variable: false}
 }
@@ -80,6 +81,7 @@ func TypeOf(t types.Type) *Type {
 func (t *Type) ID() string {
 	return t.asID(true, true)
 }
+
 func (t *Type) UnescapedID() string {
 	return t.asID(true, false)
 }

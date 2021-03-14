@@ -1,10 +1,10 @@
-package builder
+package namer
 
 import (
 	"fmt"
 )
 
-func NewNamer() *Namer {
+func New() *Namer {
 	return &Namer{lookup: map[string]struct{}{"c": {}}}
 }
 
@@ -21,7 +21,7 @@ func (m *Namer) Index() string {
 			if i > 1 {
 				name += fmt.Sprint(i)
 			}
-			if m.register(name) {
+			if m.Register(name) {
 				return name
 			}
 		}
@@ -46,7 +46,7 @@ func (m *Namer) Map() (string, string) {
 	}
 }
 
-func (m *Namer) register(name string) bool {
+func (m *Namer) Register(name string) bool {
 	if _, ok := m.lookup[name]; !ok {
 		m.lookup[name] = struct{}{}
 		return true
@@ -60,7 +60,7 @@ func (m *Namer) Name(name string) string {
 		if i > 1 {
 			numberedName += fmt.Sprint(i)
 		}
-		if m.register(numberedName) {
+		if m.Register(numberedName) {
 			return numberedName
 		}
 	}

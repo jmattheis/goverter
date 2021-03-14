@@ -10,6 +10,7 @@ import (
 	"github.com/dave/jennifer/jen"
 	"github.com/jmattheis/go-genconv/builder"
 	"github.com/jmattheis/go-genconv/comments"
+	"github.com/jmattheis/go-genconv/namer"
 )
 
 type Config struct {
@@ -44,10 +45,10 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 		file.Type().Id(converter.Config.Name).Struct()
 
 		gen := generator{
-			file:       file,
-			name:       converter.Config.Name,
-			lookup:     map[GeneratedMethodSignature]*GenerateMethod{},
-			lookupName: map[string]*GenerateMethod{},
+			namer:  namer.New(),
+			file:   file,
+			name:   converter.Config.Name,
+			lookup: map[GeneratedMethodSignature]*GenerateMethod{},
 		}
 
 		// we checked in comments, that it is an interface
@@ -60,7 +61,6 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 
 %s`, method.FullName(), err)
 			}
-
 		}
 		if err := gen.createMethods(); err != nil {
 			return nil, err
@@ -85,10 +85,10 @@ type GeneratedMethodSignature struct {
 }
 
 type generator struct {
-	name       string
-	file       *jen.File
-	lookup     map[GeneratedMethodSignature]*GenerateMethod
-	lookupName map[string]*GenerateMethod
+	namer  *namer.Namer
+	name   string
+	file   *jen.File
+	lookup map[GeneratedMethodSignature]*GenerateMethod
 }
 
 func (g *generator) registerMethod(sources *types.Package, method *types.Func, methodComments comments.Method) error {
@@ -132,9 +132,10 @@ func (g *generator) registerMethod(sources *types.Package, method *types.Func, m
 		Source: source.String(),
 		Target: target.String(),
 	}] = m
-	g.lookupName[m.Name] = m
+	g.namer.Register(m.Name)
 	return nil
 }
+
 func (g *generator) createMethods() error {
 	methods := []*GenerateMethod{}
 	for _, method := range g.lookup {
@@ -171,7 +172,7 @@ func (g *generator) addMethod(method *GenerateMethod) *builder.Error {
 	}
 
 	stmt, newID, err := g.BuildNoLookup(&builder.MethodContext{
-		Namer:         builder.NewNamer(),
+		Namer:         namer.New(),
 		MappingBaseID: target.T.String(),
 		Mapping:       method.Mapping,
 		IgnoredFields: method.IgnoredFields,
@@ -204,19 +205,7 @@ func (g *generator) Build(ctx *builder.MethodContext, sourceID *builder.JenID, s
 	}
 
 	if (source.Named && !source.Basic) || (target.Named && !target.Basic) {
-
-		name := source.UnescapedID() + "To" + strings.Title(target.UnescapedID())
-		for i := 1; ; i++ {
-			tempName := name
-			if i > 1 {
-				tempName += fmt.Sprint(i)
-			}
-			_, ok := g.lookupName[tempName]
-			if !ok {
-				name = tempName
-				break
-			}
-		}
+		name := g.namer.Name(source.UnescapedID() + "To" + strings.Title(target.UnescapedID()))
 
 		method := &GenerateMethod{
 			ID:            name,
@@ -227,7 +216,7 @@ func (g *generator) Build(ctx *builder.MethodContext, sourceID *builder.JenID, s
 			IgnoredFields: map[string]struct{}{},
 		}
 		g.lookup[GeneratedMethodSignature{Source: source.T.String(), Target: target.T.String()}] = method
-		g.lookupName[method.Name] = method
+		g.namer.Register(method.Name)
 		if err := g.addMethod(method); err != nil {
 			return nil, nil, err
 		}

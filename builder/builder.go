@@ -2,6 +2,7 @@ package builder
 
 import (
 	"github.com/dave/jennifer/jen"
+	"github.com/jmattheis/go-genconv/namer"
 )
 
 type Builder interface {
@@ -14,7 +15,7 @@ type Generator interface {
 }
 
 type MethodContext struct {
-	*Namer
+	*namer.Namer
 	MappingBaseID string
 	Mapping       map[string]string
 	IgnoredFields map[string]struct{}
