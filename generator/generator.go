@@ -13,18 +13,18 @@ import (
 )
 
 type Method struct {
-	ID               string
-	Explicit         bool
-	Name             string
-	Source           *builder.Type
-	Target           *builder.Type
-	AdditionalReturn []*builder.Type
-	Mapping          map[string]string
-	IgnoredFields    map[string]struct{}
-	Delegate         *types.Func
+	ID            string
+	Explicit      bool
+	Name          string
+	Call          *jen.Statement
+	Source        *builder.Type
+	Target        *builder.Type
+	Mapping       map[string]string
+	IgnoredFields map[string]struct{}
 
 	Jen jen.Code
 
+	SelfAsFirstParam bool
 	ReturnError      bool
 	ReturnTypeOrigin string
 	Dirty            bool
@@ -35,9 +35,10 @@ type Generator struct {
 	name   string
 	file   *jen.File
 	lookup map[builder.Signature]*Method
+	extend map[builder.Signature]*Method
 }
 
-func (g *Generator) registerMethod(sources *types.Package, method *types.Func, methodComments comments.Method) error {
+func (g *Generator) registerMethod(method *types.Func, methodComments comments.Method) error {
 	signature, ok := method.Type().(*types.Signature)
 	if !ok {
 		return fmt.Errorf("expected signature %#v", method.Type())
@@ -65,6 +66,7 @@ func (g *Generator) registerMethod(sources *types.Package, method *types.Func, m
 	}
 
 	m := &Method{
+		Call:             jen.Id("c").Dot(method.Name()),
 		ID:               method.String(),
 		Explicit:         true,
 		Name:             method.Name(),
@@ -76,23 +78,70 @@ func (g *Generator) registerMethod(sources *types.Package, method *types.Func, m
 		ReturnTypeOrigin: method.FullName(),
 	}
 
-	if methodComments.Delegate != "" {
-		delegate := sources.Scope().Lookup(methodComments.Delegate)
-		if delegate == nil {
-			return fmt.Errorf("delegate %s does not exist", methodComments.Delegate)
-		}
-		if f, ok := delegate.(*types.Func); ok {
-			m.Delegate = f
-		} else {
-			return fmt.Errorf("delegate %s does is not a function", methodComments.Delegate)
-		}
-	}
-
 	g.lookup[builder.Signature{
 		Source: source.String(),
 		Target: target.String(),
 	}] = m
 	g.namer.Register(m.Name)
+	return nil
+}
+
+func (g *Generator) parseExtend(targetInterface types.Type, scope *types.Scope, methods []string) error {
+	for _, method := range methods {
+		obj := scope.Lookup(method)
+		if obj == nil {
+			return fmt.Errorf("%s does not exist in scope", method)
+		}
+
+		fn, ok := obj.(*types.Func)
+		if !ok {
+			return fmt.Errorf("%s is not a function", method)
+		}
+		sig, ok := fn.Type().(*types.Signature)
+		if !ok {
+			return fmt.Errorf("%s has no signature", method)
+		}
+		if sig.Params().Len() == 0 || sig.Results().Len() > 2 {
+			return fmt.Errorf("%s has no or too many parameters", method)
+		}
+		if sig.Results().Len() == 0 || sig.Results().Len() > 2 {
+			return fmt.Errorf("%s has no or too many returns", method)
+		}
+
+		source := sig.Params().At(0).Type()
+		target := sig.Results().At(0).Type()
+		returnError := false
+		if sig.Results().Len() == 2 {
+			if i, ok := sig.Results().At(1).Type().(*types.Named); ok && i.Obj().Name() == "error" && i.Obj().Pkg() == nil {
+				returnError = true
+			} else {
+				return fmt.Errorf("second return parameter must have type error but had: %s", sig.Results().At(1).Type())
+			}
+		}
+
+		selfAsFirstParameter := false
+		if sig.Params().Len() == 2 {
+			if source.String() == targetInterface.String() {
+				selfAsFirstParameter = true
+				source = sig.Params().At(1).Type()
+			} else {
+				return fmt.Errorf("the first parameter must be of type %s", targetInterface.String())
+			}
+		}
+
+		g.extend[builder.Signature{Source: source.String(), Target: target.String()}] = &Method{
+			ID:               fn.String(),
+			Explicit:         true,
+			Call:             jen.Qual(fn.Pkg().Path(), fn.Name()),
+			Name:             fn.Name(),
+			Source:           builder.TypeOf(source),
+			Target:           builder.TypeOf(target),
+			SelfAsFirstParam: selfAsFirstParameter,
+			ReturnError:      returnError,
+			ReturnTypeOrigin: fn.String(),
+		}
+
+	}
 	return nil
 }
 
@@ -152,13 +201,6 @@ func (g *Generator) buildMethod(method *Method) *builder.Error {
 		returns = append(returns, jen.Id("error"))
 	}
 
-	if method.Delegate != nil {
-		method.Jen = jen.Func().Params(jen.Id("c").Op("*").Id(g.name)).Id(method.Name).
-			Params(jen.Id("source").Add(source.TypeAsJen())).Params(returns...).
-			Block(jen.Return(jen.Qual(method.Delegate.Pkg().Path(), method.Delegate.Name())).Call(jen.Id("c"), sourceID))
-		return nil
-	}
-
 	ctx := &builder.MethodContext{
 		Namer:         namer.New(),
 		MappingBaseID: target.T.String(),
@@ -195,7 +237,18 @@ func (g *Generator) BuildNoLookup(ctx *builder.MethodContext, sourceID *builder.
 }
 
 func (g *Generator) Build(ctx *builder.MethodContext, sourceID *builder.JenID, source, target *builder.Type) ([]jen.Code, *builder.JenID, *builder.Error) {
-	if method, ok := g.lookup[builder.Signature{Source: source.T.String(), Target: target.T.String()}]; ok {
+
+	method, ok := g.extend[builder.Signature{Source: source.T.String(), Target: target.T.String()}]
+	if !ok {
+		method, ok = g.lookup[builder.Signature{Source: source.T.String(), Target: target.T.String()}]
+	}
+
+	if ok {
+		params := []jen.Code{}
+		if method.SelfAsFirstParam {
+			params = append(params, jen.Id("c"))
+		}
+		params = append(params, sourceID.Code.Clone())
 		if method.ReturnError {
 			current := g.lookup[ctx.Signature]
 			if !current.ReturnError {
@@ -209,12 +262,12 @@ func (g *Generator) Build(ctx *builder.MethodContext, sourceID *builder.JenID, s
 
 			name := ctx.Name(target.ID())
 			stmt := []jen.Code{
-				jen.List(jen.Id(name), jen.Id("err")).Op(":=").Id("c").Dot(method.Name).Call(sourceID.Code),
+				jen.List(jen.Id(name), jen.Id("err")).Op(":=").Add(method.Call.Clone().Call(params...)),
 				jen.If(jen.Id("err").Op("!=").Nil()).Block(jen.Return(jen.Id(ctx.Namer.First), jen.Id("err"))),
 			}
 			return stmt, builder.VariableID(jen.Id(name)), nil
 		}
-		id := builder.OtherID(jen.Id("c").Dot(method.Name).Call(sourceID.Code))
+		id := builder.OtherID(method.Call.Clone().Call(params...))
 		return nil, id, nil
 	}
 
@@ -228,6 +281,7 @@ func (g *Generator) Build(ctx *builder.MethodContext, sourceID *builder.JenID, s
 			Target:        builder.TypeOf(target.T),
 			Mapping:       map[string]string{},
 			IgnoredFields: map[string]struct{}{},
+			Call:          jen.Id("c").Dot(name),
 		}
 		g.lookup[builder.Signature{Source: source.T.String(), Target: target.T.String()}] = method
 		g.namer.Register(method.Name)

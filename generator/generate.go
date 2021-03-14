@@ -47,14 +47,19 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 			file:   file,
 			name:   converter.Config.Name,
 			lookup: map[builder.Signature]*Method{},
+			extend: map[builder.Signature]*Method{},
+		}
+		interf := obj.Type().Underlying().(*types.Interface)
+
+		if err := gen.parseExtend(obj.Type(), sources.Scope(), converter.Config.ExtendMethods); err != nil {
+			return nil, fmt.Errorf("Error while parsing extend methods: %s", err)
 		}
 
 		// we checked in comments, that it is an interface
-		interf := obj.Type().Underlying().(*types.Interface)
 		for i := 0; i < interf.NumMethods(); i++ {
 			method := interf.Method(i)
 			converterMethod, _ := converter.Methods[method.Name()]
-			if err := gen.registerMethod(sources, method, converterMethod); err != nil {
+			if err := gen.registerMethod(method, converterMethod); err != nil {
 				return nil, fmt.Errorf("Error while creating converter method:\n    %s\n\n%s", method.String(), err)
 			}
 		}

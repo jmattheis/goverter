@@ -25,11 +25,11 @@ type Converter struct {
 }
 
 type ConverterConfig struct {
-	Name string
+	Name          string
+	ExtendMethods []string
 }
 
 type Method struct {
-	Delegate      string
 	IgnoredFields map[string]struct{}
 	NameMapping   map[string]string
 	// target to source
@@ -158,6 +158,9 @@ func parseConverterComment(comment string, config ConverterConfig) (ConverterCon
 				}
 				config.Name = fields[1]
 				continue
+			case "extend":
+				config.ExtendMethods = append(config.ExtendMethods, fields[1:]...)
+				continue
 			}
 			return config, fmt.Errorf("unknown %s comment: %s", prefix, line)
 		}
@@ -180,12 +183,6 @@ func parseMethodComment(comment string) (Method, error) {
 			}
 			fields := strings.Fields(cmd)
 			switch fields[0] {
-			case "delegate":
-				if len(fields) != 2 {
-					return m, fmt.Errorf("invalid %s:delegate must have one parameter", prefix)
-				}
-				m.Delegate = fields[1]
-				continue
 			case "map":
 				if len(fields) != 3 {
 					return m, fmt.Errorf("invalid %s:map must have two parameter", prefix)
