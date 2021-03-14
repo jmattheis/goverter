@@ -33,7 +33,8 @@ input:
             Value int
         }
 error: |
-    Error while creating converter method: (github.com/jmattheis/go-genconv/execution.Converter).Convert
+    Error while creating converter method:
+        func (github.com/jmattheis/go-genconv/execution.Converter).Convert(source github.com/jmattheis/go-genconv/execution.Input) github.com/jmattheis/go-genconv/execution.Output
 
     | github.com/jmattheis/go-genconv/execution.Input
     |

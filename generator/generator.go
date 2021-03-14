@@ -64,7 +64,6 @@ func (g *Generator) registerMethod(sources *types.Package, method *types.Func, m
 	}
 
 	m := &Method{
-		ID:            method.FullName(),
 		Immutable:     true,
 		Name:          method.Name(),
 		Source:        builder.TypeOf(source),
@@ -72,6 +71,7 @@ func (g *Generator) registerMethod(sources *types.Package, method *types.Func, m
 		Mapping:       methodComments.NameMapping,
 		IgnoredFields: methodComments.IgnoredFields,
 		ReturnError:   returnError,
+		ID:               method.String(),
 	}
 
 	if methodComments.Delegate != "" {
@@ -115,7 +115,7 @@ func (g *Generator) createMethods() error {
 				SourceType: method.Source.T.String(),
 				TargetType: method.Target.T.String(),
 			})
-			return fmt.Errorf("Error while creating converter method: %s\n\n%s", method.ID, builder.ToString(err))
+			return fmt.Errorf("Error while creating converter method:\n    %s\n\n%s", method.ID, builder.ToString(err))
 		}
 	}
 	for _, method := range g.lookup {

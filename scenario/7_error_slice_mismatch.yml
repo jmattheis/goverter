@@ -7,7 +7,8 @@ input:
             Convert(source []int16) int8
         }
 error: |
-    Error while creating converter method: (github.com/jmattheis/go-genconv/execution.Converter).Convert
+    Error while creating converter method:
+        func (github.com/jmattheis/go-genconv/execution.Converter).Convert(source []int16) int8
 
     | []int16
     |

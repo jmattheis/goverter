@@ -7,7 +7,6 @@ import (
 	"github.com/dave/jennifer/jen"
 )
 
-
 type Signature struct {
 	Source string
 	Target string

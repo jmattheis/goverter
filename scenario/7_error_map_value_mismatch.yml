@@ -7,7 +7,8 @@ input:
             Convert(source map[int]int) map[int]int64
         }
 error: |
-    Error while creating converter method: (github.com/jmattheis/go-genconv/execution.Converter).Convert
+    Error while creating converter method:
+        func (github.com/jmattheis/go-genconv/execution.Converter).Convert(source map[int]int) map[int]int64
 
     | map[int]int
     |

@@ -7,7 +7,8 @@ input:
             Convert(source int) *string
         }
 error: |
-    Error while creating converter method: (github.com/jmattheis/go-genconv/execution.Converter).Convert
+    Error while creating converter method:
+        func (github.com/jmattheis/go-genconv/execution.Converter).Convert(source int) *string
 
     | int
     |
