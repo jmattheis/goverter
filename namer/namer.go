@@ -10,6 +10,7 @@ func New() *Namer {
 
 type Namer struct {
 	lookup map[string]struct{}
+	First  string
 }
 
 var indexVars = []string{"i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"}
@@ -48,6 +49,9 @@ func (m *Namer) Map() (string, string) {
 
 func (m *Namer) Register(name string) bool {
 	if _, ok := m.lookup[name]; !ok {
+		if m.First == "" {
+			m.First = name
+		}
 		m.lookup[name] = struct{}{}
 		return true
 	}
