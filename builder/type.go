@@ -137,6 +137,9 @@ func (t Type) TypeAsJen() *jen.Statement {
 func toCode(t types.Type, st *jen.Statement) *jen.Statement {
 	switch cast := t.(type) {
 	case *types.Named:
+		if cast.Obj().Pkg() == nil {
+			return st.Id(cast.Obj().Name())
+		}
 		return st.Qual(cast.Obj().Pkg().Path(), cast.Obj().Name())
 	case *types.Map:
 		key := toCode(cast.Key(), &jen.Statement{})
