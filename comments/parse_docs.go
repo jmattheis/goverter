@@ -16,25 +16,30 @@ const (
 	converterMarker = prefix + delimter + "converter"
 )
 
+// MethodMapping a mapping between method name and method.
 type MethodMapping map[string]Method
 
+// Converter defines a converter that was marked with converterMarker.
 type Converter struct {
 	Name    string
 	Config  ConverterConfig
 	Methods MethodMapping
 }
 
+// ConverterConfig contains settings that can be set via comments.
 type ConverterConfig struct {
 	Name          string
 	ExtendMethods []string
 }
 
+// Method contains settings that can be set via comments.
 type Method struct {
 	IgnoredFields map[string]struct{}
 	NameMapping   map[string]string
 	// target to source
 }
 
+// ParseDocs parses the docs for the given pattern.
 func ParseDocs(pattern string) ([]Converter, error) {
 	pkgs, err := packages.Load(&packages.Config{
 		Mode: packages.NeedSyntax | packages.NeedCompiledGoFiles | packages.NeedTypes |

@@ -5,12 +5,15 @@ import (
 	"github.com/jmattheis/goverter/xtype"
 )
 
+// Map handles map types.
 type Map struct{}
 
+// Matches returns true, if the builder can create handle the given types.
 func (*Map) Matches(source, target *xtype.Type) bool {
 	return source.Map && target.Map
 }
 
+// Build creates conversion source code for the given source and target type.
 func (*Map) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *Error) {
 	targetMap := ctx.Name(target.ID())
 	key, value := ctx.Map()

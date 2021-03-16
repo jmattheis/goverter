@@ -7,13 +7,16 @@ import (
 	"github.com/dave/jennifer/jen"
 )
 
+// ThisVar is used as name for the reference to the converter interface.
 const ThisVar = "c"
 
+// Signature represents a signature for conversion.
 type Signature struct {
 	Source string
 	Target string
 }
 
+// Type is a helper wrapper for types.Type.
 type Type struct {
 	T             types.Type
 	Interface     bool
@@ -36,19 +39,23 @@ type Type struct {
 	BasicType     *types.Basic
 }
 
+// JenID a jennifer code wrapper with extra infos.
 type JenID struct {
 	Code     *jen.Statement
 	Variable bool
 }
 
+// VariableID is used, when the ID can be referenced. F.ex it is not a function call.
 func VariableID(code *jen.Statement) *JenID {
 	return &JenID{Code: code, Variable: true}
 }
 
+// OtherID is used, when the ID isn't a variable id.
 func OtherID(code *jen.Statement) *JenID {
 	return &JenID{Code: code, Variable: false}
 }
 
+// TypeOf creates a Type.
 func TypeOf(t types.Type) *Type {
 	rt := &Type{}
 	rt.T = t
@@ -90,10 +97,13 @@ func TypeOf(t types.Type) *Type {
 	return rt
 }
 
+// ID returns a deteministically generated id that may be used as variable.
 func (t *Type) ID() string {
 	return t.asID(true, true)
 }
 
+// UnescapedID returns a deteministically generated id that may be used as variable
+// reserved keywords aren't escaped.
 func (t *Type) UnescapedID() string {
 	return t.asID(true, false)
 }
@@ -128,6 +138,7 @@ func (t *Type) asID(seeNamed, escapeReserved bool) string {
 	return "unknown"
 }
 
+// TypeAsJen returns a jen representation of the type.
 func (t Type) TypeAsJen() *jen.Statement {
 	if t.Named {
 		return toCode(t.NamedType, &jen.Statement{})

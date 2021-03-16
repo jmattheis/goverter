@@ -10,11 +10,13 @@ import (
 	"github.com/jmattheis/goverter/generator"
 )
 
+// GenerateConfig the config for generating a converter.
 type GenerateConfig struct {
 	PackageName string
 	ScanDir     string
 }
 
+// GenerateConverter generates converters.
 func GenerateConverter(c GenerateConfig) ([]byte, error) {
 	mapping, err := comments.ParseDocs(c.ScanDir)
 	if err != nil {
@@ -31,6 +33,7 @@ func GenerateConverter(c GenerateConfig) ([]byte, error) {
 	return buf.Bytes(), err
 }
 
+// GenerateConverterFile generates converters and writes them to a file.
 func GenerateConverterFile(fileName string, c GenerateConfig) error {
 	file, err := GenerateConverter(c)
 	if err != nil {

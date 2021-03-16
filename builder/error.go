@@ -7,6 +7,7 @@ import (
 	"strings"
 )
 
+// Path defines the path inside an error message.
 type Path struct {
 	Prefix     string
 	SourceID   string
@@ -17,15 +18,18 @@ type Path struct {
 
 const pipe = '|'
 
+// Error defines a conversion error.
 type Error struct {
 	Path  []*Path
 	Cause string
 }
 
+// NewError creates an error.
 func NewError(cause string) *Error {
 	return &Error{Cause: cause, Path: []*Path{}}
 }
 
+// Lift appends the path to the error.
 func (e *Error) Lift(path *Path) *Error {
 	if path != nil {
 		e.Path = append([]*Path{path}, e.Path...)
@@ -33,6 +37,7 @@ func (e *Error) Lift(path *Path) *Error {
 	return e
 }
 
+// ToString converts the error into a string.
 func ToString(err *Error) string {
 	if len(err.Path) == 0 {
 		panic("oops that shouldn't happen")

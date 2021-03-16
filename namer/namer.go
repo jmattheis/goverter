@@ -6,10 +6,12 @@ import (
 	"github.com/jmattheis/goverter/xtype"
 )
 
+// New returns a new namer.
 func New() *Namer {
 	return &Namer{lookup: map[string]struct{}{xtype.ThisVar: {}}}
 }
 
+// Namer keeps track of used variable names.
 type Namer struct {
 	lookup map[string]struct{}
 	First  string
@@ -17,6 +19,7 @@ type Namer struct {
 
 var indexVars = []string{"i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z"}
 
+// Index returns an usused index variable name.
 func (m *Namer) Index() string {
 	for i := 1; ; i++ {
 		for _, v := range indexVars {
@@ -31,6 +34,7 @@ func (m *Namer) Index() string {
 	}
 }
 
+// Map returns an usused key and value variable name.
 func (m *Namer) Map() (string, string) {
 	for i := 0; ; i++ {
 		key := "key"
@@ -49,6 +53,7 @@ func (m *Namer) Map() (string, string) {
 	}
 }
 
+// Register registers a variable as used.
 func (m *Namer) Register(name string) bool {
 	if _, ok := m.lookup[name]; !ok {
 		if m.First == "" {
@@ -60,6 +65,7 @@ func (m *Namer) Register(name string) bool {
 	return false
 }
 
+// Name returns an usused variable name that contains the passed name.
 func (m *Namer) Name(name string) string {
 	for i := 1; ; i++ {
 		numberedName := name

@@ -5,12 +5,15 @@ import (
 	"github.com/jmattheis/goverter/xtype"
 )
 
+// List handles array / slice types.
 type List struct{}
 
+// Matches returns true, if the builder can create handle the given types.
 func (*List) Matches(source, target *xtype.Type) bool {
 	return source.List && target.List && !target.ListFixed
 }
 
+// Build creates conversion source code for the given source and target type.
 func (*List) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *Error) {
 	targetSlice := ctx.Name(target.ID())
 	index := ctx.Index()

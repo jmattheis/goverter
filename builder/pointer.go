@@ -5,12 +5,15 @@ import (
 	"github.com/jmattheis/goverter/xtype"
 )
 
+// Pointer handles pointer types.
 type Pointer struct{}
 
+// Matches returns true, if the builder can create handle the given types.
 func (*Pointer) Matches(source, target *xtype.Type) bool {
 	return source.Pointer && target.Pointer
 }
 
+// Build creates conversion source code for the given source and target type.
 func (*Pointer) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *Error) {
 	outerVar := ctx.Name(target.ID())
 
@@ -40,12 +43,15 @@ func (*Pointer) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, 
 	return stmt, xtype.VariableID(jen.Id(outerVar)), err
 }
 
+// TargetPointer handles type were only the target is a pointer.
 type TargetPointer struct{}
 
+// Matches returns true, if the builder can create handle the given types.
 func (*TargetPointer) Matches(source, target *xtype.Type) bool {
 	return !source.Pointer && target.Pointer
 }
 
+// Build creates conversion source code for the given source and target type.
 func (*TargetPointer) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *Error) {
 	stmt, id, err := gen.Build(ctx, sourceID, source, target.PointerInner)
 	if err != nil {

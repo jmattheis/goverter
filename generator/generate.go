@@ -13,10 +13,12 @@ import (
 	"github.com/jmattheis/goverter/xtype"
 )
 
+// Config the generate config.
 type Config struct {
 	Name string
 }
 
+// BuildSteps that'll used for generation.
 var BuildSteps = []builder.Builder{
 	&builder.BasicTargetPointerRule{},
 	&builder.Pointer{},
@@ -27,6 +29,7 @@ var BuildSteps = []builder.Builder{
 	&builder.Map{},
 }
 
+// Generate generates a jen.File containing converters.
 func Generate(pattern string, mapping []comments.Converter, config Config) (*jen.File, error) {
 	sources, err := importer.ForCompiler(token.NewFileSet(), "source", nil).Import(pattern)
 	if err != nil {
@@ -44,12 +47,12 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 		// create the converter struct
 		file.Type().Id(converter.Config.Name).Struct()
 
-		gen := Generator{
+		gen := generator{
 			namer:  namer.New(),
 			file:   file,
 			name:   converter.Config.Name,
-			lookup: map[xtype.Signature]*Method{},
-			extend: map[xtype.Signature]*Method{},
+			lookup: map[xtype.Signature]*methodDefinition{},
+			extend: map[xtype.Signature]*methodDefinition{},
 		}
 		interf := obj.Type().Underlying().(*types.Interface)
 
