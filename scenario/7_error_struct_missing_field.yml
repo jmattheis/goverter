@@ -29,4 +29,4 @@ error: |
     |
     | github.com/jmattheis/goverter/execution.Output
 
-    Cannot set value for field Age because no it does not exist on the source entry
+    Cannot set value for field Age because it does not exist on the source entry

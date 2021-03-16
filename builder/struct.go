@@ -46,7 +46,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 		}
 		sourceField, ok := sourceMethods[sourceName]
 		if !ok {
-			cause := fmt.Sprintf("Cannot set value for field %s because no it does not exist on the source entry", targetField.Name())
+			cause := fmt.Sprintf("Cannot set value for field %s because it does not exist on the source entry", targetField.Name())
 			return nil, nil, NewError(cause).Lift(&Path{
 				Prefix:     ".",
 				SourceID:   "???",
