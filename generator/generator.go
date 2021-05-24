@@ -279,6 +279,12 @@ func (g *generator) Build(ctx *builder.MethodContext, sourceID *xtype.JenID, sou
 			IgnoredFields: map[string]struct{}{},
 			Call:          jen.Id(xtype.ThisVar).Dot(name),
 		}
+		if ctx.PointerChange {
+			ctx.PointerChange = false
+			method.Mapping = ctx.Mapping
+			method.IgnoredFields = ctx.IgnoredFields
+		}
+
 		g.lookup[xtype.Signature{Source: source.T.String(), Target: target.T.String()}] = method
 		g.namer.Register(method.Name)
 		if err := g.buildMethod(method); err != nil {
