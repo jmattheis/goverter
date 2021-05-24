@@ -26,4 +26,5 @@ type MethodContext struct {
 	Mapping       map[string]string
 	IgnoredFields map[string]struct{}
 	Signature     xtype.Signature
+	PointerChange bool
 }
