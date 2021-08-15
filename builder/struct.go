@@ -37,6 +37,22 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 		if _, ignore := ctx.IgnoredFields[targetField.Name()]; ignore {
 			continue
 		}
+		if !targetField.Exported() {
+			targetStructType := target.StructType.String()
+			if target.Named {
+				targetStructType = target.NamedType.String()
+			}
+			sourceStructType := source.StructType.String()
+			if target.Named {
+				sourceStructType = source.NamedType.String()
+			}
+			return nil, nil, NewError(unexportedStructError(targetField.Name(), sourceStructType, targetStructType)).Lift(&Path{
+				Prefix:     ".",
+				SourceID:   "???",
+				TargetID:   targetField.Name(),
+				TargetType: targetField.Type().String(),
+			})
+		}
 
 		sourceName := targetField.Name()
 		if ctx.Signature.Target == target.T.String() {
@@ -72,4 +88,29 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 	}
 
 	return stmt, xtype.VariableID(jen.Id(name)), nil
+}
+
+func unexportedStructError(targetField, sourceType, targetType string) string {
+	return fmt.Sprintf(`Cannot set value for unexported field "%s".
+
+Possible solutions:
+
+* Ignore the given field with:
+
+      // goverter:ignore %s
+
+* Convert the struct yourself and use goverter for converting nested structs / maps / lists.
+
+* Create a custom converter function (only works, if the struct with unexported fields is nested inside another struct)
+
+      func CustomConvert(source %s) %s {
+          // implement me
+      }
+
+      // goverter:extend CustomConvert
+      type MyConverter interface {
+          // ...
+      }
+
+See https://github.com/jmattheis/goverter#extend-with-custom-implementation`, targetField, targetField, sourceType, targetType)
 }
