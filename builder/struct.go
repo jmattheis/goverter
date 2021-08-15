@@ -38,15 +38,8 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 			continue
 		}
 		if !targetField.Exported() {
-			targetStructType := target.StructType.String()
-			if target.Named {
-				targetStructType = target.NamedType.String()
-			}
-			sourceStructType := source.StructType.String()
-			if target.Named {
-				sourceStructType = source.NamedType.String()
-			}
-			return nil, nil, NewError(unexportedStructError(targetField.Name(), sourceStructType, targetStructType)).Lift(&Path{
+			cause := unexportedStructError(targetField.Name(), source.T.String(), target.T.String())
+			return nil, nil, NewError(cause).Lift(&Path{
 				Prefix:     ".",
 				SourceID:   "???",
 				TargetID:   targetField.Name(),
