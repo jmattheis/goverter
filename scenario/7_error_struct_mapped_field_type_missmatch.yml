@@ -4,15 +4,18 @@ input:
 
         // goverter:converter
         type Converter interface {
+            // goverter:map Nested.Name Name
             Convert(source Input) Output
         }
 
         type Input struct {
-            Name string
+            Nested Nested
+        }
+        type Nested struct {
+            Name int
         }
         type Output struct {
             Name string
-            Age int
         }
 error: |
     Error while creating converter method:
@@ -20,13 +23,17 @@ error: |
 
     | github.com/jmattheis/goverter/execution.Input
     |
-    |
-    |
-    source.???
-    target.Age
+    |      | github.com/jmattheis/goverter/execution.Nested
     |      |
-    |      | int
+    |      |      | int
+    |      |      |
+    source.Nested.Name
+    target       .Name
+    |             |
+    |             | string
+    |
+    |
     |
     | github.com/jmattheis/goverter/execution.Output
 
-    Cannot set value for field Age because it does not exist on the source entry.
+    TypeMismatch: Cannot convert int to string

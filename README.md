@@ -193,23 +193,26 @@ implementation, must also return error as second return.
 
 ### Struct field mapping
 
-With `goverter:map` you can map fields on a struct that have the same type but
-different names.
+With `goverter:map` you can map fields on structs that have the same type.
 
 `goverter:map` takes 2 parameters.
 
-1. source field name
+1. source field path (fields are separated by `.`)
 1. target field name
 
 ```go
 // goverter:converter
 type Converter interface {
     // goverter:map Name FullName
+    // goverter:map Nested.Age Age
     Convert(source Input) Output
 }
 
 type Input struct {
     Name string
+    Nested NestedInput
+}
+type NestedInput struct {
     Age int
 }
 type Output struct {

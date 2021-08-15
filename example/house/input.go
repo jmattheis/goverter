@@ -12,6 +12,8 @@ type Converter interface {
 	// goverter:map Name FirstName
 	// goverter:ignore Age
 	ConvertPerson(source DBPerson) APIPerson
+	// goverter:map Owner.Name OwnerName
+	ConvertApartment(source DBApartment) APIApartment
 }
 
 func SQLStringToPString(value sql.NullString) *string {
@@ -48,6 +50,7 @@ type APIRoomNR int
 type APIApartment struct {
 	Position   uint
 	Owner      APIPerson
+	OwnerName  string
 	CoResident []APIPerson
 }
 

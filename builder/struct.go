@@ -3,6 +3,7 @@ package builder
 import (
 	"fmt"
 	"go/types"
+	"strings"
 
 	"github.com/dave/jennifer/jen"
 	"github.com/jmattheis/goverter/xtype"
@@ -23,17 +24,8 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 		jen.Var().Id(name).Add(target.TypeAsJen()),
 	}
 
-	sourceStruct := source.StructType
-	targetStruct := target.StructType
-
-	sourceMethods := map[string]*types.Var{}
-	for i := 0; i < sourceStruct.NumFields(); i++ {
-		m := sourceStruct.Field(i)
-		sourceMethods[m.Name()] = m
-	}
-
-	for i := 0; i < targetStruct.NumFields(); i++ {
-		targetField := targetStruct.Field(i)
+	for i := 0; i < target.StructType.NumFields(); i++ {
+		targetField := target.StructType.Field(i)
 		if _, ignore := ctx.IgnoredFields[targetField.Name()]; ignore {
 			continue
 		}
@@ -47,40 +39,121 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 			})
 		}
 
-		sourceName := targetField.Name()
-		if ctx.Signature.Target == target.T.String() {
-			if override, ok := ctx.Mapping[targetField.Name()]; ok {
-				sourceName = override
-			}
-		}
-		sourceField, ok := sourceMethods[sourceName]
-		if !ok {
-			cause := fmt.Sprintf("Cannot set value for field %s because it does not exist on the source entry", targetField.Name())
-			return nil, nil, NewError(cause).Lift(&Path{
-				Prefix:     ".",
-				SourceID:   "???",
-				TargetID:   targetField.Name(),
-				TargetType: targetField.Type().String(),
-			})
-		}
-
-		fieldSourceID := sourceID.Code.Clone().Dot(sourceField.Name())
-
-		fieldStmt, fieldID, err := gen.Build(ctx, xtype.VariableID(fieldSourceID), xtype.TypeOf(sourceField.Type()), xtype.TypeOf(targetField.Type()))
+		nextID, nextSource, mapStmt, lift, err := mapField(gen, ctx, targetField, sourceID, source, target)
 		if err != nil {
-			return nil, nil, err.Lift(&Path{
-				Prefix:     ".",
-				SourceID:   sourceField.Name(),
-				TargetID:   targetField.Name(),
-				TargetType: targetField.Type().String(),
-				SourceType: sourceField.Type().String(),
-			})
+			return nil, nil, err
+		}
+		stmt = append(stmt, mapStmt...)
+
+		targetFieldType := xtype.TypeOf(targetField.Type())
+		fieldStmt, fieldID, err := gen.Build(ctx, xtype.VariableID(nextID), nextSource, targetFieldType)
+		if err != nil {
+			return nil, nil, err.Lift(lift...)
 		}
 		stmt = append(stmt, fieldStmt...)
 		stmt = append(stmt, jen.Id(name).Dot(targetField.Name()).Op("=").Add(fieldID.Code))
 	}
 
 	return stmt, xtype.VariableID(jen.Id(name)), nil
+}
+
+func mapField(gen Generator, ctx *MethodContext, targetField *types.Var, sourceID *xtype.JenID, source, target *xtype.Type) (*jen.Statement, *xtype.Type, []jen.Code, []*Path, *Error) {
+	lift := []*Path{}
+
+	mappedName, hasOverride := ctx.Mapping[targetField.Name()]
+	if ctx.Signature.Target != target.T.String() || !hasOverride {
+		if fieldSource, ok := source.StructField(targetField.Name()); ok {
+			nextID := sourceID.Code.Clone().Dot(targetField.Name())
+			lift = append(lift, &Path{
+				Prefix:     ".",
+				SourceID:   targetField.Name(),
+				SourceType: fieldSource.T.String(),
+				TargetID:   targetField.Name(),
+				TargetType: targetField.Type().String(),
+			})
+			return nextID, fieldSource, []jen.Code{}, lift, nil
+		}
+		cause := fmt.Sprintf("Cannot set value for field %s because it does not exist on the source entry.", targetField.Name())
+		return nil, nil, nil, nil, NewError(cause).Lift(&Path{
+			Prefix:     ".",
+			SourceID:   "???",
+			TargetID:   targetField.Name(),
+			TargetType: targetField.Type().String(),
+		})
+	}
+
+	path := strings.Split(mappedName, ".")
+	var condition *jen.Statement
+
+	stmt := []jen.Code{}
+	nextID := sourceID.Code
+	nextSource := source
+	for i := 0; i < len(path); i++ {
+		if nextSource.Pointer {
+			addCondition := nextID.Clone().Op("!=").Nil()
+			if condition == nil {
+				condition = addCondition
+			} else {
+				condition = condition.Clone().Op("&&").Add(addCondition)
+			}
+			nextSource = nextSource.PointerInner
+		}
+		if !nextSource.Struct {
+			cause := fmt.Sprintf("Cannot access '%s' on %s.", path[i], nextSource.T)
+			return nil, nil, nil, nil, NewError(cause).Lift(&Path{
+				Prefix:     ".",
+				SourceID:   path[i],
+				SourceType: "???",
+			}).Lift(lift...)
+		}
+		var ok bool
+		if nextSource, ok = nextSource.StructField(path[i]); ok {
+			nextID = nextID.Clone().Dot(path[i])
+			liftPath := &Path{
+				Prefix:     ".",
+				SourceID:   path[i],
+				SourceType: nextSource.T.String(),
+			}
+
+			if i == len(path)-1 {
+				liftPath.TargetID = targetField.Name()
+				liftPath.TargetType = targetField.Type().String()
+				if condition != nil && !nextSource.Pointer {
+					liftPath.SourceType = fmt.Sprintf("*%s (It is a pointer because the nested property in the goverter:map was a pointer)", liftPath.SourceType)
+				}
+			}
+			lift = append(lift, liftPath)
+			continue
+		}
+
+		cause := fmt.Sprintf("Mapped source field '%s' doesn't exist.", path[i])
+		return nil, nil, []jen.Code{}, nil, NewError(cause).Lift(&Path{
+			Prefix:     ".",
+			SourceID:   path[i],
+			SourceType: "???",
+		}).Lift(lift...)
+	}
+	if condition != nil {
+		pointerNext := nextSource
+		if !nextSource.Pointer {
+			pointerNext = xtype.TypeOf(types.NewPointer(nextSource.T))
+		}
+		tempName := ctx.Name(pointerNext.ID())
+		stmt = append(stmt, jen.Var().Id(tempName).Add(pointerNext.TypeAsJen()))
+		if nextSource.Pointer {
+			stmt = append(stmt, jen.If(condition).Block(
+				jen.Id(tempName).Op("=").Add(nextID.Clone()),
+			))
+		} else {
+			stmt = append(stmt, jen.If(condition).Block(
+				jen.Id(tempName).Op("=").Op("&").Add(nextID.Clone()),
+			))
+		}
+		nextSource = pointerNext
+		nextID = jen.Id(tempName)
+	}
+
+	return nextID, nextSource, stmt, lift, nil
 }
 
 func unexportedStructError(targetField, sourceType, targetType string) string {

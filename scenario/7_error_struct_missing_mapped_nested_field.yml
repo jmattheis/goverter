@@ -4,10 +4,15 @@ input:
 
         // goverter:converter
         type Converter interface {
+            // goverter:map Nested.Name3 Name
             Convert(source Input) Output
         }
 
         type Input struct {
+            Nested Nested
+            Name string
+        }
+        type Nested struct {
             Name string
         }
         type Output struct {
@@ -20,13 +25,17 @@ error: |
 
     | github.com/jmattheis/goverter/execution.Input
     |
-    |
-    |
-    source.???
-    target.Age
+    |      | github.com/jmattheis/goverter/execution.Nested
     |      |
-    |      | int
+    |      |      | ???
+    |      |      |
+    source.Nested.Name3
+    target
+    |
+    |
+    |
+    |
     |
     | github.com/jmattheis/goverter/execution.Output
 
-    Cannot set value for field Age because it does not exist on the source entry.
+    Mapped source field 'Name3' doesn't exist.
