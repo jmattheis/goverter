@@ -39,6 +39,21 @@ type Type struct {
 	BasicType     *types.Basic
 }
 
+// StructField returns the type of a struct field.
+func (t Type) StructField(name string) (*Type, bool) {
+	if !t.Struct {
+		panic("trying to get field of non struct")
+	}
+
+	for y := 0; y < t.StructType.NumFields(); y++ {
+		m := t.StructType.Field(y)
+		if m.Name() == name {
+			return TypeOf(m.Type()), true
+		}
+	}
+	return nil, false
+}
+
 // JenID a jennifer code wrapper with extra infos.
 type JenID struct {
 	Code     *jen.Statement

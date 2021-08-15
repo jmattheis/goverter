@@ -6,12 +6,24 @@ import house "github.com/jmattheis/goverter/example/house"
 
 type ConverterImpl struct{}
 
+func (c *ConverterImpl) ConvertApartment(source house.DBApartment) house.APIApartment {
+	var houseAPIApartment house.APIApartment
+	houseAPIApartment.Position = source.Position
+	houseAPIApartment.Owner = c.ConvertPerson(source.Owner)
+	houseAPIApartment.OwnerName = source.Owner.Name
+	houseAPIPersonList := make([]house.APIPerson, len(source.CoResident))
+	for i := 0; i < len(source.CoResident); i++ {
+		houseAPIPersonList[i] = c.ConvertPerson(source.CoResident[i])
+	}
+	houseAPIApartment.CoResident = houseAPIPersonList
+	return houseAPIApartment
+}
 func (c *ConverterImpl) ConvertHouse(source house.DBHouse) house.APIHouse {
 	var houseAPIHouse house.APIHouse
 	houseAPIHouse.Address = source.Address
 	mapHouseAPIRoomNRHouseAPIApartment := make(map[house.APIRoomNR]house.APIApartment, len(source.Apartments))
 	for key, value := range source.Apartments {
-		mapHouseAPIRoomNRHouseAPIApartment[house.APIRoomNR(key)] = c.houseDBApartmentToHouseAPIApartment(value)
+		mapHouseAPIRoomNRHouseAPIApartment[house.APIRoomNR(key)] = c.ConvertApartment(value)
 	}
 	houseAPIHouse.Apartments = mapHouseAPIRoomNRHouseAPIApartment
 	return houseAPIHouse
@@ -28,15 +40,4 @@ func (c *ConverterImpl) ConvertPerson(source house.DBPerson) house.APIPerson {
 	}
 	houseAPIPerson.Friends = houseAPIPersonList
 	return houseAPIPerson
-}
-func (c *ConverterImpl) houseDBApartmentToHouseAPIApartment(source house.DBApartment) house.APIApartment {
-	var houseAPIApartment house.APIApartment
-	houseAPIApartment.Position = source.Position
-	houseAPIApartment.Owner = c.ConvertPerson(source.Owner)
-	houseAPIPersonList := make([]house.APIPerson, len(source.CoResident))
-	for i := 0; i < len(source.CoResident); i++ {
-		houseAPIPersonList[i] = c.ConvertPerson(source.CoResident[i])
-	}
-	houseAPIApartment.CoResident = houseAPIPersonList
-	return houseAPIApartment
 }

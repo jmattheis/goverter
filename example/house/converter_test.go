@@ -44,7 +44,8 @@ func TestConverter(t *testing.T) {
 		Address: "Somewhere",
 		Apartments: map[house.APIRoomNR]house.APIApartment{
 			house.APIRoomNR(5): {
-				Position: 1,
+				Position:  1,
+				OwnerName: "jmattheis",
 				Owner: house.APIPerson{
 					ID:         5,
 					FirstName:  p("jmattheis"),
