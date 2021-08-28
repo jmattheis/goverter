@@ -14,6 +14,9 @@
     <a href="https://goreportcard.com/report/github.com/jmattheis/goverter">
         <img alt="Go Report Card" src="https://goreportcard.com/badge/github.com/jmattheis/goverter">
     </a>
+    <a href="https://pkg.go.dev/github.com/jmattheis/goverter">
+        <img alt="Go Reference" src="https://pkg.go.dev/badge/github.com/jmattheis/goverter.svg">
+    </a>
     <a href="https://github.com/jmattheis/goverter/releases/latest">
         <img alt="latest release" src="https://img.shields.io/github/release/jmattheis/goverter.svg">
     </a>
