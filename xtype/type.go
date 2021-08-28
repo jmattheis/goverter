@@ -1,6 +1,7 @@
 package xtype
 
 import (
+	"fmt"
 	"go/types"
 	"strings"
 
@@ -178,40 +179,47 @@ func toCode(t types.Type, st *jen.Statement) *jen.Statement {
 	case *types.Pointer:
 		return toCode(cast.Elem(), st.Op("*"))
 	case *types.Basic:
-		switch cast.Kind() {
-		case types.String:
-			return st.String()
-		case types.Int:
-			return st.Int()
-		case types.Int8:
-			return st.Int8()
-		case types.Int16:
-			return st.Int16()
-		case types.Int32:
-			return st.Int32()
-		case types.Int64:
-			return st.Int64()
-		case types.Uint:
-			return st.Uint()
-		case types.Uint8:
-			return st.Uint8()
-		case types.Uint16:
-			return st.Uint16()
-		case types.Uint32:
-			return st.Uint32()
-		case types.Uint64:
-			return st.Uint64()
-		case types.Bool:
-			return st.Bool()
-		case types.Complex128:
-			return st.Complex128()
-		case types.Complex64:
-			return st.Complex64()
-		case types.Float32:
-			return st.Float32()
-		case types.Float64:
-			return st.Float64()
-		}
+		return toCodeBasic(cast.Kind(), st)
 	}
 	panic("unsupported type " + t.String())
+}
+
+func toCodeBasic(t types.BasicKind, st *jen.Statement) *jen.Statement {
+	switch t {
+	case types.String:
+		return st.String()
+	case types.Int:
+		return st.Int()
+	case types.Int8:
+		return st.Int8()
+	case types.Int16:
+		return st.Int16()
+	case types.Int32:
+		return st.Int32()
+	case types.Int64:
+		return st.Int64()
+	case types.Uint:
+		return st.Uint()
+	case types.Uint8:
+		return st.Uint8()
+	case types.Uint16:
+		return st.Uint16()
+	case types.Uint32:
+		return st.Uint32()
+	case types.Uint64:
+		return st.Uint64()
+	case types.Bool:
+		return st.Bool()
+	case types.Complex128:
+		return st.Complex128()
+	case types.Complex64:
+		return st.Complex64()
+	case types.Float32:
+		return st.Float32()
+	case types.Float64:
+		return st.Float64()
+	default:
+		panic(fmt.Sprintf("unsupported type %d", t))
+	}
+
 }
