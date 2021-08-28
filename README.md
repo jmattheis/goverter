@@ -221,6 +221,56 @@ type Output struct {
 }
 ```
 
+
+#### Struct identity mapping
+
+With `goverter:mapIdentity` you can instruct goverter to use the source struct
+as source for the conversion to the target property.
+
+`goverter:mapIdentity` takes multiple field names separated by space ` `.
+
+```go
+// goverter:converter
+type Converter interface {
+    // goverter:mapIdentity Address
+    ConvertPerson(source Person) APIPerson
+}
+
+type Person struct {
+    Name   string
+    Street string
+    City   string
+}
+
+type APIPerson struct {
+    Name    string
+    Address APIAddress
+}
+
+type APIAddress struct {
+    Street string
+    City   string
+}
+```
+
+In the example goverter will fill `Address` by creating a converter from
+`Person` to `APIAddress`. Example generated code:
+
+```go
+func (c *ConverterImpl) ConvertPerson(source execution.Person) execution.APIPerson {
+    var structsAPIPerson execution.APIPerson
+    structsAPIPerson.Name = source.Name
+    structsAPIPerson.Address = c.structsPersonToStructsAPIAddress(source)
+    return structsAPIPerson
+}
+func (c *ConverterImpl) structsPersonToStructsAPIAddress(source execution.Person) execution.APIAddress {
+    var structsAPIAddress execution.APIAddress
+    structsAPIAddress.Street = source.Street
+    structsAPIAddress.City = source.City
+    return structsAPIAddress
+}
+```
+
 ### Struct ignore field
 
 With `goverter:ignore` you can ignore fields on the target struct

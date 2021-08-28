@@ -39,13 +39,29 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 			})
 		}
 
+		targetFieldType := xtype.TypeOf(targetField.Type())
+		if _, ok := ctx.IdentityMapping[targetField.Name()]; ok {
+			fieldStmt, fieldID, err := gen.Build(ctx, sourceID, source, targetFieldType)
+			if err != nil {
+				return nil, nil, err.Lift(&Path{
+					Prefix:     ".",
+					SourceID:   "<mapIdentity>",
+					SourceType: source.T.String(),
+					TargetID:   targetField.Name(),
+					TargetType: targetField.Type().String(),
+				})
+			}
+			stmt = append(stmt, fieldStmt...)
+			stmt = append(stmt, jen.Id(name).Dot(targetField.Name()).Op("=").Add(fieldID.Code))
+			continue
+		}
+
 		nextID, nextSource, mapStmt, lift, err := mapField(gen, ctx, targetField, sourceID, source, target)
 		if err != nil {
 			return nil, nil, err
 		}
 		stmt = append(stmt, mapStmt...)
 
-		targetFieldType := xtype.TypeOf(targetField.Type())
 		fieldStmt, fieldID, err := gen.Build(ctx, xtype.VariableID(nextID), nextSource, targetFieldType)
 		if err != nil {
 			return nil, nil, err.Lift(lift...)

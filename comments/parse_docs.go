@@ -37,6 +37,7 @@ type Method struct {
 	IgnoredFields map[string]struct{}
 	NameMapping   map[string]string
 	// target to source
+	IdentityMapping map[string]struct{}
 }
 
 // ParseDocs parses the docs for the given pattern.
@@ -179,8 +180,9 @@ func parseConverterComment(comment string, config ConverterConfig) (ConverterCon
 func parseMethodComment(comment string) (Method, error) {
 	scanner := bufio.NewScanner(strings.NewReader(comment))
 	m := Method{
-		NameMapping:   map[string]string{},
-		IgnoredFields: map[string]struct{}{},
+		NameMapping:     map[string]string{},
+		IgnoredFields:   map[string]struct{}{},
+		IdentityMapping: map[string]struct{}{},
 	}
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
@@ -196,6 +198,11 @@ func parseMethodComment(comment string) (Method, error) {
 					return m, fmt.Errorf("invalid %s:map must have two parameter", prefix)
 				}
 				m.NameMapping[fields[2]] = fields[1]
+				continue
+			case "mapIdentity":
+				for _, f := range fields[1:] {
+					m.IdentityMapping[f] = struct{}{}
+				}
 				continue
 			case "ignore":
 				for _, f := range fields[1:] {

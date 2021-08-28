@@ -14,14 +14,15 @@ import (
 )
 
 type methodDefinition struct {
-	ID            string
-	Explicit      bool
-	Name          string
-	Call          *jen.Statement
-	Source        *xtype.Type
-	Target        *xtype.Type
-	Mapping       map[string]string
-	IgnoredFields map[string]struct{}
+	ID              string
+	Explicit        bool
+	Name            string
+	Call            *jen.Statement
+	Source          *xtype.Type
+	Target          *xtype.Type
+	Mapping         map[string]string
+	IgnoredFields   map[string]struct{}
+	IdentityMapping map[string]struct{}
 
 	Jen jen.Code
 
@@ -72,6 +73,7 @@ func (g *generator) registerMethod(methodType *types.Func, methodComments commen
 		Target:           xtype.TypeOf(target),
 		Mapping:          methodComments.NameMapping,
 		IgnoredFields:    methodComments.IgnoredFields,
+		IdentityMapping:  methodComments.IdentityMapping,
 		ReturnError:      returnError,
 		ReturnTypeOrigin: methodType.FullName(),
 	}
@@ -199,10 +201,11 @@ func (g *generator) buildMethod(method *methodDefinition) *builder.Error {
 	}
 
 	ctx := &builder.MethodContext{
-		Namer:         namer.New(),
-		Mapping:       method.Mapping,
-		IgnoredFields: method.IgnoredFields,
-		Signature:     xtype.Signature{Source: method.Source.T.String(), Target: method.Target.T.String()},
+		Namer:           namer.New(),
+		Mapping:         method.Mapping,
+		IgnoredFields:   method.IgnoredFields,
+		IdentityMapping: method.IdentityMapping,
+		Signature:       xtype.Signature{Source: method.Source.T.String(), Target: method.Target.T.String()},
 	}
 	stmt, newID, err := g.buildNoLookup(ctx, xtype.VariableID(sourceID.Clone()), source, target)
 	if err != nil {

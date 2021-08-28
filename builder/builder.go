@@ -23,8 +23,9 @@ type Generator interface {
 // MethodContext exposes information for the current method.
 type MethodContext struct {
 	*namer.Namer
-	Mapping       map[string]string
-	IgnoredFields map[string]struct{}
-	Signature     xtype.Signature
-	PointerChange bool
+	Mapping         map[string]string
+	IgnoredFields   map[string]struct{}
+	IdentityMapping map[string]struct{}
+	Signature       xtype.Signature
+	PointerChange   bool
 }

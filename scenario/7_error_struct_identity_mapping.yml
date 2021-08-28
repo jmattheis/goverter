@@ -1,0 +1,47 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:mapIdentity Address
+            ConvertPerson(source Person) APIPerson
+        }
+
+        type Person struct {
+            Name   string
+            Civic  string
+            Street string
+            City   *string
+        }
+
+        type APIPerson struct {
+            Name    string
+            Address APIAddress
+        }
+
+        type APIAddress struct {
+            Civic  string
+            Street string
+            City   string
+        }
+error: |
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).ConvertPerson(source github.com/jmattheis/goverter/execution.Person) github.com/jmattheis/goverter/execution.APIPerson
+
+    | github.com/jmattheis/goverter/execution.Person
+    |
+    |      | github.com/jmattheis/goverter/execution.Person
+    |      |
+    |      |             | *string
+    |      |             |
+    source.<mapIdentity>.City
+    target.Address      .City
+    |      |             |
+    |      |             | string
+    |      |
+    |      | github.com/jmattheis/goverter/execution.APIAddress
+    |
+    | github.com/jmattheis/goverter/execution.APIPerson
+
+    TypeMismatch: Cannot convert *string to string
