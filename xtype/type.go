@@ -221,5 +221,4 @@ func toCodeBasic(t types.BasicKind, st *jen.Statement) *jen.Statement {
 	default:
 		panic(fmt.Sprintf("unsupported type %d", t))
 	}
-
 }
