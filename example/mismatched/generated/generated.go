@@ -9,7 +9,7 @@ type ConverterImpl struct{}
 func (c *ConverterImpl) Convert(source mismatched.DBCustomers) mismatched.APICustomers {
 	mismatchedAPICustomers := make(mismatched.APICustomers, len(source))
 	for i := 0; i < len(source); i++ {
-		mismatchedAPICustomers[i] = mismatched.ToAPICustomer(c, source[i])
+		mismatchedAPICustomers[i] = c.ToApiCustomer(source[i])
 	}
 	return mismatchedAPICustomers
 }
@@ -19,13 +19,19 @@ func (c *ConverterImpl) ToAPIAddress(source mismatched.DBAddress) mismatched.API
 	mismatchedAPIAddress.Postcode = source.Postcode
 	return mismatchedAPIAddress
 }
-func (c *ConverterImpl) ToAPIPerson(source mismatched.DBPerson) *mismatched.APIPerson {
-	mismatchedAPIPerson := c.mismatchedDBPersonToMismatchedAPIPerson(source)
-	return &mismatchedAPIPerson
+func (c *ConverterImpl) ToApiCustomer(source mismatched.DBCustomer) mismatched.APICustomer {
+	var mismatchedAPICustomer mismatched.APICustomer
+	mismatchedAPICustomer.APIPerson = c.mismatchedDBPersonToPMismatchedAPIPerson(source.DBPerson)
+	mismatchedAPICustomer.APIAddress = mismatched.AddressOrDefault(c, source.DBAddress)
+	return mismatchedAPICustomer
 }
 func (c *ConverterImpl) mismatchedDBPersonToMismatchedAPIPerson(source mismatched.DBPerson) mismatched.APIPerson {
 	var mismatchedAPIPerson mismatched.APIPerson
 	mismatchedAPIPerson.First = source.First
 	mismatchedAPIPerson.Last = source.Last
 	return mismatchedAPIPerson
+}
+func (c *ConverterImpl) mismatchedDBPersonToPMismatchedAPIPerson(source mismatched.DBPerson) *mismatched.APIPerson {
+	mismatchedAPIPerson := c.mismatchedDBPersonToMismatchedAPIPerson(source)
+	return &mismatchedAPIPerson
 }
