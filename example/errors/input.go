@@ -15,13 +15,6 @@ type Converter interface {
 	ToDBApartment(source APIApartment) (DBApartment, error)
 }
 
-func ConvertDBPerson(value DBPerson) APIPerson {
-	return APIPerson{
-		ID:       value.ID,
-		FullName: fmt.Sprintf("%s %s", value.FirstName, value.LastName),
-	}
-}
-
 func ToAPIPerson(value DBPerson) APIPerson {
 	return APIPerson{
 		ID:       value.ID,
