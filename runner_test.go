@@ -2,6 +2,7 @@ package goverter
 
 import (
 	"fmt"
+	"io/fs"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -25,7 +26,7 @@ func TestScenario(t *testing.T) {
 	require.NoError(t, os.MkdirAll(execDir, 0755))
 	require.NoError(t, clearDir(execDir))
 
-	for _, file := range files {
+	for _, file := range filteredFiles(t, files) {
 		require.False(t, file.IsDir(), "should not be a directory")
 
 		t.Run(file.Name(), func(t *testing.T) {
@@ -120,4 +121,39 @@ func clearDir(dir string) error {
 		}
 	}
 	return nil
+}
+
+func filteredFiles(t *testing.T, files []fs.FileInfo) []fs.FileInfo {
+	t.Helper()
+	var result []fs.FileInfo
+
+	scenarios := loadScenarios(t)
+	if len(scenarios) == 0 {
+		return files
+	}
+
+	for _, file := range files {
+		name := file.Name()
+		if _, ok := scenarios[name]; ok {
+			result = append(result, file)
+		}
+	}
+
+	return result
+}
+
+func loadScenarios(t *testing.T) map[string]bool {
+	t.Helper()
+	result := make(map[string]bool)
+
+	scenarios := os.Getenv("SCENARIOS")
+	if len(scenarios) == 0 {
+		return result
+	}
+
+	for _, sc := range strings.Split(scenarios, ",") {
+		result[sc] = true
+	}
+
+	return result
 }
