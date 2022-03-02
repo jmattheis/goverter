@@ -66,14 +66,27 @@ func TestScenario(t *testing.T) {
 				}
 			}
 
-			if scenario.Error != "" {
+			if scenario.Error != "" || scenario.ErrorStartsWith != "" {
 				require.Error(t, err)
-				expectedErr := scenario.Error
 				actualErr := replaceAbsolutePath(fmt.Sprint(err))
-				if strings.HasSuffix(expectedErr, "\n") && !strings.HasSuffix(actualErr, "\n") {
+				var expectedErr string
+				if scenario.Error != "" {
+					expectedErr = scenario.Error
 					// YAML parser inject new line at the end of multi-line string literal, remove it
-					expectedErr = strings.TrimSuffix(expectedErr, "\n")
+					// but only do so if actualErr does not have it
+					if strings.HasSuffix(expectedErr, "\n") && !strings.HasSuffix(actualErr, "\n") {
+						expectedErr = strings.TrimSuffix(expectedErr, "\n")
+					}
+				} else {
+					// always remove yaml-injected new line, we need prefix len without it
+					expectedErr = strings.TrimSuffix(scenario.ErrorStartsWith, "\n")
+					if len(actualErr) > len(expectedErr) {
+						// trim it to the prefix size to use Equal for a nice diff on test failures
+						actualErr = actualErr[0:len(expectedErr)]
+					}
 				}
+				// use Equal to show a nice diff message, other require methods do not show diffs
+				// making it hard to troubleshoot test failures
 				require.Equal(t, expectedErr, actualErr)
 			} else {
 				require.NoError(t, err)
@@ -105,8 +118,10 @@ func compile(file string) error {
 type Scenario struct {
 	Input   map[string]string `yaml:"input"`
 	Extends []string          `yaml:"extends,omitempty"`
-	Error   string            `yaml:"error,omitempty"`
 	Success string            `yaml:"success,omitempty"`
+	// for error cases, use either Error or ErrorStartsWith, not both
+	Error           string `yaml:"error,omitempty"`
+	ErrorStartsWith string `yaml:"error_starts_with,omitempty"`
 }
 
 func getCurrentPath() string {

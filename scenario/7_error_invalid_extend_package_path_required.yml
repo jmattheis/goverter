@@ -1,0 +1,14 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        // goverter:extend :Convert
+        type Converter interface {
+        }
+error: |
+    Error while parsing extend in
+        github.com/jmattheis/goverter/execution.Converter
+
+    package path must not be empty in the extend statement ":Convert".
+    See https://github.com/jmattheis/goverter#extend-with-custom-implementation

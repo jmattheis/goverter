@@ -1,0 +1,13 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        // goverter:extend wrong/package:Convert
+        type Converter interface {
+        }
+error_starts_with: |
+    Error while parsing extend in
+        github.com/jmattheis/goverter/execution.Converter
+
+    failed to load package "wrong/package", try adding a blank import for it

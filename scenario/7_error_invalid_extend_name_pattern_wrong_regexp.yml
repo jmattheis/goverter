@@ -1,0 +1,13 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        // goverter:extend strconv:(
+        type Converter interface {
+        }
+error: |
+    Error while parsing extend in
+        github.com/jmattheis/goverter/execution.Converter
+
+    could not parse name as regexp "(": error parsing regexp: missing closing ): `(`

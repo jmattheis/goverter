@@ -1,0 +1,14 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        // goverter:extend strconv:
+        type Converter interface {
+        }
+error: |
+    Error while parsing extend in
+        github.com/jmattheis/goverter/execution.Converter
+
+    method name pattern is required in the extend statement "strconv:".
+    See https://github.com/jmattheis/goverter#extend-with-custom-implementation

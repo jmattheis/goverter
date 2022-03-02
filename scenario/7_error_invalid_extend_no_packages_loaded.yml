@@ -1,0 +1,13 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        // goverter:extend file=/nonexisting:Convert
+        type Converter interface {
+        }
+error_starts_with: |
+    Error while parsing extend in
+        github.com/jmattheis/goverter/execution.Converter
+
+    no packages were loaded for "file=/nonexisting", make sure it is a valid golang package
