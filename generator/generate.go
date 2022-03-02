@@ -15,7 +15,8 @@ import (
 
 // Config the generate config.
 type Config struct {
-	Name string
+	Name          string
+	ExtendMethods []string
 }
 
 // BuildSteps that'll used for generation.
@@ -55,6 +56,10 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 			extend: map[xtype.Signature]*methodDefinition{},
 		}
 		interf := obj.Type().Underlying().(*types.Interface)
+
+		if err := gen.parseExtend(obj.Type(), sources.Scope(), config.ExtendMethods); err != nil {
+			return nil, fmt.Errorf("Error while parsing extend methods: %s", err)
+		}
 
 		if err := gen.parseExtend(obj.Type(), sources.Scope(), converter.Config.ExtendMethods); err != nil {
 			return nil, fmt.Errorf("Error while parsing extend methods: %s", err)

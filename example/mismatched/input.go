@@ -22,7 +22,6 @@ type Converter interface {
 	// goverter:map DBPerson APIPerson
 	// goverter:map DBAddress APIAddress
 	ToApiCustomer(DBCustomer) APICustomer
-
 	ToAPIAddress(DBAddress) APIAddress
 }
 

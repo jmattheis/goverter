@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 
 	goverter "github.com/jmattheis/goverter"
 )
@@ -11,6 +12,7 @@ import (
 func main() {
 	packageName := flag.String("packageName", "generated", "")
 	output := flag.String("output", "./generated/generated.go", "")
+	extends := flag.String("extends", "", "comma separated list of local or package extends")
 
 	flag.Parse()
 
@@ -20,10 +22,15 @@ func main() {
 		return
 	}
 	pattern := args[0]
+	var extendMethods []string
+	if *extends != "" {
+		extendMethods = strings.Split(*extends, ",")
+	}
 
 	err := goverter.GenerateConverterFile(*output, goverter.GenerateConfig{
-		PackageName: *packageName,
-		ScanDir:     pattern,
+		PackageName:   *packageName,
+		ScanDir:       pattern,
+		ExtendMethods: extendMethods,
 	})
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)

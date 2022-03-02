@@ -11,6 +11,7 @@ import (
 	"github.com/jmattheis/goverter/comments"
 	"github.com/jmattheis/goverter/namer"
 	"github.com/jmattheis/goverter/xtype"
+	"golang.org/x/tools/go/packages"
 )
 
 type methodDefinition struct {
@@ -38,6 +39,8 @@ type generator struct {
 	file   *jen.File
 	lookup map[xtype.Signature]*methodDefinition
 	extend map[xtype.Signature]*methodDefinition
+	// pkgCache caches the external packages, saving load time
+	pkgCache map[string][]*packages.Package
 }
 
 func (g *generator) registerMethod(methodType *types.Func, methodComments comments.Method) error {
@@ -83,64 +86,6 @@ func (g *generator) registerMethod(methodType *types.Func, methodComments commen
 		Target: target.String(),
 	}] = m
 	g.namer.Register(m.Name)
-	return nil
-}
-
-func (g *generator) parseExtend(targetInterface types.Type, scope *types.Scope, methods []string) error {
-	for _, methodName := range methods {
-		obj := scope.Lookup(methodName)
-		if obj == nil {
-			return fmt.Errorf("%s does not exist in scope", methodName)
-		}
-
-		fn, ok := obj.(*types.Func)
-		if !ok {
-			return fmt.Errorf("%s is not a function", methodName)
-		}
-		sig, ok := fn.Type().(*types.Signature)
-		if !ok {
-			return fmt.Errorf("%s has no signature", methodName)
-		}
-		if sig.Params().Len() == 0 || sig.Results().Len() > 2 {
-			return fmt.Errorf("%s has no or too many parameters", methodName)
-		}
-		if sig.Results().Len() == 0 || sig.Results().Len() > 2 {
-			return fmt.Errorf("%s has no or too many returns", methodName)
-		}
-
-		source := sig.Params().At(0).Type()
-		target := sig.Results().At(0).Type()
-		returnError := false
-		if sig.Results().Len() == 2 {
-			if i, ok := sig.Results().At(1).Type().(*types.Named); ok && i.Obj().Name() == "error" && i.Obj().Pkg() == nil {
-				returnError = true
-			} else {
-				return fmt.Errorf("second return parameter must have type error but had: %s", sig.Results().At(1).Type())
-			}
-		}
-
-		selfAsFirstParameter := false
-		if sig.Params().Len() == 2 {
-			if source.String() == targetInterface.String() {
-				selfAsFirstParameter = true
-				source = sig.Params().At(1).Type()
-			} else {
-				return fmt.Errorf("the first parameter must be of type %s", targetInterface.String())
-			}
-		}
-
-		g.extend[xtype.Signature{Source: source.String(), Target: target.String()}] = &methodDefinition{
-			ID:               fn.String(),
-			Explicit:         true,
-			Call:             jen.Qual(fn.Pkg().Path(), fn.Name()),
-			Name:             fn.Name(),
-			Source:           xtype.TypeOf(source),
-			Target:           xtype.TypeOf(target),
-			SelfAsFirstParam: selfAsFirstParameter,
-			ReturnError:      returnError,
-			ReturnTypeOrigin: fn.String(),
-		}
-	}
 	return nil
 }
 

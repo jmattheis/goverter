@@ -132,9 +132,35 @@ func (c *RenamedConverter) ...
 
 ### Extend with custom implementation
 
-With `goverter:extend` you can instruct goverter to use an implementation of
-your own. You can pass multiple function names to `goverter:extend`, or define
-the tag multiple times.
+With `goverter:extend` you can instruct goverter to use conversion methods from the same package as
+the conversion interface or from other packages.
+You can pass multiple extend statements to `goverter:extend`, or define the tag multiple times. Each
+statement can be:
+* a function name in the the package where converter interface is declared:
+```go
+// goverter:extend SQLStringToPString
+```
+
+* a function name in a different package, use `:` to separate the package path from the method:
+```go
+// goverter:extend strconv:ParseBool
+// goverter:extend github.com/google/uuid:FromBytes
+```
+
+* a golang's regexp pattern for functions in either the converter's package or in a different package package.
+```go
+// search for conversion methods that start with SQLStringTo in converter's package
+// goverter:extend SQLStringTo.*
+// this example below will enable ParseBool method
+// goverter:extend strconv:Parse.*
+```
+
+Extend tips:
+* If goverter:extend statement (with plan name or or with regexp) leads to zero matches, goverter reports it as a failure. It is likely a typo or a wrong package, simply remove or fix the wrong input.
+* When extending conversion methods with a pattern:
+  - Use golang's regexp format: OS style `*` wildcard won't work - use `.*` instead.
+  - To search for methods in a local package, the `:` character can be omited or be the first char in the name.
+* If goverter fails to load an external package, try adding it as a blank import into converter's module to force its load into gomod's cache.
 
 See [`house` example sql.NullString](https://github.com/jmattheis/goverter/blob/main/example/house/input.go#L9)
 

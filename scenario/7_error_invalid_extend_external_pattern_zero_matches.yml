@@ -1,0 +1,10 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        // it won't match anything because regexp requires .* instead of a regular wildcard
+        // goverter:extend strconv:Parse*
+        type Converter interface {
+        }
+error: 'Error while parsing extend methods: package strconv does not have methods with names that match the golang regexp pattern "Parse*" and a convert signature'

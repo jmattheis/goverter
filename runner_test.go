@@ -22,7 +22,7 @@ func TestScenario(t *testing.T) {
 	files, err := ioutil.ReadDir(scenarios)
 	require.NoError(t, err)
 
-	require.NoError(t, os.MkdirAll(execDir, 0755))
+	require.NoError(t, os.MkdirAll(execDir, os.ModePerm))
 	require.NoError(t, clearDir(execDir))
 
 	for _, file := range files {
@@ -38,16 +38,16 @@ func TestScenario(t *testing.T) {
 			require.NoError(t, err)
 
 			for name, content := range scenario.Input {
-				err = ioutil.WriteFile(path.Join(execDir, name), []byte(content), 0644)
+				err = ioutil.WriteFile(path.Join(execDir, name), []byte(content), os.ModePerm)
 				require.NoError(t, err)
 			}
 			genFile := path.Join(execDir, "generated", "generated.go")
-
 			err = GenerateConverterFile(
 				genFile,
 				GenerateConfig{
-					PackageName: "generated",
-					ScanDir:     "github.com/jmattheis/goverter/execution",
+					PackageName:   "generated",
+					ScanDir:       "github.com/jmattheis/goverter/execution",
+					ExtendMethods: scenario.Extends,
 				})
 
 			body, _ := ioutil.ReadFile(genFile)
@@ -62,7 +62,7 @@ func TestScenario(t *testing.T) {
 				}
 				newBytes, err := yaml.Marshal(&scenario)
 				if assert.NoError(t, err) {
-					ioutil.WriteFile(scenarioFileName, newBytes, 0644)
+					ioutil.WriteFile(scenarioFileName, newBytes, os.ModePerm)
 				}
 			}
 
@@ -98,6 +98,7 @@ func compile(file string) error {
 
 type Scenario struct {
 	Input   map[string]string `yaml:"input"`
+	Extends []string          `yaml:"extends,omitempty"`
 	Error   string            `yaml:"error,omitempty"`
 	Success string            `yaml:"success,omitempty"`
 }

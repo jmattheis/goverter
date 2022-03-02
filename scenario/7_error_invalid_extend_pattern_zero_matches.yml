@@ -1,0 +1,9 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        // goverter:extend HelloWorld.*
+        type Converter interface {
+        }
+error: 'Error while parsing extend methods: local package does not have methods with names that match the golang regexp pattern "HelloWorld.*" and a convert signature'
