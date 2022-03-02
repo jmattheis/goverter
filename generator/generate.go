@@ -57,10 +57,12 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 		}
 		interf := obj.Type().Underlying().(*types.Interface)
 
+		// first, load extend methods from the command line / global config.
 		if err := gen.parseExtend(obj.Type(), sources.Scope(), config.ExtendMethods); err != nil {
 			return nil, fmt.Errorf("Error while parsing extend methods: %s", err)
 		}
 
+		// now, load goverter:extend per converter, they will override dupe signatures provided beforehand
 		if err := gen.parseExtend(obj.Type(), sources.Scope(), converter.Config.ExtendMethods); err != nil {
 			return nil, fmt.Errorf("Error while parsing extend methods: %s", err)
 		}

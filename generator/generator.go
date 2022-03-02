@@ -39,7 +39,7 @@ type generator struct {
 	file   *jen.File
 	lookup map[xtype.Signature]*methodDefinition
 	extend map[xtype.Signature]*methodDefinition
-	// pkgCache caches the external packages, saving load time
+	// pkgCache caches the extend packages, saving load time
 	pkgCache map[string][]*packages.Package
 }
 

@@ -13,7 +13,7 @@ import (
 
 const (
 	// packageNameSep separates between package path and name pattern
-	// in goverter:extend input with external packages.
+	// in goverter:extend input with package path.
 	packageNameSep = ":"
 )
 
@@ -53,7 +53,7 @@ func (g *generator) parseExtendPackage(converterInterface types.Type, scope *typ
 // Note: if this method finds no candidates, it will report an error. Two reasons for that:
 // scanning packages takes time and it is very likely a human error.
 func (g *generator) searchExtendsInPackages(pkgPath string, pattern *regexp.Regexp) error {
-	// load external package, loadPackages uses cache
+	// load a package by its path, loadPackages uses cache
 	pkgs, err := g.loadPackages(pkgPath)
 	if err != nil {
 		return err
@@ -62,7 +62,7 @@ func (g *generator) searchExtendsInPackages(pkgPath string, pattern *regexp.Rege
 	var loaded int
 	for _, pkg := range pkgs {
 		// search in the scope of each package, first package is going to be the root one
-		// we cannot match the target converter interface in external packages, we must pass nil instead
+		// we cannot match the target converter interface in non-local packages: pass nil instead
 		pkgLoaded, pkgErr := g.searchExtendsInScope(nil, pkg.Types.Scope(), pattern)
 		if pkgErr != nil {
 			if err == nil {
@@ -206,7 +206,7 @@ func (g *generator) parseExtendFunc(converterInterface types.Type, fn *types.Fun
 	if sig.Params().Len() == 2 {
 		if converterInterface == nil {
 			// converterInterface is used when searching for methods in the local package only
-			return fmt.Errorf("%s should have one parameter when using extend with an external package", fn.Name())
+			return fmt.Errorf("%s should have one parameter when using extend with a package", fn.Name())
 		}
 		if source.String() == converterInterface.String() {
 			selfAsFirstParameter = true
