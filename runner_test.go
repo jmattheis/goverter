@@ -68,7 +68,13 @@ func TestScenario(t *testing.T) {
 
 			if scenario.Error != "" {
 				require.Error(t, err)
-				require.Equal(t, replaceAbsolutePath(fmt.Sprint(err)), scenario.Error)
+				expectedErr := scenario.Error
+				actualErr := replaceAbsolutePath(fmt.Sprint(err))
+				if strings.HasSuffix(expectedErr, "\n") && !strings.HasSuffix(actualErr, "\n") {
+					// YAML parser inject new line at the end of multi-line string literal, remove it
+					expectedErr = strings.TrimSuffix(expectedErr, "\n")
+				}
+				require.Equal(t, expectedErr, actualErr)
 			} else {
 				require.NoError(t, err)
 				require.NotEmpty(t, scenario.Success, "scenario.Success may not be empty")

@@ -9,4 +9,8 @@ input:
         func HelloWorld() int {
             return 0
         }
-error: 'Error while parsing extend methods: HelloWorld has no or too many parameters'
+error: |
+    Error while parsing extend in
+        github.com/jmattheis/goverter/execution.Converter
+
+    HelloWorld has no or too many parameters

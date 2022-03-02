@@ -6,4 +6,8 @@ input:
         // goverter:extend HelloWorld.*
         type Converter interface {
         }
-error: 'Error while parsing extend methods: local package does not have methods with names that match the golang regexp pattern "HelloWorld.*" and a convert signature'
+error: |
+    Error while parsing extend in
+        github.com/jmattheis/goverter/execution.Converter
+
+    local package does not have methods with names that match the golang regexp pattern "HelloWorld.*" and a convert signature

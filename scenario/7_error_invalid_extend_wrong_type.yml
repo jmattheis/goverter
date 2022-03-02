@@ -7,4 +7,8 @@ input:
         type Converter interface {
         }
         const HelloWorld = 5
-error: 'Error while parsing extend methods: HelloWorld is not a function'
+error: |
+    Error while parsing extend in
+        github.com/jmattheis/goverter/execution.Converter
+
+    HelloWorld is not a function

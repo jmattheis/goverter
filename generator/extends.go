@@ -145,13 +145,13 @@ func (g *generator) parseExtend(converterInterface types.Type, scope *types.Scop
 			if pkgPath == "" {
 				// example: goverter:extend :MyLocalConvert
 				// the purpose of the ':' in this case is confusing, do not allow such case
-				return fmt.Errorf(
-					`package path cannot be empty, remove the first : character from "%s" for local searches`,
-					methodName)
+				return fmt.Errorf(`package path must not be empty in the extend statement "%s".
+See https://github.com/jmattheis/goverter#extend-with-custom-implementation`, methodName)
 			}
 			namePattern = parts[1]
 			if namePattern == "" {
-				return fmt.Errorf(`method name pattern is required in the extend statement "%s", use .* to try matching all methods in a package`, methodName)
+				return fmt.Errorf(`method name pattern is required in the extend statement "%s".
+See https://github.com/jmattheis/goverter#extend-with-custom-implementation`, methodName)
 			}
 		}
 

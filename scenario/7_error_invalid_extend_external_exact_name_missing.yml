@@ -6,4 +6,8 @@ input:
         // goverter:extend strconv:ParseSomething
         type Converter interface {
         }
-error: 'Error while parsing extend methods: package strconv does not have methods with names that match the golang regexp pattern "ParseSomething" and a convert signature: ParseSomething does not exist in scope'
+error: |
+    Error while parsing extend in
+        github.com/jmattheis/goverter/execution.Converter
+
+    package strconv does not have methods with names that match the golang regexp pattern "ParseSomething" and a convert signature: ParseSomething does not exist in scope

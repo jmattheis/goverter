@@ -8,4 +8,8 @@ input:
         }
         func HelloWorld(int) {
         }
-error: 'Error while parsing extend methods: HelloWorld has no or too many returns'
+error: |
+    Error while parsing extend in
+        github.com/jmattheis/goverter/execution.Converter
+
+    HelloWorld has no or too many returns
