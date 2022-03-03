@@ -19,7 +19,7 @@ input:
             Name string
             Age int
         }
-error: |
+error: |-
     Error while creating converter method:
         func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
 

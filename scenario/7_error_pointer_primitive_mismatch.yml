@@ -6,7 +6,7 @@ input:
         type Converter interface {
             Convert(source int) *string
         }
-error: |
+error: |-
     Error while creating converter method:
         func (github.com/jmattheis/goverter/execution.Converter).Convert(source int) *string
 

@@ -6,7 +6,7 @@ input:
         // goverter:extend notaquery=abc:Convert
         type Converter interface {
         }
-error_starts_with: |
+error_starts_with: |-
     Error while parsing extend in
         github.com/jmattheis/goverter/execution.Converter
 

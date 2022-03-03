@@ -7,7 +7,7 @@ input:
         type Converter interface {
         }
         const HelloWorld = 5
-error: |
+error: |-
     Error while parsing extend in
         github.com/jmattheis/goverter/execution.Converter
 

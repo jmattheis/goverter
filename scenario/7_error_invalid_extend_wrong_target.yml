@@ -8,7 +8,7 @@ input:
         }
         func HelloWorld(int) {
         }
-error: |
+error: |-
     Error while parsing extend in
         github.com/jmattheis/goverter/execution.Converter
 

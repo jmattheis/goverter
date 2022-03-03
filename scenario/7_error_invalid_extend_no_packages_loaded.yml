@@ -6,7 +6,7 @@ input:
         // goverter:extend file=/nonexisting:Convert
         type Converter interface {
         }
-error_starts_with: |
+error: |-
     Error while parsing extend in
         github.com/jmattheis/goverter/execution.Converter
 

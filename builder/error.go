@@ -98,6 +98,6 @@ func ToString(err *Error) string {
 		_, _ = fmt.Fprintln(&buf, strings.TrimSpace(string(line)))
 	}
 	fmt.Fprintln(&buf)
-	fmt.Fprintln(&buf, err.Cause)
+	fmt.Fprint(&buf, err.Cause)
 	return buf.String()
 }

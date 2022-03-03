@@ -52,7 +52,7 @@ func TestScenario(t *testing.T) {
 
 			body, _ := ioutil.ReadFile(genFile)
 
-			if os.Getenv("UPDATE_SCENARIO") == "true" {
+			if os.Getenv("UPDATE_SCENARIO") == "true" && scenario.ErrorStartsWith == "" {
 				if err != nil {
 					scenario.Success = ""
 					scenario.Error = replaceAbsolutePath(fmt.Sprint(err))
@@ -66,34 +66,23 @@ func TestScenario(t *testing.T) {
 				}
 			}
 
-			if scenario.Error != "" || scenario.ErrorStartsWith != "" {
+			if scenario.ErrorStartsWith != "" {
 				require.Error(t, err)
-				actualErr := replaceAbsolutePath(fmt.Sprint(err))
-				var expectedErr string
-				if scenario.Error != "" {
-					expectedErr = scenario.Error
-					// YAML parser inject new line at the end of multi-line string literal, remove it
-					// but only do so if actualErr does not have it
-					if strings.HasSuffix(expectedErr, "\n") && !strings.HasSuffix(actualErr, "\n") {
-						expectedErr = strings.TrimSuffix(expectedErr, "\n")
-					}
-				} else {
-					// always remove yaml-injected new line, we need prefix len without it
-					expectedErr = strings.TrimSuffix(scenario.ErrorStartsWith, "\n")
-					if len(actualErr) > len(expectedErr) {
-						// trim it to the prefix size to use Equal for a nice diff on test failures
-						actualErr = actualErr[0:len(expectedErr)]
-					}
-				}
-				// use Equal to show a nice diff message, other require methods do not show diffs
-				// making it hard to troubleshoot test failures
-				require.Equal(t, expectedErr, actualErr)
-			} else {
-				require.NoError(t, err)
-				require.NotEmpty(t, scenario.Success, "scenario.Success may not be empty")
-				require.Equal(t, scenario.Success, string(body))
-				require.NoError(t, compile(genFile), "generated converter doesn't build")
+				strErr := replaceAbsolutePath(fmt.Sprint(err))
+				require.Equal(t, scenario.ErrorStartsWith, strErr[:len(scenario.ErrorStartsWith)])
+				return
 			}
+
+			if scenario.Error != "" {
+				require.Error(t, err)
+				require.Equal(t, replaceAbsolutePath(fmt.Sprint(err)), scenario.Error)
+				return
+			}
+
+			require.NoError(t, err)
+			require.NotEmpty(t, scenario.Success, "scenario.Success may not be empty")
+			require.Equal(t, scenario.Success, string(body))
+			require.NoError(t, compile(genFile), "generated converter doesn't build")
 		})
 		clearDir(execDir)
 	}

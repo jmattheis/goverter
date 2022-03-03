@@ -25,7 +25,7 @@ input:
             Street string
             City   string
         }
-error: |
+error: |-
     Error while creating converter method:
         func (github.com/jmattheis/goverter/execution.Converter).ConvertPerson(source github.com/jmattheis/goverter/execution.Person) github.com/jmattheis/goverter/execution.APIPerson
 

@@ -6,7 +6,7 @@ input:
         // goverter:extend strconv:ParseSomething
         type Converter interface {
         }
-error: |
+error: |-
     Error while parsing extend in
         github.com/jmattheis/goverter/execution.Converter
 

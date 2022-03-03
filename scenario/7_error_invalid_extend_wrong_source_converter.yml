@@ -9,7 +9,7 @@ input:
         func HelloWorld(int, int) int {
             return 0
         }
-error: |
+error: |-
     Error while parsing extend in
         github.com/jmattheis/goverter/execution.Converter
 

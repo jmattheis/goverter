@@ -6,7 +6,7 @@ input:
         type Converter interface {
             Convert(source map[int]int) map[int]int64
         }
-error: |
+error: |-
     Error while creating converter method:
         func (github.com/jmattheis/goverter/execution.Converter).Convert(source map[int]int) map[int]int64
 
