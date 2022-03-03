@@ -3,13 +3,11 @@ input:
         package structs
 
         // goverter:converter
-        // goverter:extend HelloWorld
+        // goverter:extend file=/nonexisting:Convert
         type Converter interface {
         }
-        func HelloWorld(int) {
-        }
-error: |
+error_starts_with: |
     Error while parsing extend in
         github.com/jmattheis/goverter/execution.Converter
 
-    HelloWorld has no or too many returns
+    no packages were loaded for "file=/nonexisting", make sure it is a valid golang package

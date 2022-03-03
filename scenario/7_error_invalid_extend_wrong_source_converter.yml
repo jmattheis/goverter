@@ -9,4 +9,8 @@ input:
         func HelloWorld(int, int) int {
             return 0
         }
-error: 'Error while parsing extend methods: the first parameter must be of type github.com/jmattheis/goverter/execution.Converter'
+error: |
+    Error while parsing extend in
+        github.com/jmattheis/goverter/execution.Converter
+
+    the first parameter must be of type github.com/jmattheis/goverter/execution.Converter

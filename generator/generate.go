@@ -15,7 +15,8 @@ import (
 
 // Config the generate config.
 type Config struct {
-	Name string
+	Name          string
+	ExtendMethods []string
 }
 
 // BuildSteps that'll used for generation.
@@ -56,8 +57,15 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 		}
 		interf := obj.Type().Underlying().(*types.Interface)
 
-		if err := gen.parseExtend(obj.Type(), sources.Scope(), converter.Config.ExtendMethods); err != nil {
-			return nil, fmt.Errorf("Error while parsing extend methods: %s", err)
+		extendMethods := make([]string, 0, len(config.ExtendMethods)+len(converter.Config.ExtendMethods))
+		// Order is important: converter methods are keyed using their in and out type pairs; newly
+		// discovered methods override existing ones. To enable fine-tuning per converter, extends
+		// declared on the converter inteface should override extends provided globally.
+		extendMethods = append(extendMethods, config.ExtendMethods...)
+		extendMethods = append(extendMethods, converter.Config.ExtendMethods...)
+
+		if err := gen.parseExtend(obj.Type(), sources.Scope(), extendMethods); err != nil {
+			return nil, fmt.Errorf("Error while parsing extend in\n    %s\n\n%s", obj.Type().String(), err)
 		}
 
 		// we checked in comments, that it is an interface

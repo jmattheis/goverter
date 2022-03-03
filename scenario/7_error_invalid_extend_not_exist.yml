@@ -6,4 +6,8 @@ input:
         // goverter:extend HelloWorld
         type Converter interface {
         }
-error: 'Error while parsing extend methods: HelloWorld does not exist in scope'
+error: |
+    Error while parsing extend in
+        github.com/jmattheis/goverter/execution.Converter
+
+    HelloWorld does not exist in scope

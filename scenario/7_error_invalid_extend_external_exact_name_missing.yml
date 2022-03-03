@@ -3,13 +3,11 @@ input:
         package structs
 
         // goverter:converter
-        // goverter:extend HelloWorld
+        // goverter:extend strconv:ParseSomething
         type Converter interface {
-        }
-        func HelloWorld(int) {
         }
 error: |
     Error while parsing extend in
         github.com/jmattheis/goverter/execution.Converter
 
-    HelloWorld has no or too many returns
+    package strconv does not have methods with names that match the golang regexp pattern "ParseSomething" and a convert signature: ParseSomething does not exist in scope

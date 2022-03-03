@@ -132,9 +132,26 @@ func (c *RenamedConverter) ...
 
 ### Extend with custom implementation
 
-With `goverter:extend` you can instruct goverter to use an implementation of
-your own. You can pass multiple function names to `goverter:extend`, or define
-the tag multiple times.
+With `goverter:extend` you can instruct goverter to use conversion methods from the same package as
+the conversion interface or from other packages.
+You can pass multiple extend statements to `goverter:extend`, or define the tag multiple times. Each
+statement can be:
+* a function in the package where the converter interface is declared:
+  ```go
+  // goverter:extend SQLStringToPString
+  ```
+* a function in another package. Use `:` to separate the package path from the function:
+  ```go
+  // goverter:extend strconv:ParseBool
+  // goverter:extend github.com/google/uuid:FromBytes
+  ```
+Note: The function name can be a regular expression.
+```go
+// search for conversion methods that start with SQLStringTo in converter's package
+// goverter:extend SQLStringTo.*
+// the example below enables ParseBool method
+// goverter:extend strconv:Parse.*
+```
 
 See [`house` example sql.NullString](https://github.com/jmattheis/goverter/blob/main/example/house/input.go#L9)
 

@@ -3,13 +3,11 @@ input:
         package structs
 
         // goverter:converter
-        // goverter:extend HelloWorld
+        // goverter:extend strconv:(
         type Converter interface {
-        }
-        func HelloWorld(int) {
         }
 error: |
     Error while parsing extend in
         github.com/jmattheis/goverter/execution.Converter
 
-    HelloWorld has no or too many returns
+    could not parse name as regexp "(": error parsing regexp: missing closing ): `(`

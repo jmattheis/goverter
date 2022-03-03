@@ -3,13 +3,12 @@ input:
         package structs
 
         // goverter:converter
-        // goverter:extend HelloWorld
+        // goverter:extend strconv:
         type Converter interface {
-        }
-        func HelloWorld(int) {
         }
 error: |
     Error while parsing extend in
         github.com/jmattheis/goverter/execution.Converter
 
-    HelloWorld has no or too many returns
+    method name pattern is required in the extend statement "strconv:".
+    See https://github.com/jmattheis/goverter#extend-with-custom-implementation

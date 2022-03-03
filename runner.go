@@ -12,8 +12,9 @@ import (
 
 // GenerateConfig the config for generating a converter.
 type GenerateConfig struct {
-	PackageName string
-	ScanDir     string
+	PackageName   string
+	ScanDir       string
+	ExtendMethods []string
 }
 
 // GenerateConverter generates converters.
@@ -23,7 +24,8 @@ func GenerateConverter(c GenerateConfig) ([]byte, error) {
 		return nil, err
 	}
 
-	file, err := generator.Generate(c.ScanDir, mapping, generator.Config{Name: c.PackageName})
+	file, err := generator.Generate(
+		c.ScanDir, mapping, generator.Config{Name: c.PackageName, ExtendMethods: c.ExtendMethods})
 	if err != nil {
 		return nil, err
 	}
@@ -39,10 +41,11 @@ func GenerateConverterFile(fileName string, c GenerateConfig) error {
 	if err != nil {
 		return err
 	}
-	err = os.MkdirAll(path.Dir(fileName), 0755)
+
+	err = os.MkdirAll(path.Dir(fileName), os.ModePerm)
 	if err != nil {
 		return err
 	}
 
-	return ioutil.WriteFile(fileName, file, 0755)
+	return ioutil.WriteFile(fileName, file, os.ModePerm)
 }
