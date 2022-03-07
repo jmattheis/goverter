@@ -17,6 +17,7 @@ import (
 type Config struct {
 	Name          string
 	ExtendMethods []string
+	WorkingDir    string
 }
 
 // BuildSteps that'll used for generation.
@@ -49,11 +50,12 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 		file.Type().Id(converter.Config.Name).Struct()
 
 		gen := generator{
-			namer:  namer.New(),
-			file:   file,
-			name:   converter.Config.Name,
-			lookup: map[xtype.Signature]*methodDefinition{},
-			extend: map[xtype.Signature]*methodDefinition{},
+			namer:      namer.New(),
+			file:       file,
+			name:       converter.Config.Name,
+			lookup:     map[xtype.Signature]*methodDefinition{},
+			extend:     map[xtype.Signature]*methodDefinition{},
+			workingDir: config.WorkingDir,
 		}
 		interf := obj.Type().Underlying().(*types.Interface)
 

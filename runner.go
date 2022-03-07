@@ -12,20 +12,29 @@ import (
 
 // GenerateConfig the config for generating a converter.
 type GenerateConfig struct {
-	PackageName   string
-	ScanDir       string
+	// PackageName is the package to use for the generated code.
+	PackageName string
+	// ScanDir is the package with golang files to scan for goverter tags.
+	ScanDir string
+	// ExtendMethods is a list of extensions to load in addition to goverter:extend statements
+	// declared on the interface itself.
 	ExtendMethods []string
+	// WorkingDir is the working directory (usually the location of go.mod file), can be empty.
+	WorkingDir string
 }
 
 // GenerateConverter generates converters.
 func GenerateConverter(c GenerateConfig) ([]byte, error) {
-	mapping, err := comments.ParseDocs(c.ScanDir)
+	mapping, err := comments.ParseDocsCfg(&comments.ParseDocsConfig{
+		Pattern:    c.ScanDir,
+		WorkingDir: c.WorkingDir,
+	})
 	if err != nil {
 		return nil, err
 	}
 
 	file, err := generator.Generate(
-		c.ScanDir, mapping, generator.Config{Name: c.PackageName, ExtendMethods: c.ExtendMethods})
+		c.ScanDir, mapping, generator.Config{Name: c.PackageName, ExtendMethods: c.ExtendMethods, WorkingDir: c.WorkingDir})
 	if err != nil {
 		return nil, err
 	}

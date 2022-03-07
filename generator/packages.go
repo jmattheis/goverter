@@ -15,6 +15,7 @@ func (g *generator) loadPackages(pkgPath string) ([]*packages.Package, error) {
 
 	packagesCfg := &packages.Config{
 		Mode: packages.NeedName | packages.NeedTypes | packages.NeedTypesInfo,
+		Dir:  g.workingDir,
 	}
 	pkgs, err := packages.Load(packagesCfg, pkgPath)
 	if err != nil {
