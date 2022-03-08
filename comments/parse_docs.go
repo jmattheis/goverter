@@ -24,7 +24,7 @@ type MethodMapping map[string]Method
 type ParseDocsConfig struct {
 	// PackagePattern is a golang package pattern to scan, required.
 	PackagePattern string
-	// WorkingDir is a directory to invoke the tool on. If omited, current directory is used.
+	// WorkingDir is a directory to invoke the tool on. If omitted, current directory is used.
 	WorkingDir string
 }
 
