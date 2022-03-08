@@ -20,10 +20,12 @@ const (
 // MethodMapping a mapping between method name and method.
 type MethodMapping map[string]Method
 
-// DocsParser processes goverter tags in comments.
-type DocsParser struct {
+// ParseDocsConfig provides input to the ParseDocs method below.
+type ParseDocsConfig struct {
+	// PackagePattern is a golang package pattern to scan, required.
 	PackagePattern string
-	WorkingDir     string
+	// WorkingDir is a directory to invoke the tool on. If omited, current directory is used.
+	WorkingDir string
 }
 
 // Converter defines a converter that was marked with converterMarker.
@@ -49,19 +51,13 @@ type Method struct {
 }
 
 // ParseDocs parses the docs for the given pattern.
-func ParseDocs(pattern string) ([]Converter, error) {
-	p := DocsParser{PackagePattern: pattern}
-	return p.Parse()
-}
-
-// Parse parses the docs and extracts converter metadata.
-func (p *DocsParser) Parse() ([]Converter, error) {
+func ParseDocs(config ParseDocsConfig) ([]Converter, error) {
 	loadCfg := &packages.Config{
 		Mode: packages.NeedSyntax | packages.NeedCompiledGoFiles | packages.NeedTypes |
 			packages.NeedModule | packages.NeedFiles | packages.NeedName | packages.NeedImports,
-		Dir: p.WorkingDir,
+		Dir: config.WorkingDir,
 	}
-	pkgs, err := packages.Load(loadCfg, p.PackagePattern)
+	pkgs, err := packages.Load(loadCfg, config.PackagePattern)
 	if err != nil {
 		return nil, err
 	}
