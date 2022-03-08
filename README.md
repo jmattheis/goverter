@@ -85,7 +85,7 @@ use reflection.
 
    Note that relative path must start with a dot to indicate it is not a golang package. Omiting the dot (e.g. example/simple) may not work.
 
-2. goverter created a file at `./generated/generated.go`, it may look like this:
+1. goverter created a file at `./generated/generated.go`, it may look like this:
 
    ```go
    package generated
