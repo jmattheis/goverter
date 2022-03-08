@@ -25,10 +25,11 @@ type GenerateConfig struct {
 
 // GenerateConverter generates converters.
 func GenerateConverter(c GenerateConfig) ([]byte, error) {
-	mapping, err := comments.ParseDocsCfg(&comments.ParseDocsConfig{
-		Pattern:    c.ScanDir,
-		WorkingDir: c.WorkingDir,
-	})
+	docsParser := comments.DocsParser{
+		PackagePattern: c.ScanDir,
+		WorkingDir:     c.WorkingDir,
+	}
+	mapping, err := docsParser.Parse()
 	if err != nil {
 		return nil, err
 	}

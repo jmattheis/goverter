@@ -19,10 +19,10 @@ const (
 // MethodMapping a mapping between method name and method.
 type MethodMapping map[string]Method
 
-// ParseDocsConfig is the config file for ParseDocsCfg methods
-type ParseDocsConfig struct {
-	Pattern    string
-	WorkingDir string
+// DocsParser processes goverter tags in comments.
+type DocsParser struct {
+	PackagePattern string
+	WorkingDir     string
 }
 
 // Converter defines a converter that was marked with converterMarker.
@@ -48,17 +48,18 @@ type Method struct {
 
 // ParseDocs parses the docs for the given pattern.
 func ParseDocs(pattern string) ([]Converter, error) {
-	return ParseDocsCfg(&ParseDocsConfig{Pattern: pattern})
+	p := DocsParser{PackagePattern: pattern}
+	return p.Parse()
 }
 
-// ParseDocsCfg parses the docs for the given pattern.
-func ParseDocsCfg(cfg *ParseDocsConfig) ([]Converter, error) {
+// Parse parses the docs and extracts converter metadata.
+func (p *DocsParser) Parse() ([]Converter, error) {
 	loadCfg := &packages.Config{
 		Mode: packages.NeedSyntax | packages.NeedCompiledGoFiles | packages.NeedTypes |
 			packages.NeedModule | packages.NeedFiles | packages.NeedName | packages.NeedImports,
-		Dir: cfg.WorkingDir,
+		Dir: p.WorkingDir,
 	}
-	pkgs, err := packages.Load(loadCfg, cfg.Pattern)
+	pkgs, err := packages.Load(loadCfg, p.PackagePattern)
 	if err != nil {
 		return nil, err
 	}
