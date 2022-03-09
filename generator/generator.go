@@ -41,6 +41,8 @@ type generator struct {
 	extend map[xtype.Signature]*methodDefinition
 	// pkgCache caches the extend packages, saving load time
 	pkgCache map[string][]*packages.Package
+	// workingDir is a working directory, can be empty
+	workingDir string
 }
 
 func (g *generator) registerMethod(methodType *types.Func, methodComments comments.Method) error {

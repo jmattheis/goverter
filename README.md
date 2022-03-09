@@ -77,10 +77,13 @@ use reflection.
 1. Run `goverter`:
 
    ```
-   $ go run github.com/jmattheis/goverter/cmd/goverter module-name-in-full
+   $ go run github.com/jmattheis/goverter/cmd/goverter [package-name-in-full or relative-path-starts-with-a-dot]
    # example
    $ go run github.com/jmattheis/goverter/cmd/goverter github.com/jmattheis/goverter/example/simple
+   $ go run github.com/jmattheis/goverter/cmd/goverter ./example/simple
    ```
+
+   Note that relative path must start with a dot to indicate it is not a golang package. Omiting the dot (e.g. example/simple) may not work.
 
 1. goverter created a file at `./generated/generated.go`, it may look like this:
 

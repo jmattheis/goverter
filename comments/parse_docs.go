@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"go/ast"
+	"go/types"
 	"sort"
 	"strings"
 
@@ -19,11 +20,20 @@ const (
 // MethodMapping a mapping between method name and method.
 type MethodMapping map[string]Method
 
+// ParseDocsConfig provides input to the ParseDocs method below.
+type ParseDocsConfig struct {
+	// PackagePattern is a golang package pattern to scan, required.
+	PackagePattern string
+	// WorkingDir is a directory to invoke the tool on. If omitted, current directory is used.
+	WorkingDir string
+}
+
 // Converter defines a converter that was marked with converterMarker.
 type Converter struct {
 	Name    string
 	Config  ConverterConfig
 	Methods MethodMapping
+	Scope   *types.Scope
 }
 
 // ConverterConfig contains settings that can be set via comments.
@@ -41,11 +51,13 @@ type Method struct {
 }
 
 // ParseDocs parses the docs for the given pattern.
-func ParseDocs(pattern string) ([]Converter, error) {
-	pkgs, err := packages.Load(&packages.Config{
+func ParseDocs(config ParseDocsConfig) ([]Converter, error) {
+	loadCfg := &packages.Config{
 		Mode: packages.NeedSyntax | packages.NeedCompiledGoFiles | packages.NeedTypes |
 			packages.NeedModule | packages.NeedFiles | packages.NeedName | packages.NeedImports,
-	}, pattern)
+		Dir: config.WorkingDir,
+	}
+	pkgs, err := packages.Load(loadCfg, config.PackagePattern)
 	if err != nil {
 		return nil, err
 	}
@@ -57,10 +69,11 @@ func ParseDocs(pattern string) ([]Converter, error) {
 		for _, file := range pkg.Syntax {
 			for _, decl := range file.Decls {
 				if genDecl, ok := decl.(*ast.GenDecl); ok {
-					var err error
-					if mapping, err = parseGenDecl(mapping, genDecl); err != nil {
+					converters, err := parseGenDecl(pkg.Types.Scope(), genDecl)
+					if err != nil {
 						return mapping, fmt.Errorf("%s: %s", pkg.Fset.Position(genDecl.Pos()), err)
 					}
+					mapping = append(mapping, converters...)
 				}
 			}
 		}
@@ -71,62 +84,66 @@ func ParseDocs(pattern string) ([]Converter, error) {
 	return mapping, nil
 }
 
-func parseGenDecl(mapping []Converter, decl *ast.GenDecl) ([]Converter, error) {
+func parseGenDecl(scope *types.Scope, decl *ast.GenDecl) ([]Converter, error) {
 	declDocs := decl.Doc.Text()
 
 	if strings.Contains(declDocs, converterMarker) {
 		if len(decl.Specs) != 1 {
-			return mapping, fmt.Errorf("found %s on type but it has multiple interfaces inside", converterMarker)
+			return nil, fmt.Errorf("found %s on type but it has multiple interfaces inside", converterMarker)
 		}
 		typeSpec, ok := decl.Specs[0].(*ast.TypeSpec)
 		if !ok {
-			return mapping, fmt.Errorf("%s may only be applied to type declarations ", converterMarker)
+			return nil, fmt.Errorf("%s may only be applied to type declarations ", converterMarker)
 		}
 		interfaceType, ok := typeSpec.Type.(*ast.InterfaceType)
 		if !ok {
-			return mapping, fmt.Errorf("%s may only be applied to type interface declarations ", converterMarker)
+			return nil, fmt.Errorf("%s may only be applied to type interface declarations ", converterMarker)
 		}
 		typeName := typeSpec.Name.String()
 		config, err := parseConverterComment(declDocs, ConverterConfig{Name: typeName + "Impl"})
 		if err != nil {
-			return mapping, fmt.Errorf("type %s: %s", typeName, err)
+			return nil, fmt.Errorf("type %s: %s", typeName, err)
 		}
 		methods, err := parseInterface(interfaceType)
 		if err != nil {
-			return mapping, fmt.Errorf("type %s: %s", typeName, err)
+			return nil, fmt.Errorf("type %s: %s", typeName, err)
 		}
-		mapping = append(mapping, Converter{
+		converter := Converter{
 			Name:    typeName,
 			Methods: methods,
 			Config:  config,
-		})
-		return mapping, nil
+			Scope:   scope,
+		}
+		return []Converter{converter}, nil
 	}
+
+	var converters []Converter
 
 	for _, spec := range decl.Specs {
 		if typeSpec, ok := spec.(*ast.TypeSpec); ok && strings.Contains(typeSpec.Doc.Text(), converterMarker) {
 			interfaceType, ok := typeSpec.Type.(*ast.InterfaceType)
 			if !ok {
-				return mapping, fmt.Errorf("%s may only be applied to type interface declarations ", converterMarker)
+				return nil, fmt.Errorf("%s may only be applied to type interface declarations ", converterMarker)
 			}
 			typeName := typeSpec.Name.String()
 			config, err := parseConverterComment(typeSpec.Doc.Text(), ConverterConfig{Name: typeName + "Impl"})
 			if err != nil {
-				return mapping, fmt.Errorf("type %s: %s", typeName, err)
+				return nil, fmt.Errorf("type %s: %s", typeName, err)
 			}
 			methods, err := parseInterface(interfaceType)
 			if err != nil {
-				return mapping, fmt.Errorf("type %s: %s", typeName, err)
+				return nil, fmt.Errorf("type %s: %s", typeName, err)
 			}
-			mapping = append(mapping, Converter{
+			converters = append(converters, Converter{
 				Name:    typeName,
 				Methods: methods,
 				Config:  config,
+				Scope:   scope,
 			})
 		}
 	}
 
-	return mapping, nil
+	return converters, nil
 }
 
 func parseInterface(inter *ast.InterfaceType) (MethodMapping, error) {
