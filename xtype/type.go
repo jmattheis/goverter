@@ -40,19 +40,46 @@ type Type struct {
 	BasicType     *types.Basic
 }
 
+type StructField struct {
+	Name string
+	Type *Type
+}
+
 // StructField returns the type of a struct field.
-func (t Type) StructField(name string) (*Type, bool) {
+func (t Type) StructField(name string, fold bool, ignore map[string]struct{}) (*StructField, error) {
 	if !t.Struct {
 		panic("trying to get field of non struct")
 	}
 
+	var foldMatches []*StructField
 	for y := 0; y < t.StructType.NumFields(); y++ {
 		m := t.StructType.Field(y)
+		if _, ignored := ignore[m.Name()]; ignored {
+			continue
+		}
 		if m.Name() == name {
-			return TypeOf(m.Type()), true
+			// exact match takes precedence over fold match
+			return &StructField{Name: m.Name(), Type: TypeOf(m.Type())}, nil
+		}
+		if fold && strings.EqualFold(m.Name(), name) {
+			foldMatches = append(foldMatches, &StructField{Name: m.Name(), Type: TypeOf(m.Type())})
+			// keep going to ensure struct do not have another fold match
 		}
 	}
-	return nil, false
+
+	switch len(foldMatches) {
+	case 0:
+		return nil, nil
+	case 1:
+		return foldMatches[0], nil
+	default:
+		ambNames := make([]string, 0, len(foldMatches))
+		for _, m := range foldMatches {
+			ambNames = append(ambNames, m.Name)
+		}
+		return nil, fmt.Errorf("value for field %s has ambiguous matches %s, "+
+			"use goverter:map to make an explicit choice", name, ambNames)
+	}
 }
 
 // JenID a jennifer code wrapper with extra infos.

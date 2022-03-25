@@ -1,0 +1,33 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:fold
+            Convert(source Input) Output
+        }
+
+        type Input struct {
+            MyID string
+            MyId string
+        }
+        type Output struct {
+            Myid string
+        }
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+
+    | github.com/jmattheis/goverter/execution.Input
+    |
+    |
+    |
+    source.???
+    target.Myid
+    |      |
+    |      | string
+    |
+    | github.com/jmattheis/goverter/execution.Output
+
+    Cannot match target field with the source entry: value for field Myid has ambiguous matches [MyID MyId], use goverter:map to make an explicit choice.

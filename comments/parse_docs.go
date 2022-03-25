@@ -46,6 +46,7 @@ type ConverterConfig struct {
 type Method struct {
 	IgnoredFields map[string]struct{}
 	NameMapping   map[string]string
+	FoldNames     bool
 	// target to source
 	IdentityMapping map[string]struct{}
 }
@@ -225,6 +226,12 @@ func parseMethodComment(comment string) (Method, error) {
 				for _, f := range fields[1:] {
 					m.IgnoredFields[f] = struct{}{}
 				}
+				continue
+			case "fold":
+				if len(fields) != 1 {
+					return m, fmt.Errorf("invalid %s:fold must have no parameters", prefix)
+				}
+				m.FoldNames = true
 				continue
 			}
 			return m, fmt.Errorf("unknown %s comment: %s", prefix, line)
