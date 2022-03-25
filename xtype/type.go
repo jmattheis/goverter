@@ -40,12 +40,14 @@ type Type struct {
 	BasicType     *types.Basic
 }
 
+// StructField holds the type of a struct field and its name.
 type StructField struct {
 	Name string
 	Type *Type
 }
 
-// StructField returns the type of a struct field.
+// StructField returns the type of a struct field and its name upon successful match or nil is not
+// found. This method will fail only if f fold is enabled and there are multiple non-exact matches.
 func (t Type) StructField(name string, fold bool, ignore map[string]struct{}) (*StructField, error) {
 	if !t.Struct {
 		panic("trying to get field of non struct")
@@ -63,7 +65,7 @@ func (t Type) StructField(name string, fold bool, ignore map[string]struct{}) (*
 		}
 		if fold && strings.EqualFold(m.Name(), name) {
 			foldMatches = append(foldMatches, &StructField{Name: m.Name(), Type: TypeOf(m.Type())})
-			// keep going to ensure struct do not have another fold match
+			// keep going to ensure struct does not have another fold match
 		}
 	}
 
@@ -78,7 +80,7 @@ func (t Type) StructField(name string, fold bool, ignore map[string]struct{}) (*
 			ambNames = append(ambNames, m.Name)
 		}
 		return nil, fmt.Errorf("value for field %s has ambiguous matches %s, "+
-			"use goverter:map to make an explicit choice", name, ambNames)
+			"use goverter:map to make an explicit choice or goverter:ignore", name, ambNames)
 	}
 }
 

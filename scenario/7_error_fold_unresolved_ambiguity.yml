@@ -30,4 +30,4 @@ error: |-
     |
     | github.com/jmattheis/goverter/execution.Output
 
-    Cannot match target field with the source entry: value for field Myid has ambiguous matches [MyID MyId], use goverter:map to make an explicit choice.
+    Cannot match target field with the source entry: value for field Myid has ambiguous matches [MyID MyId], use goverter:map to make an explicit choice or goverter:ignore.

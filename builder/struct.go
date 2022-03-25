@@ -95,7 +95,7 @@ func mapField(gen Generator, ctx *MethodContext, targetField *types.Var, sourceI
 		if err == nil {
 			cause = fmt.Sprintf("Cannot set value for field %s because it does not exist on the source entry.", targetField.Name())
 		} else {
-			// already from the StructField already has the relevant names
+			// error from StructField already has the relevant names
 			cause = fmt.Sprintf("Cannot match target field with the source entry: %s.", err.Error())
 		}
 		return nil, nil, nil, nil, NewError(cause).Lift(&Path{

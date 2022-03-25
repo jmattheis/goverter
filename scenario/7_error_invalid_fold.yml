@@ -1,0 +1,10 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:fold a
+            ConvertString(source string) string
+        }
+error: "/ABSOLUTE/execution/input.go:4:1: type Converter: parsing method ConvertString: invalid goverter:fold, parameters not supported"

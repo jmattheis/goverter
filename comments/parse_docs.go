@@ -229,7 +229,7 @@ func parseMethodComment(comment string) (Method, error) {
 				continue
 			case "fold":
 				if len(fields) != 1 {
-					return m, fmt.Errorf("invalid %s:fold must have no parameters", prefix)
+					return m, fmt.Errorf("invalid %s:fold, parameters not supported", prefix)
 				}
 				m.FoldNames = true
 				continue
