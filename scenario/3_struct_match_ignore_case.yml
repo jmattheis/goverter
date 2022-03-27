@@ -4,7 +4,7 @@ input:
 
         // goverter:converter
         type Converter interface {
-            // goverter:fold
+            // goverter:matchIgnoreCase
             Convert(source Input) Output
         }
 

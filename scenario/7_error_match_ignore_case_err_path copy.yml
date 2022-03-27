@@ -4,16 +4,21 @@ input:
 
         // goverter:converter
         type Converter interface {
-            // goverter:fold
+            // goverter:matchIgnoreCase
             Convert(source Input) Output
         }
 
         type Input struct {
-            MyID string
-            MyId string
+            NESTED InputNested
+        }
+        type InputNested struct {
+            Name string
         }
         type Output struct {
-            Myid string
+            Nested OutputNested
+        }
+        type OutputNested struct {
+            Name int
         }
 error: |-
     Error while creating converter method:
@@ -21,13 +26,17 @@ error: |-
 
     | github.com/jmattheis/goverter/execution.Input
     |
-    |
-    |
-    source.???
-    target.Myid
+    |      | github.com/jmattheis/goverter/execution.InputNested
     |      |
-    |      | string
+    |      |      | string
+    |      |      |
+    source.NESTED.Name
+    target.Nested.Name
+    |      |      |
+    |      |      | int
+    |      |
+    |      | github.com/jmattheis/goverter/execution.OutputNested
     |
     | github.com/jmattheis/goverter/execution.Output
 
-    Cannot match target field with the source entry: value for field Myid has ambiguous matches [MyID MyId], use goverter:map to make an explicit choice or goverter:ignore.
+    TypeMismatch: Cannot convert string to int

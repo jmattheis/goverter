@@ -24,7 +24,7 @@ type methodDefinition struct {
 	Mapping         map[string]string
 	IgnoredFields   map[string]struct{}
 	IdentityMapping map[string]struct{}
-	FoldNames       bool
+	MatchIgnoreCase bool
 
 	Jen jen.Code
 
@@ -78,7 +78,7 @@ func (g *generator) registerMethod(methodType *types.Func, methodComments commen
 		Source:           xtype.TypeOf(source),
 		Target:           xtype.TypeOf(target),
 		Mapping:          methodComments.NameMapping,
-		FoldNames:        methodComments.FoldNames,
+		MatchIgnoreCase:  methodComments.MatchIgnoreCase,
 		IgnoredFields:    methodComments.IgnoredFields,
 		IdentityMapping:  methodComments.IdentityMapping,
 		ReturnError:      returnError,
@@ -154,7 +154,7 @@ func (g *generator) buildMethod(method *methodDefinition) *builder.Error {
 		Mapping:         method.Mapping,
 		IgnoredFields:   method.IgnoredFields,
 		IdentityMapping: method.IdentityMapping,
-		FoldNames:       method.FoldNames,
+		MatchIgnoreCase: method.MatchIgnoreCase,
 		Signature:       xtype.Signature{Source: method.Source.T.String(), Target: method.Target.T.String()},
 	}
 	stmt, newID, err := g.buildNoLookup(ctx, xtype.VariableID(sourceID.Clone()), source, target)
@@ -235,7 +235,7 @@ func (g *generator) Build(ctx *builder.MethodContext, sourceID *xtype.JenID, sou
 		if ctx.PointerChange {
 			ctx.PointerChange = false
 			method.Mapping = ctx.Mapping
-			method.FoldNames = ctx.FoldNames
+			method.MatchIgnoreCase = ctx.MatchIgnoreCase
 			method.IgnoredFields = ctx.IgnoredFields
 		}
 

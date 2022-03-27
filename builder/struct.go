@@ -78,8 +78,8 @@ func mapField(gen Generator, ctx *MethodContext, targetField *types.Var, sourceI
 
 	mappedName, hasOverride := ctx.Mapping[targetField.Name()]
 	if ctx.Signature.Target != target.T.String() || !hasOverride {
-		sourceMatch, err := source.StructField(targetField.Name(), ctx.FoldNames, ctx.IgnoredFields)
-		if err == nil && sourceMatch != nil {
+		sourceMatch, err := source.StructField(targetField.Name(), ctx.MatchIgnoreCase, ctx.IgnoredFields)
+		if err == nil {
 			nextID := sourceID.Code.Clone().Dot(sourceMatch.Name)
 			lift = append(lift, &Path{
 				Prefix:     ".",
@@ -90,14 +90,8 @@ func mapField(gen Generator, ctx *MethodContext, targetField *types.Var, sourceI
 			})
 			return nextID, sourceMatch.Type, []jen.Code{}, lift, nil
 		}
-		// field lookup either did not find anything or failed due to ambiquous fold match
-		var cause string
-		if err == nil {
-			cause = fmt.Sprintf("Cannot set value for field %s because it does not exist on the source entry.", targetField.Name())
-		} else {
-			// error from StructField already has the relevant names
-			cause = fmt.Sprintf("Cannot match target field with the source entry: %s.", err.Error())
-		}
+		// field lookup either did not find anything or failed due to ambiquous match with case ignored
+		cause := fmt.Sprintf("Cannot match the target field with the source entry: %s.", err.Error())
 		return nil, nil, nil, nil, NewError(cause).Lift(&Path{
 			Prefix:     ".",
 			SourceID:   "???",
@@ -130,9 +124,9 @@ func mapField(gen Generator, ctx *MethodContext, targetField *types.Var, sourceI
 				SourceType: "???",
 			}).Lift(lift...)
 		}
-		// since we are searching for a mapped name, search for exact match, explicit field map overrides folding
+		// since we are searching for a mapped name, search for exact match, explicit field map does not ignore case
 		sourceMatch, err := nextSource.StructField(path[i], false, ctx.IgnoredFields)
-		if err == nil && sourceMatch != nil {
+		if err == nil {
 			nextSource = sourceMatch.Type
 			nextID = nextID.Clone().Dot(sourceMatch.Name)
 			liftPath := &Path{
@@ -152,14 +146,7 @@ func mapField(gen Generator, ctx *MethodContext, targetField *types.Var, sourceI
 			continue
 		}
 
-		var cause string
-		if err == nil {
-			cause = fmt.Sprintf("Mapped source field '%s' doesn't exist.", path[i])
-		} else {
-			// this should actually never happen, yet keep it in case we change mapping logic in the future.
-			cause = fmt.Sprintf("Mapped source field '%s' doesn't exist: %s.", path[i], err.Error())
-		}
-
+		cause := fmt.Sprintf("Cannot find the mapped field on the source entry: %s.", err.Error())
 		return nil, nil, []jen.Code{}, nil, NewError(cause).Lift(&Path{
 			Prefix:     ".",
 			SourceID:   path[i],

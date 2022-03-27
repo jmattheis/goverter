@@ -46,41 +46,47 @@ type StructField struct {
 	Type *Type
 }
 
-// StructField returns the type of a struct field and its name upon successful match or nil is not
-// found. This method will fail only if f fold is enabled and there are multiple non-exact matches.
-func (t Type) StructField(name string, fold bool, ignore map[string]struct{}) (*StructField, error) {
+// StructField returns the type of a struct field and its name upon successful match or
+// an error if it is not found. This method will also return a detailed error if matchIgnoreCase
+// is enabled and there are multiple non-exact matches.
+func (t Type) StructField(name string, ignoreCase bool, ignore map[string]struct{}) (*StructField, error) {
 	if !t.Struct {
 		panic("trying to get field of non struct")
 	}
 
-	var foldMatches []*StructField
+	var ambMatches []*StructField
 	for y := 0; y < t.StructType.NumFields(); y++ {
 		m := t.StructType.Field(y)
 		if _, ignored := ignore[m.Name()]; ignored {
 			continue
 		}
 		if m.Name() == name {
-			// exact match takes precedence over fold match
+			// exact match takes precedence over case-insensitive match
 			return &StructField{Name: m.Name(), Type: TypeOf(m.Type())}, nil
 		}
-		if fold && strings.EqualFold(m.Name(), name) {
-			foldMatches = append(foldMatches, &StructField{Name: m.Name(), Type: TypeOf(m.Type())})
-			// keep going to ensure struct does not have another fold match
+		if ignoreCase && strings.EqualFold(m.Name(), name) {
+			ambMatches = append(ambMatches, &StructField{Name: m.Name(), Type: TypeOf(m.Type())})
+			// keep going to ensure struct does not have another case-insensitive match
 		}
 	}
 
-	switch len(foldMatches) {
+	switch len(ambMatches) {
 	case 0:
-		return nil, nil
+		return nil, fmt.Errorf("%q does not exist", name)
 	case 1:
-		return foldMatches[0], nil
+		return ambMatches[0], nil
 	default:
-		ambNames := make([]string, 0, len(foldMatches))
-		for _, m := range foldMatches {
+		ambNames := make([]string, 0, len(ambMatches))
+		for _, m := range ambMatches {
 			ambNames = append(ambNames, m.Name)
 		}
-		return nil, fmt.Errorf("value for field %s has ambiguous matches %s, "+
-			"use goverter:map to make an explicit choice or goverter:ignore", name, ambNames)
+		return nil, fmt.Errorf(`multiple matching fields found for %q. Possible matches: %s.
+
+Explicitly define the mapping via goverter:map. Example:
+
+    goverter:map %s %s
+
+See https://github.com/jmattheis/goverter#struct-field-mapping`, name, strings.Join(ambNames, ", "), name, ambNames[0])
 	}
 }
 

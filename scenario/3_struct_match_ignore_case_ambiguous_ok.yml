@@ -4,7 +4,7 @@ input:
 
         // goverter:converter
         type Converter interface {
-            // goverter:fold
+            // goverter:matchIgnoreCase
             // goverter:map AmbID AmbId
             // goverter:ignore Ambid2
             Convert(source Input) Output
@@ -12,16 +12,16 @@ input:
 
         type Input struct {
             OtherID string
-            OtherId int
+            OtherId int // should prefer exact match
             Uuid string
-            AmbID float64
+            AmbID float64 // explicit choice
             Ambid float64
             AmbID2 string
             Ambid2 string
         }
         type Output struct {
             OtherId int
-            Uuid string
+            Uuid string // should prefer exact match
             UUID string
             AmbId float64
             AmbId2 string
