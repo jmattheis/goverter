@@ -262,14 +262,13 @@ match (if found) or reports an error. Use goverter:map to fix an ambiquous match
 type Converter interface {
     // goverter:matchIgnoreCase
     // goverter:map  FullId FullID
-    // goverter:ignore fullId
     Convert(source Input) Output
 }
 
 type Input struct {
     Uuid string
     FullId int
-    fullId int // internal field ignored
+    fullId int
 }
 type Output struct {
     UUID string // auto-matched with Uuid due to goverter:matchIgnoreCase
