@@ -253,11 +253,11 @@ func toCodeBasic(t types.BasicKind, st *jen.Statement) *jen.Statement {
 }
 
 func ambiguousMatchError(name string, ambNames []string) error {
-	return fmt.Errorf(`multiple matching fields found for %q. Possible matches: %s.
+	return fmt.Errorf(`multiple matches found for %q. Possible matches: %s.
 
 Explicitly define the mapping via goverter:map. Example:
 
     goverter:map %s %s
 
-See https://github.com/jmattheis/goverter#struct-field-mapping`, name, strings.Join(ambNames, ", "), name, ambNames[0])
+See https://github.com/jmattheis/goverter#struct-field-mapping`, name, strings.Join(ambNames, ", "), ambNames[0], name)
 }

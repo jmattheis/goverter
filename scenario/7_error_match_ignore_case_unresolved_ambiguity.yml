@@ -30,10 +30,10 @@ error: |-
     |
     | github.com/jmattheis/goverter/execution.Output
 
-    Cannot match the target field with the source entry: multiple matching fields found for "Myid". Possible matches: MyID, MyId.
+    Cannot match the target field with the source entry: multiple matches found for "Myid". Possible matches: MyID, MyId.
 
     Explicitly define the mapping via goverter:map. Example:
 
-        goverter:map Myid MyID
+        goverter:map MyID Myid
 
     See https://github.com/jmattheis/goverter#struct-field-mapping.
