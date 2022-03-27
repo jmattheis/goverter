@@ -75,7 +75,7 @@ func TestScenario(t *testing.T) {
 
 			if scenario.Error != "" {
 				require.Error(t, err)
-				require.Equal(t, replaceAbsolutePath(fmt.Sprint(err)), scenario.Error)
+				require.Equal(t, scenario.Error, replaceAbsolutePath(fmt.Sprint(err)))
 				return
 			}
 

@@ -78,18 +78,20 @@ func mapField(gen Generator, ctx *MethodContext, targetField *types.Var, sourceI
 
 	mappedName, hasOverride := ctx.Mapping[targetField.Name()]
 	if ctx.Signature.Target != target.T.String() || !hasOverride {
-		if fieldSource, ok := source.StructField(targetField.Name()); ok {
-			nextID := sourceID.Code.Clone().Dot(targetField.Name())
+		sourceMatch, err := source.StructField(targetField.Name(), ctx.MatchIgnoreCase, ctx.IgnoredFields)
+		if err == nil {
+			nextID := sourceID.Code.Clone().Dot(sourceMatch.Name)
 			lift = append(lift, &Path{
 				Prefix:     ".",
-				SourceID:   targetField.Name(),
-				SourceType: fieldSource.T.String(),
+				SourceID:   sourceMatch.Name,
+				SourceType: sourceMatch.Type.T.String(),
 				TargetID:   targetField.Name(),
 				TargetType: targetField.Type().String(),
 			})
-			return nextID, fieldSource, []jen.Code{}, lift, nil
+			return nextID, sourceMatch.Type, []jen.Code{}, lift, nil
 		}
-		cause := fmt.Sprintf("Cannot set value for field %s because it does not exist on the source entry.", targetField.Name())
+		// field lookup either did not find anything or failed due to ambiquous match with case ignored
+		cause := fmt.Sprintf("Cannot match the target field with the source entry: %s.", err.Error())
 		return nil, nil, nil, nil, NewError(cause).Lift(&Path{
 			Prefix:     ".",
 			SourceID:   "???",
@@ -122,12 +124,14 @@ func mapField(gen Generator, ctx *MethodContext, targetField *types.Var, sourceI
 				SourceType: "???",
 			}).Lift(lift...)
 		}
-		var ok bool
-		if nextSource, ok = nextSource.StructField(path[i]); ok {
-			nextID = nextID.Clone().Dot(path[i])
+		// since we are searching for a mapped name, search for exact match, explicit field map does not ignore case
+		sourceMatch, err := nextSource.StructField(path[i], false, ctx.IgnoredFields)
+		if err == nil {
+			nextSource = sourceMatch.Type
+			nextID = nextID.Clone().Dot(sourceMatch.Name)
 			liftPath := &Path{
 				Prefix:     ".",
-				SourceID:   path[i],
+				SourceID:   sourceMatch.Name,
 				SourceType: nextSource.T.String(),
 			}
 
@@ -142,7 +146,7 @@ func mapField(gen Generator, ctx *MethodContext, targetField *types.Var, sourceI
 			continue
 		}
 
-		cause := fmt.Sprintf("Mapped source field '%s' doesn't exist.", path[i])
+		cause := fmt.Sprintf("Cannot find the mapped field on the source entry: %s.", err.Error())
 		return nil, nil, []jen.Code{}, nil, NewError(cause).Lift(&Path{
 			Prefix:     ".",
 			SourceID:   path[i],

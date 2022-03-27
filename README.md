@@ -244,6 +244,37 @@ type Output struct {
 }
 ```
 
+### Case-insensitive field matching
+
+With `goverter:matchIgnoreCase` tag you can instruct goverter to perform case-insensitive mapping
+between source and target fields. If this tag is present on a conversion method, goverter matches
+the fields using strings.EqualFold method.
+
+Use this tag only when it is extremely unlikely for the source or the target to have two fields
+that differ only in casing. E.g.: converting go-jet generated model to protoc generated struct.
+If `matchIgnoreCase` is present and goverter detects an ambiquous match, it either prefers an exact
+match (if found) or reports an error. Use goverter:map to fix an ambiquous match error.
+
+`goverter:matchIgnoreCase` takes no parameters.
+
+```go
+// goverter:converter
+type Converter interface {
+    // goverter:matchIgnoreCase
+    // goverter:map  FullId FullID
+    Convert(source Input) Output
+}
+
+type Input struct {
+    Uuid string
+    FullId int
+    fullId int
+}
+type Output struct {
+    UUID string // auto-matched with Uuid due to goverter:matchIgnoreCase
+    FullID string // mapped to FullId, to resolve ambiguity
+}
+```
 
 #### Struct identity mapping
 

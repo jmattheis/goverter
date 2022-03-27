@@ -30,4 +30,4 @@ error: |-
     |
     | github.com/jmattheis/goverter/execution.Output
 
-    Mapped source field 'Name3' doesn't exist.
+    Cannot find the mapped field on the source entry: "Name3" does not exist.

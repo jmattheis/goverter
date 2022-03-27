@@ -28,4 +28,5 @@ type MethodContext struct {
 	IdentityMapping map[string]struct{}
 	Signature       xtype.Signature
 	PointerChange   bool
+	MatchIgnoreCase bool
 }

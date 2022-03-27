@@ -40,19 +40,48 @@ type Type struct {
 	BasicType     *types.Basic
 }
 
-// StructField returns the type of a struct field.
-func (t Type) StructField(name string) (*Type, bool) {
+// StructField holds the type of a struct field and its name.
+type StructField struct {
+	Name string
+	Type *Type
+}
+
+// StructField returns the type of a struct field and its name upon successful match or
+// an error if it is not found. This method will also return a detailed error if matchIgnoreCase
+// is enabled and there are multiple non-exact matches.
+func (t Type) StructField(name string, ignoreCase bool, ignore map[string]struct{}) (*StructField, error) {
 	if !t.Struct {
 		panic("trying to get field of non struct")
 	}
 
+	var ambMatches []*StructField
 	for y := 0; y < t.StructType.NumFields(); y++ {
 		m := t.StructType.Field(y)
+		if _, ignored := ignore[m.Name()]; ignored {
+			continue
+		}
 		if m.Name() == name {
-			return TypeOf(m.Type()), true
+			// exact match takes precedence over case-insensitive match
+			return &StructField{Name: m.Name(), Type: TypeOf(m.Type())}, nil
+		}
+		if ignoreCase && strings.EqualFold(m.Name(), name) {
+			ambMatches = append(ambMatches, &StructField{Name: m.Name(), Type: TypeOf(m.Type())})
+			// keep going to ensure struct does not have another case-insensitive match
 		}
 	}
-	return nil, false
+
+	switch len(ambMatches) {
+	case 0:
+		return nil, fmt.Errorf("%q does not exist", name)
+	case 1:
+		return ambMatches[0], nil
+	default:
+		ambNames := make([]string, 0, len(ambMatches))
+		for _, m := range ambMatches {
+			ambNames = append(ambNames, m.Name)
+		}
+		return nil, ambiguousMatchError(name, ambNames)
+	}
 }
 
 // JenID a jennifer code wrapper with extra infos.
@@ -221,4 +250,14 @@ func toCodeBasic(t types.BasicKind, st *jen.Statement) *jen.Statement {
 	default:
 		panic(fmt.Sprintf("unsupported type %d", t))
 	}
+}
+
+func ambiguousMatchError(name string, ambNames []string) error {
+	return fmt.Errorf(`multiple matches found for %q. Possible matches: %s.
+
+Explicitly define the mapping via goverter:map. Example:
+
+    goverter:map %s %s
+
+See https://github.com/jmattheis/goverter#struct-field-mapping`, name, strings.Join(ambNames, ", "), ambNames[0], name)
 }

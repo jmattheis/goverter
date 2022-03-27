@@ -44,8 +44,9 @@ type ConverterConfig struct {
 
 // Method contains settings that can be set via comments.
 type Method struct {
-	IgnoredFields map[string]struct{}
-	NameMapping   map[string]string
+	IgnoredFields   map[string]struct{}
+	NameMapping     map[string]string
+	MatchIgnoreCase bool
 	// target to source
 	IdentityMapping map[string]struct{}
 }
@@ -225,6 +226,12 @@ func parseMethodComment(comment string) (Method, error) {
 				for _, f := range fields[1:] {
 					m.IgnoredFields[f] = struct{}{}
 				}
+				continue
+			case "matchIgnoreCase":
+				if len(fields) != 1 {
+					return m, fmt.Errorf("invalid %s:matchIgnoreCase, parameters not supported", prefix)
+				}
+				m.MatchIgnoreCase = true
 				continue
 			}
 			return m, fmt.Errorf("unknown %s comment: %s", prefix, line)

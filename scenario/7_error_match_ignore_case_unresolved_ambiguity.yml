@@ -4,20 +4,16 @@ input:
 
         // goverter:converter
         type Converter interface {
-            // goverter:map Nested.Name3 Name
+            // goverter:matchIgnoreCase
             Convert(source Input) Output
         }
 
         type Input struct {
-            Nested Nested
-            Name string
-        }
-        type Nested struct {
-            Name string
+            MyID string
+            MyId string
         }
         type Output struct {
-            Name string
-            Age int
+            Myid string
         }
 error: |-
     Error while creating converter method:
@@ -25,17 +21,19 @@ error: |-
 
     | github.com/jmattheis/goverter/execution.Input
     |
-    |      | github.com/jmattheis/goverter/execution.Nested
+    |
+    |
+    source.???
+    target.Myid
     |      |
-    |      |      | ???
-    |      |      |
-    source.Nested.Name3
-    target
-    |
-    |
-    |
-    |
+    |      | string
     |
     | github.com/jmattheis/goverter/execution.Output
 
-    Cannot find the mapped field on the source entry: "Name3" does not exist.
+    Cannot match the target field with the source entry: multiple matches found for "Myid". Possible matches: MyID, MyId.
+
+    Explicitly define the mapping via goverter:map. Example:
+
+        goverter:map MyID Myid
+
+    See https://github.com/jmattheis/goverter#struct-field-mapping.
