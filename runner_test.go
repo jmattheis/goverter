@@ -119,15 +119,16 @@ func compile(file string) error {
 type Scenario struct {
 	Input   map[string]string `yaml:"input"`
 	Extends []string          `yaml:"extends,omitempty"`
-	Success string            `yaml:"success,omitempty"`
-	// for error cases, use either Error or ErrorStartsWith, not both
-	Error           string `yaml:"error,omitempty"`
-	ErrorStartsWith string `yaml:"error_starts_with,omitempty"`
 
 	// if OutputDir is empty, "generated" sub-folder is used as default
 	OutputDir string `yaml:"output_dir,omitempty"`
 	// if OutputPackageName is empty, "generated" package is used as default
 	OutputPackageName string `yaml:"output_package_name,omitempty"`
+
+	Success string `yaml:"success,omitempty"`
+	// for error cases, use either Error or ErrorStartsWith, not both
+	Error           string `yaml:"error,omitempty"`
+	ErrorStartsWith string `yaml:"error_starts_with,omitempty"`
 }
 
 func getCurrentPath() string {
