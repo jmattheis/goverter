@@ -21,7 +21,7 @@ func (g *generator) loadPackages(pkgPath string) ([]*packages.Package, error) {
 	if err != nil {
 		// This happens rare, and only if somebody uses advanced package pattern query in a wrong way.
 		// The cause (err) usually has enough details to troubleshoot this issue.
-		return nil, errors.Wrapf(err, "packages load failed on \"%s\"", pkgPath)
+		return nil, errors.Wrapf(err, "packages load failed on %q", pkgPath)
 	}
 	// we need at least one valid package with no errors reported during its load
 	var hasValidPackage bool
@@ -44,11 +44,11 @@ func (g *generator) loadPackages(pkgPath string) ([]*packages.Package, error) {
 			// this path does not exist, then packages.Load does not fail, yet it also returns no
 			// packages. We need to fail this case, and we cannot suggest using blank import for such
 			// cases, thus using a generic error.
-			return nil, fmt.Errorf("no packages were loaded for \"%s\", make sure it is a valid golang package", pkgPath)
+			return nil, fmt.Errorf("no packages were loaded for %q, make sure it is a valid golang package", pkgPath)
 		}
 		// Packages.Load may need local go module's help to load external packages, the best way
 		// to help is to load same package directly into converter's module using a blank import.
-		return nil, errors.Wrapf(firstErr, "failed to load package \"%s\", try adding a blank import for it", pkgPath)
+		return nil, errors.Wrapf(firstErr, "failed to load package %q, try adding a blank import for it", pkgPath)
 	}
 
 	if g.pkgCache == nil {

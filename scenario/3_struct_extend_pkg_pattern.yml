@@ -1,9 +1,18 @@
 input:
+    convert/convert.go: |
+        package convert
+
+        func StringToBool(s string) bool {
+            return stringToBool(s)
+        }
+        func stringToBool(s string) bool {
+            return true
+        }
     input.go: |
         package structs
 
         // goverter:converter
-        // goverter:extend strconv:Parse.*
+        // goverter:extend github.com/jmattheis/goverter/execution/convert:.*
         type Converter interface {
             Convert(source Input) (Output, error)
         }
@@ -21,17 +30,13 @@ success: |
 
     import (
     	execution "github.com/jmattheis/goverter/execution"
-    	"strconv"
+    	convert "github.com/jmattheis/goverter/execution/convert"
     )
 
     type ConverterImpl struct{}
 
     func (c *ConverterImpl) Convert(source execution.Input) (execution.Output, error) {
     	var structsOutput execution.Output
-    	xbool, err := strconv.ParseBool(source.Done)
-    	if err != nil {
-    		return structsOutput, err
-    	}
-    	structsOutput.Done = xbool
+    	structsOutput.Done = convert.StringToBool(source.Done)
     	return structsOutput, nil
     }
