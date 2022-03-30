@@ -45,14 +45,7 @@ func TestScenario(t *testing.T) {
 				require.NoError(t, err)
 			}
 			genPkgName := "generated"
-			if scenario.OutputPackageName != "" {
-				genPkgName = scenario.OutputPackageName
-			}
-			genPkgDir := filepath.Join(execDir, genPkgName)
-			if scenario.OutputDir != "" {
-				genPkgDir = filepath.Clean(filepath.Join(execDir, scenario.OutputDir))
-			}
-			genFile := filepath.Join(genPkgDir, "generated.go")
+			genFile := filepath.Join(execDir, genPkgName, "generated.go")
 
 			err = GenerateConverterFile(
 				genFile,
@@ -119,11 +112,6 @@ func compile(file string) error {
 type Scenario struct {
 	Input   map[string]string `yaml:"input"`
 	Extends []string          `yaml:"extends,omitempty"`
-
-	// if OutputDir is empty, "generated" sub-folder is used as default
-	OutputDir string `yaml:"output_dir,omitempty"`
-	// if OutputPackageName is empty, "generated" package is used as default
-	OutputPackageName string `yaml:"output_package_name,omitempty"`
 
 	Success string `yaml:"success,omitempty"`
 	// for error cases, use either Error or ErrorStartsWith, not both

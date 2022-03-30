@@ -22,8 +22,6 @@ input:
         type Output struct {
             Age   string
         }
-output_dir: ./generated
-output_package_name: generated
 error: |-
     Error while parsing extend in
         github.com/jmattheis/goverter/execution.Converter

@@ -26,8 +26,6 @@ type ParseExtendOptions struct {
 	ConverterScope *types.Scope
 	// ConverterInterface to use - can be nil if its use is not allowed.
 	ConverterInterface types.Type
-	// AllowUnexported allows use of unexported methods in the extend package.
-	AllowUnexported bool
 	// NamePattern is the regexp pattern to search for within the PkgPath above or
 	// (if PkgPath is empty) within the Scope.
 	NamePattern *regexp.Regexp
@@ -182,7 +180,6 @@ See https://github.com/jmattheis/goverter#extend-with-custom-implementation`, me
 		// or alike.
 		if pkgPath == "" {
 			opts.ConverterInterface = converterInterface
-			opts.AllowUnexported = true
 		}
 
 		err = g.parseExtendPackage(opts)
@@ -210,7 +207,7 @@ func (g *generator) parseExtendScopeMethod(scope *types.Scope, methodName string
 
 // parseExtend prepares an extend conversion method using its func pointer.
 func (g *generator) parseExtendFunc(fn *types.Func, opts *ParseExtendOptions) error {
-	if !opts.AllowUnexported && !fn.Exported() {
+	if opts.ConverterInterface == nil && !fn.Exported() {
 		return fmt.Errorf("method %s is unexported and package path is used", fn.Name())
 	}
 
