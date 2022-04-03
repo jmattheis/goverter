@@ -10,4 +10,4 @@ error: |-
     Error while parsing extend in
         github.com/jmattheis/goverter/execution.Converter
 
-    package strconv does not have methods with names that match the golang regexp pattern "ParseSomething" and a convert signature: ParseSomething does not exist in scope
+    could not extend: ParseSomething does not exist in scope

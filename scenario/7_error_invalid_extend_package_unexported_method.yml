@@ -23,4 +23,4 @@ error: |-
     Error while parsing extend in
         github.com/jmattheis/goverter/execution.Converter
 
-    package github.com/jmattheis/goverter/execution/convert does not have methods with names that match the golang regexp pattern "stringToBool" and a convert signature: method stringToBool is unexported
+    could not extend: method stringToBool is unexported
