@@ -26,4 +26,4 @@ error: |-
     Error while parsing extend in
         github.com/jmattheis/goverter/execution.Converter
 
-    package github.com/jmattheis/goverter/execution/generated does not have methods with names that match the golang regexp pattern "intToString" and a convert signature: method intToString is unexported and package path is used
+    package github.com/jmattheis/goverter/execution/generated does not have methods with names that match the golang regexp pattern "intToString" and a convert signature: method intToString is unexported

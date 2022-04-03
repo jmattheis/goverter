@@ -169,17 +169,10 @@ See https://github.com/jmattheis/goverter#extend-with-custom-implementation`, me
 		}
 
 		opts := &ParseExtendOptions{
-			ConverterScope: converterScope,
-			PkgPath:        pkgPath,
-			NamePattern:    pattern,
-		}
-		// For now, we allow use of converter interface and unexported methods only if package path
-		// is not in use (e.g. converter's scope is used). On demand, extend flags can be added to
-		// change the default behavior, e.g. loading extend from the generated package itself:
-		// goverter:extend generated:.*:allow_unexported=true,allow_converter_interface=true
-		// or alike.
-		if pkgPath == "" {
-			opts.ConverterInterface = converterInterface
+			ConverterScope:     converterScope,
+			PkgPath:            pkgPath,
+			NamePattern:        pattern,
+			ConverterInterface: converterInterface,
 		}
 
 		err = g.parseExtendPackage(opts)
@@ -207,8 +200,8 @@ func (g *generator) parseExtendScopeMethod(scope *types.Scope, methodName string
 
 // parseExtend prepares an extend conversion method using its func pointer.
 func (g *generator) parseExtendFunc(fn *types.Func, opts *ParseExtendOptions) error {
-	if opts.ConverterInterface == nil && !fn.Exported() {
-		return fmt.Errorf("method %s is unexported and package path is used", fn.Name())
+	if !fn.Exported() {
+		return fmt.Errorf("method %s is unexported", fn.Name())
 	}
 
 	sig, ok := fn.Type().(*types.Signature)
