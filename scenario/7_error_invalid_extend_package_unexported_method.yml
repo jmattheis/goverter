@@ -1,0 +1,26 @@
+input:
+    convert/convert.go: |
+        package convert
+
+        func stringToBool(s string) bool {
+            return true
+        }
+    input.go: |
+        package structs
+
+        // goverter:converter
+        // goverter:extend github.com/jmattheis/goverter/execution/convert:stringToBool
+        type Converter interface {
+            Convert(source Input) (Output, error)
+        }
+        type Input struct {
+            Done string
+        }
+        type Output struct {
+            Done bool
+        }
+error: |-
+    Error while parsing extend in
+        github.com/jmattheis/goverter/execution.Converter
+
+    package github.com/jmattheis/goverter/execution/convert does not have methods with names that match the golang regexp pattern "stringToBool" and a convert signature: method stringToBool is unexported and package path is used

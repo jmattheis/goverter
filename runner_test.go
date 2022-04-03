@@ -5,7 +5,6 @@ import (
 	"io/ioutil"
 	"os"
 	"os/exec"
-	"path"
 	"path/filepath"
 	"runtime"
 	"strings"
@@ -17,8 +16,9 @@ import (
 )
 
 func TestScenario(t *testing.T) {
-	scenarios := path.Join(getCurrentPath(), "scenario")
-	execDir := path.Join(getCurrentPath(), "execution")
+	curPath := getCurrentPath()
+	scenarios := filepath.Join(curPath, "scenario")
+	execDir := filepath.Join(curPath, "execution")
 	files, err := ioutil.ReadDir(scenarios)
 	require.NoError(t, err)
 
@@ -29,7 +29,7 @@ func TestScenario(t *testing.T) {
 		require.False(t, file.IsDir(), "should not be a directory")
 
 		t.Run(file.Name(), func(t *testing.T) {
-			scenarioFileName := path.Join(scenarios, file.Name())
+			scenarioFileName := filepath.Join(scenarios, file.Name())
 			scenarioBytes, err := ioutil.ReadFile(scenarioFileName)
 			require.NoError(t, err)
 
@@ -38,14 +38,19 @@ func TestScenario(t *testing.T) {
 			require.NoError(t, err)
 
 			for name, content := range scenario.Input {
-				err = ioutil.WriteFile(path.Join(execDir, name), []byte(content), os.ModePerm)
+				inPath := filepath.Join(execDir, name)
+				err = os.MkdirAll(filepath.Dir(inPath), os.ModePerm)
+				require.NoError(t, err)
+				err = os.WriteFile(filepath.Join(execDir, name), []byte(content), os.ModePerm)
 				require.NoError(t, err)
 			}
-			genFile := path.Join(execDir, "generated", "generated.go")
+			genPkgName := "generated"
+			genFile := filepath.Join(execDir, genPkgName, "generated.go")
+
 			err = GenerateConverterFile(
 				genFile,
 				GenerateConfig{
-					PackageName:   "generated",
+					PackageName:   genPkgName,
 					ScanDir:       "github.com/jmattheis/goverter/execution",
 					ExtendMethods: scenario.Extends,
 				})
@@ -55,7 +60,7 @@ func TestScenario(t *testing.T) {
 			if os.Getenv("UPDATE_SCENARIO") == "true" && scenario.ErrorStartsWith == "" {
 				if err != nil {
 					scenario.Success = ""
-					scenario.Error = replaceAbsolutePath(fmt.Sprint(err))
+					scenario.Error = replaceAbsolutePath(curPath, fmt.Sprint(err))
 				} else {
 					scenario.Success = string(body)
 					scenario.Error = ""
@@ -68,14 +73,14 @@ func TestScenario(t *testing.T) {
 
 			if scenario.ErrorStartsWith != "" {
 				require.Error(t, err)
-				strErr := replaceAbsolutePath(fmt.Sprint(err))
+				strErr := replaceAbsolutePath(curPath, fmt.Sprint(err))
 				require.Equal(t, scenario.ErrorStartsWith, strErr[:len(scenario.ErrorStartsWith)])
 				return
 			}
 
 			if scenario.Error != "" {
 				require.Error(t, err)
-				require.Equal(t, scenario.Error, replaceAbsolutePath(fmt.Sprint(err)))
+				require.Equal(t, scenario.Error, replaceAbsolutePath(curPath, fmt.Sprint(err)))
 				return
 			}
 
@@ -88,8 +93,8 @@ func TestScenario(t *testing.T) {
 	}
 }
 
-func replaceAbsolutePath(body string) string {
-	return strings.ReplaceAll(body, getCurrentPath(), "/ABSOLUTE")
+func replaceAbsolutePath(curPath, body string) string {
+	return strings.ReplaceAll(body, curPath, "/ABSOLUTE")
 }
 
 func compile(file string) error {
@@ -107,7 +112,8 @@ func compile(file string) error {
 type Scenario struct {
 	Input   map[string]string `yaml:"input"`
 	Extends []string          `yaml:"extends,omitempty"`
-	Success string            `yaml:"success,omitempty"`
+
+	Success string `yaml:"success,omitempty"`
 	// for error cases, use either Error or ErrorStartsWith, not both
 	Error           string `yaml:"error,omitempty"`
 	ErrorStartsWith string `yaml:"error_starts_with,omitempty"`
@@ -116,7 +122,7 @@ type Scenario struct {
 func getCurrentPath() string {
 	_, filename, _, _ := runtime.Caller(1)
 
-	return path.Dir(filename)
+	return filepath.Dir(filename)
 }
 
 func clearDir(dir string) error {
