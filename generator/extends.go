@@ -85,10 +85,9 @@ func (g *generator) searchExtendsInPackages(opts *ParseExtendOptions) error {
 	if loaded == 0 {
 		if err == nil {
 			return fmt.Errorf(`package %s does not have methods with names that match
-the golang regexp pattern %q and a convert signature.`, opts.PkgPath, opts.NamePattern.String())
-		} else {
-			return errors.Wrap(err, "could not extend")
+the golang regexp pattern %q and a convert signature`, opts.PkgPath, opts.NamePattern.String())
 		}
+		return errors.Wrap(err, "could not extend")
 	}
 
 	return nil

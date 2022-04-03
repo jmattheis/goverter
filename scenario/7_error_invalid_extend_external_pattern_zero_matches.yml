@@ -12,4 +12,4 @@ error: |-
         github.com/jmattheis/goverter/execution.Converter
 
     package strconv does not have methods with names that match
-    the golang regexp pattern "Parse*" and a convert signature.
+    the golang regexp pattern "Parse*" and a convert signature
