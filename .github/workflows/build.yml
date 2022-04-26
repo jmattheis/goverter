@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: golangci/golangci-lint-action@v2
         with:
-          version: v1.41.1
+          version: v1.45.1
       - run: go build ./cmd/goverter
       - run: go test -coverpkg ./...  -coverprofile=coverage.txt -covermode=atomic ./...
       - run: bash <(curl -s https://codecov.io/bash)

@@ -23,7 +23,6 @@ linters:
         - nakedret
         - nolintlint
         - sqlclosecheck
-        - staticcheck
         - structcheck
         - typecheck
         - unconvert
@@ -35,6 +34,7 @@ linters:
         - errcheck
         - funlen
         - gochecknoglobals
+        - staticcheck
         - gocognit
         - goconst
         - gocyclo
