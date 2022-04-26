@@ -27,6 +27,7 @@ type MethodContext struct {
 	IgnoredFields   map[string]struct{}
 	IdentityMapping map[string]struct{}
 	Signature       xtype.Signature
+	TargetType      *xtype.Type
 	PointerChange   bool
 	MatchIgnoreCase bool
 }

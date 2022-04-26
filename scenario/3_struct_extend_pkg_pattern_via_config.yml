@@ -31,7 +31,8 @@ success: |
     	var structsOutput execution.Output
     	xbool, err := strconv.ParseBool(source.Done)
     	if err != nil {
-    		return structsOutput, err
+    		var errValue execution.Output
+    		return errValue, err
     	}
     	structsOutput.Done = xbool
     	return structsOutput, nil

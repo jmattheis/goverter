@@ -46,7 +46,8 @@ success: |
     	var structsOutput execution.Output
     	xint, err := execution.StringToZeroConvert(source.Age)
     	if err != nil {
-    		return structsOutput, err
+    		var errValue execution.Output
+    		return errValue, err
     	}
     	structsOutput.Age = xint
     	structsOutput.Datum = execution.IntToStringConvert(source.Datum)

@@ -155,6 +155,7 @@ func (g *generator) buildMethod(method *methodDefinition) *builder.Error {
 		IgnoredFields:   method.IgnoredFields,
 		IdentityMapping: method.IdentityMapping,
 		MatchIgnoreCase: method.MatchIgnoreCase,
+		TargetType:      method.Target,
 		Signature:       xtype.Signature{Source: method.Source.T.String(), Target: method.Target.T.String()},
 	}
 	stmt, newID, err := g.buildNoLookup(ctx, xtype.VariableID(sourceID.Clone()), source, target)
@@ -210,9 +211,12 @@ func (g *generator) Build(ctx *builder.MethodContext, sourceID *xtype.JenID, sou
 			}
 
 			name := ctx.Name(target.ID())
+			innerName := ctx.Name("errValue")
 			stmt := []jen.Code{
 				jen.List(jen.Id(name), jen.Id("err")).Op(":=").Add(method.Call.Clone().Call(params...)),
-				jen.If(jen.Id("err").Op("!=").Nil()).Block(jen.Return(jen.Id(ctx.Namer.First), jen.Id("err"))),
+				jen.If(jen.Id("err").Op("!=").Nil()).Block(
+					jen.Var().Id(innerName).Add(ctx.TargetType.TypeAsJen()),
+					jen.Return(jen.Id(innerName), jen.Id("err"))),
 			}
 			return stmt, xtype.VariableID(jen.Id(name)), nil
 		}

@@ -30,7 +30,8 @@ success: |
     	for i := 0; i < len(source); i++ {
     		slicesOutput, err := c.slicesInputToSlicesOutput(source[i])
     		if err != nil {
-    			return slicesOutputList, err
+    			var errValue []execution.Output
+    			return errValue, err
     		}
     		slicesOutputList[i] = slicesOutput
     	}
@@ -43,7 +44,8 @@ success: |
     	var slicesOutput execution.Output
     	xstring, err := c.ConvertX(source.Name)
     	if err != nil {
-    		return slicesOutput, err
+    		var errValue execution.Output
+    		return errValue, err
     	}
     	slicesOutput.Name = xstring
     	slicesOutput.Age = source.Age
