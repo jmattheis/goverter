@@ -6,7 +6,7 @@ import (
 	"os"
 	"strings"
 
-	goverter "github.com/sergeydobrodey/goverter"
+	goverter "github.com/jmattheis/goverter"
 )
 
 func main() {
