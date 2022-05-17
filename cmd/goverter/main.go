@@ -13,6 +13,8 @@ func main() {
 	packageName := flag.String("packageName", "generated", "")
 	output := flag.String("output", "./generated/generated.go", "")
 	extends := flag.String("extends", "", "comma separated list of local or package extends")
+	workingDir := flag.String("workingDir", "", "optional working directory, default is the current directory")
+	packagePath := flag.String("packagePath", "", "optional full package path for the generated code")
 
 	flag.Parse()
 
@@ -27,10 +29,19 @@ func main() {
 		extendMethods = strings.Split(*extends, ",")
 	}
 
+	if *workingDir != "" {
+		if err := os.Chdir(*workingDir); err != nil {
+			_, _ = fmt.Fprintln(os.Stderr, "could not change directory:", err)
+			return
+		}
+	}
+
 	err := goverter.GenerateConverterFile(*output, goverter.GenerateConfig{
 		PackageName:   *packageName,
 		ScanDir:       pattern,
 		ExtendMethods: extendMethods,
+		WorkingDir:    *workingDir,
+		PackagePath:   *packagePath,
 	})
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)
