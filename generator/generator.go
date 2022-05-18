@@ -44,8 +44,6 @@ type generator struct {
 	pkgCache map[string][]*packages.Package
 	// workingDir is a working directory, can be empty
 	workingDir string
-	// packagePath is the package where generated code will reside, can be empty
-	packagePath string
 }
 
 func (g *generator) registerMethod(methodType *types.Func, methodComments comments.Method) error {
