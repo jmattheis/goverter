@@ -13,6 +13,7 @@ func main() {
 	packageName := flag.String("packageName", "generated", "")
 	output := flag.String("output", "./generated/generated.go", "")
 	extends := flag.String("extends", "", "comma separated list of local or package extends")
+	packagePath := flag.String("packagePath", "", "optional full package path for the generated code")
 
 	flag.Parse()
 
@@ -31,6 +32,7 @@ func main() {
 		PackageName:   *packageName,
 		ScanDir:       pattern,
 		ExtendMethods: extendMethods,
+		PackagePath:   *packagePath,
 	})
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)
