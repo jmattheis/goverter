@@ -194,9 +194,6 @@ func (g *generator) buildNoLookup(ctx *builder.MethodContext, sourceID *xtype.Je
 func (g *generator) Build(ctx *builder.MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *builder.Error) {
 	method, ok := g.extend[xtype.Signature{Source: source.T.String(), Target: target.T.String()}]
 	if !ok {
-		method, ok = g.mapExtend[xtype.Signature{Source: source.T.String(), Target: target.T.String()}]
-	}
-	if !ok {
 		method, ok = g.lookup[xtype.Signature{Source: source.T.String(), Target: target.T.String()}]
 	}
 
@@ -263,6 +260,44 @@ func (g *generator) Build(ctx *builder.MethodContext, sourceID *xtype.JenID, sou
 		if rule.Matches(source, target) {
 			return rule.Build(g, ctx, sourceID, source, target)
 		}
+	}
+
+	return nil, nil, builder.NewError(fmt.Sprintf("TypeMismatch: Cannot convert %s to %s", source.T, target.T))
+}
+
+// BuildExtend builds an implementation for the given source and target type mapFnName
+func (g *generator) BuildExtend(ctx *builder.MethodContext, mapFnName string, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *builder.Error) {
+	method, ok := g.mapExtend[xtype.Signature{Source: source.T.String(), Target: target.T.String(), Id: mapFnName}]
+
+	if ok {
+		params := []jen.Code{}
+		if method.SelfAsFirstParam {
+			params = append(params, jen.Id(xtype.ThisVar))
+		}
+		params = append(params, sourceID.Code.Clone())
+		if method.ReturnError {
+			current := g.lookup[ctx.Signature]
+			if !current.ReturnError {
+				if current.Explicit {
+					return nil, nil, builder.NewError(fmt.Sprintf("ReturnTypeMismatch: Cannot use\n\n    %s\n\nin\n\n    %s\n\nbecause no error is returned as second parameter", method.ReturnTypeOrigin, current.ID))
+				}
+				current.ReturnError = true
+				current.ReturnTypeOrigin = method.ID
+				current.Dirty = true
+			}
+
+			name := ctx.Name(target.ID())
+			innerName := ctx.Name("errValue")
+			stmt := []jen.Code{
+				jen.List(jen.Id(name), jen.Id("err")).Op(":=").Add(method.Call.Clone().Call(params...)),
+				jen.If(jen.Id("err").Op("!=").Nil()).Block(
+					jen.Var().Id(innerName).Add(ctx.TargetType.TypeAsJen()),
+					jen.Return(jen.Id(innerName), jen.Id("err"))),
+			}
+			return stmt, xtype.VariableID(jen.Id(name)), nil
+		}
+		id := xtype.OtherID(method.Call.Clone().Call(params...))
+		return nil, id, nil
 	}
 
 	return nil, nil, builder.NewError(fmt.Sprintf("TypeMismatch: Cannot convert %s to %s", source.T, target.T))

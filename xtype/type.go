@@ -15,6 +15,7 @@ const ThisVar = "c"
 type Signature struct {
 	Source string
 	Target string
+	Id     string
 }
 
 // Type is a helper wrapper for types.Type.

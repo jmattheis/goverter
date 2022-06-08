@@ -18,6 +18,7 @@ type Builder interface {
 // If no one Builder#Matches then, an error is returned.
 type Generator interface {
 	Build(ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *Error)
+	BuildExtend(ctx *MethodContext, mapFnName string, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *Error)
 }
 
 // MethodContext exposes information for the current method.

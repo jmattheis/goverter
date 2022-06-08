@@ -252,6 +252,7 @@ func (g *generator) parseExtendFunc(fn *types.Func, opts *ParseExtendOptions) er
 		ReturnTypeOrigin: fn.String(),
 	}
 	if opts.IsMapExtend {
+		xsig.Id = fn.Name()
 		g.mapExtend[xsig] = methodDef
 	} else {
 		g.extend[xsig] = methodDef
