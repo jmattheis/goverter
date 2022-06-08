@@ -243,6 +243,7 @@ func (g *generator) Build(ctx *builder.MethodContext, sourceID *xtype.JenID, sou
 		if ctx.PointerChange {
 			ctx.PointerChange = false
 			method.Mapping = ctx.Mapping
+			method.ExtendMapping = ctx.ExtendMapping
 			method.MatchIgnoreCase = ctx.MatchIgnoreCase
 			method.IgnoredFields = ctx.IgnoredFields
 		}

@@ -42,7 +42,6 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 		targetFieldType := xtype.TypeOf(targetField.Type())
 
 		if mapFnName, ok := ctx.ExtendMapping[targetField.Name()]; ok {
-			// check if method with same name
 			if sourceMatch, err := source.StructField(targetField.Name(), ctx.MatchIgnoreCase, ctx.IgnoredFields); err == nil {
 				id := &xtype.JenID{Code: sourceID.Code.Clone().Dot(targetField.Name())}
 				fieldStmt, fieldID, err := gen.BuildExtend(ctx, mapFnName, id, sourceMatch.Type, targetFieldType)
@@ -118,7 +117,7 @@ func mapField(gen Generator, ctx *MethodContext, targetField *types.Var, sourceI
 			})
 			return nextID, sourceMatch.Type, []jen.Code{}, lift, nil
 		}
-		// field lookup either did not find anything or failed due to ambiquous match with case ignored
+		// field lookup either did not find anything or failed due to ambiguous match with case ignored
 		cause := fmt.Sprintf("Cannot match the target field with the source entry: %s.", err.Error())
 		return nil, nil, nil, nil, NewError(cause).Lift(&Path{
 			Prefix:     ".",
