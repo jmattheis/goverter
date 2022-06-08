@@ -38,8 +38,9 @@ type Converter struct {
 
 // ConverterConfig contains settings that can be set via comments.
 type ConverterConfig struct {
-	Name          string
-	ExtendMethods []string
+	Name             string
+	ExtendMethods    []string
+	MapExtendMethods []string
 }
 
 // Method contains settings that can be set via comments.
@@ -49,6 +50,8 @@ type Method struct {
 	MatchIgnoreCase bool
 	// target to source
 	IdentityMapping map[string]struct{}
+	// mapping function to source
+	ExtendMapping map[string]string
 }
 
 // ParseDocs parses the docs for the given pattern.
@@ -188,6 +191,9 @@ func parseConverterComment(comment string, config ConverterConfig) (ConverterCon
 			case "extend":
 				config.ExtendMethods = append(config.ExtendMethods, fields[1:]...)
 				continue
+			case "mapExtend":
+				config.MapExtendMethods = append(config.MapExtendMethods, fields[1:]...)
+				continue
 			}
 			return config, fmt.Errorf("unknown %s comment: %s", prefix, line)
 		}
@@ -201,6 +207,7 @@ func parseMethodComment(comment string) (Method, error) {
 		NameMapping:     map[string]string{},
 		IgnoredFields:   map[string]struct{}{},
 		IdentityMapping: map[string]struct{}{},
+		ExtendMapping:   map[string]string{},
 	}
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
@@ -226,6 +233,12 @@ func parseMethodComment(comment string) (Method, error) {
 				for _, f := range fields[1:] {
 					m.IgnoredFields[f] = struct{}{}
 				}
+				continue
+			case "mapExtend":
+				if len(fields) != 3 {
+					return m, fmt.Errorf("invalid %s:mapExtend must have two parameter", prefix)
+				}
+				m.ExtendMapping[fields[1]] = fields[2]
 				continue
 			case "matchIgnoreCase":
 				if len(fields) != 1 {

@@ -22,6 +22,7 @@ type methodDefinition struct {
 	Source          *xtype.Type
 	Target          *xtype.Type
 	Mapping         map[string]string
+	ExtendMapping   map[string]string
 	IgnoredFields   map[string]struct{}
 	IdentityMapping map[string]struct{}
 	MatchIgnoreCase bool
@@ -35,11 +36,12 @@ type methodDefinition struct {
 }
 
 type generator struct {
-	namer  *namer.Namer
-	name   string
-	file   *jen.File
-	lookup map[xtype.Signature]*methodDefinition
-	extend map[xtype.Signature]*methodDefinition
+	namer     *namer.Namer
+	name      string
+	file      *jen.File
+	lookup    map[xtype.Signature]*methodDefinition
+	extend    map[xtype.Signature]*methodDefinition
+	mapExtend map[xtype.Signature]*methodDefinition
 	// pkgCache caches the extend packages, saving load time
 	pkgCache map[string][]*packages.Package
 	// workingDir is a working directory, can be empty
@@ -78,6 +80,7 @@ func (g *generator) registerMethod(methodType *types.Func, methodComments commen
 		Source:           xtype.TypeOf(source),
 		Target:           xtype.TypeOf(target),
 		Mapping:          methodComments.NameMapping,
+		ExtendMapping:    methodComments.ExtendMapping,
 		MatchIgnoreCase:  methodComments.MatchIgnoreCase,
 		IgnoredFields:    methodComments.IgnoredFields,
 		IdentityMapping:  methodComments.IdentityMapping,
@@ -152,6 +155,7 @@ func (g *generator) buildMethod(method *methodDefinition) *builder.Error {
 	ctx := &builder.MethodContext{
 		Namer:           namer.New(),
 		Mapping:         method.Mapping,
+		ExtendMapping:   method.ExtendMapping,
 		IgnoredFields:   method.IgnoredFields,
 		IdentityMapping: method.IdentityMapping,
 		MatchIgnoreCase: method.MatchIgnoreCase,
@@ -189,6 +193,9 @@ func (g *generator) buildNoLookup(ctx *builder.MethodContext, sourceID *xtype.Je
 // Build builds an implementation for the given source and target type, or uses an existing method for it.
 func (g *generator) Build(ctx *builder.MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *builder.Error) {
 	method, ok := g.extend[xtype.Signature{Source: source.T.String(), Target: target.T.String()}]
+	if !ok {
+		method, ok = g.mapExtend[xtype.Signature{Source: source.T.String(), Target: target.T.String()}]
+	}
 	if !ok {
 		method, ok = g.lookup[xtype.Signature{Source: source.T.String(), Target: target.T.String()}]
 	}

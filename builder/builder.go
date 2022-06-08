@@ -24,6 +24,7 @@ type Generator interface {
 type MethodContext struct {
 	*namer.Namer
 	Mapping         map[string]string
+	ExtendMapping   map[string]string
 	IgnoredFields   map[string]struct{}
 	IdentityMapping map[string]struct{}
 	Signature       xtype.Signature

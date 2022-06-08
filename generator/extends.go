@@ -29,6 +29,8 @@ type ParseExtendOptions struct {
 	// NamePattern is the regexp pattern to search for within the PkgPath above or
 	// (if PkgPath is empty) within the Scope.
 	NamePattern *regexp.Regexp
+
+	IsMapExtend bool
 }
 
 // parseExtendPackage parses the goverter:extend inputs with or without packages (local or external).
@@ -249,6 +251,49 @@ func (g *generator) parseExtendFunc(fn *types.Func, opts *ParseExtendOptions) er
 		ReturnError:      returnError,
 		ReturnTypeOrigin: fn.String(),
 	}
-	g.extend[xsig] = methodDef
+	if opts.IsMapExtend {
+		g.mapExtend[xsig] = methodDef
+	} else {
+		g.extend[xsig] = methodDef
+	}
+
+	return nil
+}
+
+// parseMapExtend prepares a list of mapExtend methods for use.
+func (g *generator) parseMapExtend(converterInterface types.Type, converterScope *types.Scope, methods []string) error {
+	for _, methodName := range methods {
+		parts := strings.SplitN(methodName, packageNameSep, 2)
+		var pkgPath, namePattern string
+		switch len(parts) {
+		case 0:
+			continue
+		case 1:
+			// name only, ignore empty inputs
+			namePattern = parts[0]
+			if namePattern == "" {
+				continue
+			}
+		}
+		// todo: handle other package path formats
+		pattern, err := regexp.Compile(namePattern)
+
+		if err != nil {
+			return errors.Wrapf(err, "could not parse name as regexp %q", namePattern)
+		}
+
+		opts := &ParseExtendOptions{
+			ConverterScope:     converterScope,
+			PkgPath:            pkgPath,
+			NamePattern:        pattern,
+			ConverterInterface: converterInterface,
+			IsMapExtend:        true,
+		}
+
+		err = g.parseExtendPackage(opts)
+		if err != nil {
+			return err
+		}
+	}
 	return nil
 }

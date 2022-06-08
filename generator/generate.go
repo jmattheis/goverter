@@ -50,6 +50,7 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 			name:       converter.Config.Name,
 			lookup:     map[xtype.Signature]*methodDefinition{},
 			extend:     map[xtype.Signature]*methodDefinition{},
+			mapExtend:  map[xtype.Signature]*methodDefinition{},
 			workingDir: config.WorkingDir,
 		}
 		interf := obj.Type().Underlying().(*types.Interface)
@@ -57,12 +58,18 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 		extendMethods := make([]string, 0, len(config.ExtendMethods)+len(converter.Config.ExtendMethods))
 		// Order is important: converter methods are keyed using their in and out type pairs; newly
 		// discovered methods override existing ones. To enable fine-tuning per converter, extends
-		// declared on the converter inteface should override extends provided globally.
+		// declared on the converter interface should override extends provided globally.
 		extendMethods = append(extendMethods, config.ExtendMethods...)
 		extendMethods = append(extendMethods, converter.Config.ExtendMethods...)
 
 		if err := gen.parseExtend(obj.Type(), converter.Scope, extendMethods); err != nil {
 			return nil, fmt.Errorf("Error while parsing extend in\n    %s\n\n%s", obj.Type().String(), err)
+		}
+
+		mapExtendMethods := make([]string, 0, len(converter.Config.MapExtendMethods))
+		mapExtendMethods = append(mapExtendMethods, converter.Config.MapExtendMethods...)
+		if err := gen.parseMapExtend(obj.Type(), converter.Scope, mapExtendMethods); err != nil {
+			return nil, fmt.Errorf("Error while parsing mapExtend in\n    %s\n\n%s", obj.Type().String(), err)
 		}
 
 		// we checked in comments, that it is an interface
