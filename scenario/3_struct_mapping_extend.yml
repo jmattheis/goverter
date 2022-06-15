@@ -3,8 +3,6 @@ input:
         package structs
 
         // goverter:converter
-        // goverter:mapExtend PluckAgeInt
-        // goverter:mapExtend PlusScoreInt
         type Converter interface {
             // goverter:mapExtend Age PluckAgeInt
             // goverter:mapExtend Score PlusScoreInt

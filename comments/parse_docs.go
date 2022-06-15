@@ -191,9 +191,6 @@ func parseConverterComment(comment string, config ConverterConfig) (ConverterCon
 			case "extend":
 				config.ExtendMethods = append(config.ExtendMethods, fields[1:]...)
 				continue
-			case "mapExtend":
-				config.MapExtendMethods = append(config.MapExtendMethods, fields[1:]...)
-				continue
 			}
 			return config, fmt.Errorf("unknown %s comment: %s", prefix, line)
 		}

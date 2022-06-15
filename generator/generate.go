@@ -2,13 +2,12 @@ package generator
 
 import (
 	"fmt"
-	"go/types"
-
 	"github.com/dave/jennifer/jen"
 	"github.com/jmattheis/goverter/builder"
 	"github.com/jmattheis/goverter/comments"
 	"github.com/jmattheis/goverter/namer"
 	"github.com/jmattheis/goverter/xtype"
+	"go/types"
 )
 
 // Config the generate config.
@@ -67,7 +66,8 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 		}
 
 		mapExtendMethods := make([]string, 0, len(converter.Config.MapExtendMethods))
-		mapExtendMethods = append(mapExtendMethods, converter.Config.MapExtendMethods...)
+		mapExtendMethodsMap := make(map[string]bool)
+
 		if err := gen.parseMapExtend(obj.Type(), converter.Scope, mapExtendMethods); err != nil {
 			return nil, fmt.Errorf("Error while parsing mapExtend in\n    %s\n\n%s", obj.Type().String(), err)
 		}
@@ -80,10 +80,27 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 			if m, ok := converter.Methods[method.Name()]; ok {
 				converterMethod = m
 			}
+
 			if err := gen.registerMethod(method, converterMethod); err != nil {
 				return nil, fmt.Errorf("Error while creating converter method:\n    %s\n\n%s", method.String(), err)
 			}
+
+			if len(converterMethod.ExtendMapping) > 0 {
+				for _, mapExtendFnName := range converterMethod.ExtendMapping {
+					if mapExtendMethodsMap[mapExtendFnName] {
+						continue
+					} else {
+						mapExtendMethodsMap[mapExtendFnName] = true
+						mapExtendMethods = append(mapExtendMethods, mapExtendFnName)
+					}
+				}
+			}
 		}
+
+		if err := gen.parseMapExtend(obj.Type(), converter.Scope, mapExtendMethods); err != nil {
+			return nil, fmt.Errorf("Error while parsing mapExtend in\n    %s\n\n%s", obj.Type().String(), err)
+		}
+
 		if err := gen.createMethods(); err != nil {
 			return nil, err
 		}
