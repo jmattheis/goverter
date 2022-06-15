@@ -94,7 +94,7 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 		}
 
 		if err := gen.parseMapExtend(obj.Type(), converter.Scope, mapExtendMethods); err != nil {
-			return nil, fmt.Errorf("Error while parsing mapExtend in\n    %s\n\n%s", obj.Type().String(), err)
+			return nil, fmt.Errorf("Error while parsing mapExtend in\n%s\n\n%s", obj.Type().String(), err)
 		}
 
 		if err := gen.createMethods(); err != nil {
