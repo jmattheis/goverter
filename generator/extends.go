@@ -30,7 +30,8 @@ type ParseExtendOptions struct {
 	// (if PkgPath is empty) within the Scope.
 	NamePattern *regexp.Regexp
 
-	IsMapExtend bool
+	IsMapExtend         bool
+	MapExtendMethodName string
 }
 
 // parseExtendPackage parses the goverter:extend inputs with or without packages (local or external).
@@ -57,6 +58,16 @@ func (g *generator) parseExtendPackage(opts *ParseExtendOptions) error {
 	}
 
 	return g.searchExtendsInPackages(opts)
+}
+
+func (g *generator) parseMapExtendPackage(opts *ParseExtendOptions) error {
+	// search in the converter's scope
+	err := g.parseExtendScopeMethod(opts.ConverterScope, opts.MapExtendMethodName, opts)
+	if err != nil {
+		// no failure, but also nothing found (this can happen if pattern is used yet no matches found)
+		err = fmt.Errorf("local package does not have mapExtend methods: %s", opts.MapExtendMethodName)
+	}
+	return err
 }
 
 // searchExtendsInPackages searches for extend conversion methods that match an input regexp pattern
@@ -264,34 +275,13 @@ func (g *generator) parseExtendFunc(fn *types.Func, opts *ParseExtendOptions) er
 // parseMapExtend prepares a list of mapExtend methods for use.
 func (g *generator) parseMapExtend(converterInterface types.Type, converterScope *types.Scope, methods []string) error {
 	for _, methodName := range methods {
-		parts := strings.SplitN(methodName, packageNameSep, 2)
-		var pkgPath, namePattern string
-		switch len(parts) {
-		case 0:
-			continue
-		case 1:
-			// name only, ignore empty inputs
-			namePattern = parts[0]
-			if namePattern == "" {
-				continue
-			}
-		}
-		// todo: handle other package path formats
-		pattern, err := regexp.Compile(namePattern)
-
-		if err != nil {
-			return errors.Wrapf(err, "could not parse name as regexp %q", namePattern)
-		}
-
 		opts := &ParseExtendOptions{
-			ConverterScope:     converterScope,
-			PkgPath:            pkgPath,
-			NamePattern:        pattern,
-			ConverterInterface: converterInterface,
-			IsMapExtend:        true,
+			ConverterScope:      converterScope,
+			ConverterInterface:  converterInterface,
+			IsMapExtend:         true,
+			MapExtendMethodName: methodName,
 		}
-
-		err = g.parseExtendPackage(opts)
+		err := g.parseMapExtendPackage(opts)
 		if err != nil {
 			return err
 		}

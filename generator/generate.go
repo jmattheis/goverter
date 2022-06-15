@@ -68,10 +68,6 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 		mapExtendMethods := make([]string, 0, len(converter.Config.MapExtendMethods))
 		mapExtendMethodsMap := make(map[string]bool)
 
-		if err := gen.parseMapExtend(obj.Type(), converter.Scope, mapExtendMethods); err != nil {
-			return nil, fmt.Errorf("Error while parsing mapExtend in\n    %s\n\n%s", obj.Type().String(), err)
-		}
-
 		// we checked in comments, that it is an interface
 		for i := 0; i < interf.NumMethods(); i++ {
 			method := interf.Method(i)
