@@ -270,12 +270,18 @@ func (g *generator) Build(ctx *builder.MethodContext, sourceID *xtype.JenID, sou
 func (g *generator) BuildExtend(ctx *builder.MethodContext, mapFnName string, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *builder.Error) {
 	method, ok := g.mapExtend[xtype.Signature{Source: source.T.String(), Target: target.T.String(), Id: mapFnName}]
 
+	if !ok {
+		method, ok = g.mapExtend[xtype.Signature{Target: target.T.String(), Id: mapFnName}]
+	}
+
 	if ok {
 		params := []jen.Code{}
 		if method.SelfAsFirstParam {
 			params = append(params, jen.Id(xtype.ThisVar))
 		}
-		params = append(params, sourceID.Code.Clone())
+		if method.Source != nil {
+			params = append(params, sourceID.Code.Clone())
+		}
 		if method.ReturnError {
 			current := g.lookup[ctx.Signature]
 			if !current.ReturnError {

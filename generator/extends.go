@@ -218,16 +218,21 @@ func (g *generator) parseExtendFunc(fn *types.Func, opts *ParseExtendOptions) er
 	if !ok {
 		return fmt.Errorf("%s has no signature", fn.Name())
 	}
-	if sig.Params().Len() == 0 || sig.Results().Len() > 2 {
+	if sig.Params().Len() == 0 && !opts.IsMapExtend || sig.Results().Len() > 2 {
 		return fmt.Errorf("%s has no or too many parameters", fn.Name())
 	}
 	if sig.Results().Len() == 0 || sig.Results().Len() > 2 {
 		return fmt.Errorf("%s has no or too many returns", fn.Name())
 	}
 
-	source := sig.Params().At(0).Type()
-	target := sig.Results().At(0).Type()
+	var source, target types.Type
+
+	if sig.Params().Len() > 0 {
+		source = sig.Params().At(0).Type()
+	}
+	target = sig.Results().At(0).Type()
 	returnError := false
+
 	if sig.Results().Len() == 2 {
 		if i, ok := sig.Results().At(1).Type().(*types.Named); ok && i.Obj().Name() == "error" && i.Obj().Pkg() == nil {
 			returnError = true
@@ -250,22 +255,28 @@ func (g *generator) parseExtendFunc(fn *types.Func, opts *ParseExtendOptions) er
 		}
 	}
 
-	xsig := xtype.Signature{Source: source.String(), Target: target.String()}
 	methodDef := &methodDefinition{
 		ID:               fn.String(),
 		Explicit:         true,
 		Call:             jen.Qual(fn.Pkg().Path(), fn.Name()),
 		Name:             fn.Name(),
-		Source:           xtype.TypeOf(source),
-		Target:           xtype.TypeOf(target),
 		SelfAsFirstParam: selfAsFirstParameter,
 		ReturnError:      returnError,
 		ReturnTypeOrigin: fn.String(),
 	}
+
 	if opts.IsMapExtend {
-		xsig.Id = fn.Name()
+		methodDef.Target = xtype.TypeOf(target)
+		xsig := xtype.Signature{Target: target.String(), Id: fn.Name()}
+		if source != nil {
+			methodDef.Source = xtype.TypeOf(source)
+			xsig.Source = source.String()
+		}
 		g.mapExtend[xsig] = methodDef
 	} else {
+		methodDef.Source = xtype.TypeOf(source)
+		methodDef.Target = xtype.TypeOf(target)
+		xsig := xtype.Signature{Source: source.String(), Target: target.String()}
 		g.extend[xsig] = methodDef
 	}
 
