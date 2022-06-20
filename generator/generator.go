@@ -277,31 +277,13 @@ func (g *generator) BuildExtend(ctx *builder.MethodContext, mapFnName string, so
 	if ok {
 		params := []jen.Code{}
 		if method.SelfAsFirstParam {
-			params = append(params, jen.Id(xtype.ThisVar))
+			return nil, nil, builder.NewError(fmt.Sprintf("TypeMismatch: Cannot support use self %s as first parameter in MapExtend method: %s", source.T, mapFnName))
 		}
 		if method.Source != nil {
 			params = append(params, sourceID.Code.Clone())
 		}
 		if method.ReturnError {
-			current := g.lookup[ctx.Signature]
-			if !current.ReturnError {
-				if current.Explicit {
-					return nil, nil, builder.NewError(fmt.Sprintf("ReturnTypeMismatch: Cannot use\n\n    %s\n\nin\n\n    %s\n\nbecause no error is returned as second parameter", method.ReturnTypeOrigin, current.ID))
-				}
-				current.ReturnError = true
-				current.ReturnTypeOrigin = method.ID
-				current.Dirty = true
-			}
-
-			name := ctx.Name(target.ID())
-			innerName := ctx.Name("errValue")
-			stmt := []jen.Code{
-				jen.List(jen.Id(name), jen.Id("err")).Op(":=").Add(method.Call.Clone().Call(params...)),
-				jen.If(jen.Id("err").Op("!=").Nil()).Block(
-					jen.Var().Id(innerName).Add(ctx.TargetType.TypeAsJen()),
-					jen.Return(jen.Id(innerName), jen.Id("err"))),
-			}
-			return stmt, xtype.VariableID(jen.Id(name)), nil
+			return nil, nil, builder.NewError(fmt.Sprintf("TypeMismatch: Cannot support returnError in MapExtend method: %s", mapFnName))
 		}
 		id := xtype.OtherID(method.Call.Clone().Call(params...))
 		return nil, id, nil
