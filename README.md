@@ -244,6 +244,53 @@ type Output struct {
 }
 ```
 
+### Struct extend mapping
+
+With `goverter:mapExtend` you can map methods to struct fields.
+
+`goverter:mapExtend` takes 2 parameters.
+
+1. target field path
+1. local method name
+
+The method optionally can take the source object as parameter of the conversion
+method.
+
+```go
+// goverter:converter
+type Converter interface {
+    // goverter:mapExtend FullName ExtendFullName
+    // goverter:mapExtend Age DefaultAge
+    Convert(source Input) Output
+}
+
+type Input struct {
+    ID int
+    FirstName string
+    LastName string
+}
+type Output struct {
+    ID int
+    FullName string
+    Age int
+}
+func ExtendFullName(source Input) string {
+    return source.FirstName + " " + source.LastName
+}
+func DefaultAge() int { return 42 }
+```
+
+This will generate a method like this:
+```go
+func (c *ConverterImpl) Convert(source execution.Input) execution.Output {
+    var structsOutput execution.Output
+    structsOutput.ID = source.ID
+    structsOutput.FullName = execution.ExtendFullName(source)
+    structsOutput.Age = execution.DefaultAge()
+    return structsOutput
+}
+```
+
 ### Case-insensitive field matching
 
 With `goverter:matchIgnoreCase` tag you can instruct goverter to perform case-insensitive mapping

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/dave/jennifer/jen"
+	"github.com/jmattheis/goverter/builder"
 	"github.com/jmattheis/goverter/xtype"
 	"github.com/pkg/errors"
 )
@@ -251,4 +252,44 @@ func (g *generator) parseExtendFunc(fn *types.Func, opts *ParseExtendOptions) er
 	}
 	g.extend[xsig] = methodDef
 	return nil
+}
+
+// parseExtend prepares an extend conversion method using its name and a scope to search.
+func (g *generator) parseMapExtend(scope *types.Scope, methodName string) (*builder.ExtendMethod, error) {
+	obj := scope.Lookup(methodName)
+	if obj == nil {
+		return nil, fmt.Errorf("%s does not exist in scope", methodName)
+	}
+
+	fn, ok := obj.(*types.Func)
+	if !ok {
+		return nil, fmt.Errorf("%s is not a function", methodName)
+	}
+
+	if !fn.Exported() {
+		return nil, fmt.Errorf("method %s is unexported", fn.Name())
+	}
+
+	sig, ok := fn.Type().(*types.Signature)
+	if !ok {
+		return nil, fmt.Errorf("%s has no signature", fn.Name())
+	}
+	if sig.Params().Len() >= 2 {
+		return nil, fmt.Errorf("%s has too many parameters", fn.Name())
+	}
+	if sig.Results().Len() != 1 {
+		return nil, fmt.Errorf("%s has no or too many returns", fn.Name())
+	}
+
+	methodDef := &builder.ExtendMethod{
+		ID:     fn.String(),
+		Call:   jen.Qual(fn.Pkg().Path(), fn.Name()),
+		Name:   fn.Name(),
+		Target: xtype.TypeOf(sig.Results().At(0).Type()),
+	}
+	if sig.Params().Len() == 1 {
+		methodDef.Source = xtype.TypeOf(sig.Params().At(0).Type())
+	}
+
+	return methodDef, nil
 }

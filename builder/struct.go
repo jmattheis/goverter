@@ -40,6 +40,41 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 		}
 
 		targetFieldType := xtype.TypeOf(targetField.Type())
+
+		if def, ok := ctx.ExtendMapping[targetField.Name()]; ok {
+			params := []jen.Code{}
+			if def.Source != nil {
+				if def.Source.T.String() != source.T.String() {
+					cause := fmt.Sprintf("cannot not use\n\t%s\nbecause source type mismatch\n\nExtend method param type: %s\nConverter source type: %s", def.ID, def.Source.T.String(), source.T.String())
+					return nil, nil, NewError(cause).Lift(&Path{
+						Prefix:     ".",
+						SourceID:   "<mapExtend>",
+						SourceType: def.ID,
+						TargetID:   targetField.Name(),
+						TargetType: targetField.Type().String(),
+					})
+				}
+				params = append(params, sourceID.Code.Clone())
+			}
+
+			if def.Target.T.String() != targetFieldType.T.String() {
+				cause := fmt.Sprintf("Extend method return type mismatches with target: %s != %s", def.Target.T.String(), targetFieldType.T.String())
+				return nil, nil, NewError(cause).Lift(&Path{
+					Prefix:     ".",
+					SourceID:   "()",
+					SourceType: def.Target.T.String(),
+					TargetID:   targetField.Name(),
+					TargetType: targetField.Type().String(),
+				}).Lift(&Path{
+					Prefix:     ".",
+					SourceID:   "<mapExtend>",
+					SourceType: def.ID,
+				})
+			}
+			stmt = append(stmt, jen.Id(name).Dot(targetField.Name()).Op("=").Add(def.Call.Clone().Call(params...)))
+			continue
+		}
+
 		if _, ok := ctx.IdentityMapping[targetField.Name()]; ok {
 			fieldStmt, fieldID, err := gen.Build(ctx, sourceID, source, targetFieldType)
 			if err != nil {
@@ -90,7 +125,7 @@ func mapField(gen Generator, ctx *MethodContext, targetField *types.Var, sourceI
 			})
 			return nextID, sourceMatch.Type, []jen.Code{}, lift, nil
 		}
-		// field lookup either did not find anything or failed due to ambiquous match with case ignored
+		// field lookup either did not find anything or failed due to ambiguous match with case ignored
 		cause := fmt.Sprintf("Cannot match the target field with the source entry: %s.", err.Error())
 		return nil, nil, nil, nil, NewError(cause).Lift(&Path{
 			Prefix:     ".",

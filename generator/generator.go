@@ -24,6 +24,7 @@ type methodDefinition struct {
 	Mapping         map[string]string
 	IgnoredFields   map[string]struct{}
 	IdentityMapping map[string]struct{}
+	ExtendMapping   map[string]*builder.ExtendMethod
 	MatchIgnoreCase bool
 
 	Jen jen.Code
@@ -46,7 +47,7 @@ type generator struct {
 	workingDir string
 }
 
-func (g *generator) registerMethod(methodType *types.Func, methodComments comments.Method) error {
+func (g *generator) registerMethod(scope *types.Scope, methodType *types.Func, methodComments comments.Method) error {
 	signature, ok := methodType.Type().(*types.Signature)
 	if !ok {
 		return fmt.Errorf("expected signature %#v", methodType.Type())
@@ -81,8 +82,17 @@ func (g *generator) registerMethod(methodType *types.Func, methodComments commen
 		MatchIgnoreCase:  methodComments.MatchIgnoreCase,
 		IgnoredFields:    methodComments.IgnoredFields,
 		IdentityMapping:  methodComments.IdentityMapping,
+		ExtendMapping:    map[string]*builder.ExtendMethod{},
 		ReturnError:      returnError,
 		ReturnTypeOrigin: methodType.FullName(),
+	}
+
+	for field, target := range methodComments.ExtendMapping {
+		def, err := g.parseMapExtend(scope, target)
+		if err != nil {
+			return err
+		}
+		m.ExtendMapping[field] = def
 	}
 
 	g.lookup[xtype.Signature{
@@ -152,6 +162,7 @@ func (g *generator) buildMethod(method *methodDefinition) *builder.Error {
 	ctx := &builder.MethodContext{
 		Namer:           namer.New(),
 		Mapping:         method.Mapping,
+		ExtendMapping:   method.ExtendMapping,
 		IgnoredFields:   method.IgnoredFields,
 		IdentityMapping: method.IdentityMapping,
 		MatchIgnoreCase: method.MatchIgnoreCase,
@@ -241,6 +252,7 @@ func (g *generator) Build(ctx *builder.MethodContext, sourceID *xtype.JenID, sou
 			method.Mapping = ctx.Mapping
 			method.MatchIgnoreCase = ctx.MatchIgnoreCase
 			method.IgnoredFields = ctx.IgnoredFields
+			method.ExtendMapping = ctx.ExtendMapping
 		}
 
 		g.lookup[xtype.Signature{Source: source.T.String(), Target: target.T.String()}] = method

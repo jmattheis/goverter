@@ -57,7 +57,7 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 		extendMethods := make([]string, 0, len(config.ExtendMethods)+len(converter.Config.ExtendMethods))
 		// Order is important: converter methods are keyed using their in and out type pairs; newly
 		// discovered methods override existing ones. To enable fine-tuning per converter, extends
-		// declared on the converter inteface should override extends provided globally.
+		// declared on the converter interface should override extends provided globally.
 		extendMethods = append(extendMethods, config.ExtendMethods...)
 		extendMethods = append(extendMethods, converter.Config.ExtendMethods...)
 
@@ -73,10 +73,11 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 			if m, ok := converter.Methods[method.Name()]; ok {
 				converterMethod = m
 			}
-			if err := gen.registerMethod(method, converterMethod); err != nil {
+			if err := gen.registerMethod(converter.Scope, method, converterMethod); err != nil {
 				return nil, fmt.Errorf("Error while creating converter method:\n    %s\n\n%s", method.String(), err)
 			}
 		}
+
 		if err := gen.createMethods(); err != nil {
 			return nil, err
 		}

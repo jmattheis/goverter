@@ -1,0 +1,41 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:mapExtend Score Identity
+            Convert(source Input) Output
+        }
+
+        type Input struct {
+            Name string
+        }
+        type Output struct {
+            Name string
+            Score int
+        }
+        func Identity(source int) int {
+            return source
+        }
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+
+    | github.com/jmattheis/goverter/execution.Input
+    |
+    |      | func github.com/jmattheis/goverter/execution.Identity(source int) int
+    |      |
+    source.<mapExtend>
+    target.Score
+    |      |
+    |      | int
+    |
+    | github.com/jmattheis/goverter/execution.Output
+
+    cannot not use
+    	func github.com/jmattheis/goverter/execution.Identity(source int) int
+    because source type mismatch
+
+    Extend method param type: int
+    Converter source type: github.com/jmattheis/goverter/execution.Input

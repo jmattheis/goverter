@@ -1,0 +1,23 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:mapExtend Age PluckAgeInt
+            Convert(source Input) Output
+        }
+
+        type Input struct {
+            Name string
+        }
+        type Output struct {
+            Name string
+            Age int
+        }
+        const PluckAgeInt = 24
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+
+    PluckAgeInt is not a function

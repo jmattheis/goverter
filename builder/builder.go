@@ -24,10 +24,22 @@ type Generator interface {
 type MethodContext struct {
 	*namer.Namer
 	Mapping         map[string]string
+	ExtendMapping   map[string]*ExtendMethod
 	IgnoredFields   map[string]struct{}
 	IdentityMapping map[string]struct{}
 	Signature       xtype.Signature
 	TargetType      *xtype.Type
 	PointerChange   bool
 	MatchIgnoreCase bool
+}
+
+type ExtendMethod struct {
+	ID   string
+	Name string
+	Call *jen.Statement
+	// optional source
+	Source *xtype.Type
+	Target *xtype.Type
+
+	Jen jen.Code
 }

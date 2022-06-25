@@ -1,0 +1,40 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:mapExtend Score DefaultName
+            Convert(source Input) Output
+        }
+
+        type Input struct {
+            Name string
+        }
+        type Output struct {
+            Name string
+            Score int
+        }
+        func DefaultName() string {
+            return "Joe"
+        }
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+
+    | github.com/jmattheis/goverter/execution.Input
+    |
+    |      | func github.com/jmattheis/goverter/execution.DefaultName() string
+    |      |
+    |      |           | string
+    |      |           |
+    source.<mapExtend>.()
+    target            .Score
+    |                  |
+    |                  | int
+    |
+    |
+    |
+    | github.com/jmattheis/goverter/execution.Output
+
+    Extend method return type mismatches with target: string != int
