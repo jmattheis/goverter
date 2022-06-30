@@ -1,0 +1,41 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        // goverter:extend InputToOutput
+        type Converter interface {
+            Convert(source Input) Output
+        }
+
+        type Input struct {
+            ID int
+            Age int
+        }
+        type Output struct {
+            ID int
+            Age string
+        }
+        func InputToOutput(source Input) (Output, error) {
+            return Output{}, nil
+        }
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+
+    | github.com/jmattheis/goverter/execution.Input
+    |
+    source
+    target
+    |
+    | github.com/jmattheis/goverter/execution.Output
+
+    ReturnTypeMismatch: Cannot use
+
+        func github.com/jmattheis/goverter/execution.InputToOutput(source github.com/jmattheis/goverter/execution.Input) (github.com/jmattheis/goverter/execution.Output, error)
+
+    in
+
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+
+    because no error is returned as second parameter
