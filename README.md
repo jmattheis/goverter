@@ -426,7 +426,7 @@ func (c *ConverterImpl) Convert(source Input) (Output, error) {
     xint, err := strconv.Atoi(source.PostalCode)
     if err != nil {
         var errValue Output
-        return errValue, fmt.Errorf("error setting field %q: %w", "PostalCode", err)
+        return errValue, fmt.Errorf("error setting field PostalCode: %w", err)
     }
     slicesOutput.PostalCode = xint
     return slicesOutput, nil

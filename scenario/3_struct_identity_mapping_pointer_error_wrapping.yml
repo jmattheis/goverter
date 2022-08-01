@@ -63,7 +63,7 @@ success: |
     	xint, err := strconv.Atoi(source.PostalCode)
     	if err != nil {
     		var errValue execution.APIAddress
-    		return errValue, fmt.Errorf("error setting field %q: %w", "PostalCode", err)
+    		return errValue, fmt.Errorf("error setting field PostalCode: %w", err)
     	}
     	structsAPIAddress.PostalCode = xint
     	return structsAPIAddress, nil
@@ -74,7 +74,7 @@ success: |
     	pStructsAPIAddress, err := c.structsPersonToPStructsAPIAddress(source)
     	if err != nil {
     		var errValue execution.APIPerson
-    		return errValue, fmt.Errorf("error setting field %q: %w", "Address", err)
+    		return errValue, fmt.Errorf("error setting field Address: %w", err)
     	}
     	structsAPIPerson.Address = pStructsAPIAddress
     	return structsAPIPerson, nil
