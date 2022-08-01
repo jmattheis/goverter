@@ -52,7 +52,7 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 			lookup:     map[xtype.Signature]*methodDefinition{},
 			extend:     map[xtype.Signature]*methodDefinition{},
 			workingDir: config.WorkingDir,
-			wrapErrors: config.WrapErrors,
+			wrapErrors: config.WrapErrors || converter.Config.WrapErrors,
 		}
 		interf := obj.Type().Underlying().(*types.Interface)
 

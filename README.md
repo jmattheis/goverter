@@ -396,15 +396,18 @@ type Output struct {
 
 ### Error Wrapping
 
-With `goverter:wrapErrors`, goverter will wrap conversion errors with additional troubleshooting information.
-The tag `goverter:wrapErrors` does not take parameters. The `wrapErrors` flag can also be set via command line.
+You can enable error wrapping with the `-wrapErrors` CLI flag or by adding
+`// goverter:wrapErrors` to the method or converter. Both parameters don't take any arguments.
+
+Wrapped errors will contain troubleshooting information like the target struct's field name
+related to this error.
 
 ```go
 // goverter:converter
 // goverter:extend strconv:Atoi
+// goverter:wrapErrors
 type Converter interface {
-    // goverter:wrapErrors
-    Convert(source Input) Output
+    Convert(source Input) (Output, error)
 }
 
 type Input struct {
@@ -417,7 +420,7 @@ type Output struct {
 
 The generated code reports the `PostalCode` in the wrapped error when the `Atoi` function fails.
 
-```
+```go
 func (c *ConverterImpl) Convert(source Input) (Output, error) {
     var slicesOutput Output
     xint, err := strconv.Atoi(source.PostalCode)

@@ -40,6 +40,7 @@ type Converter struct {
 type ConverterConfig struct {
 	Name          string
 	ExtendMethods []string
+	WrapErrors    bool
 }
 
 // Method contains settings that can be set via comments.
@@ -190,6 +191,12 @@ func parseConverterComment(comment string, config ConverterConfig) (ConverterCon
 				continue
 			case "extend":
 				config.ExtendMethods = append(config.ExtendMethods, fields[1:]...)
+				continue
+			case "wrapErrors":
+				if len(fields) != 1 {
+					return config, fmt.Errorf("invalid %s:wrapErrors, parameters not supported", prefix)
+				}
+				config.WrapErrors = true
 				continue
 			}
 			return config, fmt.Errorf("unknown %s comment: %s", prefix, line)
