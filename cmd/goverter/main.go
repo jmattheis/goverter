@@ -14,6 +14,8 @@ func main() {
 	output := flag.String("output", "./generated/generated.go", "")
 	extends := flag.String("extends", "", "comma separated list of local or package extends")
 	packagePath := flag.String("packagePath", "", "optional full package path for the generated code")
+	wrapErrors := flag.Bool("wrapErrors", false,
+		"if set, wrap conversion errors with extra details, such as struct field names")
 
 	flag.Parse()
 
@@ -33,6 +35,7 @@ func main() {
 		ScanDir:       pattern,
 		ExtendMethods: extendMethods,
 		PackagePath:   *packagePath,
+		WrapErrors:    *wrapErrors,
 	})
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)

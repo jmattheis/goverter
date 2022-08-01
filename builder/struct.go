@@ -75,8 +75,9 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 			continue
 		}
 
+		errWrapper := Wrap("error setting field %q", jen.Lit(targetField.Name()))
 		if _, ok := ctx.IdentityMapping[targetField.Name()]; ok {
-			fieldStmt, fieldID, err := gen.Build(ctx, sourceID, source, targetFieldType)
+			fieldStmt, fieldID, err := gen.Build(ctx, sourceID, source, targetFieldType, errWrapper)
 			if err != nil {
 				return nil, nil, err.Lift(&Path{
 					Prefix:     ".",
@@ -97,7 +98,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 		}
 		stmt = append(stmt, mapStmt...)
 
-		fieldStmt, fieldID, err := gen.Build(ctx, xtype.VariableID(nextID), nextSource, targetFieldType)
+		fieldStmt, fieldID, err := gen.Build(ctx, xtype.VariableID(nextID), nextSource, targetFieldType, errWrapper)
 		if err != nil {
 			return nil, nil, err.Lift(lift...)
 		}

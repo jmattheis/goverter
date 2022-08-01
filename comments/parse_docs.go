@@ -47,6 +47,7 @@ type Method struct {
 	IgnoredFields   map[string]struct{}
 	NameMapping     map[string]string
 	MatchIgnoreCase bool
+	WrapErrors      bool
 	// target to source
 	IdentityMapping map[string]struct{}
 	// mapping function to source
@@ -241,6 +242,12 @@ func parseMethodComment(comment string) (Method, error) {
 					return m, fmt.Errorf("invalid %s:matchIgnoreCase, parameters not supported", prefix)
 				}
 				m.MatchIgnoreCase = true
+				continue
+			case "wrapErrors":
+				if len(fields) != 1 {
+					return m, fmt.Errorf("invalid %s:wrapErrors, parameters not supported", prefix)
+				}
+				m.WrapErrors = true
 				continue
 			}
 			return m, fmt.Errorf("unknown %s comment: %s", prefix, line)

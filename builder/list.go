@@ -20,7 +20,8 @@ func (*List) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, sou
 
 	indexedSource := xtype.VariableID(sourceID.Code.Clone().Index(jen.Id(index)))
 
-	newStmt, newID, err := gen.Build(ctx, indexedSource, source.ListInner, target.ListInner)
+	errWrapper := Wrap("error setting index %d", jen.Id(index))
+	newStmt, newID, err := gen.Build(ctx, indexedSource, source.ListInner, target.ListInner, errWrapper)
 	if err != nil {
 		return nil, nil, err.Lift(&Path{
 			SourceID:   "[]",

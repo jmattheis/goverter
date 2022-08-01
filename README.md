@@ -394,6 +394,42 @@ type Output struct {
 }
 ```
 
+### Error Wrapping
+
+With `goverter:wrapErrors`, goverter will wrap conversion errors with additional troubleshooting information.
+The tag `goverter:wrapErrors` does not take parameters. The `wrapErrors` flag can also be set via command line.
+
+```go
+// goverter:converter
+// goverter:extend strconv:Atoi
+type Converter interface {
+    // goverter:wrapErrors
+    Convert(source Input) Output
+}
+
+type Input struct {
+    PostalCode string
+}
+type Output struct {
+    PostalCode int
+}
+```
+
+The generated code reports the `PostalCode` in the wrapped error when the `Atoi` function fails.
+
+```
+func (c *ConverterImpl) Convert(source Input) (Output, error) {
+    var slicesOutput Output
+    xint, err := strconv.Atoi(source.PostalCode)
+    if err != nil {
+        var errValue Output
+        return errValue, fmt.Errorf("error setting field %q: %w", "PostalCode", err)
+    }
+    slicesOutput.PostalCode = xint
+    return slicesOutput, nil
+}
+```
+
 ## Versioning
 
 goverter use [SemVer](http://semver.org/) for versioning the cli.

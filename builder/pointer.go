@@ -19,7 +19,8 @@ func (*Pointer) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, 
 
 	outerVar := ctx.Name(target.ID())
 
-	nextBlock, id, err := gen.Build(ctx, xtype.OtherID(jen.Op("*").Add(sourceID.Code.Clone())), source.PointerInner, target.PointerInner)
+	nextBlock, id, err := gen.Build(
+		ctx, xtype.OtherID(jen.Op("*").Add(sourceID.Code.Clone())), source.PointerInner, target.PointerInner, NoWrap)
 	if err != nil {
 		return nil, nil, err.Lift(&Path{
 			SourceID:   "*",
@@ -57,7 +58,7 @@ func (*TargetPointer) Matches(source, target *xtype.Type) bool {
 func (*TargetPointer) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *Error) {
 	ctx.PointerChange = true
 
-	stmt, id, err := gen.Build(ctx, sourceID, source, target.PointerInner)
+	stmt, id, err := gen.Build(ctx, sourceID, source, target.PointerInner, NoWrap)
 	if err != nil {
 		return nil, nil, err.Lift(&Path{
 			SourceID:   "*",

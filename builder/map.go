@@ -18,7 +18,7 @@ func (*Map) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, sour
 	targetMap := ctx.Name(target.ID())
 	key, value := ctx.Map()
 
-	block, newKey, err := gen.Build(ctx, xtype.VariableID(jen.Id(key)), source.MapKey, target.MapKey)
+	block, newKey, err := gen.Build(ctx, xtype.VariableID(jen.Id(key)), source.MapKey, target.MapKey, NoWrap)
 	if err != nil {
 		return nil, nil, err.Lift(&Path{
 			SourceID:   "[]",
@@ -27,7 +27,8 @@ func (*Map) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, sour
 			TargetType: "<mapkey> " + target.MapKey.T.String(),
 		})
 	}
-	valueStmt, valueKey, err := gen.Build(ctx, xtype.VariableID(jen.Id(value)), source.MapValue, target.MapValue)
+	valueStmt, valueKey, err := gen.Build(
+		ctx, xtype.VariableID(jen.Id(value)), source.MapValue, target.MapValue, NoWrap)
 	if err != nil {
 		return nil, nil, err.Lift(&Path{
 			SourceID:   "[]",
