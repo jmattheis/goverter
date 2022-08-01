@@ -54,6 +54,7 @@ func TestScenario(t *testing.T) {
 					PackagePath:   "github.com/jmattheis/goverter/execution/" + genPkgName,
 					ScanDir:       "github.com/jmattheis/goverter/execution",
 					ExtendMethods: scenario.Extends,
+					WrapErrors:    scenario.WrapErrors,
 				})
 
 			body, _ := ioutil.ReadFile(genFile)
@@ -113,6 +114,9 @@ func compile(file string) error {
 type Scenario struct {
 	Input   map[string]string `yaml:"input"`
 	Extends []string          `yaml:"extends,omitempty"`
+
+	// set to test code generation with fmt.Errorf per field
+	WrapErrors bool `yaml:"wrapErrors,omitempty"`
 
 	Success string `yaml:"success,omitempty"`
 	// for error cases, use either Error or ErrorStartsWith, not both

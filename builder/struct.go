@@ -75,8 +75,12 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 			continue
 		}
 
+		// To find out the source code for an error message like "error setting field PostalCode", people sometimes
+		// search their codebase/repo for the exact message match, in full. Inline the error message AS IS into the
+		// generated code to satisfy this search and speed up the troubleshooting efforts.
+		errWrapper := Wrap("error setting field " + targetField.Name())
 		if _, ok := ctx.IdentityMapping[targetField.Name()]; ok {
-			fieldStmt, fieldID, err := gen.Build(ctx, sourceID, source, targetFieldType)
+			fieldStmt, fieldID, err := gen.Build(ctx, sourceID, source, targetFieldType, errWrapper)
 			if err != nil {
 				return nil, nil, err.Lift(&Path{
 					Prefix:     ".",
@@ -97,7 +101,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 		}
 		stmt = append(stmt, mapStmt...)
 
-		fieldStmt, fieldID, err := gen.Build(ctx, xtype.VariableID(nextID), nextSource, targetFieldType)
+		fieldStmt, fieldID, err := gen.Build(ctx, xtype.VariableID(nextID), nextSource, targetFieldType, errWrapper)
 		if err != nil {
 			return nil, nil, err.Lift(lift...)
 		}

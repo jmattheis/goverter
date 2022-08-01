@@ -26,6 +26,9 @@ type GenerateConfig struct {
 	// generated code resides, making sure goverter does not create a loop import statement from
 	// the generated code into its own package.
 	PackagePath string
+	// WrapErrors instructs goverter to wrap conversion errors and return more details when such
+	// are available. For examples, for structs, target field name is reported, for slices: index.
+	WrapErrors bool
 }
 
 // GenerateConverter generates converters.
@@ -43,6 +46,7 @@ func GenerateConverter(c GenerateConfig) ([]byte, error) {
 		PackagePath:   c.PackagePath,
 		ExtendMethods: c.ExtendMethods,
 		WorkingDir:    c.WorkingDir,
+		WrapErrors:    c.WrapErrors,
 	})
 	if err != nil {
 		return nil, err

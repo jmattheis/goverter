@@ -40,6 +40,7 @@ type Converter struct {
 type ConverterConfig struct {
 	Name          string
 	ExtendMethods []string
+	WrapErrors    bool
 }
 
 // Method contains settings that can be set via comments.
@@ -47,6 +48,7 @@ type Method struct {
 	IgnoredFields   map[string]struct{}
 	NameMapping     map[string]string
 	MatchIgnoreCase bool
+	WrapErrors      bool
 	// target to source
 	IdentityMapping map[string]struct{}
 	// mapping function to source
@@ -190,6 +192,12 @@ func parseConverterComment(comment string, config ConverterConfig) (ConverterCon
 			case "extend":
 				config.ExtendMethods = append(config.ExtendMethods, fields[1:]...)
 				continue
+			case "wrapErrors":
+				if len(fields) != 1 {
+					return config, fmt.Errorf("invalid %s:wrapErrors, parameters not supported", prefix)
+				}
+				config.WrapErrors = true
+				continue
 			}
 			return config, fmt.Errorf("unknown %s comment: %s", prefix, line)
 		}
@@ -241,6 +249,12 @@ func parseMethodComment(comment string) (Method, error) {
 					return m, fmt.Errorf("invalid %s:matchIgnoreCase, parameters not supported", prefix)
 				}
 				m.MatchIgnoreCase = true
+				continue
+			case "wrapErrors":
+				if len(fields) != 1 {
+					return m, fmt.Errorf("invalid %s:wrapErrors, parameters not supported", prefix)
+				}
+				m.WrapErrors = true
 				continue
 			}
 			return m, fmt.Errorf("unknown %s comment: %s", prefix, line)

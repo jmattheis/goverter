@@ -34,7 +34,7 @@ func (*BasicTargetPointerRule) Matches(source, target *xtype.Type) bool {
 func (*BasicTargetPointerRule) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *Error) {
 	name := ctx.Name(target.ID())
 
-	stmt, id, err := gen.Build(ctx, sourceID, source, target.PointerInner)
+	stmt, id, err := gen.Build(ctx, sourceID, source, target.PointerInner, NoWrap)
 	if err != nil {
 		return nil, nil, err.Lift(&Path{
 			SourceID:   "*",

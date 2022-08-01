@@ -26,6 +26,7 @@ type methodDefinition struct {
 	IdentityMapping map[string]struct{}
 	ExtendMapping   map[string]*builder.ExtendMethod
 	MatchIgnoreCase bool
+	WrapErrors      bool
 
 	Jen jen.Code
 
@@ -41,6 +42,8 @@ type generator struct {
 	file   *jen.File
 	lookup map[xtype.Signature]*methodDefinition
 	extend map[xtype.Signature]*methodDefinition
+	// wrapErrors embeds field names in the error msg
+	wrapErrors bool
 	// pkgCache caches the extend packages, saving load time
 	pkgCache map[string][]*packages.Package
 	// workingDir is a working directory, can be empty
@@ -80,6 +83,7 @@ func (g *generator) registerMethod(scope *types.Scope, methodType *types.Func, m
 		Target:           xtype.TypeOf(target),
 		Mapping:          methodComments.NameMapping,
 		MatchIgnoreCase:  methodComments.MatchIgnoreCase,
+		WrapErrors:       methodComments.WrapErrors,
 		IgnoredFields:    methodComments.IgnoredFields,
 		IdentityMapping:  methodComments.IdentityMapping,
 		ExtendMapping:    map[string]*builder.ExtendMethod{},
@@ -116,7 +120,7 @@ func (g *generator) createMethods() error {
 			continue
 		}
 		method.Dirty = false
-		err := g.buildMethod(method)
+		err := g.buildMethod(method, builder.NoWrap)
 		if err != nil {
 			err = err.Lift(&builder.Path{
 				SourceID:   "source",
@@ -149,7 +153,7 @@ func (g *generator) appendToFile() {
 	}
 }
 
-func (g *generator) buildMethod(method *methodDefinition) *builder.Error {
+func (g *generator) buildMethod(method *methodDefinition, errWrapper builder.ErrorWrapper) *builder.Error {
 	sourceID := jen.Id("source")
 	source := method.Source
 	target := method.Target
@@ -166,6 +170,7 @@ func (g *generator) buildMethod(method *methodDefinition) *builder.Error {
 		IgnoredFields:   method.IgnoredFields,
 		IdentityMapping: method.IdentityMapping,
 		MatchIgnoreCase: method.MatchIgnoreCase,
+		WrapErrors:      method.WrapErrors,
 		TargetType:      method.Target,
 		Signature:       xtype.Signature{Source: method.Source.T.String(), Target: method.Target.T.String()},
 	}
@@ -174,7 +179,8 @@ func (g *generator) buildMethod(method *methodDefinition) *builder.Error {
 	var newID *xtype.JenID
 	var err *builder.Error
 	if extendMethod, ok := g.extend[ctx.Signature]; ok {
-		stmt, newID, err = g.callMethod(ctx, extendMethod, xtype.VariableID(sourceID.Clone()), source, target)
+		stmt, newID, err = g.callMethod(
+			ctx, extendMethod, xtype.VariableID(sourceID.Clone()), source, target, errWrapper)
 	} else {
 		stmt, newID, err = g.buildNoLookup(ctx, xtype.VariableID(sourceID.Clone()), source, target)
 	}
@@ -205,7 +211,13 @@ func (g *generator) buildNoLookup(ctx *builder.MethodContext, sourceID *xtype.Je
 	return nil, nil, builder.NewError(fmt.Sprintf("TypeMismatch: Cannot convert %s to %s", source.T, target.T))
 }
 
-func (g *generator) callMethod(ctx *builder.MethodContext, method *methodDefinition, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *builder.Error) {
+func (g *generator) callMethod(
+	ctx *builder.MethodContext,
+	method *methodDefinition,
+	sourceID *xtype.JenID,
+	source, target *xtype.Type,
+	errWrapper builder.ErrorWrapper,
+) ([]jen.Code, *xtype.JenID, *builder.Error) {
 	params := []jen.Code{}
 	if method.SelfAsFirstParam {
 		params = append(params, jen.Id(xtype.ThisVar))
@@ -228,7 +240,7 @@ func (g *generator) callMethod(ctx *builder.MethodContext, method *methodDefinit
 			jen.List(jen.Id(name), jen.Id("err")).Op(":=").Add(method.Call.Clone().Call(params...)),
 			jen.If(jen.Id("err").Op("!=").Nil()).Block(
 				jen.Var().Id(innerName).Add(ctx.TargetType.TypeAsJen()),
-				jen.Return(jen.Id(innerName), jen.Id("err"))),
+				jen.Return(jen.Id(innerName), g.wrap(ctx, errWrapper, jen.Id("err")))),
 		}
 		return stmt, xtype.VariableID(jen.Id(name)), nil
 	}
@@ -236,15 +248,28 @@ func (g *generator) callMethod(ctx *builder.MethodContext, method *methodDefinit
 	return nil, id, nil
 }
 
+// wrap invokes the error wrapper if feature is enabled.
+func (g *generator) wrap(ctx *builder.MethodContext, errWrapper builder.ErrorWrapper, errStmt *jen.Statement) *jen.Statement {
+	if g.wrapErrors || ctx.WrapErrors {
+		return errWrapper(errStmt)
+	}
+	return errStmt
+}
+
 // Build builds an implementation for the given source and target type, or uses an existing method for it.
-func (g *generator) Build(ctx *builder.MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *builder.Error) {
+func (g *generator) Build(
+	ctx *builder.MethodContext,
+	sourceID *xtype.JenID,
+	source, target *xtype.Type,
+	errWrapper builder.ErrorWrapper,
+) ([]jen.Code, *xtype.JenID, *builder.Error) {
 	method, ok := g.extend[xtype.Signature{Source: source.T.String(), Target: target.T.String()}]
 	if !ok {
 		method, ok = g.lookup[xtype.Signature{Source: source.T.String(), Target: target.T.String()}]
 	}
 
 	if ok {
-		return g.callMethod(ctx, method, sourceID, source, target)
+		return g.callMethod(ctx, method, sourceID, source, target, errWrapper)
 	}
 
 	if (source.Named && !source.Basic) || (target.Named && !target.Basic) {
@@ -263,17 +288,18 @@ func (g *generator) Build(ctx *builder.MethodContext, sourceID *xtype.JenID, sou
 			ctx.PointerChange = false
 			method.Mapping = ctx.Mapping
 			method.MatchIgnoreCase = ctx.MatchIgnoreCase
+			method.WrapErrors = ctx.WrapErrors
 			method.IgnoredFields = ctx.IgnoredFields
 			method.ExtendMapping = ctx.ExtendMapping
 		}
 
 		g.lookup[xtype.Signature{Source: source.T.String(), Target: target.T.String()}] = method
 		g.namer.Register(method.Name)
-		if err := g.buildMethod(method); err != nil {
+		if err := g.buildMethod(method, errWrapper); err != nil {
 			return nil, nil, err
 		}
 		// try again to trigger the found method thingy above
-		return g.Build(ctx, sourceID, source, target)
+		return g.Build(ctx, sourceID, source, target, errWrapper)
 	}
 
 	for _, rule := range BuildSteps {

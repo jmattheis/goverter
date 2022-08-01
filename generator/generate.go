@@ -17,6 +17,7 @@ type Config struct {
 	PackagePath   string
 	ExtendMethods []string
 	WorkingDir    string
+	WrapErrors    bool
 }
 
 // BuildSteps that'll used for generation.
@@ -51,6 +52,7 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 			lookup:     map[xtype.Signature]*methodDefinition{},
 			extend:     map[xtype.Signature]*methodDefinition{},
 			workingDir: config.WorkingDir,
+			wrapErrors: config.WrapErrors || converter.Config.WrapErrors,
 		}
 		interf := obj.Type().Underlying().(*types.Interface)
 
