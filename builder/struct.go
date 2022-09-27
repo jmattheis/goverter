@@ -29,6 +29,10 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 		if _, ignore := ctx.IgnoredFields[targetField.Name()]; ignore {
 			continue
 		}
+		if !targetField.Exported() && ctx.IgnoreUnexportedFields {
+			continue
+		}
+
 		if !targetField.Exported() {
 			cause := unexportedStructError(targetField.Name(), source.T.String(), target.T.String())
 			return nil, nil, NewError(cause).Lift(&Path{

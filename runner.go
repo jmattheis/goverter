@@ -29,6 +29,8 @@ type GenerateConfig struct {
 	// WrapErrors instructs goverter to wrap conversion errors and return more details when such
 	// are available. For examples, for structs, target field name is reported, for slices: index.
 	WrapErrors bool
+	// IgnoredUnexportedFields tells goverter to ignore fields that are not exported.
+	IgnoredUnexportedFields bool
 }
 
 // GenerateConverter generates converters.
@@ -42,11 +44,12 @@ func GenerateConverter(c GenerateConfig) ([]byte, error) {
 	}
 
 	file, err := generator.Generate(c.ScanDir, mapping, generator.Config{
-		Name:          c.PackageName,
-		PackagePath:   c.PackagePath,
-		ExtendMethods: c.ExtendMethods,
-		WorkingDir:    c.WorkingDir,
-		WrapErrors:    c.WrapErrors,
+		Name:                   c.PackageName,
+		PackagePath:            c.PackagePath,
+		ExtendMethods:          c.ExtendMethods,
+		WorkingDir:             c.WorkingDir,
+		WrapErrors:             c.WrapErrors,
+		IgnoreUnexportedFields: c.IgnoredUnexportedFields,
 	})
 	if err != nil {
 		return nil, err

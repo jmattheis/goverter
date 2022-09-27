@@ -16,6 +16,8 @@ func main() {
 	packagePath := flag.String("packagePath", "", "optional full package path for the generated code")
 	wrapErrors := flag.Bool("wrapErrors", false,
 		"if set, wrap conversion errors with extra details, such as struct field names")
+	ignoreUnexportedFields := flag.Bool("ignoreUnexportedFields", false,
+		"if set, unexported fields on structs are ignored")
 
 	flag.Parse()
 
@@ -31,11 +33,12 @@ func main() {
 	}
 
 	err := goverter.GenerateConverterFile(*output, goverter.GenerateConfig{
-		PackageName:   *packageName,
-		ScanDir:       pattern,
-		ExtendMethods: extendMethods,
-		PackagePath:   *packagePath,
-		WrapErrors:    *wrapErrors,
+		PackageName:             *packageName,
+		ScanDir:                 pattern,
+		ExtendMethods:           extendMethods,
+		PackagePath:             *packagePath,
+		WrapErrors:              *wrapErrors,
+		IgnoredUnexportedFields: *ignoreUnexportedFields,
 	})
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)

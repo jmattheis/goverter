@@ -27,15 +27,16 @@ type Generator interface {
 // MethodContext exposes information for the current method.
 type MethodContext struct {
 	*namer.Namer
-	Mapping         map[string]string
-	ExtendMapping   map[string]*ExtendMethod
-	IgnoredFields   map[string]struct{}
-	IdentityMapping map[string]struct{}
-	Signature       xtype.Signature
-	TargetType      *xtype.Type
-	PointerChange   bool
-	MatchIgnoreCase bool
-	WrapErrors      bool
+	Mapping                map[string]string
+	ExtendMapping          map[string]*ExtendMethod
+	IgnoredFields          map[string]struct{}
+	IgnoreUnexportedFields bool
+	IdentityMapping        map[string]struct{}
+	Signature              xtype.Signature
+	TargetType             *xtype.Type
+	PointerChange          bool
+	MatchIgnoreCase        bool
+	WrapErrors             bool
 }
 
 type ExtendMethod struct {

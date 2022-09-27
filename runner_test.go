@@ -50,11 +50,12 @@ func TestScenario(t *testing.T) {
 			err = GenerateConverterFile(
 				genFile,
 				GenerateConfig{
-					PackageName:   genPkgName,
-					PackagePath:   "github.com/jmattheis/goverter/execution/" + genPkgName,
-					ScanDir:       "github.com/jmattheis/goverter/execution",
-					ExtendMethods: scenario.Extends,
-					WrapErrors:    scenario.WrapErrors,
+					PackageName:             genPkgName,
+					PackagePath:             "github.com/jmattheis/goverter/execution/" + genPkgName,
+					ScanDir:                 "github.com/jmattheis/goverter/execution",
+					ExtendMethods:           scenario.Extends,
+					WrapErrors:              scenario.WrapErrors,
+					IgnoredUnexportedFields: scenario.IgnoreUnexportedFields,
 				})
 
 			body, _ := ioutil.ReadFile(genFile)
@@ -116,7 +117,8 @@ type Scenario struct {
 	Extends []string          `yaml:"extends,omitempty"`
 
 	// set to test code generation with fmt.Errorf per field
-	WrapErrors bool `yaml:"wrapErrors,omitempty"`
+	WrapErrors             bool `yaml:"wrapErrors,omitempty"`
+	IgnoreUnexportedFields bool `yaml:"ignore_unexported_fields,omitempty"`
 
 	Success string `yaml:"success,omitempty"`
 	// for error cases, use either Error or ErrorStartsWith, not both
