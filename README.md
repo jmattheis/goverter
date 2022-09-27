@@ -394,8 +394,8 @@ type Output struct {
 }
 ```
 
-By default goverter will fail if you don't `goverter:ignore` all unexported
-fields. To automatically ignore all unexported field you can add the
+By default, goverter will fail if you don't `goverter:ignore` all unexported
+fields. To automatically ignore all unexported fields, you can add the
 `--ignoreUnexportedFields` cli argument.
 
 ### Error Wrapping
