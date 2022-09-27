@@ -117,13 +117,13 @@ type Scenario struct {
 	Extends []string          `yaml:"extends,omitempty"`
 
 	// set to test code generation with fmt.Errorf per field
-	WrapErrors bool `yaml:"wrapErrors,omitempty"`
+	WrapErrors             bool `yaml:"wrapErrors,omitempty"`
+	IgnoreUnexportedFields bool `yaml:"ignore_unexported_fields,omitempty"`
 
 	Success string `yaml:"success,omitempty"`
 	// for error cases, use either Error or ErrorStartsWith, not both
-	Error                  string `yaml:"error,omitempty"`
-	ErrorStartsWith        string `yaml:"error_starts_with,omitempty"`
-	IgnoreUnexportedFields bool   `yaml:"ignore_unexported_fields,omitempty"`
+	Error           string `yaml:"error,omitempty"`
+	ErrorStartsWith string `yaml:"error_starts_with,omitempty"`
 }
 
 func getCurrentPath() string {
