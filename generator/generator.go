@@ -30,10 +30,11 @@ type methodDefinition struct {
 
 	Jen jen.Code
 
-	SelfAsFirstParam bool
-	ReturnError      bool
-	ReturnTypeOrigin string
-	Dirty            bool
+	SelfAsFirstParam       bool
+	ReturnError            bool
+	ReturnTypeOrigin       string
+	Dirty                  bool
+	IgnoreUnexportedFields bool
 }
 
 type generator struct {
@@ -47,7 +48,8 @@ type generator struct {
 	// pkgCache caches the extend packages, saving load time
 	pkgCache map[string][]*packages.Package
 	// workingDir is a working directory, can be empty
-	workingDir string
+	workingDir             string
+	ignoreUnexportedFields bool
 }
 
 func (g *generator) registerMethod(scope *types.Scope, methodType *types.Func, methodComments comments.Method) error {
@@ -75,20 +77,21 @@ func (g *generator) registerMethod(scope *types.Scope, methodType *types.Func, m
 	}
 
 	m := &methodDefinition{
-		Call:             jen.Id(xtype.ThisVar).Dot(methodType.Name()),
-		ID:               methodType.String(),
-		Explicit:         true,
-		Name:             methodType.Name(),
-		Source:           xtype.TypeOf(source),
-		Target:           xtype.TypeOf(target),
-		Mapping:          methodComments.NameMapping,
-		MatchIgnoreCase:  methodComments.MatchIgnoreCase,
-		WrapErrors:       methodComments.WrapErrors,
-		IgnoredFields:    methodComments.IgnoredFields,
-		IdentityMapping:  methodComments.IdentityMapping,
-		ExtendMapping:    map[string]*builder.ExtendMethod{},
-		ReturnError:      returnError,
-		ReturnTypeOrigin: methodType.FullName(),
+		Call:                   jen.Id(xtype.ThisVar).Dot(methodType.Name()),
+		ID:                     methodType.String(),
+		Explicit:               true,
+		Name:                   methodType.Name(),
+		Source:                 xtype.TypeOf(source),
+		Target:                 xtype.TypeOf(target),
+		Mapping:                methodComments.NameMapping,
+		MatchIgnoreCase:        methodComments.MatchIgnoreCase,
+		IgnoreUnexportedFields: g.ignoreUnexportedFields,
+		WrapErrors:             methodComments.WrapErrors,
+		IgnoredFields:          methodComments.IgnoredFields,
+		IdentityMapping:        methodComments.IdentityMapping,
+		ExtendMapping:          map[string]*builder.ExtendMethod{},
+		ReturnError:            returnError,
+		ReturnTypeOrigin:       methodType.FullName(),
 	}
 
 	for field, target := range methodComments.ExtendMapping {
@@ -164,15 +167,16 @@ func (g *generator) buildMethod(method *methodDefinition, errWrapper builder.Err
 	}
 
 	ctx := &builder.MethodContext{
-		Namer:           namer.New(),
-		Mapping:         method.Mapping,
-		ExtendMapping:   method.ExtendMapping,
-		IgnoredFields:   method.IgnoredFields,
-		IdentityMapping: method.IdentityMapping,
-		MatchIgnoreCase: method.MatchIgnoreCase,
-		WrapErrors:      method.WrapErrors,
-		TargetType:      method.Target,
-		Signature:       xtype.Signature{Source: method.Source.T.String(), Target: method.Target.T.String()},
+		Namer:                  namer.New(),
+		Mapping:                method.Mapping,
+		ExtendMapping:          method.ExtendMapping,
+		IgnoredFields:          method.IgnoredFields,
+		IgnoreUnexportedFields: method.IgnoreUnexportedFields,
+		IdentityMapping:        method.IdentityMapping,
+		MatchIgnoreCase:        method.MatchIgnoreCase,
+		WrapErrors:             method.WrapErrors,
+		TargetType:             method.Target,
+		Signature:              xtype.Signature{Source: method.Source.T.String(), Target: method.Target.T.String()},
 	}
 
 	var stmt []jen.Code
@@ -276,13 +280,14 @@ func (g *generator) Build(
 		name := g.namer.Name(source.UnescapedID() + "To" + strings.Title(target.UnescapedID()))
 
 		method := &methodDefinition{
-			ID:            name,
-			Name:          name,
-			Source:        xtype.TypeOf(source.T),
-			Target:        xtype.TypeOf(target.T),
-			Mapping:       map[string]string{},
-			IgnoredFields: map[string]struct{}{},
-			Call:          jen.Id(xtype.ThisVar).Dot(name),
+			ID:                     name,
+			Name:                   name,
+			Source:                 xtype.TypeOf(source.T),
+			Target:                 xtype.TypeOf(target.T),
+			Mapping:                map[string]string{},
+			IgnoredFields:          map[string]struct{}{},
+			IgnoreUnexportedFields: g.ignoreUnexportedFields,
+			Call:                   jen.Id(xtype.ThisVar).Dot(name),
 		}
 		if ctx.PointerChange {
 			ctx.PointerChange = false

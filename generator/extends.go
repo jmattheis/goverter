@@ -240,15 +240,16 @@ func (g *generator) parseExtendFunc(fn *types.Func, opts *ParseExtendOptions) er
 
 	xsig := xtype.Signature{Source: source.String(), Target: target.String()}
 	methodDef := &methodDefinition{
-		ID:               fn.String(),
-		Explicit:         true,
-		Call:             jen.Qual(fn.Pkg().Path(), fn.Name()),
-		Name:             fn.Name(),
-		Source:           xtype.TypeOf(source),
-		Target:           xtype.TypeOf(target),
-		SelfAsFirstParam: selfAsFirstParameter,
-		ReturnError:      returnError,
-		ReturnTypeOrigin: fn.String(),
+		ID:                     fn.String(),
+		Explicit:               true,
+		Call:                   jen.Qual(fn.Pkg().Path(), fn.Name()),
+		Name:                   fn.Name(),
+		Source:                 xtype.TypeOf(source),
+		Target:                 xtype.TypeOf(target),
+		SelfAsFirstParam:       selfAsFirstParameter,
+		IgnoreUnexportedFields: g.ignoreUnexportedFields,
+		ReturnError:            returnError,
+		ReturnTypeOrigin:       fn.String(),
 	}
 	g.extend[xsig] = methodDef
 	return nil

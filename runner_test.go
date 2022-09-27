@@ -50,11 +50,12 @@ func TestScenario(t *testing.T) {
 			err = GenerateConverterFile(
 				genFile,
 				GenerateConfig{
-					PackageName:   genPkgName,
-					PackagePath:   "github.com/jmattheis/goverter/execution/" + genPkgName,
-					ScanDir:       "github.com/jmattheis/goverter/execution",
-					ExtendMethods: scenario.Extends,
-					WrapErrors:    scenario.WrapErrors,
+					PackageName:             genPkgName,
+					PackagePath:             "github.com/jmattheis/goverter/execution/" + genPkgName,
+					ScanDir:                 "github.com/jmattheis/goverter/execution",
+					ExtendMethods:           scenario.Extends,
+					WrapErrors:              scenario.WrapErrors,
+					IgnoredUnexportedFields: scenario.IgnoreUnexportedFields,
 				})
 
 			body, _ := ioutil.ReadFile(genFile)
@@ -120,8 +121,9 @@ type Scenario struct {
 
 	Success string `yaml:"success,omitempty"`
 	// for error cases, use either Error or ErrorStartsWith, not both
-	Error           string `yaml:"error,omitempty"`
-	ErrorStartsWith string `yaml:"error_starts_with,omitempty"`
+	Error                  string `yaml:"error,omitempty"`
+	ErrorStartsWith        string `yaml:"error_starts_with,omitempty"`
+	IgnoreUnexportedFields bool   `yaml:"ignore_unexported_fields,omitempty"`
 }
 
 func getCurrentPath() string {
