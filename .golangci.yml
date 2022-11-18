@@ -14,7 +14,6 @@ linters:
         - gofmt
         - gofumpt
         - goimports
-        - revive
         - gomodguard
         - goprintffuncname
         - gosimple
@@ -32,6 +31,7 @@ linters:
     disable:
         - goerr113
         - errcheck
+        - revive
         - funlen
         - gochecknoglobals
         - staticcheck
