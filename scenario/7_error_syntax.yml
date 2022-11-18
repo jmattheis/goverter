@@ -6,4 +6,10 @@ input:
         type Converter interface {
         }
         oops
-error: '/ABSOLUTE/execution/input.go:6:1: expected declaration, found oops'
+error: |-
+    could not load package github.com/jmattheis/goverter/execution
+
+    /ABSOLUTE/execution/input.go:6:1: expected declaration, found oops
+
+    Goverter cannot generate converters when there are compile errors because it
+    requires the type information from the compiled sources.

@@ -69,7 +69,12 @@ func ParseDocs(config ParseDocsConfig) ([]Converter, error) {
 	mapping := []Converter{}
 	for _, pkg := range pkgs {
 		if len(pkg.Errors) > 0 {
-			return nil, pkg.Errors[0]
+			return nil, fmt.Errorf(`could not load package %s
+
+%s
+
+Goverter cannot generate converters when there are compile errors because it
+requires the type information from the compiled sources.`, pkg.PkgPath, pkg.Errors[0])
 		}
 		for _, file := range pkg.Syntax {
 			for _, decl := range file.Decls {
