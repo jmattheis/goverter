@@ -296,6 +296,7 @@ func (g *generator) Build(
 			method.WrapErrors = ctx.WrapErrors
 			method.IgnoredFields = ctx.IgnoredFields
 			method.ExtendMapping = ctx.ExtendMapping
+			method.IdentityMapping = ctx.IdentityMapping
 		}
 
 		g.lookup[xtype.Signature{Source: source.T.String(), Target: target.T.String()}] = method
