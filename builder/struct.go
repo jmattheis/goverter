@@ -47,6 +47,10 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 
 		if def, ok := ctx.ExtendMapping[targetField.Name()]; ok {
 			params := []jen.Code{}
+			if def.SelfAsFirstParam {
+				params = append(params, jen.Id(xtype.ThisVar))
+			}
+
 			if def.Source != nil {
 				if def.Source.T.String() != source.T.String() {
 					cause := fmt.Sprintf("cannot not use\n\t%s\nbecause source type mismatch\n\nExtend method param type: %s\nConverter source type: %s", def.ID, def.Source.T.String(), source.T.String())

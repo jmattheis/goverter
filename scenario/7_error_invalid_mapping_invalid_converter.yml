@@ -15,11 +15,11 @@ input:
             Name string
             Age int
         }
-        func ExtendMethod(x, source, target int) int {
-            return target
+        func ExtendMethod(converter, source string) int {
+            return 1
         }
 error: |-
     Error while creating converter method:
         func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
 
-    ExtendMethod has too many parameters
+    ExtendMethod has two parameters the first one must be the converter interface github.com/jmattheis/goverter/execution.Converter but was string

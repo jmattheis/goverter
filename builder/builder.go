@@ -40,9 +40,10 @@ type MethodContext struct {
 }
 
 type ExtendMethod struct {
-	ID   string
-	Name string
-	Call *jen.Statement
+	ID               string
+	Name             string
+	SelfAsFirstParam bool
+	Call             *jen.Statement
 	// optional source
 	Source *xtype.Type
 	Target *xtype.Type

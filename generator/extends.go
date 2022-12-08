@@ -256,7 +256,7 @@ func (g *generator) parseExtendFunc(fn *types.Func, opts *ParseExtendOptions) er
 }
 
 // parseExtend prepares an extend conversion method using its name and a scope to search.
-func (g *generator) parseMapExtend(scope *types.Scope, methodName string) (*builder.ExtendMethod, error) {
+func (g *generator) parseMapExtend(converter types.Type, scope *types.Scope, methodName string) (*builder.ExtendMethod, error) {
 	obj := scope.Lookup(methodName)
 	if obj == nil {
 		return nil, fmt.Errorf("%s does not exist in scope", methodName)
@@ -275,9 +275,6 @@ func (g *generator) parseMapExtend(scope *types.Scope, methodName string) (*buil
 	if !ok {
 		return nil, fmt.Errorf("%s has no signature", fn.Name())
 	}
-	if sig.Params().Len() >= 2 {
-		return nil, fmt.Errorf("%s has too many parameters", fn.Name())
-	}
 	if sig.Results().Len() != 1 {
 		return nil, fmt.Errorf("%s has no or too many returns", fn.Name())
 	}
@@ -288,8 +285,20 @@ func (g *generator) parseMapExtend(scope *types.Scope, methodName string) (*buil
 		Name:   fn.Name(),
 		Target: xtype.TypeOf(sig.Results().At(0).Type()),
 	}
-	if sig.Params().Len() == 1 {
+	switch sig.Params().Len() {
+	case 2:
+		actual := sig.Params().At(0).Type().String()
+		if actual != converter.String() {
+			return nil, fmt.Errorf("%s has two parameters the first one must be the converter interface %s but was %s", fn.Name(), converter.String(), actual)
+		}
+		methodDef.SelfAsFirstParam = true
+		methodDef.Source = xtype.TypeOf(sig.Params().At(1).Type())
+	case 1:
 		methodDef.Source = xtype.TypeOf(sig.Params().At(0).Type())
+	case 0:
+		// no parameter is fine
+	default:
+		return nil, fmt.Errorf("%s has too many parameters", fn.Name())
 	}
 
 	return methodDef, nil

@@ -253,8 +253,11 @@ With `goverter:mapExtend` you can map methods to struct fields.
 1. target field path
 1. local method name
 
-The method optionally can take the source object as parameter of the conversion
-method.
+The referenced method may have:
+
+- no parameters
+- one parameter passing the source object of the conversion
+- two parameters passing the converter interface and the source object of the conversion
 
 ```go
 // goverter:converter
@@ -275,6 +278,9 @@ type Output struct {
     Age int
 }
 func ExtendFullName(source Input) string {
+    return source.FirstName + " " + source.LastName
+}
+func ExtendOther(conv Converter, source Input) string {
     return source.FirstName + " " + source.LastName
 }
 func DefaultAge() int { return 42 }

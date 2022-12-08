@@ -77,7 +77,7 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 			if m, ok := converter.Methods[method.Name()]; ok {
 				converterMethod = m
 			}
-			if err := gen.registerMethod(converter.Scope, method, converterMethod); err != nil {
+			if err := gen.registerMethod(obj.Type(), converter.Scope, method, converterMethod); err != nil {
 				return nil, fmt.Errorf("Error while creating converter method:\n    %s\n\n%s", method.String(), err)
 			}
 		}

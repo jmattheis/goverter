@@ -52,7 +52,7 @@ type generator struct {
 	ignoreUnexportedFields bool
 }
 
-func (g *generator) registerMethod(scope *types.Scope, methodType *types.Func, methodComments comments.Method) error {
+func (g *generator) registerMethod(converter types.Type, scope *types.Scope, methodType *types.Func, methodComments comments.Method) error {
 	signature, ok := methodType.Type().(*types.Signature)
 	if !ok {
 		return fmt.Errorf("expected signature %#v", methodType.Type())
@@ -95,7 +95,7 @@ func (g *generator) registerMethod(scope *types.Scope, methodType *types.Func, m
 	}
 
 	for field, target := range methodComments.ExtendMapping {
-		def, err := g.parseMapExtend(scope, target)
+		def, err := g.parseMapExtend(converter, scope, target)
 		if err != nil {
 			return err
 		}
