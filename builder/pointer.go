@@ -18,9 +18,16 @@ func (*Pointer) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, 
 	ctx.PointerChange = true
 
 	outerVar := ctx.Name(target.ID())
+	ifBlock := []jen.Code{}
 
+	valueSourceID := jen.Op("*").Add(sourceID.Code.Clone())
+	if source.PointerInner.List {
+		valueListID := ctx.Name(source.PointerInner.ID() + "SourceDeref")
+		ifBlock = append(ifBlock, jen.Id(valueListID).Op(":=").Add(valueSourceID))
+		valueSourceID = jen.Id(valueListID)
+	}
 	nextBlock, id, err := gen.Build(
-		ctx, xtype.OtherID(jen.Op("*").Add(sourceID.Code.Clone())), source.PointerInner, target.PointerInner, NoWrap)
+		ctx, xtype.OtherID(valueSourceID), source.PointerInner, target.PointerInner, NoWrap)
 	if err != nil {
 		return nil, nil, err.Lift(&Path{
 			SourceID:   "*",
@@ -29,8 +36,7 @@ func (*Pointer) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, 
 			TargetType: target.PointerInner.T.String(),
 		})
 	}
-
-	ifBlock := nextBlock
+	ifBlock = append(ifBlock, nextBlock...)
 	if id.Variable {
 		ifBlock = append(ifBlock, jen.Id(outerVar).Op("=").Op("&").Add(id.Code.Clone()))
 	} else {
