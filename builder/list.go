@@ -33,7 +33,10 @@ func (*List) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, sou
 	newStmt = append(newStmt, jen.Id(targetSlice).Index(jen.Id(index)).Op("=").Add(newID.Code))
 
 	stmt := []jen.Code{
-		jen.Id(targetSlice).Op(":=").Make(target.TypeAsJen(), jen.Len(sourceID.Code.Clone())),
+		jen.Var().Add(jen.Id(targetSlice), target.TypeAsJen()),
+		jen.If(sourceID.Code.Clone().Op("!=").Nil()).Block(
+			jen.Id(targetSlice).Op("=").Make(target.TypeAsJen(), jen.Len(sourceID.Code.Clone()), jen.Len(sourceID.Code.Clone())),
+		),
 		jen.For(jen.Id(index).Op(":=").Lit(0), jen.Id(index).Op("<").Len(sourceID.Code.Clone()), jen.Id(index).Op("++")).
 			Block(newStmt...),
 	}
