@@ -11,9 +11,12 @@ func (c *ConverterImpl) ConvertApartment(source house.DBApartment) house.APIApar
 	houseAPIApartment.Position = source.Position
 	houseAPIApartment.Owner = c.ConvertPerson(source.Owner)
 	houseAPIApartment.OwnerName = source.Owner.Name
-	houseAPIPersonList := make([]house.APIPerson, len(source.CoResident))
-	for i := 0; i < len(source.CoResident); i++ {
-		houseAPIPersonList[i] = c.ConvertPerson(source.CoResident[i])
+	var houseAPIPersonList []house.APIPerson
+	if source.CoResident != nil {
+		houseAPIPersonList = make([]house.APIPerson, len(source.CoResident))
+		for i := 0; i < len(source.CoResident); i++ {
+			houseAPIPersonList[i] = c.ConvertPerson(source.CoResident[i])
+		}
 	}
 	houseAPIApartment.CoResident = houseAPIPersonList
 	return houseAPIApartment
@@ -34,9 +37,12 @@ func (c *ConverterImpl) ConvertPerson(source house.DBPerson) house.APIPerson {
 	houseAPIPerson.MiddleName = house.SQLStringToPString(source.MiddleName)
 	pString := source.Name
 	houseAPIPerson.FirstName = &pString
-	houseAPIPersonList := make([]house.APIPerson, len(source.Friends))
-	for i := 0; i < len(source.Friends); i++ {
-		houseAPIPersonList[i] = c.ConvertPerson(source.Friends[i])
+	var houseAPIPersonList []house.APIPerson
+	if source.Friends != nil {
+		houseAPIPersonList = make([]house.APIPerson, len(source.Friends))
+		for i := 0; i < len(source.Friends); i++ {
+			houseAPIPersonList[i] = c.ConvertPerson(source.Friends[i])
+		}
 	}
 	houseAPIPerson.Friends = houseAPIPersonList
 	return houseAPIPerson

@@ -21,14 +21,17 @@ success: |
     type ConverterImpl struct{}
 
     func (c *ConverterImpl) Convert(source []string) ([]int, error) {
-    	intList := make([]int, len(source))
-    	for i := 0; i < len(source); i++ {
-    		xint, err := strconv.Atoi(source[i])
-    		if err != nil {
-    			var errValue []int
-    			return errValue, fmt.Errorf("error setting index %d: %w", i, err)
+    	var intList []int
+    	if source != nil {
+    		intList = make([]int, len(source))
+    		for i := 0; i < len(source); i++ {
+    			xint, err := strconv.Atoi(source[i])
+    			if err != nil {
+    				var errValue []int
+    				return errValue, fmt.Errorf("error setting index %d: %w", i, err)
+    			}
+    			intList[i] = xint
     		}
-    		intList[i] = xint
     	}
     	return intList, nil
     }

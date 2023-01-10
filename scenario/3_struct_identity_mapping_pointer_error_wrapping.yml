@@ -45,14 +45,17 @@ success: |
     type ConverterImpl struct{}
 
     func (c *ConverterImpl) Convert(source []execution.Person) ([]execution.APIPerson, error) {
-    	structsAPIPersonList := make([]execution.APIPerson, len(source))
-    	for i := 0; i < len(source); i++ {
-    		structsAPIPerson, err := c.ConvertPerson(source[i])
-    		if err != nil {
-    			var errValue []execution.APIPerson
-    			return errValue, fmt.Errorf("error setting index %d: %w", i, err)
+    	var structsAPIPersonList []execution.APIPerson
+    	if source != nil {
+    		structsAPIPersonList = make([]execution.APIPerson, len(source))
+    		for i := 0; i < len(source); i++ {
+    			structsAPIPerson, err := c.ConvertPerson(source[i])
+    			if err != nil {
+    				var errValue []execution.APIPerson
+    				return errValue, fmt.Errorf("error setting index %d: %w", i, err)
+    			}
+    			structsAPIPersonList[i] = structsAPIPerson
     		}
-    		structsAPIPersonList[i] = structsAPIPerson
     	}
     	return structsAPIPersonList, nil
     }

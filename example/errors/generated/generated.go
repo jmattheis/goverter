@@ -17,7 +17,8 @@ func (c *ConverterImpl) ToDBApartment(source errors.APIApartment) (errors.DBApar
 	errorsDBApartment.Position = source.Position
 	errorsDBPerson, err := errors.ToDBPerson(source.Owner)
 	if err != nil {
-		return errorsDBApartment, err
+		var errValue errors.DBApartment
+		return errValue, err
 	}
 	errorsDBApartment.Owner = errorsDBPerson
 	return errorsDBApartment, nil

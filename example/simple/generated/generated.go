@@ -7,9 +7,12 @@ import simple "github.com/jmattheis/goverter/example/simple"
 type ConverterImpl struct{}
 
 func (c *ConverterImpl) Convert(source []simple.Input) []simple.Output {
-	simpleOutputList := make([]simple.Output, len(source))
-	for i := 0; i < len(source); i++ {
-		simpleOutputList[i] = c.simpleInputToSimpleOutput(source[i])
+	var simpleOutputList []simple.Output
+	if source != nil {
+		simpleOutputList = make([]simple.Output, len(source))
+		for i := 0; i < len(source); i++ {
+			simpleOutputList[i] = c.simpleInputToSimpleOutput(source[i])
+		}
 	}
 	return simpleOutputList
 }

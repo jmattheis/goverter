@@ -15,22 +15,28 @@ success: |
     type ConverterImpl struct{}
 
     func (c *ConverterImpl) ConvertPToP(source []*int) []*int {
-    	pIntList := make([]*int, len(source))
-    	for i := 0; i < len(source); i++ {
-    		var pInt *int
-    		if source[i] != nil {
-    			xint := *source[i]
-    			pInt = &xint
+    	var pIntList []*int
+    	if source != nil {
+    		pIntList = make([]*int, len(source))
+    		for i := 0; i < len(source); i++ {
+    			var pInt *int
+    			if source[i] != nil {
+    				xint := *source[i]
+    				pInt = &xint
+    			}
+    			pIntList[i] = pInt
     		}
-    		pIntList[i] = pInt
     	}
     	return pIntList
     }
     func (c *ConverterImpl) ConvertToP(source []int) []*int {
-    	pIntList := make([]*int, len(source))
-    	for i := 0; i < len(source); i++ {
-    		pInt := source[i]
-    		pIntList[i] = &pInt
+    	var pIntList []*int
+    	if source != nil {
+    		pIntList = make([]*int, len(source))
+    		for i := 0; i < len(source); i++ {
+    			pInt := source[i]
+    			pIntList[i] = &pInt
+    		}
     	}
     	return pIntList
     }

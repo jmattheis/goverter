@@ -7,9 +7,12 @@ import mismatched "github.com/jmattheis/goverter/example/mismatched"
 type ConverterImpl struct{}
 
 func (c *ConverterImpl) Convert(source mismatched.DBCustomers) mismatched.APICustomers {
-	mismatchedAPICustomers := make(mismatched.APICustomers, len(source))
-	for i := 0; i < len(source); i++ {
-		mismatchedAPICustomers[i] = c.ToApiCustomer(source[i])
+	var mismatchedAPICustomers mismatched.APICustomers
+	if source != nil {
+		mismatchedAPICustomers = make(mismatched.APICustomers, len(source))
+		for i := 0; i < len(source); i++ {
+			mismatchedAPICustomers[i] = c.ToApiCustomer(source[i])
+		}
 	}
 	return mismatchedAPICustomers
 }

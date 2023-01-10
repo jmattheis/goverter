@@ -21,7 +21,7 @@ func (*List) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, sou
 	indexedSource := xtype.VariableID(sourceID.Code.Clone().Index(jen.Id(index)))
 
 	errWrapper := Wrap("error setting index %d", jen.Id(index))
-	newStmt, newID, err := gen.Build(ctx, indexedSource, source.ListInner, target.ListInner, errWrapper)
+	forBlock, newID, err := gen.Build(ctx, indexedSource, source.ListInner, target.ListInner, errWrapper)
 	if err != nil {
 		return nil, nil, err.Lift(&Path{
 			SourceID:   "[]",
@@ -30,12 +30,24 @@ func (*List) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, sou
 			TargetType: target.ListInner.T.String(),
 		})
 	}
-	newStmt = append(newStmt, jen.Id(targetSlice).Index(jen.Id(index)).Op("=").Add(newID.Code))
+	forBlock = append(forBlock, jen.Id(targetSlice).Index(jen.Id(index)).Op("=").Add(newID.Code))
+	forStmt := jen.For(jen.Id(index).Op(":=").Lit(0), jen.Id(index).Op("<").Len(sourceID.Code.Clone()), jen.Id(index).Op("++")).
+		Block(forBlock...)
 
-	stmt := []jen.Code{
-		jen.Id(targetSlice).Op(":=").Make(target.TypeAsJen(), jen.Len(sourceID.Code.Clone())),
-		jen.For(jen.Id(index).Op(":=").Lit(0), jen.Id(index).Op("<").Len(sourceID.Code.Clone()), jen.Id(index).Op("++")).
-			Block(newStmt...),
+	stmt := []jen.Code{}
+	if source.ListFixed {
+		stmt = []jen.Code{
+			jen.Id(targetSlice).Op(":=").Make(target.TypeAsJen(), jen.Len(sourceID.Code.Clone())),
+			forStmt,
+		}
+	} else {
+		stmt = []jen.Code{
+			jen.Var().Add(jen.Id(targetSlice), target.TypeAsJen()),
+			jen.If(sourceID.Code.Clone().Op("!=").Nil()).Block(
+				jen.Id(targetSlice).Op("=").Make(target.TypeAsJen(), jen.Len(sourceID.Code.Clone())),
+				forStmt,
+			),
+		}
 	}
 
 	return stmt, xtype.VariableID(jen.Id(targetSlice)), nil

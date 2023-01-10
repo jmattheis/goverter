@@ -26,21 +26,27 @@ success: |
     type ConverterImpl struct{}
 
     func (c *ConverterImpl) ConvertP(source []execution.Input) []*execution.Output {
-    	pSlicesOutputList := make([]*execution.Output, len(source))
-    	for i := 0; i < len(source); i++ {
-    		pSlicesOutputList[i] = c.slicesInputToPSlicesOutput(source[i])
+    	var pSlicesOutputList []*execution.Output
+    	if source != nil {
+    		pSlicesOutputList = make([]*execution.Output, len(source))
+    		for i := 0; i < len(source); i++ {
+    			pSlicesOutputList[i] = c.slicesInputToPSlicesOutput(source[i])
+    		}
     	}
     	return pSlicesOutputList
     }
     func (c *ConverterImpl) ConvertPToP(source []*execution.Input) []*execution.Output {
-    	pSlicesOutputList := make([]*execution.Output, len(source))
-    	for i := 0; i < len(source); i++ {
-    		var pSlicesOutput *execution.Output
-    		if source[i] != nil {
-    			slicesOutput := c.slicesInputToSlicesOutput(*source[i])
-    			pSlicesOutput = &slicesOutput
+    	var pSlicesOutputList []*execution.Output
+    	if source != nil {
+    		pSlicesOutputList = make([]*execution.Output, len(source))
+    		for i := 0; i < len(source); i++ {
+    			var pSlicesOutput *execution.Output
+    			if source[i] != nil {
+    				slicesOutput := c.slicesInputToSlicesOutput(*source[i])
+    				pSlicesOutput = &slicesOutput
+    			}
+    			pSlicesOutputList[i] = pSlicesOutput
     		}
-    		pSlicesOutputList[i] = pSlicesOutput
     	}
     	return pSlicesOutputList
     }

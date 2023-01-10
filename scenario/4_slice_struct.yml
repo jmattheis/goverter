@@ -25,9 +25,12 @@ success: |
     type ConverterImpl struct{}
 
     func (c *ConverterImpl) Convert(source []execution.Input) []execution.Output {
-    	slicesOutputList := make([]execution.Output, len(source))
-    	for i := 0; i < len(source); i++ {
-    		slicesOutputList[i] = c.slicesInputToSlicesOutput(source[i])
+    	var slicesOutputList []execution.Output
+    	if source != nil {
+    		slicesOutputList = make([]execution.Output, len(source))
+    		for i := 0; i < len(source); i++ {
+    			slicesOutputList[i] = c.slicesInputToSlicesOutput(source[i])
+    		}
     	}
     	return slicesOutputList
     }
