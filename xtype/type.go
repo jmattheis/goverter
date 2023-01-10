@@ -175,10 +175,7 @@ func (t *Type) asID(seeNamed, escapeReserved bool) string {
 		return "map" + strings.Title(t.MapKey.asID(true, false)+strings.Title(t.MapValue.asID(true, false)))
 	}
 	if t.Struct {
-		if escapeReserved {
-			return "xstruct"
-		}
-		return "struct"
+		return "unnamed"
 	}
 	return "unknown"
 }
@@ -209,8 +206,31 @@ func toCode(t types.Type, st *jen.Statement) *jen.Statement {
 		return toCode(cast.Elem(), st.Op("*"))
 	case *types.Basic:
 		return toCodeBasic(cast.Kind(), st)
+	case *types.Struct:
+		return toCodeStruct(cast, st)
 	}
 	panic("unsupported type " + t.String())
+}
+
+func toCodeStruct(t *types.Struct, st *jen.Statement) *jen.Statement {
+	fields := []jen.Code{}
+	for i := 0; i < t.NumFields(); i++ {
+		f := t.Field(i)
+		tag := t.Tag(i)
+
+		fieldType := toCode(f.Type(), &jen.Statement{})
+		if tag != "" {
+			fieldType = fieldType.Add(jen.Id("`" + tag + "`"))
+		}
+
+		if !f.Embedded() {
+			fieldType = jen.Id(f.Name()).Add(fieldType)
+		}
+
+		fields = append(fields, fieldType)
+	}
+
+	return st.Struct(fields...)
 }
 
 func toCodeBasic(t types.BasicKind, st *jen.Statement) *jen.Statement {
