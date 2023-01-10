@@ -32,14 +32,24 @@ func (*List) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, sou
 	}
 	newStmt = append(newStmt, jen.Id(targetSlice).Index(jen.Id(index)).Op("=").Add(newID.Code))
 
-	stmt := []jen.Code{
-		jen.Var().Add(jen.Id(targetSlice), target.TypeAsJen()),
-		jen.If(sourceID.Code.Clone().Op("!=").Nil()).Block(
-			jen.Id(targetSlice).Op("=").Make(target.TypeAsJen(), jen.Len(sourceID.Code.Clone()), jen.Len(sourceID.Code.Clone())),
-		),
-		jen.For(jen.Id(index).Op(":=").Lit(0), jen.Id(index).Op("<").Len(sourceID.Code.Clone()), jen.Id(index).Op("++")).
-			Block(newStmt...),
+	var initializeStmt []jen.Code
+	if source.ListFixed {
+		initializeStmt = []jen.Code{
+			jen.Id(targetSlice).Op(":=").Make(target.TypeAsJen(), jen.Len(sourceID.Code.Clone()), jen.Len(sourceID.Code.Clone())),
+		}
+	} else {
+		initializeStmt = []jen.Code{
+			jen.Var().Add(jen.Id(targetSlice), target.TypeAsJen()),
+			jen.If(sourceID.Code.Clone().Op("!=").Nil()).Block(
+				jen.Id(targetSlice).Op("=").Make(target.TypeAsJen(), jen.Len(sourceID.Code.Clone()), jen.Len(sourceID.Code.Clone())),
+			),
+		}
 	}
+
+	loopAssignStmt := jen.For(jen.Id(index).Op(":=").Lit(0), jen.Id(index).Op("<").Len(sourceID.Code.Clone()), jen.Id(index).Op("++")).
+		Block(newStmt...)
+
+	stmt := append(initializeStmt, loopAssignStmt)
 
 	return stmt, xtype.VariableID(jen.Id(targetSlice)), nil
 }
