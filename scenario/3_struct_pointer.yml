@@ -39,8 +39,8 @@ success: |
     	var pPStructsX **execution.X
     	if source.Age != nil {
     		var pStructsX *execution.X
-    		if *source.Age != nil {
-    			structsX := c.structsXToStructsX(**source.Age)
+    		if (*source.Age) != nil {
+    			structsX := c.structsXToStructsX((*(*source.Age)))
     			pStructsX = &structsX
     		}
     		pPStructsX = &pStructsX
@@ -52,7 +52,7 @@ success: |
     	var structsX execution.X
     	var pStructsY *execution.Y
     	if source.Y != nil {
-    		structsY := c.structsYToStructsY(*source.Y)
+    		structsY := c.structsYToStructsY((*source.Y))
     		pStructsY = &structsY
     	}
     	structsX.Y = pStructsY
@@ -62,7 +62,7 @@ success: |
     	var structsY execution.Y
     	var pStructsZ *execution.Z
     	if source.Z != nil {
-    		structsZ := c.structsZToStructsZ(*source.Z)
+    		structsZ := c.structsZToStructsZ((*source.Z))
     		pStructsZ = &structsZ
     	}
     	structsY.Z = pStructsZ

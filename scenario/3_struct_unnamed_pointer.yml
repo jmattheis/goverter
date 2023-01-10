@@ -8,14 +8,18 @@ input:
         }
 
         type Input struct {
-            House []struct {
-                Name string
+            House *struct {
+                Inner *struct {
+                    Name string
+                }
             }
         }
 
         type Output struct {
-            House []struct {
-                Name string
+            House *struct {
+                Inner *struct {
+                    Name string
+                }
             }
         }
 success: |
@@ -29,21 +33,30 @@ success: |
 
     func (c *ConverterImpl) ConvertHouse(source execution.Input) execution.Output {
     	var structsOutput execution.Output
-    	var unnamedList []struct {
-    		Name string
-    	}
-    	if source.House != nil {
-    		unnamedList = make([]struct {
+    	var pUnnamed *struct {
+    		Inner *struct {
     			Name string
-    		}, len(source.House))
-    		for i := 0; i < len(source.House); i++ {
-    			var unnamed struct {
-    				Name string
-    			}
-    			unnamed.Name = source.House[i].Name
-    			unnamedList[i] = unnamed
     		}
     	}
-    	structsOutput.House = unnamedList
+    	if source.House != nil {
+    		var unnamed struct {
+    			Inner *struct {
+    				Name string
+    			}
+    		}
+    		var pUnnamed2 *struct {
+    			Name string
+    		}
+    		if (*source.House).Inner != nil {
+    			var unnamed2 struct {
+    				Name string
+    			}
+    			unnamed2.Name = (*(*source.House).Inner).Name
+    			pUnnamed2 = &unnamed2
+    		}
+    		unnamed.Inner = pUnnamed2
+    		pUnnamed = &unnamed
+    	}
+    	structsOutput.House = pUnnamed
     	return structsOutput
     }

@@ -29,25 +29,38 @@ success: |
 
     func (c *ConverterImpl) ConvertHouse(source execution.Input) execution.Output {
     	var structsOutput execution.Output
-    	unnamedListList := make([][]struct {
+    	var unnamedListList [][]struct {
     		Names []string
-    	}, len(source.House))
-    	for i := 0; i < len(source.House); i++ {
-    		unnamedList := make([]struct {
+    	}
+    	if source.House != nil {
+    		unnamedListList = make([][]struct {
     			Names []string
-    		}, len(source.House[i]))
-    		for j := 0; j < len(source.House[i]); j++ {
-    			var unnamed struct {
+    		}, len(source.House))
+    		for i := 0; i < len(source.House); i++ {
+    			var unnamedList []struct {
     				Names []string
     			}
-    			stringList := make([]string, len(source.House[i][j].Names))
-    			for k := 0; k < len(source.House[i][j].Names); k++ {
-    				stringList[k] = source.House[i][j].Names[k]
+    			if source.House[i] != nil {
+    				unnamedList = make([]struct {
+    					Names []string
+    				}, len(source.House[i]))
+    				for j := 0; j < len(source.House[i]); j++ {
+    					var unnamed struct {
+    						Names []string
+    					}
+    					var stringList []string
+    					if source.House[i][j].Names != nil {
+    						stringList = make([]string, len(source.House[i][j].Names))
+    						for k := 0; k < len(source.House[i][j].Names); k++ {
+    							stringList[k] = source.House[i][j].Names[k]
+    						}
+    					}
+    					unnamed.Names = stringList
+    					unnamedList[j] = unnamed
+    				}
     			}
-    			unnamed.Names = stringList
-    			unnamedList[j] = unnamed
+    			unnamedListList[i] = unnamedList
     		}
-    		unnamedListList[i] = unnamedList
     	}
     	structsOutput.House = unnamedListList
     	return structsOutput

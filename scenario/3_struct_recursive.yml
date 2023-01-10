@@ -32,7 +32,7 @@ success: |
     	structsOutput.Age = source.Age
     	var pStructsOutput *execution.Output
     	if source.Value != nil {
-    		structsOutput2 := c.Convert(*source.Value)
+    		structsOutput2 := c.Convert((*source.Value))
     		pStructsOutput = &structsOutput2
     	}
     	structsOutput.Value = pStructsOutput

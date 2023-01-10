@@ -33,7 +33,7 @@ success: |
     func (c *ConverterImpl) Convert(source *execution.In) *execution.Out {
     	var pStructsOut *execution.Out
     	if source != nil {
-    		structsOut := c.structsInToStructsOut(*source)
+    		structsOut := c.structsInToStructsOut((*source))
     		pStructsOut = &structsOut
     	}
     	return pStructsOut

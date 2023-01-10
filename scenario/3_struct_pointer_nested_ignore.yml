@@ -37,7 +37,7 @@ success: |
     func (c *ConverterImpl) Convert(source *execution.InputOne) *execution.OutputOne {
     	var pStructsOutputOne *execution.OutputOne
     	if source != nil {
-    		structsOutputOne := c.structsInputOneToStructsOutputOne(*source)
+    		structsOutputOne := c.structsInputOneToStructsOutputOne((*source))
     		pStructsOutputOne = &structsOutputOne
     	}
     	return pStructsOutputOne

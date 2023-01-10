@@ -28,7 +28,7 @@ success: |
     func (c *ConverterImpl) Convert(source *execution.Input) *execution.Output {
     	var pStructsOutput *execution.Output
     	if source != nil {
-    		structsOutput := c.structsInputToStructsOutput(*source)
+    		structsOutput := c.structsInputToStructsOutput((*source))
     		pStructsOutput = &structsOutput
     	}
     	return pStructsOutput

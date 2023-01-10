@@ -35,7 +35,7 @@ success: |
     	var structsApiModel execution.ApiModel
     	var pStructsApiInner *execution.ApiInner
     	if source.Inner != nil {
-    		structsApiInner := c.structsDBInnerToStructsApiInner(*source.Inner)
+    		structsApiInner := c.structsDBInnerToStructsApiInner((*source.Inner))
     		pStructsApiInner = &structsApiInner
     	}
     	structsApiModel.Inner = pStructsApiInner

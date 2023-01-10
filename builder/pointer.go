@@ -21,10 +21,8 @@ func (*Pointer) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, 
 	ifBlock := []jen.Code{}
 
 	valueSourceID := jen.Op("*").Add(sourceID.Code.Clone())
-	if source.PointerInner.List {
-		valueListID := ctx.Name(source.PointerInner.ID() + "SourceDeref")
-		ifBlock = append(ifBlock, jen.Id(valueListID).Op(":=").Add(valueSourceID))
-		valueSourceID = jen.Id(valueListID)
+	if !source.PointerInner.Basic {
+		valueSourceID = jen.Parens(valueSourceID)
 	}
 	nextBlock, id, err := gen.Build(
 		ctx, xtype.OtherID(valueSourceID), source.PointerInner, target.PointerInner, NoWrap)

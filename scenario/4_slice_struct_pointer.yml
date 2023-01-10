@@ -42,7 +42,7 @@ success: |
     		for i := 0; i < len(source); i++ {
     			var pSlicesOutput *execution.Output
     			if source[i] != nil {
-    				slicesOutput := c.slicesInputToSlicesOutput(*source[i])
+    				slicesOutput := c.slicesInputToSlicesOutput((*source[i]))
     				pSlicesOutput = &slicesOutput
     			}
     			pSlicesOutputList[i] = pSlicesOutput

@@ -25,9 +25,12 @@ success: |
 
     func (c *ConverterImpl) ConvertHouse(source execution.DBHouseNames) execution.APIHouseNames {
     	var slices_arraysAPIHouseNames execution.APIHouseNames
-    	stringList := make([]string, len(source.Names))
-    	for i := 0; i < len(source.Names); i++ {
-    		stringList[i] = source.Names[i]
+    	var stringList []string
+    	if source.Names != nil {
+    		stringList = make([]string, len(source.Names))
+    		for i := 0; i < len(source.Names); i++ {
+    			stringList[i] = source.Names[i]
+    		}
     	}
     	pStringList := &stringList
     	pPStringList := &pStringList
