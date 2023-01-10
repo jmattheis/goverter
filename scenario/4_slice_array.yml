@@ -14,7 +14,7 @@ success: |
     type ConverterImpl struct{}
 
     func (c *ConverterImpl) Convert(source [5]int) []int {
-    	intList := make([]int, len(source))
+    	intList := make([]int, len(source), len(source))
     	for i := 0; i < len(source); i++ {
     		intList[i] = source[i]
     	}

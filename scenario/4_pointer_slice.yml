@@ -28,7 +28,10 @@ success: |
     	var pStringList *[]string
     	if source.Names != nil {
     		stringListSourceDeref := *source.Names
-    		stringList := make([]string, len(stringListSourceDeref))
+    		var stringList []string
+    		if stringListSourceDeref != nil {
+    			stringList = make([]string, len(stringListSourceDeref), len(stringListSourceDeref))
+    		}
     		for i := 0; i < len(stringListSourceDeref); i++ {
     			stringList[i] = stringListSourceDeref[i]
     		}

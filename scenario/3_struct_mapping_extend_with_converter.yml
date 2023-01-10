@@ -45,14 +45,20 @@ success: |
     	return pStructsOutput
     }
     func (c *ConverterImpl) ConvertCats(source []execution.Cat) []execution.Animal {
-    	structsAnimalList := make([]execution.Animal, len(source))
+    	var structsAnimalList []execution.Animal
+    	if source != nil {
+    		structsAnimalList = make([]execution.Animal, len(source), len(source))
+    	}
     	for i := 0; i < len(source); i++ {
     		structsAnimalList[i] = c.structsCatToStructsAnimal(source[i])
     	}
     	return structsAnimalList
     }
     func (c *ConverterImpl) ConvertDogs(source []execution.Dog) []execution.Animal {
-    	structsAnimalList := make([]execution.Animal, len(source))
+    	var structsAnimalList []execution.Animal
+    	if source != nil {
+    		structsAnimalList = make([]execution.Animal, len(source), len(source))
+    	}
     	for i := 0; i < len(source); i++ {
     		structsAnimalList[i] = c.structsDogToStructsAnimal(source[i])
     	}

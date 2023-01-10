@@ -21,7 +21,10 @@ success: |
     type ConverterImpl struct{}
 
     func (c *ConverterImpl) Convert(source []string) ([]int, error) {
-    	intList := make([]int, len(source))
+    	var intList []int
+    	if source != nil {
+    		intList = make([]int, len(source), len(source))
+    	}
     	for i := 0; i < len(source); i++ {
     		xint, err := strconv.Atoi(source[i])
     		if err != nil {
