@@ -45,14 +45,24 @@ type ConverterConfig struct {
 
 // Method contains settings that can be set via comments.
 type Method struct {
-	IgnoredFields   map[string]struct{}
-	NameMapping     map[string]string
 	MatchIgnoreCase bool
 	WrapErrors      bool
-	// target to source
-	IdentityMapping map[string]struct{}
-	// mapping function to source
-	ExtendMapping map[string]string
+	Fields          map[string]*FieldMapping
+}
+
+func (m *Method) Field(targetName string) *FieldMapping {
+	target, ok := m.Fields[targetName]
+	if !ok {
+		target = &FieldMapping{}
+		m.Fields[targetName] = target
+	}
+	return target
+}
+
+type FieldMapping struct {
+	Source   string
+	Function string
+	Ignore   bool
 }
 
 // ParseDocs parses the docs for the given pattern.
@@ -213,10 +223,7 @@ func parseConverterComment(comment string, config ConverterConfig) (ConverterCon
 func parseMethodComment(comment string) (Method, error) {
 	scanner := bufio.NewScanner(strings.NewReader(comment))
 	m := Method{
-		NameMapping:     map[string]string{},
-		IgnoredFields:   map[string]struct{}{},
-		IdentityMapping: map[string]struct{}{},
-		ExtendMapping:   map[string]string{},
+		Fields: map[string]*FieldMapping{},
 	}
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
@@ -231,23 +238,25 @@ func parseMethodComment(comment string) (Method, error) {
 				if len(fields) != 3 {
 					return m, fmt.Errorf("invalid %s:map must have two parameter", prefix)
 				}
-				m.NameMapping[fields[2]] = fields[1]
+				m.Field(fields[2]).Source = fields[1]
 				continue
 			case "mapIdentity":
 				for _, f := range fields[1:] {
-					m.IdentityMapping[f] = struct{}{}
+					m.Field(f).Source = "."
 				}
 				continue
 			case "ignore":
 				for _, f := range fields[1:] {
-					m.IgnoredFields[f] = struct{}{}
+					m.Field(f).Ignore = true
 				}
 				continue
 			case "mapExtend":
 				if len(fields) != 3 {
 					return m, fmt.Errorf("invalid %s:mapExtend must have two parameter", prefix)
 				}
-				m.ExtendMapping[fields[1]] = fields[2]
+				f := m.Field(fields[1])
+				f.Function = fields[2]
+				f.Source = "."
 				continue
 			case "matchIgnoreCase":
 				if len(fields) != 1 {

@@ -26,7 +26,10 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 
 	for i := 0; i < target.StructType.NumFields(); i++ {
 		targetField := target.StructType.Field(i)
-		if _, ignore := ctx.IgnoredFields[targetField.Name()]; ignore {
+
+		fieldMapping := ctx.Field(targetField.Name())
+
+		if fieldMapping.Ignore {
 			continue
 		}
 		if !targetField.Exported() && ctx.IgnoreUnexportedFields {
@@ -45,7 +48,8 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 
 		targetFieldType := xtype.TypeOf(targetField.Type())
 
-		if def, ok := ctx.ExtendMapping[targetField.Name()]; ok {
+		if fieldMapping.Function != nil {
+			def := fieldMapping.Function
 			params := []jen.Code{}
 			if def.SelfAsFirstParam {
 				params = append(params, jen.Id(xtype.ThisVar))
@@ -87,7 +91,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 		// search their codebase/repo for the exact message match, in full. Inline the error message AS IS into the
 		// generated code to satisfy this search and speed up the troubleshooting efforts.
 		errWrapper := Wrap("error setting field " + targetField.Name())
-		if _, ok := ctx.IdentityMapping[targetField.Name()]; ok {
+		if fieldMapping.Source == "." {
 			fieldStmt, fieldID, err := gen.Build(ctx, sourceID, source, targetFieldType, errWrapper)
 			if err != nil {
 				return nil, nil, err.Lift(&Path{
@@ -122,10 +126,14 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 
 func mapField(gen Generator, ctx *MethodContext, targetField *types.Var, sourceID *xtype.JenID, source, target *xtype.Type) (*jen.Statement, *xtype.Type, []jen.Code, []*Path, *Error) {
 	lift := []*Path{}
+	ignored := func(name string) bool {
+		return ctx.Field(name).Ignore
+	}
 
-	mappedName, hasOverride := ctx.Mapping[targetField.Name()]
+	mappedName := ctx.Field(targetField.Name()).Source
+	hasOverride := mappedName != ""
 	if ctx.Signature.Target != target.T.String() || !hasOverride {
-		sourceMatch, err := source.StructField(targetField.Name(), ctx.MatchIgnoreCase, ctx.IgnoredFields)
+		sourceMatch, err := source.StructField(targetField.Name(), ctx.MatchIgnoreCase, ignored)
 		if err == nil {
 			nextID := sourceID.Code.Clone().Dot(sourceMatch.Name)
 			lift = append(lift, &Path{
@@ -172,7 +180,7 @@ func mapField(gen Generator, ctx *MethodContext, targetField *types.Var, sourceI
 			}).Lift(lift...)
 		}
 		// since we are searching for a mapped name, search for exact match, explicit field map does not ignore case
-		sourceMatch, err := nextSource.StructField(path[i], false, ctx.IgnoredFields)
+		sourceMatch, err := nextSource.StructField(path[i], false, ignored)
 		if err == nil {
 			nextSource = sourceMatch.Type
 			nextID = nextID.Clone().Dot(sourceMatch.Name)

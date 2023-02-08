@@ -27,11 +27,8 @@ type Generator interface {
 // MethodContext exposes information for the current method.
 type MethodContext struct {
 	*namer.Namer
-	Mapping                map[string]string
-	ExtendMapping          map[string]*ExtendMethod
-	IgnoredFields          map[string]struct{}
+	Fields                 map[string]*FieldMapping
 	IgnoreUnexportedFields bool
-	IdentityMapping        map[string]struct{}
 	Signature              xtype.Signature
 	TargetType             *xtype.Type
 	PointerChange          bool
@@ -39,6 +36,21 @@ type MethodContext struct {
 	WrapErrors             bool
 }
 
+func (ctx *MethodContext) Field(name string) *FieldMapping {
+	prop, ok := ctx.Fields[name]
+	if !ok {
+		return emptyMapping
+	}
+	return prop
+}
+
+var emptyMapping *FieldMapping = &FieldMapping{}
+
+type FieldMapping struct {
+	Source   string
+	Ignore   bool
+	Function *ExtendMethod
+}
 type ExtendMethod struct {
 	ID               string
 	Name             string
