@@ -37,7 +37,7 @@ use reflection.
   [Docs](#extend-with-custom-implementation)
 - Optional return of an error: [Docs](#errors)
 - Awesome error
-  messages: [mismatch type test](https://github.com/jmattheis/goverter/blob/main/scenario/7_error_nested_mismatch.yml)
+  messages: [mismatch type test](https://github.com/jmattheis/goverter/blob/main/scenario/type_mismatch.yml)
 - No reflection in the generated code
 
 ## Usage

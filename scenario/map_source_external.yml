@@ -1,0 +1,21 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:mapExtend Age strconv:Atoi
+            Convert(source Input) Output
+        }
+
+        type Input struct {
+            Age string
+        }
+        type Output struct {
+            Age int
+        }
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+
+    strconv:Atoi does not exist in scope
