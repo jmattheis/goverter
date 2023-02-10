@@ -10,5 +10,5 @@ error: |-
     Error while parsing extend in
         github.com/jmattheis/goverter/execution.Converter
 
-    method name pattern is required in the extend statement "strconv:".
-    See https://github.com/jmattheis/goverter#extend-with-custom-implementation
+    method name pattern is required in the custom method "strconv:".
+    See https://goverter.jmattheis.de/#/conversion/custom

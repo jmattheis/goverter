@@ -3,21 +3,16 @@ input:
         package structs
 
         // goverter:converter
-        // goverter:extend InputToOutput
         type Converter interface {
+            // goverter:map Age | strconv:Atoi
             Convert(source Input) Output
         }
 
         type Input struct {
-            ID int
-            Age int
-        }
-        type Output struct {
-            ID int
             Age string
         }
-        func InputToOutput(source Input) (Output, error) {
-            return Output{}, nil
+        type Output struct {
+            Age int
         }
 error: |-
     Error while creating converter method:
@@ -25,14 +20,18 @@ error: |-
 
     | github.com/jmattheis/goverter/execution.Input
     |
-    source
-    target
+    |      | string
+    |      |
+    source.Age
+    target.Age
+    |      |
+    |      | int
     |
     | github.com/jmattheis/goverter/execution.Output
 
     ReturnTypeMismatch: Cannot use
 
-        func github.com/jmattheis/goverter/execution.InputToOutput(source github.com/jmattheis/goverter/execution.Input) (github.com/jmattheis/goverter/execution.Output, error)
+        func strconv.Atoi(s string) (int, error)
 
     in
 

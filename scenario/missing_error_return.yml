@@ -39,4 +39,4 @@ error: |-
 
         func (github.com/jmattheis/goverter/execution.Converter).Convert(source []github.com/jmattheis/goverter/execution.Input) []github.com/jmattheis/goverter/execution.Output
 
-    because no error is returned as second parameter
+    because no error is returned as second return parameter

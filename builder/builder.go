@@ -22,6 +22,13 @@ type Generator interface {
 		sourceID *xtype.JenID,
 		source, target *xtype.Type,
 		errWrapper ErrorWrapper) ([]jen.Code, *xtype.JenID, *Error)
+
+	CallExtendMethod(
+		ctx *MethodContext,
+		method *ExtendMethod,
+		sourceID *xtype.JenID,
+		source, target *xtype.Type,
+		errWrapper ErrorWrapper) ([]jen.Code, *xtype.JenID, *Error)
 }
 
 // MethodContext exposes information for the current method.
@@ -55,10 +62,9 @@ type ExtendMethod struct {
 	ID               string
 	Name             string
 	SelfAsFirstParam bool
+	ReturnError      bool
 	Call             *jen.Statement
 	// optional source
 	Source *xtype.Type
 	Target *xtype.Type
-
-	Jen jen.Code
 }

@@ -183,7 +183,7 @@ func (g *generator) buildMethod(method *methodDefinition, errWrapper builder.Err
 	var newID *xtype.JenID
 	var err *builder.Error
 	if extendMethod, ok := g.extend[ctx.Signature]; ok {
-		stmt, newID, err = g.callMethod(
+		stmt, newID, err = g.callByDefinition(
 			ctx, extendMethod, xtype.VariableID(sourceID.Clone()), source, target, errWrapper)
 	} else {
 		stmt, newID, err = g.buildNoLookup(ctx, xtype.VariableID(sourceID.Clone()), source, target)
@@ -215,9 +215,51 @@ func (g *generator) buildNoLookup(ctx *builder.MethodContext, sourceID *xtype.Je
 	return nil, nil, builder.NewError(fmt.Sprintf("TypeMismatch: Cannot convert %s to %s", source.T, target.T))
 }
 
-func (g *generator) callMethod(
+type callableMethod struct {
+	ID               string
+	Call             *jen.Statement
+	SelfAsFirstParam bool
+	ReturnError      bool
+	ReturnTypeOrigin string
+}
+
+func (g *generator) callByDefinition(
 	ctx *builder.MethodContext,
 	method *methodDefinition,
+	sourceID *xtype.JenID,
+	source, target *xtype.Type,
+	errWrapper builder.ErrorWrapper,
+) ([]jen.Code, *xtype.JenID, *builder.Error) {
+	callable := &callableMethod{
+		ID:               method.ID,
+		Call:             method.Call,
+		ReturnError:      method.ReturnError,
+		ReturnTypeOrigin: method.ReturnTypeOrigin,
+		SelfAsFirstParam: method.SelfAsFirstParam,
+	}
+	return g.callMethod(ctx, callable, sourceID, source, target, errWrapper)
+}
+
+func (g *generator) CallExtendMethod(
+	ctx *builder.MethodContext,
+	method *builder.ExtendMethod,
+	sourceID *xtype.JenID,
+	source, target *xtype.Type,
+	errWrapper builder.ErrorWrapper,
+) ([]jen.Code, *xtype.JenID, *builder.Error) {
+	callable := &callableMethod{
+		ID:               method.ID,
+		Call:             method.Call,
+		ReturnError:      method.ReturnError,
+		ReturnTypeOrigin: method.ID,
+		SelfAsFirstParam: method.SelfAsFirstParam,
+	}
+	return g.callMethod(ctx, callable, sourceID, source, target, errWrapper)
+}
+
+func (g *generator) callMethod(
+	ctx *builder.MethodContext,
+	method *callableMethod,
 	sourceID *xtype.JenID,
 	source, target *xtype.Type,
 	errWrapper builder.ErrorWrapper,
@@ -226,12 +268,14 @@ func (g *generator) callMethod(
 	if method.SelfAsFirstParam {
 		params = append(params, jen.Id(xtype.ThisVar))
 	}
-	params = append(params, sourceID.Code.Clone())
+	if sourceID != nil {
+		params = append(params, sourceID.Code.Clone())
+	}
 	if method.ReturnError {
 		current := g.lookup[ctx.Signature]
 		if !current.ReturnError {
 			if current.Explicit {
-				return nil, nil, builder.NewError(fmt.Sprintf("ReturnTypeMismatch: Cannot use\n\n    %s\n\nin\n\n    %s\n\nbecause no error is returned as second parameter", method.ReturnTypeOrigin, current.ID))
+				return nil, nil, builder.NewError(fmt.Sprintf("ReturnTypeMismatch: Cannot use\n\n    %s\n\nin\n\n    %s\n\nbecause no error is returned as second return parameter", method.ReturnTypeOrigin, current.ID))
 			}
 			current.ReturnError = true
 			current.ReturnTypeOrigin = method.ID
@@ -273,7 +317,7 @@ func (g *generator) Build(
 	}
 
 	if ok {
-		return g.callMethod(ctx, method, sourceID, source, target, errWrapper)
+		return g.callByDefinition(ctx, method, sourceID, source, target, errWrapper)
 	}
 
 	if (source.Named && !source.Basic) || (target.Named && !target.Basic) {

@@ -1,0 +1,22 @@
+input:
+    input.go: |
+        package execution
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:map Age | :IntToString
+            Convert(source Input) Output
+        }
+
+        type Input struct {
+            Age   int
+        }
+        type Output struct {
+            Age   string
+        }
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+
+    package path must not be empty in the custom method ":IntToString".
+    See https://goverter.jmattheis.de/#/conversion/custom

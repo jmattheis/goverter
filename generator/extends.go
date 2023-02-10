@@ -132,33 +132,37 @@ func (g *generator) searchExtendsInScope(scope *types.Scope, opts *ParseExtendOp
 	return loaded, nil
 }
 
+func splitCustomMethod(fullMethod string) (path, name string, err error) {
+	parts := strings.SplitN(fullMethod, packageNameSep, 2)
+	switch len(parts) {
+	case 0:
+		return "", "", fmt.Errorf("Invalid custom method: %s", fullMethod)
+	case 1:
+		name = parts[0]
+	case 2:
+		path = parts[0]
+		name = parts[1]
+		if path == "" {
+			// example: goverter:extend :MyLocalConvert
+			// the purpose of the ':' in this case is confusing, do not allow such case
+			return "", "", fmt.Errorf(`package path must not be empty in the custom method "%s".
+See https://goverter.jmattheis.de/#/conversion/custom`, fullMethod)
+		}
+	}
+
+	if name == "" {
+		return "", "", fmt.Errorf(`method name pattern is required in the custom method "%s".
+See https://goverter.jmattheis.de/#/conversion/custom`, fullMethod)
+	}
+	return
+}
+
 // parseExtend prepares a list of extend methods for use.
 func (g *generator) parseExtend(converterInterface types.Type, converterScope *types.Scope, methods []string) error {
 	for _, methodName := range methods {
-		parts := strings.SplitN(methodName, packageNameSep, 2)
-		var pkgPath, namePattern string
-		switch len(parts) {
-		case 0:
-			continue
-		case 1:
-			// name only, ignore empty inputs
-			namePattern = parts[0]
-			if namePattern == "" {
-				continue
-			}
-		case 2:
-			pkgPath = parts[0]
-			if pkgPath == "" {
-				// example: goverter:extend :MyLocalConvert
-				// the purpose of the ':' in this case is confusing, do not allow such case
-				return fmt.Errorf(`package path must not be empty in the extend statement "%s".
-See https://github.com/jmattheis/goverter#extend-with-custom-implementation`, methodName)
-			}
-			namePattern = parts[1]
-			if namePattern == "" {
-				return fmt.Errorf(`method name pattern is required in the extend statement "%s".
-See https://github.com/jmattheis/goverter#extend-with-custom-implementation`, methodName)
-			}
+		pkgPath, namePattern, err := splitCustomMethod(methodName)
+		if err != nil {
+			return err
 		}
 
 		pattern, err := regexp.Compile(namePattern)
@@ -256,34 +260,61 @@ func (g *generator) parseExtendFunc(fn *types.Func, opts *ParseExtendOptions) er
 }
 
 // parseExtend prepares an extend conversion method using its name and a scope to search.
-func (g *generator) parseMapExtend(converter types.Type, scope *types.Scope, methodName string) (*builder.ExtendMethod, error) {
-	obj := scope.Lookup(methodName)
+func (g *generator) parseMapExtend(converter types.Type, scope *types.Scope, fullMethod string) (*builder.ExtendMethod, error) {
+	pkgPath, name, err := splitCustomMethod(fullMethod)
+	if err != nil {
+		return nil, err
+	}
+
+	useScope := scope
+
+	if pkgPath != "" {
+		pkgs, err := g.loadPackages(pkgPath)
+		if err != nil {
+			return nil, err
+		}
+		if len(pkgs) != 1 {
+			return nil, fmt.Errorf("'%s' package path matches multiple packages, it must match exactly one.", fullMethod)
+		}
+		useScope = pkgs[0].Types.Scope()
+	}
+
+	obj := useScope.Lookup(name)
 	if obj == nil {
-		return nil, fmt.Errorf("%s does not exist in scope", methodName)
+		return nil, fmt.Errorf("%s does not exist in scope", fullMethod)
 	}
 
 	fn, ok := obj.(*types.Func)
 	if !ok {
-		return nil, fmt.Errorf("%s is not a function", methodName)
+		return nil, fmt.Errorf("%s is not a function", fullMethod)
 	}
 
 	if !fn.Exported() {
-		return nil, fmt.Errorf("method %s is unexported", fn.Name())
+		return nil, fmt.Errorf("method %s is unexported", fullMethod)
 	}
 
 	sig, ok := fn.Type().(*types.Signature)
 	if !ok {
-		return nil, fmt.Errorf("%s has no signature", fn.Name())
+		return nil, fmt.Errorf("%s has no signature", fullMethod)
 	}
-	if sig.Results().Len() != 1 {
+	if sig.Results().Len() == 0 || sig.Results().Len() > 2 {
 		return nil, fmt.Errorf("%s has no or too many returns", fn.Name())
+	}
+	returnError := false
+	if sig.Results().Len() == 2 {
+		if i, ok := sig.Results().At(1).Type().(*types.Named); ok && i.Obj().Name() == "error" && i.Obj().Pkg() == nil {
+			returnError = true
+		} else {
+			return nil, fmt.Errorf("second return parameter must have type error but had: %s", sig.Results().At(1).Type())
+		}
 	}
 
 	methodDef := &builder.ExtendMethod{
-		ID:     fn.String(),
-		Call:   jen.Qual(fn.Pkg().Path(), fn.Name()),
-		Name:   fn.Name(),
-		Target: xtype.TypeOf(sig.Results().At(0).Type()),
+		ID:          fn.String(),
+		ReturnError: returnError,
+		Call:        jen.Qual(fn.Pkg().Path(), fn.Name()),
+		Name:        fn.Name(),
+		Target:      xtype.TypeOf(sig.Results().At(0).Type()),
 	}
 	switch sig.Params().Len() {
 	case 2:

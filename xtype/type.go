@@ -279,5 +279,5 @@ Explicitly define the mapping via goverter:map. Example:
 
     goverter:map %s %s
 
-See https://github.com/jmattheis/goverter#struct-field-mapping`, name, strings.Join(ambNames, ", "), ambNames[0], name)
+See https://goverter.jmattheis.de/#/conversion/mapping`, name, strings.Join(ambNames, ", "), ambNames[0], name)
 }

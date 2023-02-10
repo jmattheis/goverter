@@ -1,25 +1,26 @@
 input:
+    external/method.go: |
+        package external
+        func IntToString(int) string {
+            return ""
+        }
     input.go: |
-        package structs
+        package execution
 
         // goverter:converter
         type Converter interface {
-            // goverter:mapExtend Age PluckAgeInt
+            // goverter:map Age | github.com/jmattheis/goverter/...:IntToString
             Convert(source Input) Output
         }
 
         type Input struct {
-            Name string
+            Age   int
         }
         type Output struct {
-            Name string
-            Age int
-        }
-        func PluckAgeInt(source Input) (int, int) {
-            return 1, 1
+            Age   string
         }
 error: |-
     Error while creating converter method:
         func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
 
-    PluckAgeInt has no or too many returns
+    'github.com/jmattheis/goverter/...:IntToString' package path matches multiple packages, it must match exactly one.

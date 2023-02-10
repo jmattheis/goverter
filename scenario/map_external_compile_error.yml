@@ -1,0 +1,27 @@
+input:
+    external/method.go: |
+        package external
+        func IntToString(int) string {
+            return 5
+        }
+    input.go: |
+        package execution
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:map Age | github.com/jmattheis/goverter/execution/external:IntToString
+            Convert(source Input) Output
+        }
+
+        type Input struct {
+            Age   int
+        }
+        type Output struct {
+            Age   string
+        }
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+
+    failed to load package "github.com/jmattheis/goverter/execution/external", try adding a blank import for it: -: # github.com/jmattheis/goverter/execution/external
+    execution/external/method.go:3:12: cannot use 5 (untyped int constant) as string value in return statement

@@ -74,6 +74,8 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 			}
 
 			sourceLift := []*Path{}
+			var functionCallSourceID *xtype.JenID
+			var functionCallSourceType *xtype.Type
 			if def.Source != nil {
 				nextID, nextSource, mapStmt, mapLift, err := mapField(gen, ctx, targetField, sourceID, source, target)
 				if err != nil {
@@ -94,7 +96,8 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 						SourceType: def.ID,
 					}).Lift(sourceLift...)
 				}
-				params = append(params, nextID.Clone())
+				functionCallSourceID = xtype.VariableID(nextID.Clone())
+				functionCallSourceType = nextSource
 			}
 
 			if def.Target.T.String() != targetFieldType.T.String() {
@@ -111,7 +114,12 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 					SourceType: def.ID,
 				}).Lift(sourceLift...)
 			}
-			stmt = append(stmt, jen.Id(name).Dot(targetField.Name()).Op("=").Add(def.Call.Clone().Call(params...)))
+			callStmt, callReturnID, err := gen.CallExtendMethod(ctx, fieldMapping.Function, functionCallSourceID, functionCallSourceType, targetFieldType, errWrapper)
+			if err != nil {
+				return nil, nil, err.Lift(sourceLift...)
+			}
+			stmt = append(stmt, callStmt...)
+			stmt = append(stmt, jen.Id(name).Dot(targetField.Name()).Op("=").Add(callReturnID.Code))
 		}
 	}
 
@@ -244,22 +252,9 @@ func unexportedStructError(targetField, sourceType, targetType string) string {
 
 Possible solutions:
 
-* Ignore the given field with:
+* Ignore the given field:
+  https://goverter.jmattheis.de/#/conversion/mapping?id=ignore
 
-      // goverter:ignore %s
-
-* Convert the struct yourself and use goverter for converting nested structs / maps / lists.
-
-* Create a custom converter function (only works, if the struct with unexported fields is nested inside another struct)
-
-      func CustomConvert(source %s) %s {
-          // implement me
-      }
-
-      // goverter:extend CustomConvert
-      type MyConverter interface {
-          // ...
-      }
-
-See https://github.com/jmattheis/goverter#extend-with-custom-implementation`, targetField, targetField, sourceType, targetType)
+* Create a custom converter function:
+  https://goverter.jmattheis.de/#/conversion/custom`, targetField)
 }
