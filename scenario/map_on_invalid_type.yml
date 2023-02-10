@@ -1,0 +1,30 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:map Lastname Surname
+            ConvertPerson(source []Person) []APIPerson
+        }
+
+        type Person struct {
+            Lastname string
+        }
+
+        type APIPerson struct {
+            Surename string
+        }
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).ConvertPerson(source []github.com/jmattheis/goverter/execution.Person) []github.com/jmattheis/goverter/execution.APIPerson
+
+    | []github.com/jmattheis/goverter/execution.Person
+    |
+    source
+    target
+    |
+    | []github.com/jmattheis/goverter/execution.APIPerson
+
+    Invalid struct field mapping. Field mappings like goverter:map or goverter:ignore may only be set on struct or struct pointers.
+    See https://goverter.jmattheis.de/#/conversion/configure-nested
