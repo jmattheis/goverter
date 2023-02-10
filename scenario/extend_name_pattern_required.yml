@@ -11,4 +11,4 @@ error: |-
         github.com/jmattheis/goverter/execution.Converter
 
     method name pattern is required in the extend statement "strconv:".
-    See https://github.com/jmattheis/goverter#extend-with-custom-implementation
+    See https://goverter.jmattheis.de/#/conversion/custom

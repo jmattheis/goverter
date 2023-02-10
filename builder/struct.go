@@ -244,22 +244,9 @@ func unexportedStructError(targetField, sourceType, targetType string) string {
 
 Possible solutions:
 
-* Ignore the given field with:
+* Ignore the given field:
+  https://goverter.jmattheis.de/#/conversion/mapping?id=ignore
 
-      // goverter:ignore %s
-
-* Convert the struct yourself and use goverter for converting nested structs / maps / lists.
-
-* Create a custom converter function (only works, if the struct with unexported fields is nested inside another struct)
-
-      func CustomConvert(source %s) %s {
-          // implement me
-      }
-
-      // goverter:extend CustomConvert
-      type MyConverter interface {
-          // ...
-      }
-
-See https://github.com/jmattheis/goverter#extend-with-custom-implementation`, targetField, targetField, sourceType, targetType)
+* Create a custom converter function:
+  https://goverter.jmattheis.de/#/conversion/custom`, targetField)
 }

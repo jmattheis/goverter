@@ -36,4 +36,4 @@ error: |-
 
         goverter:map MyID Myid
 
-    See https://github.com/jmattheis/goverter#struct-field-mapping.
+    See https://goverter.jmattheis.de/#/conversion/mapping.
