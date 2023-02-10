@@ -1,43 +1,23 @@
-<p align="center">
-    <img width="300" src=".github/logo.svg" />
-</p>
-
-<h1 align="center">goverter</h1>
-<p align="center"><i>a "type-safe Go converter" generator</i></p>
-<p align="center">
-    <a href="https://github.com/jmattheis/goverter/actions/workflows/build.yml">
-        <img alt="Build Status" src="https://github.com/jmattheis/goverter/actions/workflows/build.yml/badge.svg">
-    </a>
-     <a href="https://codecov.io/gh/jmattheis/goverter">
-        <img alt="codecov" src="https://codecov.io/gh/jmattheis/goverter/branch/main/graph/badge.svg">
-    </a>
-    <a href="https://goreportcard.com/report/github.com/jmattheis/goverter">
-        <img alt="Go Report Card" src="https://goreportcard.com/badge/github.com/jmattheis/goverter">
-    </a>
-    <a href="https://pkg.go.dev/github.com/jmattheis/goverter">
-        <img alt="Go Reference" src="https://pkg.go.dev/badge/github.com/jmattheis/goverter.svg">
-    </a>
-    <a href="https://github.com/jmattheis/goverter/releases/latest">
-        <img alt="latest release" src="https://img.shields.io/github/release/jmattheis/goverter.svg">
-    </a>
-</p>
+<a href="https://github.com/jmattheis/goverter/actions/workflows/build.yml">
+    <img alt="Build Status" src="https://github.com/jmattheis/goverter/actions/workflows/build.yml/badge.svg">
+</a>
+<a href="https://codecov.io/gh/jmattheis/goverter">
+    <img alt="codecov" src="https://codecov.io/gh/jmattheis/goverter/branch/main/graph/badge.svg">
+</a>
+<a href="https://goreportcard.com/report/github.com/jmattheis/goverter">
+    <img alt="Go Report Card" src="https://goreportcard.com/badge/github.com/jmattheis/goverter">
+</a>
+<a href="https://pkg.go.dev/github.com/jmattheis/goverter">
+    <img alt="Go Reference" src="https://pkg.go.dev/badge/github.com/jmattheis/goverter.svg">
+</a>
+<a href="https://github.com/jmattheis/goverter/releases/latest">
+    <img alt="latest release" src="https://img.shields.io/github/release/jmattheis/goverter.svg">
+</a>
 
 goverter is a tool for creating type-safe converters. All you have to
 do is create an interface and execute goverter. The project is meant as
 alternative to [jinzhu/copier](https://github.com/jinzhu/copier) that doesn't
 use reflection.
-
-[Installation](https://goverter.jmattheis.de/#/install) ᛫ [Conversion Docs](https://goverter.jmattheis.de/#/conversion)
-
-## Features
-
-- Automatic conversion of builtin types
-  ([`house` example](https://github.com/jmattheis/goverter/blob/main/example/house)), this includes:
-  - slices, maps, named types, primitive types, pointers
-  - structs with same fields
-- [You can implement custom converter methods](https://goverter.jmattheis.de/#/conversion/custom)
-- [Awesome error messages](https://goverter.jmattheis.de/#/conversion/?id=error-early)
-- No reflection in the generated code
 
 ## Usage
 
@@ -113,14 +93,3 @@ use reflection.
         return exampleOutputList
     }
     ```
-
-## Versioning
-
-goverter uses [SemVer](http://semver.org/) for versioning the cli.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE)
-file for details
-
-_Logo by [MariaLetta](https://github.com/MariaLetta)_
