@@ -10,5 +10,5 @@ error: |-
     Error while parsing extend in
         github.com/jmattheis/goverter/execution.Converter
 
-    package path must not be empty in the extend statement ":Convert".
+    package path must not be empty in the custom method ":Convert".
     See https://goverter.jmattheis.de/#/conversion/custom

@@ -1,21 +1,26 @@
 input:
+    external/method.go: |
+        package external
+        func intToString(int) string {
+            return ""
+        }
     input.go: |
-        package structs
+        package execution
 
         // goverter:converter
         type Converter interface {
-            // goverter:mapExtend Age strconv:Atoi
+            // goverter:map Age | github.com/jmattheis/goverter/execution/external:intToString
             Convert(source Input) Output
         }
 
         type Input struct {
-            Age string
+            Age   int
         }
         type Output struct {
-            Age int
+            Age   string
         }
 error: |-
     Error while creating converter method:
         func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
 
-    strconv:Atoi has no or too many returns
+    method github.com/jmattheis/goverter/execution/external:intToString is unexported

@@ -378,8 +378,10 @@ The `[Mapping Method]` may have:
 -   one parameter passing the source of the conversion
 -   two parameters passing the converter interface and the source of the conversion
 
-Currently it's not possible to use an external method as `[Mapping Method]`,
-and to return errors in this method.
+You can extend methods from external packages by separating the package path
+with `:` from the method.
+
+!> The mapping method currently may not return an error. See https://github.com/jmattheis/goverter/issues/43
 
 <!-- tabs:start -->
 
@@ -393,6 +395,7 @@ type Converter interface {
     // goverter:map URL | PrependHTTPS
     // goverter:map . FullName | GetFullName
     // goverter:map Age | DefaultAge
+    // goverter:map Value | strconv:Itoa
     Convert(Input) (Output, error)
 }
 
@@ -401,11 +404,15 @@ type Input struct{
 
     FirstName string
     LastName  string
+
+    Value int
 }
 type Output struct{
     URL      string
     FullName string
     Age      int
+
+    Value string
 }
 
 func GetFullName(input Input) string {
@@ -426,7 +433,10 @@ func DefaultAge() int {
 ```go
 package generated
 
-import example "goverter/example"
+import (
+	example "goverter/example"
+	"strconv"
+)
 
 type ConverterImpl struct{}
 
@@ -435,6 +445,7 @@ func (c *ConverterImpl) Convert(source example.Input) (example.Output, error) {
 	exampleOutput.URL = example.PrependHTTPS(source.URL)
 	exampleOutput.FullName = example.GetFullName(source)
 	exampleOutput.Age = example.DefaultAge()
+	exampleOutput.Value = strconv.Itoa(source.Value)
 	return exampleOutput, nil
 }
 ```
