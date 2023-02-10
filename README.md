@@ -27,7 +27,7 @@ do is create an interface and execute goverter. The project is meant as
 alternative to [jinzhu/copier](https://github.com/jinzhu/copier) that doesn't
 use reflection.
 
-[Installation](https://goverter.jmattheis.de/#/install) ᛫ [Conversion Docs](https://goverter.jmattheis.de/#/conversion)
+[Installation](https://goverter.jmattheis.de/#/install) ᛫ [Conversion Docs](https://goverter.jmattheis.de/#/conversion/)
 
 ## Features
 
@@ -77,7 +77,7 @@ use reflection.
     }
     ```
 
-    See [Conversion](https://goverter.jmattheis.de/#/conversion) for more information.
+    See [Conversion](https://goverter.jmattheis.de/#/conversion/) for more information.
 
 1. Run `goverter`:
 
