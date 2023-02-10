@@ -232,40 +232,69 @@ func parseMethodComment(comment string) (Method, error) {
 			if cmd == "" {
 				return m, fmt.Errorf("unknown %s comment: %s", prefix, line)
 			}
-			fields := strings.Fields(cmd)
-			switch fields[0] {
+			parts := strings.SplitN(cmd, " ", 2)
+			key := parts[0]
+
+			remaining := ""
+			if len(parts) == 2 {
+				remaining = parts[1]
+			}
+			switch key {
 			case "map":
-				if len(fields) != 3 {
-					return m, fmt.Errorf("invalid %s:map must have two parameter", prefix)
+				parts := strings.SplitN(remaining, "|", 2)
+				fields := strings.Fields(parts[0])
+				custom := ""
+				if len(parts) == 2 {
+					custom = strings.TrimSpace(parts[1])
 				}
-				m.Field(fields[2]).Source = fields[1]
+
+				if len(fields) == 1 {
+					fields = append(fields, fields[0])
+				}
+
+				if len(fields) == 0 {
+					return m, fmt.Errorf("invalid %s:map missing target field", prefix)
+				}
+
+				if len(fields) > 2 {
+					return m, fmt.Errorf("invalid %s:map too many fields", prefix)
+				}
+
+				f := m.Field(fields[1])
+				f.Function = custom
+				f.Source = fields[0]
 				continue
 			case "mapIdentity":
-				for _, f := range fields[1:] {
+				fields := strings.Fields(remaining)
+				for _, f := range fields {
 					m.Field(f).Source = "."
 				}
 				continue
 			case "ignore":
-				for _, f := range fields[1:] {
+				fields := strings.Fields(remaining)
+				for _, f := range fields {
 					m.Field(f).Ignore = true
 				}
 				continue
 			case "mapExtend":
-				if len(fields) != 3 {
+				fields := strings.Fields(remaining)
+				if len(fields) != 2 {
 					return m, fmt.Errorf("invalid %s:mapExtend must have two parameter", prefix)
 				}
-				f := m.Field(fields[1])
-				f.Function = fields[2]
+				f := m.Field(fields[0])
+				f.Function = fields[1]
 				f.Source = "."
 				continue
 			case "matchIgnoreCase":
-				if len(fields) != 1 {
+				fields := strings.Fields(remaining)
+				if len(fields) != 0 {
 					return m, fmt.Errorf("invalid %s:matchIgnoreCase, parameters not supported", prefix)
 				}
 				m.MatchIgnoreCase = true
 				continue
 			case "wrapErrors":
-				if len(fields) != 1 {
+				fields := strings.Fields(remaining)
+				if len(fields) != 0 {
 					return m, fmt.Errorf("invalid %s:wrapErrors, parameters not supported", prefix)
 				}
 				m.WrapErrors = true

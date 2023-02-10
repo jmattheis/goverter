@@ -24,10 +24,18 @@ error: |-
 
     | github.com/jmattheis/goverter/execution.Input
     |
-    |      | func github.com/jmattheis/goverter/execution.Identity(source int) int
+    |      | goverter:map . Score
     |      |
-    source.<mapExtend>
+    |      |     | func github.com/jmattheis/goverter/execution.Identity(source int) int
+    |      |     |
+    |      |     |        | int
+    |      |     |        |
+    source.     :Identity(source)
     target.Score
+    |      |
+    |      |
+    |      |
+    |      |
     |      |
     |      | int
     |

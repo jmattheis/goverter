@@ -1,0 +1,64 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:map A.B.Relative Absolute | ToAbsolute
+            ConvertPerson(source Input) Output
+        }
+
+        type Input struct {
+            A A
+        }
+        type A struct {
+            B B
+        }
+        type B struct {
+            Relative string
+        }
+
+        type Output struct {
+            Absolute string
+        }
+
+        func ToAbsolute(s int) string {
+            return "https://example.org/"
+        }
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).ConvertPerson(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+
+    | github.com/jmattheis/goverter/execution.Input
+    |
+    |      | github.com/jmattheis/goverter/execution.A
+    |      |
+    |      | | github.com/jmattheis/goverter/execution.B
+    |      | |
+    |      | | | string
+    |      | | |
+    |      | | |        | func github.com/jmattheis/goverter/execution.ToAbsolute(s int) string
+    |      | | |        |
+    |      | | |        |          | int
+    |      | | |        |          |
+    source.A.B.Relative:ToAbsolute(source)
+    target    .Absolute
+    |          |
+    |          |
+    |          |
+    |          |
+    |          |
+    |          | string
+    |
+    |
+    |
+    |
+    |
+    | github.com/jmattheis/goverter/execution.Output
+
+    cannot not use
+    	func github.com/jmattheis/goverter/execution.ToAbsolute(s int) string
+    because source type mismatch
+
+    Extend method param type: int
+    Converter source type: string

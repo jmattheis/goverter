@@ -28,7 +28,7 @@ error: |-
     |      |
     |      |           | string
     |      |           |
-    source.<mapExtend>.()
+    source:DefaultName.()
     target            .Score
     |                  |
     |                  | int

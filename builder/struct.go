@@ -48,25 +48,53 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 
 		targetFieldType := xtype.TypeOf(targetField.Type())
 
-		if fieldMapping.Function != nil {
+		// To find out the source code for an error message like "error setting field PostalCode", people sometimes
+		// search their codebase/repo for the exact message match, in full. Inline the error message AS IS into the
+		// generated code to satisfy this search and speed up the troubleshooting efforts.
+		errWrapper := Wrap("error setting field " + targetField.Name())
+
+		if fieldMapping.Function == nil {
+			nextID, nextSource, mapStmt, lift, err := mapField(gen, ctx, targetField, sourceID, source, target)
+			if err != nil {
+				return nil, nil, err
+			}
+			stmt = append(stmt, mapStmt...)
+
+			fieldStmt, fieldID, err := gen.Build(ctx, xtype.VariableID(nextID), nextSource, targetFieldType, errWrapper)
+			if err != nil {
+				return nil, nil, err.Lift(lift...)
+			}
+			stmt = append(stmt, fieldStmt...)
+			stmt = append(stmt, jen.Id(name).Dot(targetField.Name()).Op("=").Add(fieldID.Code))
+		} else {
 			def := fieldMapping.Function
 			params := []jen.Code{}
 			if def.SelfAsFirstParam {
 				params = append(params, jen.Id(xtype.ThisVar))
 			}
 
+			sourceLift := []*Path{}
 			if def.Source != nil {
-				if def.Source.T.String() != source.T.String() {
-					cause := fmt.Sprintf("cannot not use\n\t%s\nbecause source type mismatch\n\nExtend method param type: %s\nConverter source type: %s", def.ID, def.Source.T.String(), source.T.String())
-					return nil, nil, NewError(cause).Lift(&Path{
-						Prefix:     ".",
-						SourceID:   "<mapExtend>",
-						SourceType: def.ID,
-						TargetID:   targetField.Name(),
-						TargetType: targetField.Type().String(),
-					})
+				nextID, nextSource, mapStmt, mapLift, err := mapField(gen, ctx, targetField, sourceID, source, target)
+				if err != nil {
+					return nil, nil, err
 				}
-				params = append(params, sourceID.Code.Clone())
+				sourceLift = mapLift
+				stmt = append(stmt, mapStmt...)
+
+				if def.Source.T.String() != nextSource.T.String() {
+					cause := fmt.Sprintf("cannot not use\n\t%s\nbecause source type mismatch\n\nExtend method param type: %s\nConverter source type: %s", def.ID, def.Source.T.String(), nextSource.T.String())
+					return nil, nil, NewError(cause).Lift(&Path{
+						Prefix:     "(",
+						SourceID:   "source)",
+						SourceType: def.Source.T.String(),
+					}).Lift(&Path{
+						Prefix:     ":",
+						SourceID:   def.Name,
+						SourceType: def.ID,
+					}).Lift(sourceLift...)
+				}
+				params = append(params, nextID.Clone())
 			}
 
 			if def.Target.T.String() != targetFieldType.T.String() {
@@ -78,47 +106,13 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 					TargetID:   targetField.Name(),
 					TargetType: targetField.Type().String(),
 				}).Lift(&Path{
-					Prefix:     ".",
-					SourceID:   "<mapExtend>",
+					Prefix:     ":",
+					SourceID:   def.Name,
 					SourceType: def.ID,
-				})
+				}).Lift(sourceLift...)
 			}
 			stmt = append(stmt, jen.Id(name).Dot(targetField.Name()).Op("=").Add(def.Call.Clone().Call(params...)))
-			continue
 		}
-
-		// To find out the source code for an error message like "error setting field PostalCode", people sometimes
-		// search their codebase/repo for the exact message match, in full. Inline the error message AS IS into the
-		// generated code to satisfy this search and speed up the troubleshooting efforts.
-		errWrapper := Wrap("error setting field " + targetField.Name())
-		if fieldMapping.Source == "." {
-			fieldStmt, fieldID, err := gen.Build(ctx, sourceID, source, targetFieldType, errWrapper)
-			if err != nil {
-				return nil, nil, err.Lift(&Path{
-					Prefix:     ".",
-					SourceID:   "<mapIdentity>",
-					SourceType: source.T.String(),
-					TargetID:   targetField.Name(),
-					TargetType: targetField.Type().String(),
-				})
-			}
-			stmt = append(stmt, fieldStmt...)
-			stmt = append(stmt, jen.Id(name).Dot(targetField.Name()).Op("=").Add(fieldID.Code))
-			continue
-		}
-
-		nextID, nextSource, mapStmt, lift, err := mapField(gen, ctx, targetField, sourceID, source, target)
-		if err != nil {
-			return nil, nil, err
-		}
-		stmt = append(stmt, mapStmt...)
-
-		fieldStmt, fieldID, err := gen.Build(ctx, xtype.VariableID(nextID), nextSource, targetFieldType, errWrapper)
-		if err != nil {
-			return nil, nil, err.Lift(lift...)
-		}
-		stmt = append(stmt, fieldStmt...)
-		stmt = append(stmt, jen.Id(name).Dot(targetField.Name()).Op("=").Add(fieldID.Code))
 	}
 
 	return stmt, xtype.VariableID(jen.Id(name)), nil
@@ -130,7 +124,9 @@ func mapField(gen Generator, ctx *MethodContext, targetField *types.Var, sourceI
 		return ctx.Field(name).Ignore
 	}
 
-	mappedName := ctx.Field(targetField.Name()).Source
+	def := ctx.Field(targetField.Name())
+	mappedName := def.Source
+
 	hasOverride := mappedName != ""
 	if ctx.Signature.Target != target.T.String() || !hasOverride {
 		sourceMatch, err := source.StructField(targetField.Name(), ctx.MatchIgnoreCase, ignored)
@@ -155,12 +151,24 @@ func mapField(gen Generator, ctx *MethodContext, targetField *types.Var, sourceI
 		})
 	}
 
-	path := strings.Split(mappedName, ".")
 	var condition *jen.Statement
 
 	stmt := []jen.Code{}
 	nextID := sourceID.Code
 	nextSource := source
+
+	if mappedName == "." {
+		lift = append(lift, &Path{
+			Prefix:     ".",
+			SourceID:   " ",
+			SourceType: "goverter:map . " + targetField.Name(),
+			TargetID:   targetField.Name(),
+			TargetType: targetField.Type().String(),
+		})
+		return nextID, nextSource, stmt, lift, nil
+	}
+
+	path := strings.Split(mappedName, ".")
 	for i := 0; i < len(path); i++ {
 		if nextSource.Pointer {
 			addCondition := nextID.Clone().Op("!=").Nil()
