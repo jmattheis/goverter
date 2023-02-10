@@ -4,7 +4,7 @@ input:
 
         // goverter:converter
         type Converter interface {
-            // goverter:mapExtend Score Identity
+            // goverter:mapExtend Score DefaultName
             Convert(source Input) Output
         }
 
@@ -15,8 +15,8 @@ input:
             Name string
             Score int
         }
-        func Identity(source int) int {
-            return source
+        func DefaultName() string {
+            return "Joe"
         }
 error: |-
     Error while creating converter method:
@@ -24,18 +24,17 @@ error: |-
 
     | github.com/jmattheis/goverter/execution.Input
     |
-    |      | func github.com/jmattheis/goverter/execution.Identity(source int) int
+    |      | func github.com/jmattheis/goverter/execution.DefaultName() string
     |      |
-    source.<mapExtend>
-    target.Score
-    |      |
-    |      | int
+    |      |           | string
+    |      |           |
+    source:DefaultName.()
+    target            .Score
+    |                  |
+    |                  | int
+    |
+    |
     |
     | github.com/jmattheis/goverter/execution.Output
 
-    cannot not use
-    	func github.com/jmattheis/goverter/execution.Identity(source int) int
-    because source type mismatch
-
-    Extend method param type: int
-    Converter source type: github.com/jmattheis/goverter/execution.Input
+    Extend method return type mismatches with target: string != int

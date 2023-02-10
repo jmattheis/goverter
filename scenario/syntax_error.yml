@@ -9,7 +9,8 @@ input:
 error: |-
     could not load package github.com/jmattheis/goverter/execution
 
-    /ABSOLUTE/execution/input.go:6:1: expected declaration, found oops
+    -: # github.com/jmattheis/goverter/execution
+    execution/input.go:6:1: syntax error: non-declaration statement outside function body
 
     Goverter cannot generate converters when there are compile errors because it
     requires the type information from the compiled sources.

@@ -20,6 +20,14 @@ input:
             ConvertComplex64(source complex64) complex64
             ConvertFloat32(source float32) float32
             ConvertFloat64(source float64) float64
+
+            ConvertPString(source string) *string
+            ConvertPPString(source *string) *string
+
+            Convert(source ID) OtherID
+            Convert2(source ID) *OtherID
+            Convert3(source int) *OtherID
+            Convert4(source ID) int
         }
         type ID int
         type OtherID int
@@ -28,8 +36,24 @@ success: |
 
     package generated
 
+    import execution "github.com/jmattheis/goverter/execution"
+
     type ConverterImpl struct{}
 
+    func (c *ConverterImpl) Convert(source execution.ID) execution.OtherID {
+    	return execution.OtherID(source)
+    }
+    func (c *ConverterImpl) Convert2(source execution.ID) *execution.OtherID {
+    	pPrimitiveOtherID := c.Convert(source)
+    	return &pPrimitiveOtherID
+    }
+    func (c *ConverterImpl) Convert3(source int) *execution.OtherID {
+    	pPrimitiveOtherID := execution.OtherID(source)
+    	return &pPrimitiveOtherID
+    }
+    func (c *ConverterImpl) Convert4(source execution.ID) int {
+    	return int(source)
+    }
     func (c *ConverterImpl) ConvertBool(source bool) bool {
     	return source
     }
@@ -59,6 +83,18 @@ success: |
     }
     func (c *ConverterImpl) ConvertInt8(source int8) int8 {
     	return source
+    }
+    func (c *ConverterImpl) ConvertPPString(source *string) *string {
+    	var pString *string
+    	if source != nil {
+    		xstring := c.ConvertString(*source)
+    		pString = &xstring
+    	}
+    	return pString
+    }
+    func (c *ConverterImpl) ConvertPString(source string) *string {
+    	pString := c.ConvertString(source)
+    	return &pString
     }
     func (c *ConverterImpl) ConvertString(source string) string {
     	return source

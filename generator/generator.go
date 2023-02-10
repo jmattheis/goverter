@@ -15,16 +15,14 @@ import (
 )
 
 type methodDefinition struct {
-	ID              string
-	Explicit        bool
-	Name            string
-	Call            *jen.Statement
-	Source          *xtype.Type
-	Target          *xtype.Type
-	Mapping         map[string]string
-	IgnoredFields   map[string]struct{}
-	IdentityMapping map[string]struct{}
-	ExtendMapping   map[string]*builder.ExtendMethod
+	ID       string
+	Explicit bool
+	Name     string
+	Call     *jen.Statement
+	Source   *xtype.Type
+	Target   *xtype.Type
+
+	Fields          map[string]*builder.FieldMapping
 	MatchIgnoreCase bool
 	WrapErrors      bool
 
@@ -76,6 +74,22 @@ func (g *generator) registerMethod(converter types.Type, scope *types.Scope, met
 		}
 	}
 
+	builderProperties := map[string]*builder.FieldMapping{}
+
+	for name, property := range methodComments.Fields {
+		builderProperties[name] = &builder.FieldMapping{
+			Ignore: property.Ignore,
+			Source: property.Source,
+		}
+		if property.Function != "" {
+			def, err := g.parseMapExtend(converter, scope, property.Function)
+			if err != nil {
+				return err
+			}
+			builderProperties[name].Function = def
+		}
+	}
+
 	m := &methodDefinition{
 		Call:                   jen.Id(xtype.ThisVar).Dot(methodType.Name()),
 		ID:                     methodType.String(),
@@ -83,23 +97,12 @@ func (g *generator) registerMethod(converter types.Type, scope *types.Scope, met
 		Name:                   methodType.Name(),
 		Source:                 xtype.TypeOf(source),
 		Target:                 xtype.TypeOf(target),
-		Mapping:                methodComments.NameMapping,
+		Fields:                 builderProperties,
 		MatchIgnoreCase:        methodComments.MatchIgnoreCase,
 		IgnoreUnexportedFields: g.ignoreUnexportedFields,
 		WrapErrors:             methodComments.WrapErrors,
-		IgnoredFields:          methodComments.IgnoredFields,
-		IdentityMapping:        methodComments.IdentityMapping,
-		ExtendMapping:          map[string]*builder.ExtendMethod{},
 		ReturnError:            returnError,
 		ReturnTypeOrigin:       methodType.FullName(),
-	}
-
-	for field, target := range methodComments.ExtendMapping {
-		def, err := g.parseMapExtend(converter, scope, target)
-		if err != nil {
-			return err
-		}
-		m.ExtendMapping[field] = def
 	}
 
 	g.lookup[xtype.Signature{
@@ -168,11 +171,8 @@ func (g *generator) buildMethod(method *methodDefinition, errWrapper builder.Err
 
 	ctx := &builder.MethodContext{
 		Namer:                  namer.New(),
-		Mapping:                method.Mapping,
-		ExtendMapping:          method.ExtendMapping,
-		IgnoredFields:          method.IgnoredFields,
+		Fields:                 method.Fields,
 		IgnoreUnexportedFields: method.IgnoreUnexportedFields,
-		IdentityMapping:        method.IdentityMapping,
 		MatchIgnoreCase:        method.MatchIgnoreCase,
 		WrapErrors:             method.WrapErrors,
 		TargetType:             method.Target,
@@ -284,19 +284,15 @@ func (g *generator) Build(
 			Name:                   name,
 			Source:                 xtype.TypeOf(source.T),
 			Target:                 xtype.TypeOf(target.T),
-			Mapping:                map[string]string{},
-			IgnoredFields:          map[string]struct{}{},
+			Fields:                 map[string]*builder.FieldMapping{},
 			IgnoreUnexportedFields: g.ignoreUnexportedFields,
 			Call:                   jen.Id(xtype.ThisVar).Dot(name),
 		}
 		if ctx.PointerChange {
 			ctx.PointerChange = false
-			method.Mapping = ctx.Mapping
+			method.Fields = ctx.Fields
 			method.MatchIgnoreCase = ctx.MatchIgnoreCase
 			method.WrapErrors = ctx.WrapErrors
-			method.IgnoredFields = ctx.IgnoredFields
-			method.ExtendMapping = ctx.ExtendMapping
-			method.IdentityMapping = ctx.IdentityMapping
 		}
 
 		g.lookup[xtype.Signature{Source: source.T.String(), Target: target.T.String()}] = method

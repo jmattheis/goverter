@@ -49,7 +49,7 @@ type StructField struct {
 // StructField returns the type of a struct field and its name upon successful match or
 // an error if it is not found. This method will also return a detailed error if matchIgnoreCase
 // is enabled and there are multiple non-exact matches.
-func (t Type) StructField(name string, ignoreCase bool, ignore map[string]struct{}) (*StructField, error) {
+func (t Type) StructField(name string, ignoreCase bool, ignored func(name string) bool) (*StructField, error) {
 	if !t.Struct {
 		panic("trying to get field of non struct")
 	}
@@ -57,7 +57,7 @@ func (t Type) StructField(name string, ignoreCase bool, ignore map[string]struct
 	var ambMatches []*StructField
 	for y := 0; y < t.StructType.NumFields(); y++ {
 		m := t.StructType.Field(y)
-		if _, ignored := ignore[m.Name()]; ignored {
+		if ignored(m.Name()) {
 			continue
 		}
 		if m.Name() == name {

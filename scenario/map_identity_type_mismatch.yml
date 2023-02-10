@@ -31,14 +31,14 @@ error: |-
 
     | github.com/jmattheis/goverter/execution.Person
     |
-    |      | github.com/jmattheis/goverter/execution.Person
+    |      | goverter:map . Address
     |      |
-    |      |             | *string
-    |      |             |
-    source.<mapIdentity>.City
-    target.Address      .City
-    |      |             |
-    |      |             | string
+    |      |       | *string
+    |      |       |
+    source.       .City
+    target.Address.City
+    |      |       |
+    |      |       | string
     |      |
     |      | github.com/jmattheis/goverter/execution.APIAddress
     |
