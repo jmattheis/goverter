@@ -4,7 +4,7 @@ input:
 
         // goverter:converter
         type Converter interface {
-            // goverter:mapExtend Age PluckAgeInt
+            // goverter:map Age | PluckAgeInt
             Convert(source Input) Output
         }
 
@@ -22,4 +22,4 @@ error: |-
     Error while creating converter method:
         func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
 
-    PluckAgeInt has no or too many returns
+    second return parameter must have type error but had: int

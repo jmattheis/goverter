@@ -4,18 +4,22 @@ input:
 
         // goverter:converter
         type Converter interface {
-            // goverter:mapExtend Age strconv:Atoi
+            // goverter:map Age | PluckAgeInt
             Convert(source Input) Output
         }
 
         type Input struct {
-            Age string
+            Name string
         }
         type Output struct {
+            Name string
             Age int
+        }
+        func PluckAgeInt(source Input) (int, int, int) {
+            return 1, 1, 1
         }
 error: |-
     Error while creating converter method:
         func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
 
-    strconv:Atoi has no or too many returns
+    PluckAgeInt has no or too many returns

@@ -297,15 +297,24 @@ func (g *generator) parseMapExtend(converter types.Type, scope *types.Scope, ful
 	if !ok {
 		return nil, fmt.Errorf("%s has no signature", fullMethod)
 	}
-	if sig.Results().Len() != 1 {
-		return nil, fmt.Errorf("%s has no or too many returns", fullMethod)
+	if sig.Results().Len() == 0 || sig.Results().Len() > 2 {
+		return nil, fmt.Errorf("%s has no or too many returns", fn.Name())
+	}
+	returnError := false
+	if sig.Results().Len() == 2 {
+		if i, ok := sig.Results().At(1).Type().(*types.Named); ok && i.Obj().Name() == "error" && i.Obj().Pkg() == nil {
+			returnError = true
+		} else {
+			return nil, fmt.Errorf("second return parameter must have type error but had: %s", sig.Results().At(1).Type())
+		}
 	}
 
 	methodDef := &builder.ExtendMethod{
-		ID:     fn.String(),
-		Call:   jen.Qual(fn.Pkg().Path(), fn.Name()),
-		Name:   fn.Name(),
-		Target: xtype.TypeOf(sig.Results().At(0).Type()),
+		ID:          fn.String(),
+		ReturnError: returnError,
+		Call:        jen.Qual(fn.Pkg().Path(), fn.Name()),
+		Name:        fn.Name(),
+		Target:      xtype.TypeOf(sig.Results().At(0).Type()),
 	}
 	switch sig.Params().Len() {
 	case 2:

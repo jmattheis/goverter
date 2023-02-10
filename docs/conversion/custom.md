@@ -381,8 +381,6 @@ The `[Mapping Method]` may have:
 You can extend methods from external packages by separating the package path
 with `:` from the method.
 
-!> The mapping method currently may not return an error. See https://github.com/jmattheis/goverter/issues/43
-
 <!-- tabs:start -->
 
 #### **input.go**
@@ -446,6 +444,64 @@ func (c *ConverterImpl) Convert(source example.Input) (example.Output, error) {
 	exampleOutput.FullName = example.GetFullName(source)
 	exampleOutput.Age = example.DefaultAge()
 	exampleOutput.Value = strconv.Itoa(source.Value)
+	return exampleOutput, nil
+}
+```
+
+<!-- tabs:end -->
+
+### Mapping Method with error
+
+The `[Mapping Method]` can optionally return an error as second return
+parameter.
+
+<!-- tabs:start -->
+
+#### **input.go**
+
+```go
+package example
+
+import "strconv"
+
+// goverter:converter
+type Converter interface {
+	// goverter:map NumberString Number | ParseInt
+	Convert(Input) (Output, error)
+}
+
+type Input struct {
+	Name  string
+	NumberString string
+}
+type Output struct {
+	Name  string
+	Number int
+}
+
+func ParseInt(s string) (int, error) {
+	return strconv.Atoi(s)
+}
+```
+
+#### **generated/generated.go**
+
+```go
+package generated
+
+import example "goverter/example"
+
+type ConverterImpl struct{}
+
+func (c *ConverterImpl) Convert(source example.Input) (example.Output, error) {
+	var exampleOutput example.Output
+	exampleOutput.Name = source.Name
+	xint, err := example.ParseInt(source.NumberString)
+	if err != nil {
+		var errValue example.Output
+		return errValue, err
+	}
+	exampleOutput.Number = xint
 	return exampleOutput, nil
 }
 ```

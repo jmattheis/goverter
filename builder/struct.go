@@ -74,6 +74,8 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 			}
 
 			sourceLift := []*Path{}
+			var functionCallSourceID *xtype.JenID
+			var functionCallSourceType *xtype.Type
 			if def.Source != nil {
 				nextID, nextSource, mapStmt, mapLift, err := mapField(gen, ctx, targetField, sourceID, source, target)
 				if err != nil {
@@ -94,7 +96,8 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 						SourceType: def.ID,
 					}).Lift(sourceLift...)
 				}
-				params = append(params, nextID.Clone())
+				functionCallSourceID = xtype.VariableID(nextID.Clone())
+				functionCallSourceType = nextSource
 			}
 
 			if def.Target.T.String() != targetFieldType.T.String() {
@@ -111,7 +114,12 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 					SourceType: def.ID,
 				}).Lift(sourceLift...)
 			}
-			stmt = append(stmt, jen.Id(name).Dot(targetField.Name()).Op("=").Add(def.Call.Clone().Call(params...)))
+			callStmt, callReturnID, err := gen.CallExtendMethod(ctx, fieldMapping.Function, functionCallSourceID, functionCallSourceType, targetFieldType, errWrapper)
+			if err != nil {
+				return nil, nil, err.Lift(sourceLift...)
+			}
+			stmt = append(stmt, callStmt...)
+			stmt = append(stmt, jen.Id(name).Dot(targetField.Name()).Op("=").Add(callReturnID.Code))
 		}
 	}
 
