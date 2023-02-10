@@ -179,6 +179,13 @@ func (g *generator) buildMethod(method *methodDefinition, errWrapper builder.Err
 		Signature:              xtype.Signature{Source: method.Source.T.String(), Target: method.Target.T.String()},
 	}
 
+	if method.Explicit && len(method.Fields) > 0 {
+		isStructPointer := method.Target.Pointer && method.Target.PointerInner.Struct
+		if !method.Target.Struct && !isStructPointer {
+			return builder.NewError("Invalid struct field mapping. Field mappings like goverter:map or goverter:ignore may only be set on struct or struct pointers.\nSee https://goverter.jmattheis.de/#/conversion/configure-nested")
+		}
+	}
+
 	var stmt []jen.Code
 	var newID *xtype.JenID
 	var err *builder.Error
