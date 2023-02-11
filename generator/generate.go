@@ -82,6 +82,10 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 			}
 		}
 
+		if err := gen.validateMethods(); err != nil {
+			return nil, err
+		}
+
 		if err := gen.createMethods(); err != nil {
 			return nil, err
 		}

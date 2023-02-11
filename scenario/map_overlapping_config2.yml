@@ -1,0 +1,28 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:ignore Age
+            Convert(source *Input) (*Output)
+
+            ConvertSub(source Input) (*Output)
+        }
+
+        type Input struct {
+            Name string
+        }
+        type Output struct {
+            Name string
+        }
+error: |-
+    Overlapping field mapping found.
+
+    Please move the field related goverter:* comments from this method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source *github.com/jmattheis/goverter/execution.Input) *github.com/jmattheis/goverter/execution.Output
+
+    to this method:
+        func (github.com/jmattheis/goverter/execution.Converter).ConvertSub(source github.com/jmattheis/goverter/execution.Input) *github.com/jmattheis/goverter/execution.Output
+
+    Goverter will use ConvertSub inside the implementation of Convert, thus, field related settings would be ignored.
