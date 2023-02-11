@@ -105,10 +105,7 @@ func (g *generator) registerMethod(converter types.Type, scope *types.Scope, met
 		ReturnTypeOrigin:       methodType.FullName(),
 	}
 
-	g.lookup[xtype.Signature{
-		Source: source.String(),
-		Target: target.String(),
-	}] = m
+	g.lookup[xtype.SignatureOf(m.Source, m.Target)] = m
 	g.namer.Register(m.Name)
 	return nil
 }
@@ -176,7 +173,7 @@ func (g *generator) buildMethod(method *methodDefinition, errWrapper builder.Err
 		MatchIgnoreCase:        method.MatchIgnoreCase,
 		WrapErrors:             method.WrapErrors,
 		TargetType:             method.Target,
-		Signature:              xtype.Signature{Source: method.Source.T.String(), Target: method.Target.T.String()},
+		Signature:              xtype.SignatureOf(method.Source, method.Target),
 	}
 
 	if method.Explicit && len(method.Fields) > 0 {
@@ -318,9 +315,10 @@ func (g *generator) Build(
 	source, target *xtype.Type,
 	errWrapper builder.ErrorWrapper,
 ) ([]jen.Code, *xtype.JenID, *builder.Error) {
-	method, ok := g.extend[xtype.Signature{Source: source.T.String(), Target: target.T.String()}]
+	signature := xtype.SignatureOf(source, target)
+	method, ok := g.extend[signature]
 	if !ok {
-		method, ok = g.lookup[xtype.Signature{Source: source.T.String(), Target: target.T.String()}]
+		method, ok = g.lookup[signature]
 	}
 
 	if ok {
@@ -346,7 +344,7 @@ func (g *generator) Build(
 			method.WrapErrors = ctx.WrapErrors
 		}
 
-		g.lookup[xtype.Signature{Source: source.T.String(), Target: target.T.String()}] = method
+		g.lookup[signature] = method
 		g.namer.Register(method.Name)
 		if err := g.buildMethod(method, errWrapper); err != nil {
 			return nil, nil, err

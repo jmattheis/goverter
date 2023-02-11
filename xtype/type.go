@@ -17,6 +17,10 @@ type Signature struct {
 	Target string
 }
 
+func SignatureOf(source, target *Type) Signature {
+	return Signature{Source: source.T.String(), Target: target.T.String()}
+}
+
 // Type is a helper wrapper for types.Type.
 type Type struct {
 	T             types.Type
