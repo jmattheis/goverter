@@ -35,9 +35,10 @@ use reflection.
   ([`house` example](https://github.com/jmattheis/goverter/blob/main/example/house)), this includes:
   - slices, maps, named types, primitive types, pointers
   - structs with same fields
+- [Deep copy / converts deeply](https://en.wikipedia.org/wiki/Object_copying#Deep_copy)
 - [You can implement custom converter methods](https://goverter.jmattheis.de/#/conversion/custom)
 - [Awesome error messages](https://goverter.jmattheis.de/#/conversion/?id=error-early)
-- No reflection in the generated code
+- No reflection is used at runtime
 
 ## Usage
 
