@@ -33,17 +33,16 @@ success: |
 
     func (c *ConverterImpl) Convert(source execution.DBModel) execution.ApiModel {
     	var structsApiModel execution.ApiModel
-    	var pStructsApiInner *execution.ApiInner
-    	if source.Inner != nil {
-    		structsApiInner := c.structsDBInnerToStructsApiInner((*source.Inner))
-    		pStructsApiInner = &structsApiInner
-    	}
-    	structsApiModel.Inner = pStructsApiInner
+    	structsApiModel.Inner = c.pStructsDBInnerToPStructsApiInner(source.Inner)
     	return structsApiModel
     }
-    func (c *ConverterImpl) structsDBInnerToStructsApiInner(source execution.DBInner) execution.ApiInner {
-    	var structsApiInner execution.ApiInner
-    	structsApiInner.Name = source.Name
-    	structsApiInner.Value = source.Value
-    	return structsApiInner
+    func (c *ConverterImpl) pStructsDBInnerToPStructsApiInner(source *execution.DBInner) *execution.ApiInner {
+    	var pStructsApiInner *execution.ApiInner
+    	if source != nil {
+    		var structsApiInner execution.ApiInner
+    		structsApiInner.Name = (*source).Name
+    		structsApiInner.Value = (*source).Value
+    		pStructsApiInner = &structsApiInner
+    	}
+    	return pStructsApiInner
     }

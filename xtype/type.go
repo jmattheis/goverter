@@ -44,6 +44,10 @@ type Type struct {
 	BasicType     *types.Basic
 }
 
+func (t *Type) AsPointer() *Type {
+	return TypeOf(types.NewPointer(t.T))
+}
+
 // StructField holds the type of a struct field and its name.
 type StructField struct {
 	Name string

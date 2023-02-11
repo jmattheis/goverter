@@ -27,7 +27,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 	for i := 0; i < target.StructType.NumFields(); i++ {
 		targetField := target.StructType.Field(i)
 
-		fieldMapping := ctx.Field(targetField.Name())
+		fieldMapping := ctx.Field(target, targetField.Name())
 
 		if fieldMapping.Ignore {
 			continue
@@ -125,14 +125,15 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 func mapField(gen Generator, ctx *MethodContext, targetField *types.Var, sourceID *xtype.JenID, source, target *xtype.Type) (*jen.Statement, *xtype.Type, []jen.Code, []*Path, *Error) {
 	lift := []*Path{}
 	ignored := func(name string) bool {
-		return ctx.Field(name).Ignore
+		return ctx.Field(target, name).Ignore
 	}
 
-	def := ctx.Field(targetField.Name())
+	def := ctx.Field(target, targetField.Name())
 	mappedName := def.Source
 
 	hasOverride := mappedName != ""
-	if ctx.Signature.Target != target.T.String() || !hasOverride {
+
+	if !hasOverride {
 		sourceMatch, err := source.StructField(targetField.Name(), ctx.MatchIgnoreCase, ignored)
 		if err == nil {
 			nextID := sourceID.Code.Clone().Dot(sourceMatch.Name)

@@ -166,9 +166,15 @@ func (g *generator) buildMethod(method *methodDefinition, errWrapper builder.Err
 		returns = append(returns, jen.Id("error"))
 	}
 
+	fieldsTarget := method.Target.T.String()
+	if method.Target.Pointer && method.Target.PointerInner.Struct {
+		fieldsTarget = method.Target.PointerInner.T.String()
+	}
+
 	ctx := &builder.MethodContext{
 		Namer:                  namer.New(),
 		Fields:                 method.Fields,
+		FieldsTarget:           fieldsTarget,
 		IgnoreUnexportedFields: method.IgnoreUnexportedFields,
 		MatchIgnoreCase:        method.MatchIgnoreCase,
 		WrapErrors:             method.WrapErrors,
@@ -325,7 +331,17 @@ func (g *generator) Build(
 		return g.callByDefinition(ctx, method, sourceID, source, target, errWrapper)
 	}
 
-	if (source.Named && !source.Basic) || (target.Named && !target.Basic) {
+	hasPointerStructMethod := false
+	if source.Struct && target.Struct {
+		pointerSignature := xtype.SignatureOf(source.AsPointer(), target.AsPointer())
+
+		_, hasPointerStructMethod = g.extend[pointerSignature]
+		if !hasPointerStructMethod {
+			_, hasPointerStructMethod = g.lookup[pointerSignature]
+		}
+	}
+
+	if !hasPointerStructMethod && ((source.Named && !source.Basic) || (target.Named && !target.Basic) || (source.Pointer && source.PointerInner.Named && !source.PointerInner.Basic)) {
 		name := g.namer.Name(source.UnescapedID() + "To" + strings.Title(target.UnescapedID()))
 
 		method := &methodDefinition{
@@ -336,12 +352,6 @@ func (g *generator) Build(
 			Fields:                 map[string]*builder.FieldMapping{},
 			IgnoreUnexportedFields: g.ignoreUnexportedFields,
 			Call:                   jen.Id(xtype.ThisVar).Dot(name),
-		}
-		if ctx.PointerChange {
-			ctx.PointerChange = false
-			method.Fields = ctx.Fields
-			method.MatchIgnoreCase = ctx.MatchIgnoreCase
-			method.WrapErrors = ctx.WrapErrors
 		}
 
 		g.lookup[signature] = method
