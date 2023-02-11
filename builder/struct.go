@@ -68,10 +68,6 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 			stmt = append(stmt, jen.Id(name).Dot(targetField.Name()).Op("=").Add(fieldID.Code))
 		} else {
 			def := fieldMapping.Function
-			params := []jen.Code{}
-			if def.SelfAsFirstParam {
-				params = append(params, jen.Id(xtype.ThisVar))
-			}
 
 			sourceLift := []*Path{}
 			var functionCallSourceID *xtype.JenID
