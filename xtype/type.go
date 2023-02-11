@@ -94,8 +94,9 @@ func (t Type) StructField(name string, ignoreCase bool, ignored func(name string
 
 // JenID a jennifer code wrapper with extra infos.
 type JenID struct {
-	Code     *jen.Statement
-	Variable bool
+	ParentPointer *JenID
+	Code          *jen.Statement
+	Variable      bool
 }
 
 // VariableID is used, when the ID can be referenced. F.ex it is not a function call.

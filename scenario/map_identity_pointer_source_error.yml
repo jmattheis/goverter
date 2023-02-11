@@ -1,0 +1,51 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:map . FullName | ToFullName
+            ConvertPerson(source Person) APIPerson
+        }
+
+        type Person struct {
+            FirstName string
+            LastName  string
+        }
+
+        type APIPerson struct {
+            FullName string
+        }
+
+        func ToFullName(input *Person) string {
+            return input.FirstName + " " + input.LastName
+        }
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).ConvertPerson(source github.com/jmattheis/goverter/execution.Person) github.com/jmattheis/goverter/execution.APIPerson
+
+    | github.com/jmattheis/goverter/execution.Person
+    |
+    |      | goverter:map . FullName
+    |      |
+    |      |        | func github.com/jmattheis/goverter/execution.ToFullName(input *github.com/jmattheis/goverter/execution.Person) string
+    |      |        |
+    |      |        |          | *github.com/jmattheis/goverter/execution.Person
+    |      |        |          |
+    source.        :ToFullName(source)
+    target.FullName
+    |      |
+    |      |
+    |      |
+    |      |
+    |      |
+    |      | string
+    |
+    | github.com/jmattheis/goverter/execution.APIPerson
+
+    cannot not use
+    	func github.com/jmattheis/goverter/execution.ToFullName(input *github.com/jmattheis/goverter/execution.Person) string
+    because source type mismatch
+
+    Extend method param type: *github.com/jmattheis/goverter/execution.Person
+    Converter source type: github.com/jmattheis/goverter/execution.Person

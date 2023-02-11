@@ -80,7 +80,15 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 				sourceLift = mapLift
 				stmt = append(stmt, mapStmt...)
 
-				if def.Source.T.String() != nextSource.T.String() {
+				switch {
+				case def.Source.T.String() == nextSource.T.String():
+					functionCallSourceID = xtype.VariableID(nextID.Clone())
+					functionCallSourceType = nextSource
+				case fieldMapping.Source == "." && sourceID.ParentPointer != nil &&
+					def.Source.T.String() == source.AsPointer().T.String():
+					functionCallSourceID = sourceID.ParentPointer
+					functionCallSourceType = source.AsPointer()
+				default:
 					cause := fmt.Sprintf("cannot not use\n\t%s\nbecause source type mismatch\n\nExtend method param type: %s\nConverter source type: %s", def.ID, def.Source.T.String(), nextSource.T.String())
 					return nil, nil, NewError(cause).Lift(&Path{
 						Prefix:     "(",
@@ -92,8 +100,6 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 						SourceType: def.ID,
 					}).Lift(sourceLift...)
 				}
-				functionCallSourceID = xtype.VariableID(nextID.Clone())
-				functionCallSourceType = nextSource
 			}
 
 			if def.Target.T.String() != targetFieldType.T.String() {

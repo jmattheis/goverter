@@ -22,8 +22,11 @@ func (*Pointer) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, 
 	if !source.PointerInner.Basic {
 		valueSourceID = jen.Parens(valueSourceID)
 	}
+
+	innerID := xtype.OtherID(valueSourceID)
+	innerID.ParentPointer = sourceID
 	nextBlock, id, err := gen.Build(
-		ctx, xtype.OtherID(valueSourceID), source.PointerInner, target.PointerInner, NoWrap)
+		ctx, innerID, source.PointerInner, target.PointerInner, NoWrap)
 	if err != nil {
 		return nil, nil, err.Lift(&Path{
 			SourceID:   "*",
