@@ -30,11 +30,14 @@ success: |
     	var structsOutput execution.Output
     	structsOutput.Name = source.Name
     	structsOutput.Age = source.Age
-    	var pStructsOutput *execution.Output
-    	if source.Value != nil {
-    		structsOutput2 := c.Convert((*source.Value))
-    		pStructsOutput = &structsOutput2
-    	}
-    	structsOutput.Value = pStructsOutput
+    	structsOutput.Value = c.pStructsInputToPStructsOutput(source.Value)
     	return structsOutput
+    }
+    func (c *ConverterImpl) pStructsInputToPStructsOutput(source *execution.Input) *execution.Output {
+    	var pStructsOutput *execution.Output
+    	if source != nil {
+    		structsOutput := c.Convert((*source))
+    		pStructsOutput = &structsOutput
+    	}
+    	return pStructsOutput
     }

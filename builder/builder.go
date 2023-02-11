@@ -35,15 +35,19 @@ type Generator interface {
 type MethodContext struct {
 	*namer.Namer
 	Fields                 map[string]*FieldMapping
+	FieldsTarget           string
 	IgnoreUnexportedFields bool
 	Signature              xtype.Signature
 	TargetType             *xtype.Type
-	PointerChange          bool
 	MatchIgnoreCase        bool
 	WrapErrors             bool
 }
 
-func (ctx *MethodContext) Field(name string) *FieldMapping {
+func (ctx *MethodContext) Field(target *xtype.Type, name string) *FieldMapping {
+	if ctx.FieldsTarget != target.T.String() {
+		return emptyMapping
+	}
+
 	prop, ok := ctx.Fields[name]
 	if !ok {
 		return emptyMapping

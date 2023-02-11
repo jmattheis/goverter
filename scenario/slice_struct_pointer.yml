@@ -40,15 +40,18 @@ success: |
     	if source != nil {
     		pSlicesOutputList = make([]*execution.Output, len(source))
     		for i := 0; i < len(source); i++ {
-    			var pSlicesOutput *execution.Output
-    			if source[i] != nil {
-    				slicesOutput := c.slicesInputToSlicesOutput((*source[i]))
-    				pSlicesOutput = &slicesOutput
-    			}
-    			pSlicesOutputList[i] = pSlicesOutput
+    			pSlicesOutputList[i] = c.pSlicesInputToPSlicesOutput(source[i])
     		}
     	}
     	return pSlicesOutputList
+    }
+    func (c *ConverterImpl) pSlicesInputToPSlicesOutput(source *execution.Input) *execution.Output {
+    	var pSlicesOutput *execution.Output
+    	if source != nil {
+    		slicesOutput := c.slicesInputToSlicesOutput((*source))
+    		pSlicesOutput = &slicesOutput
+    	}
+    	return pSlicesOutput
     }
     func (c *ConverterImpl) slicesInputToPSlicesOutput(source execution.Input) *execution.Output {
     	slicesOutput := c.slicesInputToSlicesOutput(source)

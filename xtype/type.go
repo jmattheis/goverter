@@ -17,6 +17,10 @@ type Signature struct {
 	Target string
 }
 
+func SignatureOf(source, target *Type) Signature {
+	return Signature{Source: source.T.String(), Target: target.T.String()}
+}
+
 // Type is a helper wrapper for types.Type.
 type Type struct {
 	T             types.Type
@@ -38,6 +42,10 @@ type Type struct {
 	MapValue      *Type
 	Basic         bool
 	BasicType     *types.Basic
+}
+
+func (t *Type) AsPointer() *Type {
+	return TypeOf(types.NewPointer(t.T))
 }
 
 // StructField holds the type of a struct field and its name.
@@ -86,8 +94,9 @@ func (t Type) StructField(name string, ignoreCase bool, ignored func(name string
 
 // JenID a jennifer code wrapper with extra infos.
 type JenID struct {
-	Code     *jen.Statement
-	Variable bool
+	ParentPointer *JenID
+	Code          *jen.Statement
+	Variable      bool
 }
 
 // VariableID is used, when the ID can be referenced. F.ex it is not a function call.

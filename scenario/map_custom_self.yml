@@ -39,7 +39,8 @@ success: |
     func (c *ConverterImpl) Convert(source *execution.Input) *execution.Output {
     	var pStructsOutput *execution.Output
     	if source != nil {
-    		structsOutput := c.structsInputToStructsOutput((*source))
+    		var structsOutput execution.Output
+    		structsOutput.Animals = execution.Combine(c, (*source))
     		pStructsOutput = &structsOutput
     	}
     	return pStructsOutput
@@ -73,9 +74,4 @@ success: |
     	var structsAnimal execution.Animal
     	structsAnimal.Name = source.Name
     	return structsAnimal
-    }
-    func (c *ConverterImpl) structsInputToStructsOutput(source execution.Input) execution.Output {
-    	var structsOutput execution.Output
-    	structsOutput.Animals = execution.Combine(c, source)
-    	return structsOutput
     }

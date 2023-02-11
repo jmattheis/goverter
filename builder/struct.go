@@ -27,7 +27,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 	for i := 0; i < target.StructType.NumFields(); i++ {
 		targetField := target.StructType.Field(i)
 
-		fieldMapping := ctx.Field(targetField.Name())
+		fieldMapping := ctx.Field(target, targetField.Name())
 
 		if fieldMapping.Ignore {
 			continue
@@ -68,10 +68,6 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 			stmt = append(stmt, jen.Id(name).Dot(targetField.Name()).Op("=").Add(fieldID.Code))
 		} else {
 			def := fieldMapping.Function
-			params := []jen.Code{}
-			if def.SelfAsFirstParam {
-				params = append(params, jen.Id(xtype.ThisVar))
-			}
 
 			sourceLift := []*Path{}
 			var functionCallSourceID *xtype.JenID
@@ -84,7 +80,15 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 				sourceLift = mapLift
 				stmt = append(stmt, mapStmt...)
 
-				if def.Source.T.String() != nextSource.T.String() {
+				switch {
+				case def.Source.T.String() == nextSource.T.String():
+					functionCallSourceID = xtype.VariableID(nextID.Clone())
+					functionCallSourceType = nextSource
+				case fieldMapping.Source == "." && sourceID.ParentPointer != nil &&
+					def.Source.T.String() == source.AsPointer().T.String():
+					functionCallSourceID = sourceID.ParentPointer
+					functionCallSourceType = source.AsPointer()
+				default:
 					cause := fmt.Sprintf("cannot not use\n\t%s\nbecause source type mismatch\n\nExtend method param type: %s\nConverter source type: %s", def.ID, def.Source.T.String(), nextSource.T.String())
 					return nil, nil, NewError(cause).Lift(&Path{
 						Prefix:     "(",
@@ -96,8 +100,6 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 						SourceType: def.ID,
 					}).Lift(sourceLift...)
 				}
-				functionCallSourceID = xtype.VariableID(nextID.Clone())
-				functionCallSourceType = nextSource
 			}
 
 			if def.Target.T.String() != targetFieldType.T.String() {
@@ -129,14 +131,15 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 func mapField(gen Generator, ctx *MethodContext, targetField *types.Var, sourceID *xtype.JenID, source, target *xtype.Type) (*jen.Statement, *xtype.Type, []jen.Code, []*Path, *Error) {
 	lift := []*Path{}
 	ignored := func(name string) bool {
-		return ctx.Field(name).Ignore
+		return ctx.Field(target, name).Ignore
 	}
 
-	def := ctx.Field(targetField.Name())
+	def := ctx.Field(target, targetField.Name())
 	mappedName := def.Source
 
 	hasOverride := mappedName != ""
-	if ctx.Signature.Target != target.T.String() || !hasOverride {
+
+	if !hasOverride {
 		sourceMatch, err := source.StructField(targetField.Name(), ctx.MatchIgnoreCase, ignored)
 		if err == nil {
 			nextID := sourceID.Code.Clone().Dot(sourceMatch.Name)

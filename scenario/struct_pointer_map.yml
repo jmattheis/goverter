@@ -38,17 +38,13 @@ success: |
     func (c *ConverterImpl) Convert(source *execution.InputOne) *execution.OutputOne {
     	var pStructsOutputOne *execution.OutputOne
     	if source != nil {
-    		structsOutputOne := c.structsInputOneToStructsOutputOne((*source))
+    		var structsOutputOne execution.OutputOne
+    		structsOutputOne.Name2 = (*source).Name
+    		structsOutputOne.Age = (*source).Age
+    		structsOutputOne.Nested = c.structsInputTwoToStructsOutputTwo((*source).Nested)
     		pStructsOutputOne = &structsOutputOne
     	}
     	return pStructsOutputOne
-    }
-    func (c *ConverterImpl) structsInputOneToStructsOutputOne(source execution.InputOne) execution.OutputOne {
-    	var structsOutputOne execution.OutputOne
-    	structsOutputOne.Name2 = source.Name
-    	structsOutputOne.Age = source.Age
-    	structsOutputOne.Nested = c.structsInputTwoToStructsOutputTwo(source.Nested)
-    	return structsOutputOne
     }
     func (c *ConverterImpl) structsInputTwoToStructsOutputTwo(source execution.InputTwo) execution.OutputTwo {
     	var structsOutputTwo execution.OutputTwo

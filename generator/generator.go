@@ -105,11 +105,23 @@ func (g *generator) registerMethod(converter types.Type, scope *types.Scope, met
 		ReturnTypeOrigin:       methodType.FullName(),
 	}
 
-	g.lookup[xtype.Signature{
-		Source: source.String(),
-		Target: target.String(),
-	}] = m
+	g.lookup[xtype.SignatureOf(m.Source, m.Target)] = m
 	g.namer.Register(m.Name)
+	return nil
+}
+
+func (g *generator) validateMethods() error {
+	for _, method := range g.lookup {
+		if method.Explicit && len(method.Fields) > 0 {
+			isTargetStructPointer := method.Target.Pointer && method.Target.PointerInner.Struct
+			if !method.Target.Struct && !isTargetStructPointer {
+				return fmt.Errorf("Invalid struct field mapping on method:\n    %s\n\nField mappings like goverter:map or goverter:ignore may only be set on struct or struct pointers.\nSee https://goverter.jmattheis.de/#/conversion/configure-nested", method.ID)
+			}
+			if overlapping, ok := g.findOverlappingExplicitStructMethod(method); ok {
+				return fmt.Errorf("Overlapping field mapping found.\n\nPlease move the field related goverter:* comments from this method:\n    %s\n\nto this method:\n    %s\n\nGoverter will use %s inside the implementation of %s, thus, field related settings would be ignored.", method.ID, overlapping.ID, overlapping.Name, method.Name)
+			}
+		}
+	}
 	return nil
 }
 
@@ -159,6 +171,29 @@ func (g *generator) appendToFile() {
 	}
 }
 
+func (g *generator) findOverlappingExplicitStructMethod(method *methodDefinition) (*methodDefinition, bool) {
+	source := method.Source
+	target := method.Target
+
+	switch {
+	case source.Struct && target.Pointer && target.PointerInner.Struct:
+		method, ok := g.lookup[xtype.SignatureOf(source, target.PointerInner)]
+		if ok && method.Explicit {
+			return method, true
+		}
+	case source.Pointer && source.PointerInner.Struct && target.Pointer && target.PointerInner.Struct:
+		method, ok := g.lookup[xtype.SignatureOf(source.PointerInner, target)]
+		if ok && method.Explicit {
+			return method, true
+		}
+		method, ok = g.lookup[xtype.SignatureOf(source.PointerInner, target.PointerInner)]
+		if ok && method.Explicit {
+			return method, true
+		}
+	}
+	return nil, false
+}
+
 func (g *generator) buildMethod(method *methodDefinition, errWrapper builder.ErrorWrapper) *builder.Error {
 	sourceID := jen.Id("source")
 	source := method.Source
@@ -169,21 +204,20 @@ func (g *generator) buildMethod(method *methodDefinition, errWrapper builder.Err
 		returns = append(returns, jen.Id("error"))
 	}
 
+	fieldsTarget := method.Target.T.String()
+	if method.Target.Pointer && method.Target.PointerInner.Struct {
+		fieldsTarget = method.Target.PointerInner.T.String()
+	}
+
 	ctx := &builder.MethodContext{
 		Namer:                  namer.New(),
 		Fields:                 method.Fields,
+		FieldsTarget:           fieldsTarget,
 		IgnoreUnexportedFields: method.IgnoreUnexportedFields,
 		MatchIgnoreCase:        method.MatchIgnoreCase,
 		WrapErrors:             method.WrapErrors,
 		TargetType:             method.Target,
-		Signature:              xtype.Signature{Source: method.Source.T.String(), Target: method.Target.T.String()},
-	}
-
-	if method.Explicit && len(method.Fields) > 0 {
-		isStructPointer := method.Target.Pointer && method.Target.PointerInner.Struct
-		if !method.Target.Struct && !isStructPointer {
-			return builder.NewError("Invalid struct field mapping. Field mappings like goverter:map or goverter:ignore may only be set on struct or struct pointers.\nSee https://goverter.jmattheis.de/#/conversion/configure-nested")
-		}
+		Signature:              xtype.SignatureOf(method.Source, method.Target),
 	}
 
 	var stmt []jen.Code
@@ -318,16 +352,27 @@ func (g *generator) Build(
 	source, target *xtype.Type,
 	errWrapper builder.ErrorWrapper,
 ) ([]jen.Code, *xtype.JenID, *builder.Error) {
-	method, ok := g.extend[xtype.Signature{Source: source.T.String(), Target: target.T.String()}]
+	signature := xtype.SignatureOf(source, target)
+	method, ok := g.extend[signature]
 	if !ok {
-		method, ok = g.lookup[xtype.Signature{Source: source.T.String(), Target: target.T.String()}]
+		method, ok = g.lookup[signature]
 	}
 
 	if ok {
 		return g.callByDefinition(ctx, method, sourceID, source, target, errWrapper)
 	}
 
-	if (source.Named && !source.Basic) || (target.Named && !target.Basic) {
+	hasPointerStructMethod := false
+	if source.Struct && target.Struct {
+		pointerSignature := xtype.SignatureOf(source.AsPointer(), target.AsPointer())
+
+		_, hasPointerStructMethod = g.extend[pointerSignature]
+		if !hasPointerStructMethod {
+			_, hasPointerStructMethod = g.lookup[pointerSignature]
+		}
+	}
+
+	if !hasPointerStructMethod && ((source.Named && !source.Basic) || (target.Named && !target.Basic) || (source.Pointer && source.PointerInner.Named && !source.PointerInner.Basic)) {
 		name := g.namer.Name(source.UnescapedID() + "To" + strings.Title(target.UnescapedID()))
 
 		method := &methodDefinition{
@@ -339,14 +384,8 @@ func (g *generator) Build(
 			IgnoreUnexportedFields: g.ignoreUnexportedFields,
 			Call:                   jen.Id(xtype.ThisVar).Dot(name),
 		}
-		if ctx.PointerChange {
-			ctx.PointerChange = false
-			method.Fields = ctx.Fields
-			method.MatchIgnoreCase = ctx.MatchIgnoreCase
-			method.WrapErrors = ctx.WrapErrors
-		}
 
-		g.lookup[xtype.Signature{Source: source.T.String(), Target: target.T.String()}] = method
+		g.lookup[signature] = method
 		g.namer.Register(method.Name)
 		if err := g.buildMethod(method, errWrapper); err != nil {
 			return nil, nil, err
