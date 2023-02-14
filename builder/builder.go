@@ -41,6 +41,14 @@ type MethodContext struct {
 	TargetType             *xtype.Type
 	MatchIgnoreCase        bool
 	WrapErrors             bool
+
+	TargetVar *jen.Statement
+}
+
+func (ctx *MethodContext) SetErrorTargetVar(m *jen.Statement) {
+	if ctx.TargetVar == nil {
+		ctx.TargetVar = m
+	}
 }
 
 func (ctx *MethodContext) Field(target *xtype.Type, name string) *FieldMapping {

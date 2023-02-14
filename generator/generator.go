@@ -220,29 +220,30 @@ func (g *generator) buildMethod(method *methodDefinition, errWrapper builder.Err
 		Signature:              xtype.SignatureOf(method.Source, method.Target),
 	}
 
-	var stmt []jen.Code
-	var newID *xtype.JenID
-	var err *builder.Error
+	var funcBlock []jen.Code
 	if extendMethod, ok := g.extend[ctx.Signature]; ok {
-		stmt, newID, err = g.callByDefinition(
+		jenReturn, err := g.delegateMethod(
 			ctx, extendMethod, xtype.VariableID(sourceID.Clone()), source, target, errWrapper)
+		if err != nil {
+			return err
+		}
+		funcBlock = []jen.Code{jenReturn}
 	} else {
-		stmt, newID, err = g.buildNoLookup(ctx, xtype.VariableID(sourceID.Clone()), source, target)
-	}
-	if err != nil {
-		return err
-	}
+		stmt, newID, err := g.buildNoLookup(ctx, xtype.VariableID(sourceID.Clone()), source, target)
+		if err != nil {
+			return err
+		}
+		ret := []jen.Code{newID.Code}
+		if method.ReturnError {
+			ret = append(ret, jen.Nil())
+		}
 
-	ret := []jen.Code{newID.Code}
-	if method.ReturnError {
-		ret = append(ret, jen.Nil())
+		funcBlock = append(stmt, jen.Return(ret...))
 	}
-
-	stmt = append(stmt, jen.Return(ret...))
 
 	method.Jen = jen.Func().Params(jen.Id(xtype.ThisVar).Op("*").Id(g.name)).Id(method.Name).
 		Params(jen.Id("source").Add(source.TypeAsJen())).Params(returns...).
-		Block(stmt...)
+		Block(funcBlock...)
 
 	return nil
 }
@@ -323,18 +324,57 @@ func (g *generator) callMethod(
 			current.Dirty = true
 		}
 
+		var errBlock []jen.Code
+		if ctx.TargetVar == nil {
+			innerName := ctx.Name("errValue")
+			errBlock = []jen.Code{
+				jen.Var().Id(innerName).Add(ctx.TargetType.TypeAsJen()),
+				jen.Return(jen.Id(innerName), g.wrap(ctx, errWrapper, jen.Id("err"))),
+			}
+		} else {
+			errBlock = []jen.Code{
+				jen.Return(ctx.TargetVar, g.wrap(ctx, errWrapper, jen.Id("err"))),
+			}
+		}
 		name := ctx.Name(target.ID())
-		innerName := ctx.Name("errValue")
 		stmt := []jen.Code{
 			jen.List(jen.Id(name), jen.Id("err")).Op(":=").Add(method.Call.Clone().Call(params...)),
-			jen.If(jen.Id("err").Op("!=").Nil()).Block(
-				jen.Var().Id(innerName).Add(ctx.TargetType.TypeAsJen()),
-				jen.Return(jen.Id(innerName), g.wrap(ctx, errWrapper, jen.Id("err")))),
+			jen.If(jen.Id("err").Op("!=").Nil()).Block(errBlock...),
 		}
 		return stmt, xtype.VariableID(jen.Id(name)), nil
 	}
 	id := xtype.OtherID(method.Call.Clone().Call(params...))
 	return nil, id, nil
+}
+
+func (g *generator) delegateMethod(
+	ctx *builder.MethodContext,
+	delegateTo *methodDefinition,
+	sourceID *xtype.JenID,
+	source, target *xtype.Type,
+	errWrapper builder.ErrorWrapper,
+) (*jen.Statement, *builder.Error) {
+	params := []jen.Code{}
+	if delegateTo.SelfAsFirstParam {
+		params = append(params, jen.Id(xtype.ThisVar))
+	}
+	if sourceID != nil {
+		params = append(params, sourceID.Code.Clone())
+	}
+	current := g.lookup[ctx.Signature]
+
+	returns := []jen.Code{delegateTo.Call.Clone().Call(params...)}
+
+	if delegateTo.ReturnError {
+		if !current.ReturnError {
+			return nil, builder.NewError(fmt.Sprintf("ReturnTypeMismatch: Cannot use\n\n    %s\n\nin\n\n    %s\n\nbecause no error is returned as second return parameter", delegateTo.ReturnTypeOrigin, current.ID))
+		}
+	} else {
+		if current.ReturnError {
+			returns = append(returns, jen.Nil())
+		}
+	}
+	return jen.Return(returns...), nil
 }
 
 // wrap invokes the error wrapper if feature is enabled.

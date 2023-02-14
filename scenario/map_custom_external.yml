@@ -30,8 +30,7 @@ success: |
     	var structsOutput execution.Output
     	xint, err := strconv.Atoi(source.Age)
     	if err != nil {
-    		var errValue execution.Output
-    		return errValue, err
+    		return structsOutput, err
     	}
     	structsOutput.Age = xint
     	return structsOutput, nil

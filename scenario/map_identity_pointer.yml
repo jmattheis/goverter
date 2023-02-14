@@ -46,8 +46,7 @@ success: |
     	structsAPIPerson.Name = source.Name
     	pStructsAPIAddress, err := c.structsPersonToPStructsAPIAddress(source)
     	if err != nil {
-    		var errValue execution.APIPerson
-    		return errValue, err
+    		return structsAPIPerson, err
     	}
     	structsAPIPerson.Address = pStructsAPIAddress
     	return structsAPIPerson, nil
@@ -55,8 +54,7 @@ success: |
     func (c *ConverterImpl) structsPersonToPStructsAPIAddress(source execution.Person) (*execution.APIAddress, error) {
     	structsAPIAddress, err := c.ConvertAddress(source)
     	if err != nil {
-    		var errValue *execution.APIAddress
-    		return errValue, err
+    		return nil, err
     	}
     	return &structsAPIAddress, nil
     }

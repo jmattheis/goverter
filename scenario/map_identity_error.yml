@@ -51,8 +51,7 @@ success: |
     		for i := 0; i < len(source); i++ {
     			structsAPIPerson, err := c.ConvertPerson(source[i])
     			if err != nil {
-    				var errValue []execution.APIPerson
-    				return errValue, fmt.Errorf("error setting index %d: %w", i, err)
+    				return nil, fmt.Errorf("error setting index %d: %w", i, err)
     			}
     			structsAPIPersonList[i] = structsAPIPerson
     		}
@@ -65,8 +64,7 @@ success: |
     	structsAPIAddress.City = source.City
     	xint, err := strconv.Atoi(source.PostalCode)
     	if err != nil {
-    		var errValue execution.APIAddress
-    		return errValue, fmt.Errorf("error setting field PostalCode: %w", err)
+    		return structsAPIAddress, fmt.Errorf("error setting field PostalCode: %w", err)
     	}
     	structsAPIAddress.PostalCode = xint
     	return structsAPIAddress, nil
@@ -76,8 +74,7 @@ success: |
     	structsAPIPerson.Name = source.Name
     	pStructsAPIAddress, err := c.structsPersonToPStructsAPIAddress(source)
     	if err != nil {
-    		var errValue execution.APIPerson
-    		return errValue, fmt.Errorf("error setting field Address: %w", err)
+    		return structsAPIPerson, fmt.Errorf("error setting field Address: %w", err)
     	}
     	structsAPIPerson.Address = pStructsAPIAddress
     	return structsAPIPerson, nil
@@ -85,8 +82,7 @@ success: |
     func (c *ConverterImpl) structsPersonToPStructsAPIAddress(source execution.Person) (*execution.APIAddress, error) {
     	structsAPIAddress, err := c.ConvertAddress(source)
     	if err != nil {
-    		var errValue *execution.APIAddress
-    		return errValue, err
+    		return nil, err
     	}
     	return &structsAPIAddress, nil
     }

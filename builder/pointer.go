@@ -15,6 +15,7 @@ func (*Pointer) Matches(source, target *xtype.Type) bool {
 
 // Build creates conversion source code for the given source and target type.
 func (*Pointer) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *Error) {
+	ctx.SetErrorTargetVar(jen.Nil())
 	outerVar := ctx.Name(target.ID())
 	ifBlock := []jen.Code{}
 
@@ -61,6 +62,7 @@ func (*TargetPointer) Matches(source, target *xtype.Type) bool {
 
 // Build creates conversion source code for the given source and target type.
 func (*TargetPointer) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *Error) {
+	ctx.SetErrorTargetVar(jen.Nil())
 	stmt, id, err := gen.Build(ctx, sourceID, source, target.PointerInner, NoWrap)
 	if err != nil {
 		return nil, nil, err.Lift(&Path{

@@ -285,8 +285,7 @@ func (c *ConverterImpl) Convert(source example.Input) (example.Output, error) {
 	var exampleOutput example.Output
 	xint, err := example.StringToInt(source.Value)
 	if err != nil {
-		var errValue example.Output
-		return errValue, err
+		return exampleOutput, err
 	}
 	exampleOutput.Value = xint
 	return exampleOutput, nil
@@ -347,8 +346,7 @@ func (c *ConverterImpl) Convert(source example.Input) (example.Output, error) {
 	var exampleOutput example.Output
 	xint, err := strconv.Atoi(source.Value)
 	if err != nil {
-		var errValue example.Output
-		return errValue, err
+		return exampleOutput, err
 	}
 	exampleOutput.Value = xint
 	return exampleOutput, nil
@@ -498,8 +496,7 @@ func (c *ConverterImpl) Convert(source example.Input) (example.Output, error) {
 	exampleOutput.Name = source.Name
 	xint, err := example.ParseInt(source.NumberString)
 	if err != nil {
-		var errValue example.Output
-		return errValue, err
+		return exampleOutput, err
 	}
 	exampleOutput.Number = xint
 	return exampleOutput, nil
