@@ -15,6 +15,7 @@ func (*Map) Matches(source, target *xtype.Type) bool {
 
 // Build creates conversion source code for the given source and target type.
 func (*Map) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *Error) {
+	ctx.SetErrorTargetVar(jen.Nil())
 	targetMap := ctx.Name(target.ID())
 	key, value := ctx.Map()
 

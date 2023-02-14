@@ -86,8 +86,7 @@ func (c *ConverterImpl) Convert(source example.Input) (example.Output, error) {
 	var exampleOutput example.Output
 	xint, err := strconv.Atoi(source.PostalCode)
 	if err != nil {
-		var errValue example.Output
-		return errValue, fmt.Errorf("error setting field PostalCode: %w", err)
+		return exampleOutput, fmt.Errorf("error setting field PostalCode: %w", err)
 	}
 	exampleOutput.PostalCode = xint
 	return exampleOutput, nil

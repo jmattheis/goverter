@@ -33,6 +33,7 @@ func (*BasicTargetPointerRule) Matches(source, target *xtype.Type) bool {
 // Build creates conversion source code for the given source and target type.
 func (*BasicTargetPointerRule) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *Error) {
 	name := ctx.Name(target.ID())
+	ctx.SetErrorTargetVar(jen.Nil())
 
 	stmt, id, err := gen.Build(ctx, sourceID, source, target.PointerInner, NoWrap)
 	if err != nil {
