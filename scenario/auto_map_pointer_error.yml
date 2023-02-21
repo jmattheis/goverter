@@ -1,0 +1,43 @@
+input:
+    input.go: |
+        package example
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:autoMap Address
+            Convert(Person) FlatPerson
+        }
+
+        type FlatPerson struct {
+            Name    string
+            Age     int
+            Street  string
+        }
+        type Person struct {
+            Name    string
+            Age     int
+            Address *Address
+        }
+        type Address struct {
+            Street  string
+        }
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(github.com/jmattheis/goverter/execution.Person) github.com/jmattheis/goverter/execution.FlatPerson
+
+    | github.com/jmattheis/goverter/execution.Person
+    |
+    |      | *github.com/jmattheis/goverter/execution.Address
+    |      |
+    |      |       | *string (It is a pointer because the nested property in the goverter:map was a pointer)
+    |      |       |
+    source.Address.Street
+    target        .Street
+    |              |
+    |              | string
+    |
+    |
+    |
+    | github.com/jmattheis/goverter/execution.FlatPerson
+
+    TypeMismatch: Cannot convert *string to string
