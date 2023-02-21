@@ -1,0 +1,42 @@
+input:
+    input.go: |
+        package example
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:autoMap Abc
+            Convert(Person) FlatPerson
+        }
+
+        type FlatPerson struct {
+            Name    string
+            Age     int
+            Street  string
+            ZipCode string
+        }
+        type Person struct {
+            Name    string
+            Age     int
+            Address Address
+            Street  string
+        }
+        type Address struct {
+            Street  string
+            ZipCode string
+        }
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(github.com/jmattheis/goverter/execution.Person) github.com/jmattheis/goverter/execution.FlatPerson
+
+    | github.com/jmattheis/goverter/execution.Person
+    |
+    |      | goverter:autoMap
+    |      |
+    source.Abc
+    target
+    |
+    |
+    |
+    | github.com/jmattheis/goverter/execution.FlatPerson
+
+    "Abc" does not exist

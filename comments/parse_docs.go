@@ -47,6 +47,7 @@ type ConverterConfig struct {
 type Method struct {
 	MatchIgnoreCase bool
 	WrapErrors      bool
+	AutoMap         []string
 	Fields          map[string]*FieldMapping
 }
 
@@ -275,6 +276,9 @@ func parseMethodComment(comment string) (Method, error) {
 				for _, f := range fields {
 					m.Field(f).Ignore = true
 				}
+				continue
+			case "autoMap":
+				m.AutoMap = append(m.AutoMap, strings.TrimSpace(remaining))
 				continue
 			case "mapExtend":
 				fields := strings.Fields(remaining)

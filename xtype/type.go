@@ -50,6 +50,11 @@ func (t *Type) AsPointer() *Type {
 
 // StructField holds the type of a struct field and its name.
 type StructField struct {
+	Path []string
+	Type *Type
+}
+
+type SimpleStructField struct {
 	Name string
 	Type *Type
 }
@@ -57,12 +62,12 @@ type StructField struct {
 // StructField returns the type of a struct field and its name upon successful match or
 // an error if it is not found. This method will also return a detailed error if matchIgnoreCase
 // is enabled and there are multiple non-exact matches.
-func (t Type) StructField(name string, ignoreCase bool, ignored func(name string) bool) (*StructField, error) {
+func (t Type) findAllFields(path []string, name string, ignoreCase bool, ignored func(name string) bool) (*StructField, []*StructField) {
 	if !t.Struct {
 		panic("trying to get field of non struct")
 	}
 
-	var ambMatches []*StructField
+	var matches []*StructField
 	for y := 0; y < t.StructType.NumFields(); y++ {
 		m := t.StructType.Field(y)
 		if ignored(m.Name()) {
@@ -70,25 +75,65 @@ func (t Type) StructField(name string, ignoreCase bool, ignored func(name string
 		}
 		if m.Name() == name {
 			// exact match takes precedence over case-insensitive match
-			return &StructField{Name: m.Name(), Type: TypeOf(m.Type())}, nil
+			newPath := append([]string{}, path...)
+			newPath = append(newPath, m.Name())
+			return &StructField{Path: newPath, Type: TypeOf(m.Type())}, nil
 		}
 		if ignoreCase && strings.EqualFold(m.Name(), name) {
-			ambMatches = append(ambMatches, &StructField{Name: m.Name(), Type: TypeOf(m.Type())})
+			newPath := append([]string{}, path...)
+			newPath = append(newPath, m.Name())
+			matches = append(matches, &StructField{Path: newPath, Type: TypeOf(m.Type())})
 			// keep going to ensure struct does not have another case-insensitive match
 		}
 	}
 
-	switch len(ambMatches) {
+	return nil, matches
+}
+
+type FieldSources struct {
+	Path []string
+	Type *Type
+}
+
+func FindExactField(source *Type, name string) (*SimpleStructField, error) {
+	exactMatch, _ := source.findAllFields(nil, name, false, func(name string) bool { return false })
+	if exactMatch == nil {
+		return nil, fmt.Errorf("%q does not exist", name)
+	}
+	return &SimpleStructField{Name: exactMatch.Path[0], Type: exactMatch.Type}, nil
+}
+
+func FindField(name string, ignoreCase bool, ignored func(name string) bool, source *Type, additionalFieldSources []FieldSources) (*StructField, error) {
+	exactMatch, ignoreCaseMatches := source.findAllFields(nil, name, ignoreCase, ignored)
+	var exactMatches []*StructField
+	if exactMatch != nil {
+		exactMatches = append(exactMatches, exactMatch)
+	}
+
+	for _, source := range additionalFieldSources {
+		sourceExactMatch, sourceIgnoreCaseMatches := source.Type.findAllFields(source.Path, name, ignoreCase, ignored)
+		if sourceExactMatch != nil {
+			exactMatches = append(exactMatches, sourceExactMatch)
+		}
+		ignoreCaseMatches = append(ignoreCaseMatches, sourceIgnoreCaseMatches...)
+	}
+
+	matches := exactMatches
+	if len(matches) == 0 {
+		matches = ignoreCaseMatches
+	}
+
+	switch len(matches) {
+	case 1:
+		return matches[0], nil
 	case 0:
 		return nil, fmt.Errorf("%q does not exist", name)
-	case 1:
-		return ambMatches[0], nil
 	default:
-		ambNames := make([]string, 0, len(ambMatches))
-		for _, m := range ambMatches {
-			ambNames = append(ambNames, m.Name)
+		names := make([]string, 0, len(matches))
+		for _, m := range matches {
+			names = append(names, strings.Join(m.Path, "."))
 		}
-		return nil, ambiguousMatchError(name, ambNames)
+		return nil, ambiguousMatchError(name, names)
 	}
 }
 

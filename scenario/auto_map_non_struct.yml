@@ -1,0 +1,37 @@
+input:
+    input.go: |
+        package example
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:autoMap Address
+            Convert(Person) FlatPerson
+        }
+
+        type FlatPerson struct {
+            Name    string
+            Age     int
+            Street  string
+            ZipCode string
+        }
+        type Person struct {
+            Name    string
+            Age     int
+            Address string
+        }
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(github.com/jmattheis/goverter/execution.Person) github.com/jmattheis/goverter/execution.FlatPerson
+
+    | github.com/jmattheis/goverter/execution.Person
+    |
+    |      | string
+    |      |
+    source.Address
+    target
+    |
+    |
+    |
+    | github.com/jmattheis/goverter/execution.FlatPerson
+
+    Address is not a struct or struct pointer

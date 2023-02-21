@@ -1,0 +1,48 @@
+input:
+    input.go: |
+        package example
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:autoMap Address
+            Convert(Person) FlatPerson
+        }
+
+        type FlatPerson struct {
+            Name    string
+            Age     int
+            Street  string
+            ZipCode string
+        }
+        type Person struct {
+            Name    string
+            Age     int
+            Address Address
+            Street  string
+        }
+        type Address struct {
+            Street  string
+            ZipCode string
+        }
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(github.com/jmattheis/goverter/execution.Person) github.com/jmattheis/goverter/execution.FlatPerson
+
+    | github.com/jmattheis/goverter/execution.Person
+    |
+    |
+    |
+    source.???
+    target.Street
+    |      |
+    |      | string
+    |
+    | github.com/jmattheis/goverter/execution.FlatPerson
+
+    Cannot match the target field with the source entry: multiple matches found for "Street". Possible matches: Street, Address.Street.
+
+    Explicitly define the mapping via goverter:map. Example:
+
+        goverter:map Street Street
+
+    See https://goverter.jmattheis.de/#/conversion/mapping.

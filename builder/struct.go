@@ -25,6 +25,11 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 		jen.Var().Id(name).Add(target.TypeAsJen()),
 	}
 
+	additionalFieldSources, err := parseAutoMap(ctx, source)
+	if err != nil {
+		return nil, nil, err
+	}
+
 	for i := 0; i < target.StructType.NumFields(); i++ {
 		targetField := target.StructType.Field(i)
 
@@ -55,7 +60,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 		errWrapper := Wrap("error setting field " + targetField.Name())
 
 		if fieldMapping.Function == nil {
-			nextID, nextSource, mapStmt, lift, err := mapField(gen, ctx, targetField, sourceID, source, target)
+			nextID, nextSource, mapStmt, lift, err := mapField(gen, ctx, targetField, sourceID, source, target, additionalFieldSources)
 			if err != nil {
 				return nil, nil, err
 			}
@@ -74,7 +79,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 			var functionCallSourceID *xtype.JenID
 			var functionCallSourceType *xtype.Type
 			if def.Source != nil {
-				nextID, nextSource, mapStmt, mapLift, err := mapField(gen, ctx, targetField, sourceID, source, target)
+				nextID, nextSource, mapStmt, mapLift, err := mapField(gen, ctx, targetField, sourceID, source, target, additionalFieldSources)
 				if err != nil {
 					return nil, nil, err
 				}
@@ -129,38 +134,41 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 	return stmt, xtype.VariableID(jen.Id(name)), nil
 }
 
-func mapField(gen Generator, ctx *MethodContext, targetField *types.Var, sourceID *xtype.JenID, source, target *xtype.Type) (*jen.Statement, *xtype.Type, []jen.Code, []*Path, *Error) {
+func mapField(gen Generator, ctx *MethodContext, targetField *types.Var, sourceID *xtype.JenID, source, target *xtype.Type, additionalFieldSources []xtype.FieldSources) (*jen.Statement, *xtype.Type, []jen.Code, []*Path, *Error) {
 	lift := []*Path{}
 	ignored := func(name string) bool {
 		return ctx.Field(target, name).Ignore
 	}
 
 	def := ctx.Field(target, targetField.Name())
-	mappedName := def.Source
-
-	hasOverride := mappedName != ""
-
-	if !hasOverride {
-		sourceMatch, err := source.StructField(targetField.Name(), ctx.MatchIgnoreCase, ignored)
-		if err == nil {
-			nextID := sourceID.Code.Clone().Dot(sourceMatch.Name)
-			lift = append(lift, &Path{
-				Prefix:     ".",
-				SourceID:   sourceMatch.Name,
-				SourceType: sourceMatch.Type.T.String(),
-				TargetID:   targetField.Name(),
-				TargetType: targetField.Type().String(),
-			})
-			return nextID, sourceMatch.Type, []jen.Code{}, lift, nil
-		}
-		// field lookup either did not find anything or failed due to ambiguous match with case ignored
-		cause := fmt.Sprintf("Cannot match the target field with the source entry: %s.", err.Error())
-		return nil, nil, nil, nil, NewError(cause).Lift(&Path{
+	pathString := def.Source
+	if pathString == "." {
+		lift = append(lift, &Path{
 			Prefix:     ".",
-			SourceID:   "???",
+			SourceID:   " ",
+			SourceType: "goverter:map . " + targetField.Name(),
 			TargetID:   targetField.Name(),
 			TargetType: targetField.Type().String(),
 		})
+		return sourceID.Code, source, nil, lift, nil
+	}
+
+	var path []string
+	if pathString == "" {
+		sourceMatch, err := xtype.FindField(targetField.Name(), ctx.MatchIgnoreCase, ignored, source, additionalFieldSources)
+		if err != nil {
+			cause := fmt.Sprintf("Cannot match the target field with the source entry: %s.", err.Error())
+			return nil, nil, nil, nil, NewError(cause).Lift(&Path{
+				Prefix:     ".",
+				SourceID:   "???",
+				TargetID:   targetField.Name(),
+				TargetType: targetField.Type().String(),
+			})
+		}
+
+		path = sourceMatch.Path
+	} else {
+		path = strings.Split(pathString, ".")
 	}
 
 	var condition *jen.Statement
@@ -169,18 +177,6 @@ func mapField(gen Generator, ctx *MethodContext, targetField *types.Var, sourceI
 	nextID := sourceID.Code
 	nextSource := source
 
-	if mappedName == "." {
-		lift = append(lift, &Path{
-			Prefix:     ".",
-			SourceID:   " ",
-			SourceType: "goverter:map . " + targetField.Name(),
-			TargetID:   targetField.Name(),
-			TargetType: targetField.Type().String(),
-		})
-		return nextID, nextSource, stmt, lift, nil
-	}
-
-	path := strings.Split(mappedName, ".")
 	for i := 0; i < len(path); i++ {
 		if nextSource.Pointer {
 			addCondition := nextID.Clone().Op("!=").Nil()
@@ -199,8 +195,7 @@ func mapField(gen Generator, ctx *MethodContext, targetField *types.Var, sourceI
 				SourceType: "???",
 			}).Lift(lift...)
 		}
-		// since we are searching for a mapped name, search for exact match, explicit field map does not ignore case
-		sourceMatch, err := nextSource.StructField(path[i], false, ignored)
+		sourceMatch, err := xtype.FindExactField(nextSource, path[i])
 		if err == nil {
 			nextSource = sourceMatch.Type
 			nextID = nextID.Clone().Dot(sourceMatch.Name)
@@ -249,6 +244,43 @@ func mapField(gen Generator, ctx *MethodContext, targetField *types.Var, sourceI
 	}
 
 	return nextID, nextSource, stmt, lift, nil
+}
+
+func parseAutoMap(ctx *MethodContext, source *xtype.Type) ([]xtype.FieldSources, *Error) {
+	fieldSources := []xtype.FieldSources{}
+	for _, field := range ctx.AutoMap {
+		innerSource := source
+		lift := []*Path{}
+		path := strings.Split(field, ".")
+		for _, part := range path {
+			field, err := xtype.FindExactField(innerSource, part)
+			if err != nil {
+				return nil, NewError(err.Error()).Lift(&Path{
+					Prefix:     ".",
+					SourceID:   part,
+					SourceType: "goverter:autoMap",
+				}).Lift(lift...)
+			}
+			lift = append(lift, &Path{
+				Prefix:     ".",
+				SourceID:   field.Name,
+				SourceType: field.Type.T.String(),
+			})
+			innerSource = field.Type
+
+			switch {
+			case innerSource.Pointer && innerSource.PointerInner.Struct:
+				innerSource = xtype.TypeOf(innerSource.PointerInner.StructType)
+			case innerSource.Struct:
+				// ok
+			default:
+				return nil, NewError(fmt.Sprintf("%s is not a struct or struct pointer", part)).Lift(lift...)
+			}
+		}
+
+		fieldSources = append(fieldSources, xtype.FieldSources{Path: path, Type: innerSource})
+	}
+	return fieldSources, nil
 }
 
 func unexportedStructError(targetField, sourceType, targetType string) string {

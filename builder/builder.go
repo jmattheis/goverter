@@ -41,6 +41,7 @@ type MethodContext struct {
 	TargetType             *xtype.Type
 	MatchIgnoreCase        bool
 	WrapErrors             bool
+	AutoMap                []string
 
 	TargetVar *jen.Statement
 }

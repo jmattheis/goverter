@@ -24,6 +24,7 @@ type methodDefinition struct {
 
 	Fields          map[string]*builder.FieldMapping
 	MatchIgnoreCase bool
+	AutoMap         []string
 	WrapErrors      bool
 
 	Jen jen.Code
@@ -98,6 +99,7 @@ func (g *generator) registerMethod(converter types.Type, scope *types.Scope, met
 		Source:                 xtype.TypeOf(source),
 		Target:                 xtype.TypeOf(target),
 		Fields:                 builderProperties,
+		AutoMap:                methodComments.AutoMap,
 		MatchIgnoreCase:        methodComments.MatchIgnoreCase,
 		IgnoreUnexportedFields: g.ignoreUnexportedFields,
 		WrapErrors:             methodComments.WrapErrors,
@@ -215,6 +217,7 @@ func (g *generator) buildMethod(method *methodDefinition, errWrapper builder.Err
 		FieldsTarget:           fieldsTarget,
 		IgnoreUnexportedFields: method.IgnoreUnexportedFields,
 		MatchIgnoreCase:        method.MatchIgnoreCase,
+		AutoMap:                method.AutoMap,
 		WrapErrors:             method.WrapErrors,
 		TargetType:             method.Target,
 		Signature:              xtype.SignatureOf(method.Source, method.Target),
