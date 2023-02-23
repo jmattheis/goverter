@@ -8,6 +8,7 @@ import (
 	"sort"
 	"strings"
 
+	"github.com/jmattheis/goverter/builder"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -40,15 +41,14 @@ type Converter struct {
 type ConverterConfig struct {
 	Name          string
 	ExtendMethods []string
-	WrapErrors    bool
+	Flags         builder.ConversionFlags
 }
 
 // Method contains settings that can be set via comments.
 type Method struct {
-	MatchIgnoreCase bool
-	WrapErrors      bool
-	AutoMap         []string
-	Fields          map[string]*FieldMapping
+	Flags   builder.ConversionFlags
+	AutoMap []string
+	Fields  map[string]*FieldMapping
 }
 
 func (m *Method) Field(targetName string) *FieldMapping {
@@ -121,7 +121,10 @@ func parseGenDecl(scope *types.Scope, decl *ast.GenDecl) ([]Converter, error) {
 			return nil, fmt.Errorf("%s may only be applied to type interface declarations ", converterMarker)
 		}
 		typeName := typeSpec.Name.String()
-		config, err := parseConverterComment(declDocs, ConverterConfig{Name: typeName + "Impl"})
+		config, err := parseConverterComment(declDocs, ConverterConfig{
+			Name:  typeName + "Impl",
+			Flags: builder.ConversionFlags{},
+		})
 		if err != nil {
 			return nil, fmt.Errorf("type %s: %s", typeName, err)
 		}
@@ -147,7 +150,7 @@ func parseGenDecl(scope *types.Scope, decl *ast.GenDecl) ([]Converter, error) {
 				return nil, fmt.Errorf("%s may only be applied to type interface declarations ", converterMarker)
 			}
 			typeName := typeSpec.Name.String()
-			config, err := parseConverterComment(typeSpec.Doc.Text(), ConverterConfig{Name: typeName + "Impl"})
+			config, err := parseConverterComment(typeSpec.Doc.Text(), ConverterConfig{Name: typeName + "Impl", Flags: builder.ConversionFlags{}})
 			if err != nil {
 				return nil, fmt.Errorf("type %s: %s", typeName, err)
 			}
@@ -212,7 +215,7 @@ func parseConverterComment(comment string, config ConverterConfig) (ConverterCon
 				if len(fields) != 1 {
 					return config, fmt.Errorf("invalid %s:wrapErrors, parameters not supported", prefix)
 				}
-				config.WrapErrors = true
+				config.Flags.Set(builder.FlagWrapErrors)
 				continue
 			}
 			return config, fmt.Errorf("unknown %s comment: %s", prefix, line)
@@ -225,6 +228,7 @@ func parseMethodComment(comment string) (Method, error) {
 	scanner := bufio.NewScanner(strings.NewReader(comment))
 	m := Method{
 		Fields: map[string]*FieldMapping{},
+		Flags:  builder.ConversionFlags{},
 	}
 	for scanner.Scan() {
 		line := strings.TrimSpace(scanner.Text())
@@ -290,18 +294,16 @@ func parseMethodComment(comment string) (Method, error) {
 				f.Source = "."
 				continue
 			case "matchIgnoreCase":
-				fields := strings.Fields(remaining)
-				if len(fields) != 0 {
+				if strings.TrimSpace(remaining) != "" {
 					return m, fmt.Errorf("invalid %s:matchIgnoreCase, parameters not supported", prefix)
 				}
-				m.MatchIgnoreCase = true
+				m.Flags.Set(builder.FlagMatchIgnoreCase)
 				continue
 			case "wrapErrors":
-				fields := strings.Fields(remaining)
-				if len(fields) != 0 {
+				if strings.TrimSpace(remaining) != "" {
 					return m, fmt.Errorf("invalid %s:wrapErrors, parameters not supported", prefix)
 				}
-				m.WrapErrors = true
+				m.Flags.Set(builder.FlagWrapErrors)
 				continue
 			}
 			return m, fmt.Errorf("unknown %s comment: %s", prefix, line)

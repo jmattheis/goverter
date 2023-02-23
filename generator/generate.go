@@ -47,14 +47,16 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 		file.Type().Id(converter.Config.Name).Struct()
 
 		gen := generator{
-			namer:                  namer.New(),
-			file:                   file,
-			name:                   converter.Config.Name,
-			lookup:                 map[xtype.Signature]*methodDefinition{},
-			extend:                 map[xtype.Signature]*methodDefinition{},
-			workingDir:             config.WorkingDir,
-			wrapErrors:             config.WrapErrors || converter.Config.WrapErrors,
-			ignoreUnexportedFields: config.IgnoreUnexportedFields,
+			namer:      namer.New(),
+			file:       file,
+			name:       converter.Config.Name,
+			lookup:     map[xtype.Signature]*methodDefinition{},
+			extend:     map[xtype.Signature]*methodDefinition{},
+			workingDir: config.WorkingDir,
+			flags: converter.Config.Flags.Add(builder.ConversionFlags{
+				builder.FlagWrapErrors:       config.WrapErrors,
+				builder.FlagIgnoreUnexported: config.IgnoreUnexportedFields,
+			}),
 		}
 		interf := obj.Type().Underlying().(*types.Interface)
 

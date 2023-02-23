@@ -38,7 +38,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 		if fieldMapping.Ignore {
 			continue
 		}
-		if !targetField.Exported() && ctx.IgnoreUnexportedFields {
+		if !targetField.Exported() && ctx.Flags.Has(FlagIgnoreUnexported) {
 			continue
 		}
 
@@ -155,7 +155,7 @@ func mapField(gen Generator, ctx *MethodContext, targetField *types.Var, sourceI
 
 	var path []string
 	if pathString == "" {
-		sourceMatch, err := xtype.FindField(targetField.Name(), ctx.MatchIgnoreCase, ignored, source, additionalFieldSources)
+		sourceMatch, err := xtype.FindField(targetField.Name(), ctx.Flags.Has(FlagMatchIgnoreCase), ignored, source, additionalFieldSources)
 		if err != nil {
 			cause := fmt.Sprintf("Cannot match the target field with the source entry: %s.", err.Error())
 			return nil, nil, nil, nil, NewError(cause).Lift(&Path{
