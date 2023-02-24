@@ -285,6 +285,62 @@ func (c *ConverterImpl) Convert(source example.Input) example.Output {
 
 <!-- tabs:end -->
 
+### Ignore All Missing
+
+If a struct has multiple **exported** fields that should be ignored, then you
+can use `goverter:ignoreMissing`, to ignore these. The comment can be added to
+both the converter interface or to a specific conversion method.
+
+!> Using this setting is not recommended, because this can easily lead to
+   unwanted behavior when e.g. renaming fields on a struct and forgetting to
+   change the goverter converter accordingly.
+
+<details>
+  <summary>Example (click to expand)</summary>
+
+<!-- tabs:start -->
+
+#### **input.go**
+
+```go
+package example
+
+// goverter:converter
+type Converter interface {
+    // goverter:ignoreMissing
+    Convert(source Input) Output
+}
+
+type Input struct {
+    Name string
+}
+type Output struct {
+    Name string
+    Age int
+    Street string
+}
+```
+
+#### **generated/generated.go**
+
+```go
+package generated
+
+import example "goverter/example"
+
+type ConverterImpl struct{}
+
+func (c *ConverterImpl) Convert(source example.Input) example.Output {
+	var exampleOutput example.Output
+	exampleOutput.Name = source.Name
+	return exampleOutput
+}
+```
+
+<!-- tabs:end -->
+
+</details>
+
 ## Case-insensitive matching
 
 Goverter will automatically fields if they have the exactly same name. You can

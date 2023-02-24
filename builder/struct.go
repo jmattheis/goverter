@@ -60,7 +60,10 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 		errWrapper := Wrap("error setting field " + targetField.Name())
 
 		if fieldMapping.Function == nil {
-			nextID, nextSource, mapStmt, lift, err := mapField(gen, ctx, targetField, sourceID, source, target, additionalFieldSources)
+			nextID, nextSource, mapStmt, lift, skip, err := mapField(gen, ctx, targetField, sourceID, source, target, additionalFieldSources)
+			if skip {
+				continue
+			}
 			if err != nil {
 				return nil, nil, err
 			}
@@ -79,7 +82,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 			var functionCallSourceID *xtype.JenID
 			var functionCallSourceType *xtype.Type
 			if def.Source != nil {
-				nextID, nextSource, mapStmt, mapLift, err := mapField(gen, ctx, targetField, sourceID, source, target, additionalFieldSources)
+				nextID, nextSource, mapStmt, mapLift, _, err := mapField(gen, ctx, targetField, sourceID, source, target, additionalFieldSources)
 				if err != nil {
 					return nil, nil, err
 				}
@@ -134,7 +137,14 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 	return stmt, xtype.VariableID(jen.Id(name)), nil
 }
 
-func mapField(gen Generator, ctx *MethodContext, targetField *types.Var, sourceID *xtype.JenID, source, target *xtype.Type, additionalFieldSources []xtype.FieldSources) (*jen.Statement, *xtype.Type, []jen.Code, []*Path, *Error) {
+func mapField(
+	gen Generator,
+	ctx *MethodContext,
+	targetField *types.Var,
+	sourceID *xtype.JenID,
+	source, target *xtype.Type,
+	additionalFieldSources []xtype.FieldSources,
+) (*jen.Statement, *xtype.Type, []jen.Code, []*Path, bool, *Error) {
 	lift := []*Path{}
 	ignored := func(name string) bool {
 		return ctx.Field(target, name).Ignore
@@ -150,7 +160,7 @@ func mapField(gen Generator, ctx *MethodContext, targetField *types.Var, sourceI
 			TargetID:   targetField.Name(),
 			TargetType: targetField.Type().String(),
 		})
-		return sourceID.Code, source, nil, lift, nil
+		return sourceID.Code, source, nil, lift, false, nil
 	}
 
 	var path []string
@@ -158,7 +168,11 @@ func mapField(gen Generator, ctx *MethodContext, targetField *types.Var, sourceI
 		sourceMatch, err := xtype.FindField(targetField.Name(), ctx.Flags.Has(FlagMatchIgnoreCase), ignored, source, additionalFieldSources)
 		if err != nil {
 			cause := fmt.Sprintf("Cannot match the target field with the source entry: %s.", err.Error())
-			return nil, nil, nil, nil, NewError(cause).Lift(&Path{
+			skip := false
+			if ctx.Flags.Has(FlagIgnoreMissing) {
+				_, skip = err.(*xtype.NoMatchError)
+			}
+			return nil, nil, nil, nil, skip, NewError(cause).Lift(&Path{
 				Prefix:     ".",
 				SourceID:   "???",
 				TargetID:   targetField.Name(),
@@ -189,7 +203,7 @@ func mapField(gen Generator, ctx *MethodContext, targetField *types.Var, sourceI
 		}
 		if !nextSource.Struct {
 			cause := fmt.Sprintf("Cannot access '%s' on %s.", path[i], nextSource.T)
-			return nil, nil, nil, nil, NewError(cause).Lift(&Path{
+			return nil, nil, nil, nil, false, NewError(cause).Lift(&Path{
 				Prefix:     ".",
 				SourceID:   path[i],
 				SourceType: "???",
@@ -217,7 +231,7 @@ func mapField(gen Generator, ctx *MethodContext, targetField *types.Var, sourceI
 		}
 
 		cause := fmt.Sprintf("Cannot find the mapped field on the source entry: %s.", err.Error())
-		return nil, nil, []jen.Code{}, nil, NewError(cause).Lift(&Path{
+		return nil, nil, []jen.Code{}, nil, false, NewError(cause).Lift(&Path{
 			Prefix:     ".",
 			SourceID:   path[i],
 			SourceType: "???",
@@ -243,7 +257,7 @@ func mapField(gen Generator, ctx *MethodContext, targetField *types.Var, sourceI
 		nextID = jen.Id(tempName)
 	}
 
-	return nextID, nextSource, stmt, lift, nil
+	return nextID, nextSource, stmt, lift, false, nil
 }
 
 func parseAutoMap(ctx *MethodContext, source *xtype.Type) ([]xtype.FieldSources, *Error) {

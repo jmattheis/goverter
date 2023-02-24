@@ -1,0 +1,41 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:ignoreMissing
+            Convert(source Input) Output
+        }
+
+        type Input struct {
+            Name string
+        }
+        type Output struct {
+            Name string
+            age  string
+        }
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+
+    | github.com/jmattheis/goverter/execution.Input
+    |
+    |
+    |
+    source.???
+    target.age
+    |      |
+    |      | string
+    |
+    | github.com/jmattheis/goverter/execution.Output
+
+    Cannot set value for unexported field "age".
+
+    Possible solutions:
+
+    * Ignore the given field:
+      https://goverter.jmattheis.de/#/conversion/mapping?id=ignore
+
+    * Create a custom converter function:
+      https://goverter.jmattheis.de/#/conversion/custom

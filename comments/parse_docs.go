@@ -217,6 +217,9 @@ func parseConverterComment(comment string, config ConverterConfig) (ConverterCon
 				}
 				config.Flags.Set(builder.FlagWrapErrors)
 				continue
+			case "ignoreMissing":
+				config.Flags.Set(builder.FlagIgnoreMissing)
+				continue
 			}
 			return config, fmt.Errorf("unknown %s comment: %s", prefix, line)
 		}
@@ -253,21 +256,19 @@ func parseMethodComment(comment string) (Method, error) {
 					custom = strings.TrimSpace(parts[1])
 				}
 
-				if len(fields) == 1 {
-					fields = append(fields, fields[0])
-				}
-
-				if len(fields) == 0 {
+				switch len(fields) {
+				case 1:
+					f := m.Field(fields[0])
+					f.Function = custom
+				case 2:
+					f := m.Field(fields[1])
+					f.Source = fields[0]
+					f.Function = custom
+				case 0:
 					return m, fmt.Errorf("invalid %s:map missing target field", prefix)
-				}
-
-				if len(fields) > 2 {
+				default:
 					return m, fmt.Errorf("invalid %s:map too many fields", prefix)
 				}
-
-				f := m.Field(fields[1])
-				f.Function = custom
-				f.Source = fields[0]
 				continue
 			case "mapIdentity":
 				fields := strings.Fields(remaining)
@@ -298,6 +299,9 @@ func parseMethodComment(comment string) (Method, error) {
 					return m, fmt.Errorf("invalid %s:matchIgnoreCase, parameters not supported", prefix)
 				}
 				m.Flags.Set(builder.FlagMatchIgnoreCase)
+				continue
+			case "ignoreMissing":
+				m.Flags.Set(builder.FlagIgnoreMissing)
 				continue
 			case "wrapErrors":
 				if strings.TrimSpace(remaining) != "" {

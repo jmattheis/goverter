@@ -103,6 +103,12 @@ func FindExactField(source *Type, name string) (*SimpleStructField, error) {
 	return &SimpleStructField{Name: exactMatch.Path[0], Type: exactMatch.Type}, nil
 }
 
+type NoMatchError struct{ Field string }
+
+func (err *NoMatchError) Error() string {
+	return fmt.Sprintf("\"%s\" does not exist", err.Field)
+}
+
 func FindField(name string, ignoreCase bool, ignored func(name string) bool, source *Type, additionalFieldSources []FieldSources) (*StructField, error) {
 	exactMatch, ignoreCaseMatches := source.findAllFields(nil, name, ignoreCase, ignored)
 	var exactMatches []*StructField
@@ -127,7 +133,7 @@ func FindField(name string, ignoreCase bool, ignored func(name string) bool, sou
 	case 1:
 		return matches[0], nil
 	case 0:
-		return nil, fmt.Errorf("%q does not exist", name)
+		return nil, &NoMatchError{Field: name}
 	default:
 		names := make([]string, 0, len(matches))
 		for _, m := range matches {
