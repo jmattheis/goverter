@@ -217,6 +217,9 @@ func parseConverterComment(comment string, config ConverterConfig) (ConverterCon
 				}
 				config.Flags.Set(builder.FlagWrapErrors)
 				continue
+			case "ignoreUnexported":
+				config.Flags.Set(builder.FlagIgnoreUnexported)
+				continue
 			case "ignoreMissing":
 				config.Flags.Set(builder.FlagIgnoreMissing)
 				continue
@@ -302,6 +305,9 @@ func parseMethodComment(comment string) (Method, error) {
 				continue
 			case "ignoreMissing":
 				m.Flags.Set(builder.FlagIgnoreMissing)
+				continue
+			case "ignoreUnexported":
+				m.Flags.Set(builder.FlagIgnoreUnexported)
 				continue
 			case "wrapErrors":
 				if strings.TrimSpace(remaining) != "" {
