@@ -6,7 +6,6 @@ run:
 linters:
     enable:
         - asciicheck
-        - deadcode
         - depguard
         - exportloopref
         - gci
@@ -22,11 +21,9 @@ linters:
         - nakedret
         - nolintlint
         - sqlclosecheck
-        - structcheck
         - typecheck
         - unconvert
         - unused
-        - varcheck
         - whitespace
     disable:
         - goerr113
