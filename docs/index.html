@@ -31,10 +31,18 @@
         maxLevel: 4,
         subMaxLevel: 2,
         plugins: [
-            function (hook) {
+            function (hook, vm) {
                 hook.afterEach(function (html, next) {
                     ghVersion.then((version) => next(html.replace(/GITHUB_VERSION/g, version)))
-                })
+                });
+                // workaround https://github.com/jhildenbiddle/docsify-tabs/issues/25
+                hook.doneEach(function () {
+                    const id = vm.route.query.id;
+                    const element = id ? document.querySelector(`[data-id="${id}"]`) : undefined;
+                    if (element) {
+                        setTimeout(function() { element.scrollIntoView(); }, 1000);
+                    }
+                });
             }
         ]
     }
