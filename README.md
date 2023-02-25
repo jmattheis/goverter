@@ -31,14 +31,15 @@ use reflection.
 
 ## Features
 
-- Automatic conversion of builtin types
-  ([`house` example](https://github.com/jmattheis/goverter/blob/main/example/house)), this includes:
-  - slices, maps, named types, primitive types, pointers
-  - structs with same fields
-- [Deep copy / converts deeply](https://en.wikipedia.org/wiki/Object_copying#Deep_copy)
-- [You can implement custom converter methods](https://goverter.jmattheis.de/#/conversion/custom)
-- [Awesome error messages](https://goverter.jmattheis.de/#/conversion/?id=error-early)
-- No reflection is used at runtime
+- **Fast execution**: No reflection is used at runtime
+- Automatically [deep
+  copies](https://en.wikipedia.org/wiki/Object_copying#Deep_copy) builtin
+  types: slices, maps, named types, primitive types, pointers, structs with
+  same fields
+- **Customizable**: [You can implement custom converter methods](https://goverter.jmattheis.de/#/conversion/custom)
+- [Clear errors when generating the conversion methods](https://goverter.jmattheis.de/#/conversion/?id=error-early) if
+  - unmapped fields are missing on the target struct
+  - types cannot be converted without loosing information
 
 ## Usage
 
@@ -83,7 +84,7 @@ use reflection.
 1. Run `goverter`:
 
     ```bash
-    $ go run github.com/jmattheis/goverter/cmd/goverter@GITHUB_VERSION ./
+    $ go run github.com/jmattheis/goverter/cmd/goverter@v0.16.0 ./
     ```
 
     See [Installation](https://goverter.jmattheis.de/#/install) for more information.

@@ -287,9 +287,10 @@ func (c *ConverterImpl) Convert(source example.Input) example.Output {
 
 ### Ignore All Missing
 
-If a struct has multiple **exported** fields that should be ignored, then you
-can use `goverter:ignoreMissing`, to ignore these. The comment can be added to
-both the converter interface or to a specific conversion method.
+If the source struct has multiple missing **exported** fields that should be
+ignored, then you can use `goverter:ignoreMissing`, to ignore these. The
+comment can be added to both the converter interface or to a specific
+conversion method.
 
 !> Using this setting is not recommended, because this can easily lead to
    unwanted behavior when e.g. renaming fields on a struct and forgetting to
