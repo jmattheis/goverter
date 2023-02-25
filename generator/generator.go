@@ -25,15 +25,14 @@ type methodDefinition struct {
 	Fields          map[string]*builder.FieldMapping
 	MatchIgnoreCase bool
 	AutoMap         []string
-	WrapErrors      bool
 
 	Jen jen.Code
 
-	SelfAsFirstParam       bool
-	ReturnError            bool
-	ReturnTypeOrigin       string
-	Dirty                  bool
-	IgnoreUnexportedFields bool
+	SelfAsFirstParam bool
+	ReturnError      bool
+	ReturnTypeOrigin string
+	Dirty            bool
+	Flags            builder.ConversionFlags
 }
 
 type generator struct {
@@ -42,13 +41,11 @@ type generator struct {
 	file   *jen.File
 	lookup map[xtype.Signature]*methodDefinition
 	extend map[xtype.Signature]*methodDefinition
-	// wrapErrors embeds field names in the error msg
-	wrapErrors bool
 	// pkgCache caches the extend packages, saving load time
 	pkgCache map[string][]*packages.Package
 	// workingDir is a working directory, can be empty
-	workingDir             string
-	ignoreUnexportedFields bool
+	workingDir string
+	flags      builder.ConversionFlags
 }
 
 func (g *generator) registerMethod(converter types.Type, scope *types.Scope, methodType *types.Func, methodComments comments.Method) error {
@@ -92,19 +89,17 @@ func (g *generator) registerMethod(converter types.Type, scope *types.Scope, met
 	}
 
 	m := &methodDefinition{
-		Call:                   jen.Id(xtype.ThisVar).Dot(methodType.Name()),
-		ID:                     methodType.String(),
-		Explicit:               true,
-		Name:                   methodType.Name(),
-		Source:                 xtype.TypeOf(source),
-		Target:                 xtype.TypeOf(target),
-		Fields:                 builderProperties,
-		AutoMap:                methodComments.AutoMap,
-		MatchIgnoreCase:        methodComments.MatchIgnoreCase,
-		IgnoreUnexportedFields: g.ignoreUnexportedFields,
-		WrapErrors:             methodComments.WrapErrors,
-		ReturnError:            returnError,
-		ReturnTypeOrigin:       methodType.FullName(),
+		Call:             jen.Id(xtype.ThisVar).Dot(methodType.Name()),
+		ID:               methodType.String(),
+		Explicit:         true,
+		Name:             methodType.Name(),
+		Source:           xtype.TypeOf(source),
+		Target:           xtype.TypeOf(target),
+		Fields:           builderProperties,
+		AutoMap:          methodComments.AutoMap,
+		Flags:            g.flags.Add(methodComments.Flags),
+		ReturnError:      returnError,
+		ReturnTypeOrigin: methodType.FullName(),
 	}
 
 	g.lookup[xtype.SignatureOf(m.Source, m.Target)] = m
@@ -212,15 +207,13 @@ func (g *generator) buildMethod(method *methodDefinition, errWrapper builder.Err
 	}
 
 	ctx := &builder.MethodContext{
-		Namer:                  namer.New(),
-		Fields:                 method.Fields,
-		FieldsTarget:           fieldsTarget,
-		IgnoreUnexportedFields: method.IgnoreUnexportedFields,
-		MatchIgnoreCase:        method.MatchIgnoreCase,
-		AutoMap:                method.AutoMap,
-		WrapErrors:             method.WrapErrors,
-		TargetType:             method.Target,
-		Signature:              xtype.SignatureOf(method.Source, method.Target),
+		Namer:        namer.New(),
+		Fields:       method.Fields,
+		FieldsTarget: fieldsTarget,
+		Flags:        method.Flags,
+		AutoMap:      method.AutoMap,
+		TargetType:   method.Target,
+		Signature:    xtype.SignatureOf(method.Source, method.Target),
 	}
 
 	var funcBlock []jen.Code
@@ -382,7 +375,7 @@ func (g *generator) delegateMethod(
 
 // wrap invokes the error wrapper if feature is enabled.
 func (g *generator) wrap(ctx *builder.MethodContext, errWrapper builder.ErrorWrapper, errStmt *jen.Statement) *jen.Statement {
-	if g.wrapErrors || ctx.WrapErrors {
+	if ctx.Flags.Has(builder.FlagWrapErrors) {
 		return errWrapper(errStmt)
 	}
 	return errStmt
@@ -419,13 +412,13 @@ func (g *generator) Build(
 		name := g.namer.Name(source.UnescapedID() + "To" + strings.Title(target.UnescapedID()))
 
 		method := &methodDefinition{
-			ID:                     name,
-			Name:                   name,
-			Source:                 xtype.TypeOf(source.T),
-			Target:                 xtype.TypeOf(target.T),
-			Fields:                 map[string]*builder.FieldMapping{},
-			IgnoreUnexportedFields: g.ignoreUnexportedFields,
-			Call:                   jen.Id(xtype.ThisVar).Dot(name),
+			ID:     name,
+			Name:   name,
+			Source: xtype.TypeOf(source.T),
+			Target: xtype.TypeOf(target.T),
+			Fields: map[string]*builder.FieldMapping{},
+			Flags:  g.flags,
+			Call:   jen.Id(xtype.ThisVar).Dot(name),
 		}
 
 		g.lookup[signature] = method

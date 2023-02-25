@@ -1,0 +1,51 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:ignoreUnexported
+            Convert(source Input) Output
+        }
+
+        type Input struct {
+            Nested NestedInput
+        }
+        type Output struct {
+            Nested NestedOutput
+        }
+        type NestedInput struct {
+            Name string
+        }
+        type NestedOutput struct {
+            Name string
+            internalState string
+        }
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+
+    | github.com/jmattheis/goverter/execution.Input
+    |
+    |      | github.com/jmattheis/goverter/execution.NestedInput
+    |      |
+    |      |
+    |      |
+    source.Nested.???
+    target.Nested.internalState
+    |      |      |
+    |      |      | string
+    |      |
+    |      | github.com/jmattheis/goverter/execution.NestedOutput
+    |
+    | github.com/jmattheis/goverter/execution.Output
+
+    Cannot set value for unexported field "internalState".
+
+    Possible solutions:
+
+    * Ignore the given field:
+      https://goverter.jmattheis.de/#/conversion/mapping?id=ignore
+
+    * Create a custom converter function:
+      https://goverter.jmattheis.de/#/conversion/custom

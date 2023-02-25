@@ -1,0 +1,39 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:ignoreMissing
+            // goverter:map Age | DefaultAge
+            Convert(source Input) Output
+        }
+
+        func DefaultAge(s string) int {
+            return 42
+        }
+
+        type Input struct {
+            Name string
+        }
+        type Output struct {
+            Name   string
+            Age    int
+            Street string
+        }
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+
+    | github.com/jmattheis/goverter/execution.Input
+    |
+    |
+    |
+    source.???
+    target.Age
+    |      |
+    |      | int
+    |
+    | github.com/jmattheis/goverter/execution.Output
+
+    Cannot match the target field with the source entry: "Age" does not exist.

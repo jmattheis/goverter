@@ -1,0 +1,43 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:ignoreMissing
+            Convert(source Input) Output
+        }
+
+        type Input struct {
+            Nested NestedInput
+        }
+        type Output struct {
+            Nested NestedOutput
+        }
+        type NestedInput struct {
+            Name string
+        }
+        type NestedOutput struct {
+            Name string
+            Age  string
+        }
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+
+    | github.com/jmattheis/goverter/execution.Input
+    |
+    |      | github.com/jmattheis/goverter/execution.NestedInput
+    |      |
+    |      |
+    |      |
+    source.Nested.???
+    target.Nested.Age
+    |      |      |
+    |      |      | string
+    |      |
+    |      | github.com/jmattheis/goverter/execution.NestedOutput
+    |
+    | github.com/jmattheis/goverter/execution.Output
+
+    Cannot match the target field with the source entry: "Age" does not exist.

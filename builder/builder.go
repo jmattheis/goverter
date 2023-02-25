@@ -34,14 +34,12 @@ type Generator interface {
 // MethodContext exposes information for the current method.
 type MethodContext struct {
 	*namer.Namer
-	Fields                 map[string]*FieldMapping
-	FieldsTarget           string
-	IgnoreUnexportedFields bool
-	Signature              xtype.Signature
-	TargetType             *xtype.Type
-	MatchIgnoreCase        bool
-	WrapErrors             bool
-	AutoMap                []string
+	Fields       map[string]*FieldMapping
+	FieldsTarget string
+	Signature    xtype.Signature
+	TargetType   *xtype.Type
+	AutoMap      []string
+	Flags        ConversionFlags
 
 	TargetVar *jen.Statement
 }
