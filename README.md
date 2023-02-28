@@ -38,8 +38,8 @@ use reflection.
   same fields
 - **Customizable**: [You can implement custom converter methods](https://goverter.jmattheis.de/#/conversion/custom)
 - [Clear errors when generating the conversion methods](https://goverter.jmattheis.de/#/conversion/?id=error-early) if
-  - unmapped fields are missing on the target struct
-  - types cannot be converted without loosing information
+  - the target struct has unmapped fields
+  - types cannot be converted without losing information
 
 ## Usage
 
