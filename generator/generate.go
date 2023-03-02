@@ -19,6 +19,7 @@ type Config struct {
 	WorkingDir             string
 	WrapErrors             bool
 	IgnoreUnexportedFields bool
+	MatchFieldsIgnoreCase  bool
 }
 
 // BuildSteps that'll used for generation.
@@ -56,6 +57,7 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 			flags: converter.Config.Flags.Add(builder.ConversionFlags{
 				builder.FlagWrapErrors:       config.WrapErrors,
 				builder.FlagIgnoreUnexported: config.IgnoreUnexportedFields,
+				builder.FlagMatchIgnoreCase:  config.MatchFieldsIgnoreCase,
 			}),
 		}
 		interf := obj.Type().Underlying().(*types.Interface)

@@ -18,6 +18,8 @@ func main() {
 		"if set, wrap conversion errors with extra details, such as struct field names")
 	ignoreUnexportedFields := flag.Bool("ignoreUnexportedFields", false,
 		"if set, unexported fields on structs are ignored")
+	matchFieldsIgnoreCase := flag.Bool("matchIgnoreCase", false,
+		"if set, all struct field matches will be applied case insensitively")
 
 	flag.Parse()
 
@@ -39,6 +41,7 @@ func main() {
 		PackagePath:             *packagePath,
 		WrapErrors:              *wrapErrors,
 		IgnoredUnexportedFields: *ignoreUnexportedFields,
+		MatchFieldsIgnoreCase:   *matchFieldsIgnoreCase,
 	})
 	if err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)
