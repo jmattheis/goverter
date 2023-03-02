@@ -8,8 +8,8 @@ import (
 
 // Builder builds converter implementations, and can decide if it can handle the given type.
 type Builder interface {
-	// Matches returns true, if the builder can create handle the given types
-	Matches(source, target *xtype.Type) bool
+	// Matches returns true, if the builder can create handle the given types.
+	Matches(ctx *MethodContext, source, target *xtype.Type) bool
 	// Build creates conversion source code for the given source and target type.
 	Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *Error)
 }

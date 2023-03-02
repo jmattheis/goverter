@@ -13,7 +13,7 @@ import (
 type Struct struct{}
 
 // Matches returns true, if the builder can create handle the given types.
-func (*Struct) Matches(source, target *xtype.Type) bool {
+func (*Struct) Matches(_ *MethodContext, source, target *xtype.Type) bool {
 	return source.Struct && target.Struct
 }
 

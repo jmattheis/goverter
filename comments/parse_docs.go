@@ -226,6 +226,9 @@ func parseConverterComment(comment string, config ConverterConfig) (ConverterCon
 			case "ignoreMissing":
 				config.Flags.Set(builder.FlagIgnoreMissing)
 				continue
+			case "useZeroValueOnPointerInconsistency":
+				config.Flags.Set(builder.FlagZeroValueOnPtrInconsistency)
+				continue
 			}
 			return config, fmt.Errorf("unknown %s comment: %s", prefix, line)
 		}
@@ -311,6 +314,9 @@ func parseMethodComment(comment string) (Method, error) {
 				continue
 			case "ignoreUnexported":
 				m.Flags.Set(builder.FlagIgnoreUnexported)
+				continue
+			case "useZeroValueOnPointerInconsistency":
+				m.Flags.Set(builder.FlagZeroValueOnPtrInconsistency)
 				continue
 			case "wrapErrors":
 				if strings.TrimSpace(remaining) != "" {

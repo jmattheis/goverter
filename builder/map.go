@@ -9,7 +9,7 @@ import (
 type Map struct{}
 
 // Matches returns true, if the builder can create handle the given types.
-func (*Map) Matches(source, target *xtype.Type) bool {
+func (*Map) Matches(_ *MethodContext, source, target *xtype.Type) bool {
 	return source.Map && target.Map
 }
 
