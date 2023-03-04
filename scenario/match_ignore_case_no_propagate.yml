@@ -1,0 +1,44 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:matchIgnoreCase
+            Convert(source Input) Output
+        }
+
+        type Input struct {
+            UUID string
+            Nested InputNested
+        }
+        type InputNested struct {
+            ID string
+        }
+        type Output struct {
+            Uuid string
+            Nested OutputNested
+        }
+        type OutputNested struct {
+            Id string
+        }
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+
+    | github.com/jmattheis/goverter/execution.Input
+    |
+    |      | github.com/jmattheis/goverter/execution.InputNested
+    |      |
+    |      |
+    |      |
+    source.Nested.???
+    target.Nested.Id
+    |      |      |
+    |      |      | string
+    |      |
+    |      | github.com/jmattheis/goverter/execution.OutputNested
+    |
+    | github.com/jmattheis/goverter/execution.Output
+
+    Cannot match the target field with the source entry: "Id" does not exist.

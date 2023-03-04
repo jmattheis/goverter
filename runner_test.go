@@ -120,7 +120,7 @@ type Scenario struct {
 	// set to test code generation with fmt.Errorf per field
 	WrapErrors             bool `yaml:"wrapErrors,omitempty"`
 	IgnoreUnexportedFields bool `yaml:"ignore_unexported_fields,omitempty"`
-	MatchFieldsIgnoreCase  bool `yaml:"match_fields_ignore_keys,omitempty"`
+	MatchFieldsIgnoreCase  bool `yaml:"match_fields_ignore_case,omitempty"`
 
 	Success string `yaml:"success,omitempty"`
 	// for error cases, use either Error or ErrorStartsWith, not both

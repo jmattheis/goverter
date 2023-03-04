@@ -19,7 +19,7 @@ func main() {
 	ignoreUnexportedFields := flag.Bool("ignoreUnexportedFields", false,
 		"if set, unexported fields on structs are ignored")
 	matchFieldsIgnoreCase := flag.Bool("matchFieldsIgnoreCase", false,
-		"if set, all struct field matches will be applied case insensitively")
+		"if set, struct fields will be matched case-insensitively")
 
 	flag.Parse()
 
