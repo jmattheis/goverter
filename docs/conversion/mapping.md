@@ -400,8 +400,10 @@ func (c *ConverterImpl) Convert(source example.Input) example.Output {
 
 ## Case-insensitive matching
 
-Goverter will automatically fields if they have the exactly same name. You can
-enable case-insensitive field matching with `goverter:matchIgnoreCase`.
+If you have fields that only differ in capitalization, then you can enable
+case-insensitive field matching by adding the comment
+`goverter:matchIgnoreCase` to a specific conversion method, globally on the
+interface or the CLI flag `-matchFieldsIgnoreCase`.
 
 Use this tag only when it is extremely unlikely for the source or the target to
 have two fields that differ only in casing. E.g.: converting go-jet generated

@@ -31,6 +31,8 @@ type GenerateConfig struct {
 	WrapErrors bool
 	// IgnoredUnexportedFields tells goverter to ignore fields that are not exported.
 	IgnoredUnexportedFields bool
+	// MatchFieldsIgnoreCase tells goverter to use case insensitive match everywhere.
+	MatchFieldsIgnoreCase bool
 }
 
 // GenerateConverter generates converters.
@@ -50,6 +52,7 @@ func GenerateConverter(c GenerateConfig) ([]byte, error) {
 		WorkingDir:             c.WorkingDir,
 		WrapErrors:             c.WrapErrors,
 		IgnoreUnexportedFields: c.IgnoredUnexportedFields,
+		MatchFieldsIgnoreCase:  c.MatchFieldsIgnoreCase,
 	})
 	if err != nil {
 		return nil, err

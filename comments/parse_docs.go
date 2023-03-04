@@ -220,6 +220,9 @@ func parseConverterComment(comment string, config ConverterConfig) (ConverterCon
 			case "ignoreUnexported":
 				config.Flags.Set(builder.FlagIgnoreUnexported)
 				continue
+			case "matchIgnoreCase":
+				config.Flags.Set(builder.FlagMatchIgnoreCase)
+				continue
 			case "ignoreMissing":
 				config.Flags.Set(builder.FlagIgnoreMissing)
 				continue
