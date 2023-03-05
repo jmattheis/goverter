@@ -65,7 +65,7 @@ use reflection.
       Convert(source Input) Output
     }
 
-    type Person struct {
+    type Input struct {
       Name string
       Nested InputNested
     }
