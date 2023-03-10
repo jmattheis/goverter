@@ -65,7 +65,7 @@ func (m *Namer) Register(name string) bool {
 	return false
 }
 
-// Name returns an usused variable name that contains the passed name.
+// Name returns an unused variable name that contains the passed name.
 func (m *Namer) Name(name string) string {
 	for i := 1; ; i++ {
 		numberedName := name

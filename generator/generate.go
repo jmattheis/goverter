@@ -26,6 +26,7 @@ type Config struct {
 var BuildSteps = []builder.Builder{
 	&builder.BasicTargetPointerRule{},
 	&builder.Pointer{},
+	&builder.SourcePointer{},
 	&builder.TargetPointer{},
 	&builder.Basic{},
 	&builder.Struct{},

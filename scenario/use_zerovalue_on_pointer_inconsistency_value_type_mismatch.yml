@@ -1,0 +1,37 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        // goverter:useZeroValueOnPointerInconsistency
+        type Converter interface {
+            ConvertPerson(source Person) APIPerson
+        }
+
+        type Person struct {
+            FirstName *string
+        }
+
+        type APIPerson struct {
+            FirstName int
+        }
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).ConvertPerson(source github.com/jmattheis/goverter/execution.Person) github.com/jmattheis/goverter/execution.APIPerson
+
+    | github.com/jmattheis/goverter/execution.Person
+    |
+    |      | *string
+    |      |
+    |      |        | string
+    |      |        |
+    source.FirstName*
+    target.FirstName
+    |      |
+    |      |
+    |      |
+    |      | int
+    |
+    | github.com/jmattheis/goverter/execution.APIPerson
+
+    TypeMismatch: Cannot convert string to int

@@ -1,0 +1,32 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        type Converter interface {
+            ConvertPerson(source Person) APIPerson
+        }
+
+        type Person struct {
+            FirstName *string
+        }
+
+        type APIPerson struct {
+            FirstName string
+        }
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).ConvertPerson(source github.com/jmattheis/goverter/execution.Person) github.com/jmattheis/goverter/execution.APIPerson
+
+    | github.com/jmattheis/goverter/execution.Person
+    |
+    |      | *string
+    |      |
+    source.FirstName
+    target.FirstName
+    |      |
+    |      | string
+    |
+    | github.com/jmattheis/goverter/execution.APIPerson
+
+    TypeMismatch: Cannot convert *string to string

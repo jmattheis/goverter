@@ -9,7 +9,7 @@ import (
 type Basic struct{}
 
 // Matches returns true, if the builder can create handle the given types.
-func (*Basic) Matches(source, target *xtype.Type) bool {
+func (*Basic) Matches(_ *MethodContext, source, target *xtype.Type) bool {
 	return source.Basic && target.Basic &&
 		source.BasicType.Kind() == target.BasicType.Kind()
 }
@@ -26,7 +26,7 @@ func (*Basic) Build(_ Generator, _ *MethodContext, sourceID *xtype.JenID, source
 type BasicTargetPointerRule struct{}
 
 // Matches returns true, if the builder can create handle the given types.
-func (*BasicTargetPointerRule) Matches(source, target *xtype.Type) bool {
+func (*BasicTargetPointerRule) Matches(_ *MethodContext, source, target *xtype.Type) bool {
 	return source.Basic && target.Pointer && target.PointerInner.Basic
 }
 

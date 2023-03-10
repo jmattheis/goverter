@@ -246,7 +246,7 @@ func (g *generator) buildMethod(method *methodDefinition, errWrapper builder.Err
 
 func (g *generator) buildNoLookup(ctx *builder.MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *builder.Error) {
 	for _, rule := range BuildSteps {
-		if rule.Matches(source, target) {
+		if rule.Matches(ctx, source, target) {
 			return rule.Build(g, ctx, sourceID, source, target)
 		}
 	}
@@ -422,7 +422,6 @@ func (g *generator) Build(
 		}
 
 		g.lookup[signature] = method
-		g.namer.Register(method.Name)
 		if err := g.buildMethod(method, errWrapper); err != nil {
 			return nil, nil, err
 		}
@@ -431,7 +430,7 @@ func (g *generator) Build(
 	}
 
 	for _, rule := range BuildSteps {
-		if rule.Matches(source, target) {
+		if rule.Matches(ctx, source, target) {
 			return rule.Build(g, ctx, sourceID, source, target)
 		}
 	}
