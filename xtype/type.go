@@ -243,42 +243,61 @@ func (t *Type) asID(seeNamed, escapeReserved bool) string {
 // TypeAsJen returns a jen representation of the type.
 func (t Type) TypeAsJen() *jen.Statement {
 	if t.Named {
-		return toCode(t.NamedType, &jen.Statement{})
+		return toCode(t.NamedType)
 	}
-	return toCode(t.T, &jen.Statement{})
+	return toCode(t.T)
 }
 
-func toCode(t types.Type, st *jen.Statement) *jen.Statement {
+func toCode(t types.Type) *jen.Statement {
 	switch cast := t.(type) {
 	case *types.Named:
-		if cast.Obj().Pkg() == nil {
-			return st.Id(cast.Obj().Name())
-		}
-		return st.Qual(cast.Obj().Pkg().Path(), cast.Obj().Name())
+		return toCodeNamed(cast)
 	case *types.Map:
-		key := toCode(cast.Key(), &jen.Statement{})
-		return toCode(cast.Elem(), st.Map(key))
+		return jen.Map(toCode(cast.Key())).Add(toCode(cast.Elem()))
 	case *types.Slice:
-		return toCode(cast.Elem(), st.Index())
+		return jen.Index().Add(toCode(cast.Elem()))
 	case *types.Array:
-		return toCode(cast.Elem(), st.Index(jen.Lit(int(cast.Len()))))
+		return jen.Index(jen.Lit(int(cast.Len()))).Add(toCode(cast.Elem()))
 	case *types.Pointer:
-		return toCode(cast.Elem(), st.Op("*"))
+		return jen.Op("*").Add(toCode(cast.Elem()))
 	case *types.Basic:
-		return toCodeBasic(cast.Kind(), st)
+		return toCodeBasic(cast.Kind())
 	case *types.Struct:
-		return toCodeStruct(cast, st)
+		return toCodeStruct(cast)
 	}
 	panic("unsupported type " + t.String())
 }
 
-func toCodeStruct(t *types.Struct, st *jen.Statement) *jen.Statement {
+func toCodeNamed(t *types.Named) *jen.Statement {
+	var name *jen.Statement
+	if t.Obj().Pkg() == nil {
+		name = jen.Id(t.Obj().Name())
+	} else {
+		name = jen.Qual(t.Obj().Pkg().Path(), t.Obj().Name())
+	}
+
+	args := t.TypeArgs()
+
+	if args.Len() == 0 {
+		return name
+	}
+
+	jenArgs := []jen.Code{}
+	for i := 0; i < args.Len(); i++ {
+		arg := args.At(i)
+		jenArgs = append(jenArgs, toCode(arg))
+	}
+
+	return name.Index(jen.List(jenArgs...))
+}
+
+func toCodeStruct(t *types.Struct) *jen.Statement {
 	fields := []jen.Code{}
 	for i := 0; i < t.NumFields(); i++ {
 		f := t.Field(i)
 		tag := t.Tag(i)
 
-		fieldType := toCode(f.Type(), &jen.Statement{})
+		fieldType := toCode(f.Type())
 		if tag != "" {
 			fieldType = fieldType.Add(jen.Id("`" + tag + "`"))
 		}
@@ -290,43 +309,43 @@ func toCodeStruct(t *types.Struct, st *jen.Statement) *jen.Statement {
 		fields = append(fields, fieldType)
 	}
 
-	return st.Struct(fields...)
+	return jen.Struct(fields...)
 }
 
-func toCodeBasic(t types.BasicKind, st *jen.Statement) *jen.Statement {
+func toCodeBasic(t types.BasicKind) *jen.Statement {
 	switch t {
 	case types.String:
-		return st.String()
+		return jen.String()
 	case types.Int:
-		return st.Int()
+		return jen.Int()
 	case types.Int8:
-		return st.Int8()
+		return jen.Int8()
 	case types.Int16:
-		return st.Int16()
+		return jen.Int16()
 	case types.Int32:
-		return st.Int32()
+		return jen.Int32()
 	case types.Int64:
-		return st.Int64()
+		return jen.Int64()
 	case types.Uint:
-		return st.Uint()
+		return jen.Uint()
 	case types.Uint8:
-		return st.Uint8()
+		return jen.Uint8()
 	case types.Uint16:
-		return st.Uint16()
+		return jen.Uint16()
 	case types.Uint32:
-		return st.Uint32()
+		return jen.Uint32()
 	case types.Uint64:
-		return st.Uint64()
+		return jen.Uint64()
 	case types.Bool:
-		return st.Bool()
+		return jen.Bool()
 	case types.Complex128:
-		return st.Complex128()
+		return jen.Complex128()
 	case types.Complex64:
-		return st.Complex64()
+		return jen.Complex64()
 	case types.Float32:
-		return st.Float32()
+		return jen.Float32()
 	case types.Float64:
-		return st.Float64()
+		return jen.Float64()
 	default:
 		panic(fmt.Sprintf("unsupported type %d", t))
 	}
