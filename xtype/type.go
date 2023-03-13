@@ -251,10 +251,7 @@ func (t Type) TypeAsJen() *jen.Statement {
 func toCode(t types.Type) *jen.Statement {
 	switch cast := t.(type) {
 	case *types.Named:
-		if cast.Obj().Pkg() == nil {
-			return jen.Id(cast.Obj().Name())
-		}
-		return jen.Qual(cast.Obj().Pkg().Path(), cast.Obj().Name())
+		return toCodeNamed(cast)
 	case *types.Map:
 		return jen.Map(toCode(cast.Key())).Add(toCode(cast.Elem()))
 	case *types.Slice:
@@ -269,6 +266,29 @@ func toCode(t types.Type) *jen.Statement {
 		return toCodeStruct(cast)
 	}
 	panic("unsupported type " + t.String())
+}
+
+func toCodeNamed(t *types.Named) *jen.Statement {
+	var name *jen.Statement
+	if t.Obj().Pkg() == nil {
+		name = jen.Id(t.Obj().Name())
+	} else {
+		name = jen.Qual(t.Obj().Pkg().Path(), t.Obj().Name())
+	}
+
+	args := t.TypeArgs()
+
+	if args.Len() == 0 {
+		return name
+	}
+
+	jenArgs := []jen.Code{}
+	for i := 0; i < args.Len(); i++ {
+		arg := args.At(i)
+		jenArgs = append(jenArgs, toCode(arg))
+	}
+
+	return name.Index(jen.List(jenArgs...))
 }
 
 func toCodeStruct(t *types.Struct) *jen.Statement {
