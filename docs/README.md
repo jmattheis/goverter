@@ -21,6 +21,8 @@ use reflection.
 
 ## Usage
 
+1. Ensure your `go version` is 1.16 or above
+
 1. Create a go modules project if you haven't done so already
 
     ```bash
