@@ -43,6 +43,8 @@ use reflection.
 
 ## Usage
 
+1. Ensure your `go version` is 1.16 or above
+
 1. Create a go modules project if you haven't done so already
 
     ```bash
@@ -84,7 +86,7 @@ use reflection.
 1. Run `goverter`:
 
     ```bash
-    $ go run github.com/jmattheis/goverter/cmd/goverter@v0.17.1 ./
+    $ go run github.com/jmattheis/goverter/cmd/goverter@v0.17.2 ./
     ```
 
     See [Installation](https://goverter.jmattheis.de/#/install) for more information.

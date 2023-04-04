@@ -276,15 +276,14 @@ func toCodeNamed(t *types.Named) *jen.Statement {
 		name = jen.Qual(t.Obj().Pkg().Path(), t.Obj().Name())
 	}
 
-	args := t.TypeArgs()
+	args := getTypeArgs(t)
 
-	if args.Len() == 0 {
+	if len(args) == 0 {
 		return name
 	}
 
 	jenArgs := []jen.Code{}
-	for i := 0; i < args.Len(); i++ {
-		arg := args.At(i)
+	for _, arg := range args {
 		jenArgs = append(jenArgs, toCode(arg))
 	}
 
