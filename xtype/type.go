@@ -264,8 +264,44 @@ func toCode(t types.Type) *jen.Statement {
 		return toCodeBasic(cast.Kind())
 	case *types.Struct:
 		return toCodeStruct(cast)
+	case *types.Interface:
+		return toCodeInterface(cast)
 	}
 	panic("unsupported type " + t.String())
+}
+
+func toCodeInterface(t *types.Interface) *jen.Statement {
+	content := []jen.Code{}
+	for i := 0; i < t.NumEmbeddeds(); i++ {
+		content = append(content, toCode(t.EmbeddedType(i)))
+	}
+
+	for i := 0; i < t.NumExplicitMethods(); i++ {
+		method := t.ExplicitMethod(i)
+		content = append(content, toCodeFunc(method))
+	}
+
+	return jen.Interface(content...)
+}
+
+func toCodeFunc(t *types.Func) *jen.Statement {
+	sig := t.Type().(*types.Signature)
+	return toCodeSignature(t.Name(), sig)
+}
+
+func toCodeSignature(name string, t *types.Signature) *jen.Statement {
+	jenParams := []jen.Code{}
+	params := t.Params()
+	for i := 0; i < params.Len(); i++ {
+		jenParams = append(jenParams, toCode(params.At(i).Type()))
+	}
+
+	jenResults := []jen.Code{}
+	results := t.Results()
+	for i := 0; i < results.Len(); i++ {
+		jenResults = append(jenResults, toCode(results.At(i).Type()))
+	}
+	return jen.Id(name).Params(jenParams...).Params(jenResults...)
 }
 
 func toCodeNamed(t *types.Named) *jen.Statement {
