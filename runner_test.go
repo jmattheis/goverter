@@ -94,7 +94,9 @@ func TestScenario(t *testing.T) {
 			require.Equal(t, scenario.Success, string(body))
 			require.NoError(t, compile(genFile), "generated converter doesn't build")
 		})
-		clearDir(execDir)
+		if os.Getenv("SKIP_CLEAN") != "true" {
+			clearDir(execDir)
+		}
 	}
 }
 
