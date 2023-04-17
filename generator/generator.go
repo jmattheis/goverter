@@ -210,6 +210,7 @@ func (g *generator) buildMethod(method *methodDefinition, errWrapper builder.Err
 		Namer:        namer.New(),
 		Fields:       method.Fields,
 		FieldsTarget: fieldsTarget,
+		SeenNamed:    map[string]struct{}{},
 		Flags:        method.Flags,
 		AutoMap:      method.AutoMap,
 		TargetType:   method.Target,
@@ -408,7 +409,24 @@ func (g *generator) Build(
 		}
 	}
 
-	if !hasPointerStructMethod && ((source.Named && !source.Basic) || (target.Named && !target.Basic) || (source.Pointer && source.PointerInner.Named && !source.PointerInner.Basic)) {
+	createSubMethod := false
+
+	if ctx.HasSeen(source) {
+		g.lookup[ctx.Signature].Dirty = true
+		createSubMethod = true
+	} else if !hasPointerStructMethod {
+		switch {
+		case source.Named && !source.Basic:
+			createSubMethod = true
+		case target.Named && !target.Basic:
+			createSubMethod = true
+		case source.Pointer && source.PointerInner.Named && !source.PointerInner.Basic:
+			createSubMethod = true
+		}
+	}
+	ctx.MarkSeen(source)
+
+	if createSubMethod {
 		name := g.namer.Name(source.UnescapedID() + "To" + strings.Title(target.UnescapedID()))
 
 		method := &methodDefinition{

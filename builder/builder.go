@@ -40,8 +40,26 @@ type MethodContext struct {
 	TargetType   *xtype.Type
 	AutoMap      []string
 	Flags        ConversionFlags
+	SeenNamed    map[string]struct{}
 
 	TargetVar *jen.Statement
+}
+
+func (ctx *MethodContext) HasSeen(source *xtype.Type) bool {
+	if !source.Named {
+		return false
+	}
+	typeString := source.NamedType.String()
+	_, ok := ctx.SeenNamed[typeString]
+	return ok
+}
+
+func (ctx *MethodContext) MarkSeen(source *xtype.Type) {
+	if !source.Named {
+		return
+	}
+	typeString := source.NamedType.String()
+	ctx.SeenNamed[typeString] = struct{}{}
 }
 
 func (ctx *MethodContext) SetErrorTargetVar(m *jen.Statement) {

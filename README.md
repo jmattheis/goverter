@@ -86,7 +86,7 @@ use reflection.
 1. Run `goverter`:
 
     ```bash
-    $ go run github.com/jmattheis/goverter/cmd/goverter@v0.17.3 ./
+    $ go run github.com/jmattheis/goverter/cmd/goverter@v0.17.4 ./
     ```
 
     See [Installation](https://goverter.jmattheis.de/#/install) for more information.
