@@ -22,7 +22,7 @@
 <body>
 <div id="app"></div>
 <script>
-    const ghVersion = fetch('https://api.github.com/repos/jmattheis/goverter/tags').then(resp => resp.json()).then(data => data[0].name.slice(1))
+    const ghVersion = fetch('https://api.github.com/repos/jmattheis/goverter/tags').then(resp => resp.json()).then(data => data[0].name)
     window.$docsify = {
         name: 'Goverter',
         repo: 'jmattheis/goverter',
