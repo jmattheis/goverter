@@ -434,7 +434,7 @@ func (g *generator) Build(
 			Name:   name,
 			Source: xtype.TypeOf(source.T),
 			Target: xtype.TypeOf(target.T),
-			Fields: map[string]*builder.FieldMapping{},
+			Fields: ctx.SubFields,
 			Flags:  g.flags,
 			Call:   jen.Id(xtype.ThisVar).Dot(name),
 		}

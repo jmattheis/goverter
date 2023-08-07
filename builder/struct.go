@@ -69,7 +69,26 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 			}
 			stmt = append(stmt, mapStmt...)
 
-			fieldStmt, fieldID, err := gen.Build(ctx, xtype.VariableID(nextID), nextSource, targetFieldType, errWrapper)
+			subFields := map[string]*FieldMapping{}
+			for k, prop := range ctx.Fields {
+				if strings.HasPrefix(k, targetField.Name()+".") {
+					subFields[k[len(targetField.Name())+1:]] = prop
+				}
+			}
+			subCtx := &MethodContext{
+				Namer:        ctx.Namer,
+				Fields:       ctx.Fields,
+				SubFields:    subFields,
+				FieldsTarget: ctx.FieldsTarget,
+				Signature:    ctx.Signature,
+				TargetType:   ctx.TargetType,
+				AutoMap:      ctx.AutoMap,
+				Flags:        ctx.Flags,
+				SeenNamed:    ctx.SeenNamed,
+				TargetVar:    ctx.TargetVar,
+			}
+
+			fieldStmt, fieldID, err := gen.Build(subCtx, xtype.VariableID(nextID), nextSource, targetFieldType, errWrapper)
 			if err != nil {
 				return nil, nil, err.Lift(lift...)
 			}

@@ -35,6 +35,7 @@ type Generator interface {
 type MethodContext struct {
 	*namer.Namer
 	Fields       map[string]*FieldMapping
+	SubFields    map[string]*FieldMapping
 	FieldsTarget string
 	Signature    xtype.Signature
 	TargetType   *xtype.Type
