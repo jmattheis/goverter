@@ -19,6 +19,11 @@ func (*Struct) Matches(_ *MethodContext, source, target *xtype.Type) bool {
 
 // Build creates conversion source code for the given source and target type.
 func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *Error) {
+	// Optimization for golang sets
+	if !source.Named && !target.Named && source.StructType.NumFields() == 0 && target.StructType.NumFields() == 0 {
+		return nil, sourceID, nil
+	}
+
 	name := ctx.Name(target.ID())
 	ctx.SetErrorTargetVar(jen.Id(name))
 	stmt := []jen.Code{
@@ -29,6 +34,8 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 	if err != nil {
 		return nil, nil, err
 	}
+
+	usedSourceID := false
 
 	for i := 0; i < target.StructType.NumFields(); i++ {
 		targetField := target.StructType.Field(i)
@@ -60,6 +67,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 		errWrapper := Wrap("error setting field " + targetField.Name())
 
 		if fieldMapping.Function == nil {
+			usedSourceID = true
 			nextID, nextSource, mapStmt, lift, skip, err := mapField(gen, ctx, targetField, sourceID, source, target, additionalFieldSources)
 			if skip {
 				continue
@@ -82,6 +90,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 			var functionCallSourceID *xtype.JenID
 			var functionCallSourceType *xtype.Type
 			if def.Source != nil {
+				usedSourceID = true
 				nextID, nextSource, mapStmt, mapLift, _, err := mapField(gen, ctx, targetField, sourceID, source, target, additionalFieldSources)
 				if err != nil {
 					return nil, nil, err
@@ -132,6 +141,9 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 			stmt = append(stmt, callStmt...)
 			stmt = append(stmt, jen.Id(name).Dot(targetField.Name()).Op("=").Add(callReturnID.Code))
 		}
+	}
+	if !usedSourceID {
+		stmt = append(stmt, jen.Id("_").Op("=").Add(sourceID.Code.Clone()))
 	}
 
 	return stmt, xtype.VariableID(jen.Id(name)), nil
