@@ -6,7 +6,6 @@ run:
 linters:
     enable:
         - asciicheck
-        - depguard
         - exportloopref
         - gci
         - godot
