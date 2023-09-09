@@ -423,6 +423,9 @@ func (g *generator) Build(
 		case source.Pointer && source.PointerInner.Named && !source.PointerInner.Basic:
 			createSubMethod = true
 		}
+		if ctx.Flags.Has(builder.FlagSkipCopySameType) && source.T.String() == target.T.String() {
+			createSubMethod = false
+		}
 	}
 	ctx.MarkSeen(source)
 

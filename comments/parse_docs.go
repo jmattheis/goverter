@@ -226,6 +226,9 @@ func parseConverterComment(comment string, config ConverterConfig) (ConverterCon
 			case "ignoreMissing":
 				config.Flags.Set(builder.FlagIgnoreMissing)
 				continue
+			case "skipCopySameType":
+				config.Flags.Set(builder.FlagSkipCopySameType)
+				continue
 			case "useZeroValueOnPointerInconsistency":
 				config.Flags.Set(builder.FlagZeroValueOnPtrInconsistency)
 				continue
@@ -317,6 +320,9 @@ func parseMethodComment(comment string) (Method, error) {
 				continue
 			case "useZeroValueOnPointerInconsistency":
 				m.Flags.Set(builder.FlagZeroValueOnPtrInconsistency)
+				continue
+			case "skipCopySameType":
+				m.Flags.Set(builder.FlagSkipCopySameType)
 				continue
 			case "wrapErrors":
 				if strings.TrimSpace(remaining) != "" {
