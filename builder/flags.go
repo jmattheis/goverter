@@ -8,6 +8,7 @@ const (
 	FlagMatchIgnoreCase
 	FlagIgnoreUnexported
 	FlagZeroValueOnPtrInconsistency
+	FlagSkipCopySameType
 )
 
 type ConversionFlags map[ConversionFlag]bool

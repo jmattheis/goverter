@@ -32,10 +32,11 @@ use reflection.
 ## Features
 
 - **Fast execution**: No reflection is used at runtime
-- Automatically [deep
-  copies](https://en.wikipedia.org/wiki/Object_copying#Deep_copy) builtin
-  types: slices, maps, named types, primitive types, pointers, structs with
-  same fields
+- Automatically converts builtin types: slices, maps, named types, primitive
+  types, pointers, structs with same fields
+- [Deep copies](https://en.wikipedia.org/wiki/Object_copying#Deep_copy) per
+  default and supports [shallow
+  copying](https://en.wikipedia.org/wiki/Object_copying#Shallow_copy)
 - **Customizable**: [You can implement custom converter methods](https://goverter.jmattheis.de/#/conversion/custom)
 - [Clear errors when generating the conversion methods](https://goverter.jmattheis.de/#/conversion/?id=error-early) if
   - the target struct has unmapped fields
@@ -86,7 +87,7 @@ use reflection.
 1. Run `goverter`:
 
     ```bash
-    $ go run github.com/jmattheis/goverter/cmd/goverter@v0.17.4 ./
+    $ go run github.com/jmattheis/goverter/cmd/goverter@v0.18.0 ./
     ```
 
     See [Installation](https://goverter.jmattheis.de/#/install) for more information.
