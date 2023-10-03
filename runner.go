@@ -33,6 +33,8 @@ type GenerateConfig struct {
 	IgnoredUnexportedFields bool
 	// MatchFieldsIgnoreCase tells goverter to use case insensitive match everywhere.
 	MatchFieldsIgnoreCase bool
+	// Add comment on generated structs
+	CommentOnStruct string
 }
 
 // GenerateConverter generates converters.
@@ -53,6 +55,7 @@ func GenerateConverter(c GenerateConfig) ([]byte, error) {
 		WrapErrors:             c.WrapErrors,
 		IgnoreUnexportedFields: c.IgnoredUnexportedFields,
 		MatchFieldsIgnoreCase:  c.MatchFieldsIgnoreCase,
+		CommentOnStruct:        c.CommentOnStruct,
 	})
 	if err != nil {
 		return nil, err

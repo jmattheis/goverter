@@ -20,6 +20,7 @@ type Config struct {
 	WrapErrors             bool
 	IgnoreUnexportedFields bool
 	MatchFieldsIgnoreCase  bool
+	CommentOnStruct        string
 }
 
 // BuildSteps that'll used for generation.
@@ -45,6 +46,8 @@ func Generate(pattern string, mapping []comments.Converter, config Config) (*jen
 		if obj == nil {
 			return nil, fmt.Errorf("%s: could not find %s", pattern, converter.Name)
 		}
+
+		file.Comment(config.CommentOnStruct)
 
 		// create the converter struct
 		file.Type().Id(converter.Config.Name).Struct()
