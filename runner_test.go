@@ -10,6 +10,7 @@ import (
 	"strings"
 	"testing"
 
+	"github.com/jmattheis/goverter/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
@@ -45,22 +46,21 @@ func TestScenario(t *testing.T) {
 				require.NoError(t, err)
 			}
 			genPkgName := "generated"
-			genFile := filepath.Join(execDir, genPkgName, "generated.go")
+			genFolder := filepath.Join(execDir, genPkgName)
 
-			err = GenerateConverterFile(
-				genFile,
-				GenerateConfig{
-					PackageName:             genPkgName,
-					WorkingDir:              execDir,
-					PackagePath:             "github.com/jmattheis/goverter/execution/" + genPkgName,
-					ScanDir:                 "github.com/jmattheis/goverter/execution",
-					ExtendMethods:           scenario.Extends,
-					WrapErrors:              scenario.WrapErrors,
-					IgnoredUnexportedFields: scenario.IgnoreUnexportedFields,
-					MatchFieldsIgnoreCase:   scenario.MatchFieldsIgnoreCase,
+			global := append([]string{"outputPackage github.com/jmattheis/goverter/execution/" + genPkgName}, scenario.Global...)
+
+			err = GenerateConverter(
+				&GenerateConfig{
+					WorkingDir:      execDir,
+					PackagePatterns: []string{"github.com/jmattheis/goverter/execution"},
+					Global: config.RawLines{
+						Lines:    global,
+						Location: "scenario global",
+					},
 				})
 
-			body, _ := ioutil.ReadFile(genFile)
+			body, _ := os.ReadFile(filepath.Join(genFolder, "generated.go"))
 
 			if os.Getenv("UPDATE_SCENARIO") == "true" && scenario.ErrorStartsWith == "" {
 				if err != nil {
@@ -72,7 +72,7 @@ func TestScenario(t *testing.T) {
 				}
 				newBytes, err := yaml.Marshal(&scenario)
 				if assert.NoError(t, err) {
-					ioutil.WriteFile(scenarioFileName, newBytes, os.ModePerm)
+					os.WriteFile(scenarioFileName, newBytes, os.ModePerm)
 				}
 			}
 
@@ -92,7 +92,7 @@ func TestScenario(t *testing.T) {
 			require.NoError(t, err)
 			require.NotEmpty(t, scenario.Success, "scenario.Success may not be empty")
 			require.Equal(t, scenario.Success, string(body))
-			require.NoError(t, compile(genFile), "generated converter doesn't build")
+			require.NoError(t, compile(genFolder), "generated converter doesn't build")
 		})
 		if os.Getenv("SKIP_CLEAN") != "true" {
 			clearDir(execDir)
@@ -104,9 +104,9 @@ func replaceAbsolutePath(curPath, body string) string {
 	return strings.ReplaceAll(body, curPath, "/ABSOLUTE")
 }
 
-func compile(file string) error {
+func compile(dir string) error {
 	cmd := exec.Command("go", "build", "")
-	cmd.Dir = filepath.Dir(file)
+	cmd.Dir = dir
 	_, err := cmd.Output()
 	if err != nil {
 		if exit, ok := err.(*exec.ExitError); ok {
@@ -117,13 +117,8 @@ func compile(file string) error {
 }
 
 type Scenario struct {
-	Input   map[string]string `yaml:"input"`
-	Extends []string          `yaml:"extends,omitempty"`
-
-	// set to test code generation with fmt.Errorf per field
-	WrapErrors             bool `yaml:"wrapErrors,omitempty"`
-	IgnoreUnexportedFields bool `yaml:"ignore_unexported_fields,omitempty"`
-	MatchFieldsIgnoreCase  bool `yaml:"match_fields_ignore_case,omitempty"`
+	Input  map[string]string `yaml:"input"`
+	Global []string          `yaml:"global,omitempty"`
 
 	Success string `yaml:"success,omitempty"`
 	// for error cases, use either Error or ErrorStartsWith, not both

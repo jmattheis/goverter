@@ -57,7 +57,7 @@ type SourcePointer struct{}
 
 // Matches returns true, if the builder can create handle the given types.
 func (*SourcePointer) Matches(ctx *MethodContext, source, target *xtype.Type) bool {
-	return ctx.Flags.Has(FlagZeroValueOnPtrInconsistency) && source.Pointer && !target.Pointer
+	return ctx.Conf.UseZeroValueOnPointerInconsistency && source.Pointer && !target.Pointer
 }
 
 // Build creates conversion source code for the given source and target type.

@@ -43,7 +43,7 @@ error: |-
     |
     | github.com/jmattheis/goverter/execution.APIPerson
 
-    cannot not use
+    cannot use
     	func github.com/jmattheis/goverter/execution.ToFullName(input *github.com/jmattheis/goverter/execution.Person) string
     because source type mismatch
 

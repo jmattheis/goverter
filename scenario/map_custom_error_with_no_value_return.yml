@@ -19,7 +19,11 @@ input:
 
         }
 error: |-
-    Error while creating converter method:
+    error parsing 'goverter:mapExtend' at
+        /ABSOLUTE/execution/input.go:6:5
         func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
 
-    PluckAgeInt has no or too many returns
+    error parsing type:
+        func github.com/jmattheis/goverter/execution.PluckAgeInt(source github.com/jmattheis/goverter/execution.Input)
+
+    must have one or two returns

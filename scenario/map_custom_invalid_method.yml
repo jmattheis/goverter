@@ -19,7 +19,11 @@ input:
             return 1
         }
 error: |-
-    Error while creating converter method:
+    error parsing 'goverter:mapExtend' at
+        /ABSOLUTE/execution/input.go:6:5
         func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
 
-    ExtendMethod has two parameters the first one must be the converter interface github.com/jmattheis/goverter/execution.Converter but was string
+    error parsing type:
+        func github.com/jmattheis/goverter/execution.ExtendMethod(converter string, source string) int
+
+    first parameter must be of type github.com/jmattheis/goverter/execution.Converter but was string when having two parameters

@@ -19,7 +19,11 @@ input:
             return 1, 1
         }
 error: |-
-    Error while creating converter method:
+    error parsing 'goverter:map' at
+        /ABSOLUTE/execution/input.go:6:5
         func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
 
-    second return parameter must have type error but had: int
+    error parsing type:
+        func github.com/jmattheis/goverter/execution.PluckAgeInt(source github.com/jmattheis/goverter/execution.Input) (int, int)
+
+    must have type error as second return but has: int

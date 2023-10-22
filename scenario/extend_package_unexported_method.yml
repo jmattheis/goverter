@@ -20,7 +20,11 @@ input:
             Done bool
         }
 error: |-
-    Error while parsing extend in
+    error parsing 'goverter:extend' at
+        /ABSOLUTE/execution/input.go:5:1
         github.com/jmattheis/goverter/execution.Converter
 
-    could not extend: method stringToBool is unexported
+    error parsing type:
+        func github.com/jmattheis/goverter/execution/convert.stringToBool(s string) bool
+
+    must be exported

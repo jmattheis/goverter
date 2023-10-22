@@ -15,4 +15,9 @@ input:
             Name string
             Age int
         }
-error: '/ABSOLUTE/execution/input.go:4:1: type Converter: parsing method Convert: invalid goverter:mapExtend must have two parameter'
+error: |-
+    error parsing 'goverter:mapExtend' at
+        /ABSOLUTE/execution/input.go:6:5
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+
+    must have two parameter

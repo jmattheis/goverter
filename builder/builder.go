@@ -2,6 +2,8 @@ package builder
 
 import (
 	"github.com/dave/jennifer/jen"
+	"github.com/jmattheis/goverter/config"
+	"github.com/jmattheis/goverter/method"
 	"github.com/jmattheis/goverter/namer"
 	"github.com/jmattheis/goverter/xtype"
 )
@@ -23,9 +25,9 @@ type Generator interface {
 		source, target *xtype.Type,
 		errWrapper ErrorWrapper) ([]jen.Code, *xtype.JenID, *Error)
 
-	CallExtendMethod(
+	CallMethod(
 		ctx *MethodContext,
-		method *ExtendMethod,
+		method *method.Definition,
 		sourceID *xtype.JenID,
 		source, target *xtype.Type,
 		errWrapper ErrorWrapper) ([]jen.Code, *xtype.JenID, *Error)
@@ -34,12 +36,10 @@ type Generator interface {
 // MethodContext exposes information for the current method.
 type MethodContext struct {
 	*namer.Namer
-	Fields       map[string]*FieldMapping
+	Conf         *config.Method
 	FieldsTarget string
 	Signature    xtype.Signature
 	TargetType   *xtype.Type
-	AutoMap      []string
-	Flags        ConversionFlags
 	SeenNamed    map[string]struct{}
 
 	TargetVar *jen.Statement
@@ -68,32 +68,16 @@ func (ctx *MethodContext) SetErrorTargetVar(m *jen.Statement) {
 	}
 }
 
-func (ctx *MethodContext) Field(target *xtype.Type, name string) *FieldMapping {
+func (ctx *MethodContext) Field(target *xtype.Type, name string) *config.FieldMapping {
 	if ctx.FieldsTarget != target.T.String() {
 		return emptyMapping
 	}
 
-	prop, ok := ctx.Fields[name]
+	prop, ok := ctx.Conf.Fields[name]
 	if !ok {
 		return emptyMapping
 	}
 	return prop
 }
 
-var emptyMapping *FieldMapping = &FieldMapping{}
-
-type FieldMapping struct {
-	Source   string
-	Ignore   bool
-	Function *ExtendMethod
-}
-type ExtendMethod struct {
-	ID               string
-	Name             string
-	SelfAsFirstParam bool
-	ReturnError      bool
-	Call             *jen.Statement
-	// optional source
-	Source *xtype.Type
-	Target *xtype.Type
-}
+var emptyMapping *config.FieldMapping = &config.FieldMapping{}

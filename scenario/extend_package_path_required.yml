@@ -7,7 +7,8 @@ input:
         type Converter interface {
         }
 error: |-
-    Error while parsing extend in
+    error parsing 'goverter:extend' at
+        /ABSOLUTE/execution/input.go:5:1
         github.com/jmattheis/goverter/execution.Converter
 
     package path must not be empty in the custom method ":Convert".

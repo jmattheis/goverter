@@ -8,7 +8,11 @@ input:
         }
         const HelloWorld = 5
 error: |-
-    Error while parsing extend in
+    error parsing 'goverter:extend' at
+        /ABSOLUTE/execution/input.go:5:1
         github.com/jmattheis/goverter/execution.Converter
 
-    HelloWorld is not a function
+    error parsing type:
+        const github.com/jmattheis/goverter/execution.HelloWorld untyped int
+
+    must be a function

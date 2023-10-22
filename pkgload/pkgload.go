@@ -1,4 +1,4 @@
-package generator
+package pkgload
 
 import (
 	"fmt"
@@ -7,9 +7,21 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
+func New(workDir string) *PackageLoader {
+	return &PackageLoader{
+		cache:      map[string][]*packages.Package{},
+		workingDir: workDir,
+	}
+}
+
+type PackageLoader struct {
+	workingDir string
+	cache      map[string][]*packages.Package
+}
+
 // loadPackages is used to load extend packages, with caching support.
-func (g *generator) loadPackages(pkgPath string) ([]*packages.Package, error) {
-	if pkgs, ok := g.pkgCache[pkgPath]; ok {
+func (g *PackageLoader) Load(pkgPath string) ([]*packages.Package, error) {
+	if pkgs, ok := g.cache[pkgPath]; ok {
 		return pkgs, nil
 	}
 
@@ -51,9 +63,6 @@ func (g *generator) loadPackages(pkgPath string) ([]*packages.Package, error) {
 		return nil, errors.Wrapf(firstErr, "failed to load package %q, try adding a blank import for it", pkgPath)
 	}
 
-	if g.pkgCache == nil {
-		g.pkgCache = make(map[string][]*packages.Package)
-	}
-	g.pkgCache[pkgPath] = pkgs
+	g.cache[pkgPath] = pkgs
 	return pkgs, nil
 }

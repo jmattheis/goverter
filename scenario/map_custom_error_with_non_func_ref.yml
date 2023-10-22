@@ -17,7 +17,11 @@ input:
         }
         const PluckAgeInt = 24
 error: |-
-    Error while creating converter method:
+    error parsing 'goverter:mapExtend' at
+        /ABSOLUTE/execution/input.go:6:5
         func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
 
-    PluckAgeInt is not a function
+    error parsing type:
+        const github.com/jmattheis/goverter/execution.PluckAgeInt untyped int
+
+    must be a function

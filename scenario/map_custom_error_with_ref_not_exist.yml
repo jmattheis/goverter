@@ -16,7 +16,8 @@ input:
             Age int
         }
 error: |-
-    Error while creating converter method:
+    error parsing 'goverter:mapExtend' at
+        /ABSOLUTE/execution/input.go:6:5
         func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
 
     PluckAgeInt does not exist in scope
