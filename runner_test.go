@@ -7,6 +7,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"strings"
 	"testing"
 
@@ -46,11 +47,10 @@ func TestScenario(t *testing.T) {
 				require.NoError(t, err)
 			}
 			genPkgName := "generated"
-			genFolder := filepath.Join(execDir, genPkgName)
 
 			global := append([]string{"outputPackage github.com/jmattheis/goverter/execution/" + genPkgName}, scenario.Global...)
 
-			err = GenerateConverter(
+			files, err := generateConvertersRaw(
 				&GenerateConfig{
 					WorkingDir:      execDir,
 					PackagePatterns: []string{"github.com/jmattheis/goverter/execution"},
@@ -60,14 +60,14 @@ func TestScenario(t *testing.T) {
 					},
 				})
 
-			body, _ := os.ReadFile(filepath.Join(genFolder, "generated.go"))
+			actualOutputFiles := toOutputFiles(execDir, files)
 
 			if os.Getenv("UPDATE_SCENARIO") == "true" && scenario.ErrorStartsWith == "" {
 				if err != nil {
-					scenario.Success = ""
+					scenario.Success = []*OutputFile{}
 					scenario.Error = replaceAbsolutePath(curPath, fmt.Sprint(err))
 				} else {
-					scenario.Success = string(body)
+					scenario.Success = toOutputFiles(execDir, files)
 					scenario.Error = ""
 				}
 				newBytes, err := yaml.Marshal(&scenario)
@@ -91,8 +91,11 @@ func TestScenario(t *testing.T) {
 
 			require.NoError(t, err)
 			require.NotEmpty(t, scenario.Success, "scenario.Success may not be empty")
-			require.Equal(t, scenario.Success, string(body))
-			require.NoError(t, compile(genFolder), "generated converter doesn't build")
+			require.Equal(t, scenario.Success, actualOutputFiles)
+
+			err = writeFiles(files)
+			require.NoError(t, err)
+			require.NoError(t, compile(execDir), "generated converter doesn't build")
 		})
 		if os.Getenv("SKIP_CLEAN") != "true" {
 			clearDir(execDir)
@@ -105,7 +108,7 @@ func replaceAbsolutePath(curPath, body string) string {
 }
 
 func compile(dir string) error {
-	cmd := exec.Command("go", "build", "")
+	cmd := exec.Command("go", "build", "./...")
 	cmd.Dir = dir
 	_, err := cmd.Output()
 	if err != nil {
@@ -116,14 +119,50 @@ func compile(dir string) error {
 	return err
 }
 
+func toOutputFiles(execDir string, files map[string][]byte) []*OutputFile {
+	output := []*OutputFile{}
+	for fileName, content := range files {
+		rel, err := filepath.Rel(execDir, fileName)
+		if err != nil {
+			panic("could not create relpath")
+		}
+		output = append(output, &OutputFile{Name: rel, Content: string(content)})
+	}
+	sort.Slice(output, func(i, j int) bool {
+		return output[i].Name < output[j].Name
+	})
+	return output
+}
+
 type Scenario struct {
 	Input  map[string]string `yaml:"input"`
 	Global []string          `yaml:"global,omitempty"`
 
-	Success string `yaml:"success,omitempty"`
+	Success []*OutputFile `yaml:"success,omitempty"`
 	// for error cases, use either Error or ErrorStartsWith, not both
 	Error           string `yaml:"error,omitempty"`
 	ErrorStartsWith string `yaml:"error_starts_with,omitempty"`
+}
+
+type OutputFile struct {
+	Name    string
+	Content string
+}
+
+func (f *OutputFile) MarshalYAML() (interface{}, error) {
+	return map[string]string{f.Name: f.Content}, nil
+}
+
+func (f *OutputFile) UnmarshalYAML(value *yaml.Node) error {
+	v := map[string]string{}
+	err := value.Decode(&v)
+
+	for name, content := range v {
+		f.Name = name
+		f.Content = content
+	}
+
+	return err
 }
 
 func getCurrentPath() string {
