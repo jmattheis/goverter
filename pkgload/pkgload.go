@@ -3,7 +3,6 @@ package pkgload
 import (
 	"fmt"
 
-	"github.com/pkg/errors"
 	"golang.org/x/tools/go/packages"
 )
 
@@ -33,7 +32,7 @@ func (g *PackageLoader) Load(pkgPath string) ([]*packages.Package, error) {
 	if err != nil {
 		// This happens rare, and only if somebody uses advanced package pattern query in a wrong way.
 		// The cause (err) usually has enough details to troubleshoot this issue.
-		return nil, errors.Wrapf(err, "packages load failed on %q", pkgPath)
+		return nil, fmt.Errorf("packages load failed on %q: %s", pkgPath, err)
 	}
 	// we need at least one valid package with no errors reported during its load
 	var hasValidPackage bool
@@ -60,7 +59,7 @@ func (g *PackageLoader) Load(pkgPath string) ([]*packages.Package, error) {
 		}
 		// Packages.Load may need local go module's help to load external packages, the best way
 		// to help is to load same package directly into converter's module using a blank import.
-		return nil, errors.Wrapf(firstErr, "failed to load package %q, try adding a blank import for it", pkgPath)
+		return nil, fmt.Errorf("failed to load package %q, try adding a blank import for it: %s", pkgPath, firstErr)
 	}
 
 	g.cache[pkgPath] = pkgs

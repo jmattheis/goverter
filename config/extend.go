@@ -8,7 +8,6 @@ import (
 
 	"github.com/jmattheis/goverter/method"
 	"github.com/jmattheis/goverter/pkgload"
-	"github.com/pkg/errors"
 )
 
 // ParseExtendOptions holds extend method options.
@@ -36,7 +35,7 @@ func parseExtend(loader *pkgload.PackageLoader, c *Converter, methods []string) 
 
 		pattern, err := regexp.Compile(namePattern)
 		if err != nil {
-			return nil, errors.Wrapf(err, "could not parse name as regexp %q", namePattern)
+			return nil, fmt.Errorf("could not parse name as regexp %q: %s", namePattern, err)
 		}
 
 		opts := &ParseExtendOptions{
