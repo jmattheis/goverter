@@ -50,10 +50,15 @@ func TestScenario(t *testing.T) {
 
 			global := append([]string{"outputPackage github.com/jmattheis/goverter/execution/" + genPkgName}, scenario.Global...)
 
+			patterns := scenario.Patterns
+			if len(patterns) == 0 {
+				patterns = append(patterns, "github.com/jmattheis/goverter/execution")
+			}
+
 			files, err := generateConvertersRaw(
 				&GenerateConfig{
 					WorkingDir:      execDir,
-					PackagePatterns: []string{"github.com/jmattheis/goverter/execution"},
+					PackagePatterns: patterns,
 					Global: config.RawLines{
 						Lines:    global,
 						Location: "scenario global",
@@ -138,7 +143,8 @@ type Scenario struct {
 	Input  map[string]string `yaml:"input"`
 	Global []string          `yaml:"global,omitempty"`
 
-	Success []*OutputFile `yaml:"success,omitempty"`
+	Patterns []string      `yaml:"patterns,omitempty"`
+	Success  []*OutputFile `yaml:"success,omitempty"`
 	// for error cases, use either Error or ErrorStartsWith, not both
 	Error           string `yaml:"error,omitempty"`
 	ErrorStartsWith string `yaml:"error_starts_with,omitempty"`

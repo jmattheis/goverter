@@ -16,6 +16,7 @@ type fileManager struct {
 
 type managedFile struct {
 	Package string
+	Initial *config.Converter
 	Content *jen.File
 }
 
@@ -26,6 +27,7 @@ func (m *fileManager) Get(c *config.Converter, workDirectory string) (*jen.File,
 	if !ok {
 		f = &managedFile{
 			Package: c.OutputPackage,
+			Initial: c,
 		}
 
 		parts := strings.SplitN(c.OutputPackage, ":", 2)
@@ -43,7 +45,8 @@ func (m *fileManager) Get(c *config.Converter, workDirectory string) (*jen.File,
 	}
 
 	if f.Package != c.OutputPackage {
-		return nil, fmt.Errorf("damn") // TODO fix
+		return nil, fmt.Errorf("Error creating converters\n    %s\n    %s\nand\n    %s\n    %s\n\nCannot use different packages\n    %s\n    %s\nin the same output file:\n    %s",
+			c.FileSource, c.Type, f.Initial.FileSource, f.Initial.Type, c.OutputPackage, f.Initial.OutputPackage, output)
 	}
 
 	return f.Content, nil
@@ -63,7 +66,7 @@ func (m *fileManager) renderFiles() (map[string][]byte, error) {
 
 func getOutputDir(c *config.Converter, cwd string) string {
 	if strings.HasPrefix(c.OutputFile, "@cwd/") {
-		return filepath.Join(cwd, c.OutputFile)
+		return filepath.Join(cwd, strings.TrimPrefix(c.OutputFile, "@cwd/"))
 	}
 	return filepath.Join(filepath.Dir(c.FileSource), c.OutputFile)
 }
