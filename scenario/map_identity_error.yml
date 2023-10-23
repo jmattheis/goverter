@@ -7,7 +7,7 @@ input:
         type Converter interface {
             Convert(source []Person) ([]APIPerson, error)
 
-            // goverter:mapIdentity Address
+            // goverter:map . Address
             ConvertPerson(source Person) (APIPerson, error)
 
             ConvertAddress(source Person) (APIAddress, error)

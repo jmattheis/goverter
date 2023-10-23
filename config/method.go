@@ -62,11 +62,6 @@ func parseMethodLine(loader *pkgload.PackageLoader, c *Converter, m *Method, val
 	switch cmd {
 	case "map":
 		err = parseMethodMap(loader, c, m, rest)
-	case "mapIdentity":
-		fields := strings.Fields(rest)
-		for _, f := range fields {
-			m.Field(f).Source = "."
-		}
 	case "ignore":
 		fields := strings.Fields(rest)
 		for _, f := range fields {

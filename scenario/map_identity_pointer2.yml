@@ -4,7 +4,7 @@ input:
 
         // goverter:converter
         type Converter interface {
-            // goverter:mapIdentity Base
+            // goverter:map . Base
             Convert(in *In) *Out
         }
 
