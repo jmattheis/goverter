@@ -1,7 +1,7 @@
 - [Intro](/)
 - [Installation](install.md)
 - [CLI](cli.md)
-- [Generation](Generation.md)
+- [Generation](generation.md)
 - [Config](config/)
   - [Define settings](config/define.md)
   - [Nested settings](config/nested.md)
