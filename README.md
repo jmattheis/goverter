@@ -27,7 +27,9 @@ do is create an interface and execute goverter. The project is meant as
 alternative to [jinzhu/copier](https://github.com/jinzhu/copier) that doesn't
 use reflection.
 
-[Installation](https://goverter.jmattheis.de/#/install) ᛫ [Conversion Docs](https://goverter.jmattheis.de/#/conversion/)
+[Installation](https://goverter.jmattheis.de/#/install) ᛫
+[CLI](https://goverter.jmattheis.de/#/cli) ᛫
+[Config](https://goverter.jmattheis.de/#/config/)
 
 ## Features
 
@@ -37,12 +39,12 @@ use reflection.
 - [Deep copies](https://en.wikipedia.org/wiki/Object_copying#Deep_copy) per
   default and supports [shallow
   copying](https://en.wikipedia.org/wiki/Object_copying#Shallow_copy)
-- **Customizable**: [You can implement custom converter methods](https://goverter.jmattheis.de/#/conversion/custom)
-- [Clear errors when generating the conversion methods](https://goverter.jmattheis.de/#/conversion/?id=error-early) if
+- **Customizable**: [You can implement custom converter methods](https://goverter.jmattheis.de/#/config/extend)
+- [Clear errors when generating the conversion methods](https://goverter.jmattheis.de/#/generation?id=error-early) if
   - the target struct has unmapped fields
   - types cannot be converted without losing information
 
-## Usage
+## Getting Started
 
 1. Ensure your `go version` is 1.16 or above
 
@@ -52,7 +54,8 @@ use reflection.
     $ go mod init module-name
     ```
 
-1. Create your converter interface and mark it with a comment containing `goverter:converter`
+1. Create your converter interface and mark it with a comment containing
+   [`goverter:converter`](https://goverter.jmattheis.de/#/config/converter)
 
     `input.go`
 
@@ -82,7 +85,7 @@ use reflection.
     }
     ```
 
-    See [Conversion](https://goverter.jmattheis.de/#/conversion/) for more information.
+    See [Configuration](https://goverter.jmattheis.de/#/config) for more information.
 
 1. Run `goverter`:
 
@@ -90,7 +93,8 @@ use reflection.
     $ go run github.com/jmattheis/goverter/cmd/goverter@v0.18.0 ./
     ```
 
-    See [Installation](https://goverter.jmattheis.de/#/install) for more information.
+    See [Installation](https://goverter.jmattheis.de/#/install) and
+    [CLI](https://goverter.jmattheis.de/#/cli) for more information.
 
 1. goverter created a file at `./generated/generated.go`, it may look like this:
 
@@ -118,6 +122,8 @@ use reflection.
         return exampleOutputList
     }
     ```
+
+    See [Generation](https://goverter.jmattheis.de/#/generation) for more information.
 
 ## Versioning
 

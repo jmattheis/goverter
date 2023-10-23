@@ -7,4 +7,9 @@ input:
             // goverter:oops
             ConvertString(source string) string
         }
-error: '/ABSOLUTE/execution/input.go:4:1: type Converter: parsing method ConvertString: unknown goverter comment: goverter:oops'
+error: |-
+    error parsing 'goverter:oops' at
+        /ABSOLUTE/execution/input.go:6:5
+        func (github.com/jmattheis/goverter/execution.Converter).ConvertString(source string) string
+
+    unknown setting: oops

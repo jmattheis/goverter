@@ -1,0 +1,23 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:map | Malformed
+            ConvertPerson(source Person) APIPerson
+        }
+
+        type Person struct {
+            Name   string
+        }
+
+        type APIPerson struct {
+            Name    string
+        }
+error: |-
+    error parsing 'goverter:map' at
+        /ABSOLUTE/execution/input.go:6:5
+        func (github.com/jmattheis/goverter/execution.Converter).ConvertPerson(source github.com/jmattheis/goverter/execution.Person) github.com/jmattheis/goverter/execution.APIPerson
+
+    missing target field

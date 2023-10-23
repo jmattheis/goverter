@@ -7,4 +7,9 @@ input:
             // goverter:not_existing
             Converter interface { }
         )
-error: '/ABSOLUTE/execution/input.go:3:1: type Converter: unknown goverter comment: goverter:not_existing'
+error: |-
+    error parsing 'goverter:not_existing' at
+        /ABSOLUTE/execution/input.go:6:15
+        github.com/jmattheis/goverter/execution.Converter
+
+    unknown setting: not_existing

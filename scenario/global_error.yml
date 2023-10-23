@@ -1,0 +1,14 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        type Converter interface {}
+global:
+    - unknown
+error: |-
+    error parsing 'goverter:unknown' at
+        scenario global
+        global
+
+    unknown setting: unknown

@@ -7,4 +7,9 @@ input:
             // goverter:
             Converter interface { }
         )
-error: '/ABSOLUTE/execution/input.go:3:1: type Converter: unknown goverter comment: goverter:'
+error: |-
+    error parsing 'goverter:' at
+        /ABSOLUTE/execution/input.go:6:15
+        github.com/jmattheis/goverter/execution.Converter
+
+    missing setting key

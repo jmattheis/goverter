@@ -6,4 +6,9 @@ input:
         // goverter:name a b
         type Converter interface {
         }
-error: '/ABSOLUTE/execution/input.go:5:1: type Converter: invalid goverter:name must have one parameter'
+error: |-
+    error parsing 'goverter:name' at
+        /ABSOLUTE/execution/input.go:5:1
+        github.com/jmattheis/goverter/execution.Converter
+
+    must have one value but got 2: "a b"

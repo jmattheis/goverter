@@ -45,7 +45,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 		if fieldMapping.Ignore {
 			continue
 		}
-		if !targetField.Exported() && ctx.Flags.Has(FlagIgnoreUnexported) {
+		if !targetField.Exported() && ctx.Conf.IgnoreUnexported {
 			continue
 		}
 
@@ -107,7 +107,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 					functionCallSourceID = sourceID.ParentPointer
 					functionCallSourceType = source.AsPointer()
 				default:
-					cause := fmt.Sprintf("cannot not use\n\t%s\nbecause source type mismatch\n\nExtend method param type: %s\nConverter source type: %s", def.ID, def.Source.T.String(), nextSource.T.String())
+					cause := fmt.Sprintf("cannot use\n\t%s\nbecause source type mismatch\n\nExtend method param type: %s\nConverter source type: %s", def.ID, def.Source.T.String(), nextSource.T.String())
 					return nil, nil, NewError(cause).Lift(&Path{
 						Prefix:     "(",
 						SourceID:   "source)",
@@ -125,7 +125,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 				return nil, nil, NewError(cause).Lift(&Path{
 					Prefix:     ".",
 					SourceID:   "()",
-					SourceType: def.Target.T.String(),
+					SourceType: def.Parameters.Target.T.String(),
 					TargetID:   targetField.Name(),
 					TargetType: targetField.Type().String(),
 				}).Lift(&Path{
@@ -134,7 +134,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 					SourceType: def.ID,
 				}).Lift(sourceLift...)
 			}
-			callStmt, callReturnID, err := gen.CallExtendMethod(ctx, fieldMapping.Function, functionCallSourceID, functionCallSourceType, targetFieldType, errWrapper)
+			callStmt, callReturnID, err := gen.CallMethod(ctx, fieldMapping.Function, functionCallSourceID, functionCallSourceType, targetFieldType, errWrapper)
 			if err != nil {
 				return nil, nil, err.Lift(sourceLift...)
 			}
@@ -177,11 +177,11 @@ func mapField(
 
 	var path []string
 	if pathString == "" {
-		sourceMatch, err := xtype.FindField(targetField.Name(), ctx.Flags.Has(FlagMatchIgnoreCase), ignored, source, additionalFieldSources)
+		sourceMatch, err := xtype.FindField(targetField.Name(), ctx.Conf.MatchIgnoreCase, ignored, source, additionalFieldSources)
 		if err != nil {
 			cause := fmt.Sprintf("Cannot match the target field with the source entry: %s.", err.Error())
 			skip := false
-			if ctx.Flags.Has(FlagIgnoreMissing) {
+			if ctx.Conf.IgnoreMissing {
 				_, skip = err.(*xtype.NoMatchError)
 			}
 			return nil, nil, nil, nil, skip, NewError(cause).Lift(&Path{
@@ -274,7 +274,7 @@ func mapField(
 
 func parseAutoMap(ctx *MethodContext, source *xtype.Type) ([]xtype.FieldSources, *Error) {
 	fieldSources := []xtype.FieldSources{}
-	for _, field := range ctx.AutoMap {
+	for _, field := range ctx.Conf.AutoMap {
 		innerSource := source
 		lift := []*Path{}
 		path := strings.Split(field, ".")
@@ -315,8 +315,9 @@ func unexportedStructError(targetField, sourceType, targetType string) string {
 Possible solutions:
 
 * Ignore the given field:
-  https://goverter.jmattheis.de/#/conversion/mapping?id=ignore
+  https://goverter.jmattheis.de/#/config/ignore
 
 * Create a custom converter function:
-  https://goverter.jmattheis.de/#/conversion/custom`, targetField)
+  https://goverter.jmattheis.de/#/config/extend
+  https://goverter.jmattheis.de/#/config/map`, targetField)
 }

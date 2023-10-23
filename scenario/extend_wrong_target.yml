@@ -9,7 +9,11 @@ input:
         func HelloWorld(int) {
         }
 error: |-
-    Error while parsing extend in
+    error parsing 'goverter:extend' at
+        /ABSOLUTE/execution/input.go:5:1
         github.com/jmattheis/goverter/execution.Converter
 
-    HelloWorld has no or too many returns
+    error parsing type:
+        func github.com/jmattheis/goverter/execution.HelloWorld(int)
+
+    must have one or two returns

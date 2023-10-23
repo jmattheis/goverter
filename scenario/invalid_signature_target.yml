@@ -7,7 +7,7 @@ input:
             Convert(map[string]int)
         }
 error: |-
-    Error while creating converter method:
+    error parsing converter method:
         func (github.com/jmattheis/goverter/execution.Converter).Convert(map[string]int)
 
-    return has no or too many parameters
+    must have one or two returns

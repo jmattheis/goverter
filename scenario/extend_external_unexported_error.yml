@@ -23,7 +23,11 @@ input:
             Age   string
         }
 error: |-
-    Error while parsing extend in
+    error parsing 'goverter:extend' at
+        /ABSOLUTE/execution/input.go:6:1
         github.com/jmattheis/goverter/execution.Converter
 
-    could not extend: method intToString is unexported
+    error parsing type:
+        func github.com/jmattheis/goverter/execution/generated.intToString(int) string
+
+    must be exported

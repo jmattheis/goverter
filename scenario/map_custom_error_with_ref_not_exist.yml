@@ -4,7 +4,7 @@ input:
 
         // goverter:converter
         type Converter interface {
-            // goverter:mapExtend Age PluckAgeInt
+            // goverter:map . Age | PluckAgeInt
             Convert(source Input) Output
         }
 
@@ -16,7 +16,8 @@ input:
             Age int
         }
 error: |-
-    Error while creating converter method:
+    error parsing 'goverter:map' at
+        /ABSOLUTE/execution/input.go:6:5
         func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
 
     PluckAgeInt does not exist in scope

@@ -4,7 +4,7 @@ input:
 
         // goverter:converter
         type Converter interface {
-            // goverter:mapExtend Score Identity
+            // goverter:map . Score | Identity
             Convert(source Input) Output
         }
 
@@ -41,7 +41,7 @@ error: |-
     |
     | github.com/jmattheis/goverter/execution.Output
 
-    cannot not use
+    cannot use
     	func github.com/jmattheis/goverter/execution.Identity(source int) int
     because source type mismatch
 

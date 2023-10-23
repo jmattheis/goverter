@@ -7,4 +7,9 @@ input:
             // goverter:matchIgnoreCase a
             ConvertString(source string) string
         }
-error: '/ABSOLUTE/execution/input.go:4:1: type Converter: parsing method ConvertString: invalid goverter:matchIgnoreCase, parameters not supported'
+error: |-
+    error parsing 'goverter:matchIgnoreCase' at
+        /ABSOLUTE/execution/input.go:6:5
+        func (github.com/jmattheis/goverter/execution.Converter).ConvertString(source string) string
+
+    invalid boolean value: 'a' must be one of 'yes', 'no'

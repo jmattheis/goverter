@@ -2,225 +2,108 @@ package generator
 
 import (
 	"fmt"
-	"go/types"
 	"sort"
 	"strings"
 
 	"github.com/dave/jennifer/jen"
 	"github.com/jmattheis/goverter/builder"
-	"github.com/jmattheis/goverter/comments"
+	"github.com/jmattheis/goverter/config"
+	"github.com/jmattheis/goverter/method"
 	"github.com/jmattheis/goverter/namer"
 	"github.com/jmattheis/goverter/xtype"
-	"golang.org/x/tools/go/packages"
 )
 
-type methodDefinition struct {
-	ID       string
-	Explicit bool
-	Name     string
-	Call     *jen.Statement
-	Source   *xtype.Type
-	Target   *xtype.Type
+type generatedMethod struct {
+	*config.Method
 
-	Fields          map[string]*builder.FieldMapping
-	MatchIgnoreCase bool
-	AutoMap         []string
+	Explicit bool
+	Dirty    bool
 
 	Jen jen.Code
-
-	SelfAsFirstParam bool
-	ReturnError      bool
-	ReturnTypeOrigin string
-	Dirty            bool
-	Flags            builder.ConversionFlags
 }
 
 type generator struct {
 	namer  *namer.Namer
-	name   string
-	file   *jen.File
-	lookup map[xtype.Signature]*methodDefinition
-	extend map[xtype.Signature]*methodDefinition
-	// pkgCache caches the extend packages, saving load time
-	pkgCache map[string][]*packages.Package
-	// workingDir is a working directory, can be empty
-	workingDir string
-	flags      builder.ConversionFlags
+	conf   *config.Converter
+	lookup map[xtype.Signature]*generatedMethod
+	extend map[xtype.Signature]*method.Definition
 }
 
-func (g *generator) registerMethod(converter types.Type, scope *types.Scope, methodType *types.Func, methodComments comments.Method) error {
-	signature, ok := methodType.Type().(*types.Signature)
-	if !ok {
-		return fmt.Errorf("expected signature %#v", methodType.Type())
+func (g *generator) buildMethods(f *jen.File) error {
+	genMethods := []*generatedMethod{}
+	for _, genMethod := range g.lookup {
+		genMethods = append(genMethods, genMethod)
 	}
-	params := signature.Params()
-	if params.Len() != 1 {
-		return fmt.Errorf("expected signature to have only one parameter")
-	}
-	result := signature.Results()
-	if result.Len() < 1 || result.Len() > 2 {
-		return fmt.Errorf("return has no or too many parameters")
-	}
-	source := params.At(0).Type()
-	target := result.At(0).Type()
-	returnError := false
-	if result.Len() == 2 {
-		if i, ok := result.At(1).Type().(*types.Named); ok && i.Obj().Name() == "error" && i.Obj().Pkg() == nil {
-			returnError = true
-		} else {
-			return fmt.Errorf("second return parameter must have type error but had: %s", result.At(1).Type())
-		}
-	}
-
-	builderProperties := map[string]*builder.FieldMapping{}
-
-	for name, property := range methodComments.Fields {
-		builderProperties[name] = &builder.FieldMapping{
-			Ignore: property.Ignore,
-			Source: property.Source,
-		}
-		if property.Function != "" {
-			def, err := g.parseMapExtend(converter, scope, property.Function)
-			if err != nil {
-				return err
-			}
-			builderProperties[name].Function = def
-		}
-	}
-
-	m := &methodDefinition{
-		Call:             jen.Id(xtype.ThisVar).Dot(methodType.Name()),
-		ID:               methodType.String(),
-		Explicit:         true,
-		Name:             methodType.Name(),
-		Source:           xtype.TypeOf(source),
-		Target:           xtype.TypeOf(target),
-		Fields:           builderProperties,
-		AutoMap:          methodComments.AutoMap,
-		Flags:            g.flags.Add(methodComments.Flags),
-		ReturnError:      returnError,
-		ReturnTypeOrigin: methodType.FullName(),
-	}
-
-	g.lookup[xtype.SignatureOf(m.Source, m.Target)] = m
-	g.namer.Register(m.Name)
-	return nil
-}
-
-func (g *generator) validateMethods() error {
-	for _, method := range g.lookup {
-		if method.Explicit && len(method.Fields) > 0 {
-			isTargetStructPointer := method.Target.Pointer && method.Target.PointerInner.Struct
-			if !method.Target.Struct && !isTargetStructPointer {
-				return fmt.Errorf("Invalid struct field mapping on method:\n    %s\n\nField mappings like goverter:map or goverter:ignore may only be set on struct or struct pointers.\nSee https://goverter.jmattheis.de/#/conversion/configure-nested", method.ID)
-			}
-			if overlapping, ok := g.findOverlappingExplicitStructMethod(method); ok {
-				return fmt.Errorf("Overlapping field mapping found.\n\nPlease move the field related goverter:* comments from this method:\n    %s\n\nto this method:\n    %s\n\nGoverter will use %s inside the implementation of %s, thus, field related settings would be ignored.", method.ID, overlapping.ID, overlapping.Name, method.Name)
-			}
-		}
-	}
-	return nil
-}
-
-func (g *generator) createMethods() error {
-	methods := []*methodDefinition{}
-	for _, method := range g.lookup {
-		methods = append(methods, method)
-	}
-	sort.Slice(methods, func(i, j int) bool {
-		return methods[i].Name < methods[j].Name
+	sort.Slice(genMethods, func(i, j int) bool {
+		return genMethods[i].Name < genMethods[j].Name
 	})
-	for _, method := range methods {
-		if method.Jen != nil && !method.Dirty {
+	for _, genMethod := range genMethods {
+		if genMethod.Jen != nil && !genMethod.Dirty {
 			continue
 		}
-		method.Dirty = false
-		err := g.buildMethod(method, builder.NoWrap)
+		genMethod.Dirty = false
+		err := g.buildMethod(genMethod, builder.NoWrap)
 		if err != nil {
 			err = err.Lift(&builder.Path{
 				SourceID:   "source",
 				TargetID:   "target",
-				SourceType: method.Source.T.String(),
-				TargetType: method.Target.T.String(),
+				SourceType: genMethod.Source.T.String(),
+				TargetType: genMethod.Target.T.String(),
 			})
-			return fmt.Errorf("Error while creating converter method:\n    %s\n\n%s", method.ID, builder.ToString(err))
+			return fmt.Errorf("Error while creating converter method:\n    %s\n\n%s", genMethod.ID, builder.ToString(err))
 		}
 	}
-	for _, method := range g.lookup {
-		if method.Dirty {
-			return g.createMethods()
+	for _, genMethod := range g.lookup {
+		if genMethod.Dirty {
+			return g.buildMethods(f)
 		}
 	}
-	g.appendToFile()
+	g.appendGenerated(f)
 	return nil
 }
 
-func (g *generator) appendToFile() {
-	methods := []*methodDefinition{}
-	for _, method := range g.lookup {
-		methods = append(methods, method)
+func (g *generator) appendGenerated(f *jen.File) {
+	genMethods := []*generatedMethod{}
+	for _, genMethod := range g.lookup {
+		genMethods = append(genMethods, genMethod)
 	}
-	sort.Slice(methods, func(i, j int) bool {
-		return methods[i].Name < methods[j].Name
+	sort.Slice(genMethods, func(i, j int) bool {
+		return genMethods[i].Name < genMethods[j].Name
 	})
-	for _, method := range methods {
-		g.file.Add(method.Jen)
+
+	for _, def := range genMethods {
+		f.Add(def.Jen)
 	}
 }
 
-func (g *generator) findOverlappingExplicitStructMethod(method *methodDefinition) (*methodDefinition, bool) {
-	source := method.Source
-	target := method.Target
-
-	switch {
-	case source.Struct && target.Pointer && target.PointerInner.Struct:
-		method, ok := g.lookup[xtype.SignatureOf(source, target.PointerInner)]
-		if ok && method.Explicit {
-			return method, true
-		}
-	case source.Pointer && source.PointerInner.Struct && target.Pointer && target.PointerInner.Struct:
-		method, ok := g.lookup[xtype.SignatureOf(source.PointerInner, target)]
-		if ok && method.Explicit {
-			return method, true
-		}
-		method, ok = g.lookup[xtype.SignatureOf(source.PointerInner, target.PointerInner)]
-		if ok && method.Explicit {
-			return method, true
-		}
-	}
-	return nil, false
-}
-
-func (g *generator) buildMethod(method *methodDefinition, errWrapper builder.ErrorWrapper) *builder.Error {
+func (g *generator) buildMethod(genMethod *generatedMethod, errWrapper builder.ErrorWrapper) *builder.Error {
 	sourceID := jen.Id("source")
-	source := method.Source
-	target := method.Target
+	source := genMethod.Source
+	target := genMethod.Target
 
 	returns := []jen.Code{target.TypeAsJen()}
-	if method.ReturnError {
+	if genMethod.ReturnError {
 		returns = append(returns, jen.Id("error"))
 	}
 
-	fieldsTarget := method.Target.T.String()
-	if method.Target.Pointer && method.Target.PointerInner.Struct {
-		fieldsTarget = method.Target.PointerInner.T.String()
+	fieldsTarget := genMethod.Target.T.String()
+	if genMethod.Target.Pointer && genMethod.Target.PointerInner.Struct {
+		fieldsTarget = genMethod.Target.PointerInner.T.String()
 	}
 
 	ctx := &builder.MethodContext{
 		Namer:        namer.New(),
-		Fields:       method.Fields,
+		Conf:         genMethod.Method,
 		FieldsTarget: fieldsTarget,
 		SeenNamed:    map[string]struct{}{},
-		Flags:        method.Flags,
-		AutoMap:      method.AutoMap,
-		TargetType:   method.Target,
-		Signature:    xtype.SignatureOf(method.Source, method.Target),
+		TargetType:   genMethod.Target,
+		Signature:    genMethod.Signature(),
 	}
 
 	var funcBlock []jen.Code
-	if extendMethod, ok := g.extend[ctx.Signature]; ok {
+	if def, ok := g.extend[ctx.Signature]; ok {
 		jenReturn, err := g.delegateMethod(
-			ctx, extendMethod, xtype.VariableID(sourceID.Clone()), source, target, errWrapper)
+			ctx, def, xtype.VariableID(sourceID.Clone()), source, target, errWrapper)
 		if err != nil {
 			return err
 		}
@@ -231,14 +114,14 @@ func (g *generator) buildMethod(method *methodDefinition, errWrapper builder.Err
 			return err
 		}
 		ret := []jen.Code{newID.Code}
-		if method.ReturnError {
+		if genMethod.ReturnError {
 			ret = append(ret, jen.Nil())
 		}
 
 		funcBlock = append(stmt, jen.Return(ret...))
 	}
 
-	method.Jen = jen.Func().Params(jen.Id(xtype.ThisVar).Op("*").Id(g.name)).Id(method.Name).
+	genMethod.Jen = jen.Func().Params(jen.Id(xtype.ThisVar).Op("*").Id(g.conf.Name)).Id(genMethod.Name).
 		Params(jen.Id("source").Add(source.TypeAsJen())).Params(returns...).
 		Block(funcBlock...)
 
@@ -254,70 +137,28 @@ func (g *generator) buildNoLookup(ctx *builder.MethodContext, sourceID *xtype.Je
 	return nil, nil, builder.NewError(fmt.Sprintf("TypeMismatch: Cannot convert %s to %s", source.T, target.T))
 }
 
-type callableMethod struct {
-	ID               string
-	Call             *jen.Statement
-	SelfAsFirstParam bool
-	ReturnError      bool
-	ReturnTypeOrigin string
-}
-
-func (g *generator) callByDefinition(
+func (g *generator) CallMethod(
 	ctx *builder.MethodContext,
-	method *methodDefinition,
-	sourceID *xtype.JenID,
-	source, target *xtype.Type,
-	errWrapper builder.ErrorWrapper,
-) ([]jen.Code, *xtype.JenID, *builder.Error) {
-	callable := &callableMethod{
-		ID:               method.ID,
-		Call:             method.Call,
-		ReturnError:      method.ReturnError,
-		ReturnTypeOrigin: method.ReturnTypeOrigin,
-		SelfAsFirstParam: method.SelfAsFirstParam,
-	}
-	return g.callMethod(ctx, callable, sourceID, source, target, errWrapper)
-}
-
-func (g *generator) CallExtendMethod(
-	ctx *builder.MethodContext,
-	method *builder.ExtendMethod,
-	sourceID *xtype.JenID,
-	source, target *xtype.Type,
-	errWrapper builder.ErrorWrapper,
-) ([]jen.Code, *xtype.JenID, *builder.Error) {
-	callable := &callableMethod{
-		ID:               method.ID,
-		Call:             method.Call,
-		ReturnError:      method.ReturnError,
-		ReturnTypeOrigin: method.ID,
-		SelfAsFirstParam: method.SelfAsFirstParam,
-	}
-	return g.callMethod(ctx, callable, sourceID, source, target, errWrapper)
-}
-
-func (g *generator) callMethod(
-	ctx *builder.MethodContext,
-	method *callableMethod,
+	definition *method.Definition,
 	sourceID *xtype.JenID,
 	source, target *xtype.Type,
 	errWrapper builder.ErrorWrapper,
 ) ([]jen.Code, *xtype.JenID, *builder.Error) {
 	params := []jen.Code{}
-	if method.SelfAsFirstParam {
+	if definition.SelfAsFirstParameter {
 		params = append(params, jen.Id(xtype.ThisVar))
 	}
 	if sourceID != nil {
 		params = append(params, sourceID.Code.Clone())
 	}
-	if method.ReturnError {
+	if definition.ReturnError {
 		current := g.lookup[ctx.Signature]
 		if !current.ReturnError {
 			if current.Explicit {
-				return nil, nil, builder.NewError(fmt.Sprintf("ReturnTypeMismatch: Cannot use\n\n    %s\n\nin\n\n    %s\n\nbecause no error is returned as second return parameter", method.ReturnTypeOrigin, current.ID))
+				return nil, nil, builder.NewError(fmt.Sprintf("ReturnTypeMismatch: Cannot use\n\n    %s\n\nin\n\n    %s\n\nbecause no error is returned as second return parameter", definition.ReturnTypeOriginID, current.ID))
 			}
 			current.ReturnError = true
-			current.ReturnTypeOrigin = method.ID
+			current.ReturnTypeOriginID = definition.ID
 			current.Dirty = true
 		}
 
@@ -335,24 +176,24 @@ func (g *generator) callMethod(
 		}
 		name := ctx.Name(target.ID())
 		stmt := []jen.Code{
-			jen.List(jen.Id(name), jen.Id("err")).Op(":=").Add(method.Call.Clone().Call(params...)),
+			jen.List(jen.Id(name), jen.Id("err")).Op(":=").Add(definition.Call.Clone().Call(params...)),
 			jen.If(jen.Id("err").Op("!=").Nil()).Block(errBlock...),
 		}
 		return stmt, xtype.VariableID(jen.Id(name)), nil
 	}
-	id := xtype.OtherID(method.Call.Clone().Call(params...))
+	id := xtype.OtherID(definition.Call.Clone().Call(params...))
 	return nil, id, nil
 }
 
 func (g *generator) delegateMethod(
 	ctx *builder.MethodContext,
-	delegateTo *methodDefinition,
+	delegateTo *method.Definition,
 	sourceID *xtype.JenID,
 	source, target *xtype.Type,
 	errWrapper builder.ErrorWrapper,
 ) (*jen.Statement, *builder.Error) {
 	params := []jen.Code{}
-	if delegateTo.SelfAsFirstParam {
+	if delegateTo.SelfAsFirstParameter {
 		params = append(params, jen.Id(xtype.ThisVar))
 	}
 	if sourceID != nil {
@@ -364,7 +205,7 @@ func (g *generator) delegateMethod(
 
 	if delegateTo.ReturnError {
 		if !current.ReturnError {
-			return nil, builder.NewError(fmt.Sprintf("ReturnTypeMismatch: Cannot use\n\n    %s\n\nin\n\n    %s\n\nbecause no error is returned as second return parameter", delegateTo.ReturnTypeOrigin, current.ID))
+			return nil, builder.NewError(fmt.Sprintf("ReturnTypeMismatch: Cannot use\n\n    %s\n\nin\n\n    %s\n\nbecause no error is returned as second return parameter", delegateTo.ReturnTypeOriginID, current.ID))
 		}
 	} else {
 		if current.ReturnError {
@@ -376,7 +217,7 @@ func (g *generator) delegateMethod(
 
 // wrap invokes the error wrapper if feature is enabled.
 func (g *generator) wrap(ctx *builder.MethodContext, errWrapper builder.ErrorWrapper, errStmt *jen.Statement) *jen.Statement {
-	if ctx.Flags.Has(builder.FlagWrapErrors) {
+	if ctx.Conf.WrapErrors {
 		return errWrapper(errStmt)
 	}
 	return errStmt
@@ -390,13 +231,11 @@ func (g *generator) Build(
 	errWrapper builder.ErrorWrapper,
 ) ([]jen.Code, *xtype.JenID, *builder.Error) {
 	signature := xtype.SignatureOf(source, target)
-	method, ok := g.extend[signature]
-	if !ok {
-		method, ok = g.lookup[signature]
+	if def, ok := g.extend[signature]; ok {
+		return g.CallMethod(ctx, def, sourceID, source, target, errWrapper)
 	}
-
-	if ok {
-		return g.callByDefinition(ctx, method, sourceID, source, target, errWrapper)
+	if genMethod, ok := g.lookup[signature]; ok {
+		return g.CallMethod(ctx, genMethod.Definition, sourceID, source, target, errWrapper)
 	}
 
 	hasPointerStructMethod := false
@@ -423,7 +262,7 @@ func (g *generator) Build(
 		case source.Pointer && source.PointerInner.Named && !source.PointerInner.Basic:
 			createSubMethod = true
 		}
-		if ctx.Flags.Has(builder.FlagSkipCopySameType) && source.T.String() == target.T.String() {
+		if ctx.Conf.SkipCopySameType && source.T.String() == target.T.String() {
 			createSubMethod = false
 		}
 	}
@@ -432,18 +271,23 @@ func (g *generator) Build(
 	if createSubMethod {
 		name := g.namer.Name(source.UnescapedID() + "To" + strings.Title(target.UnescapedID()))
 
-		method := &methodDefinition{
-			ID:     name,
-			Name:   name,
-			Source: xtype.TypeOf(source.T),
-			Target: xtype.TypeOf(target.T),
-			Fields: map[string]*builder.FieldMapping{},
-			Flags:  g.flags,
-			Call:   jen.Id(xtype.ThisVar).Dot(name),
+		genMethod := &generatedMethod{
+			Method: &config.Method{
+				Common: g.conf.Common,
+				Definition: &method.Definition{
+					ID:   name,
+					Name: name,
+					Call: jen.Id(xtype.ThisVar).Dot(name),
+					Parameters: method.Parameters{
+						Source: xtype.TypeOf(source.T),
+						Target: xtype.TypeOf(target.T),
+					},
+				},
+			},
 		}
 
-		g.lookup[signature] = method
-		if err := g.buildMethod(method, errWrapper); err != nil {
+		g.lookup[signature] = genMethod
+		if err := g.buildMethod(genMethod, errWrapper); err != nil {
 			return nil, nil, err
 		}
 		// try again to trigger the found method thingy above

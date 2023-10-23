@@ -7,8 +7,9 @@ input:
         type Converter interface {
         }
 error: |-
-    Error while parsing extend in
+    error parsing 'goverter:extend' at
+        /ABSOLUTE/execution/input.go:5:1
         github.com/jmattheis/goverter/execution.Converter
 
     method name pattern is required in the custom method "strconv:".
-    See https://goverter.jmattheis.de/#/conversion/custom
+    See https://goverter.jmattheis.de/#/config/extend

@@ -7,9 +7,11 @@ import (
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"strings"
 	"testing"
 
+	"github.com/jmattheis/goverter/config"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
@@ -45,34 +47,37 @@ func TestScenario(t *testing.T) {
 				require.NoError(t, err)
 			}
 			genPkgName := "generated"
-			genFile := filepath.Join(execDir, genPkgName, "generated.go")
 
-			err = GenerateConverterFile(
-				genFile,
-				GenerateConfig{
-					PackageName:             genPkgName,
-					WorkingDir:              execDir,
-					PackagePath:             "github.com/jmattheis/goverter/execution/" + genPkgName,
-					ScanDir:                 "github.com/jmattheis/goverter/execution",
-					ExtendMethods:           scenario.Extends,
-					WrapErrors:              scenario.WrapErrors,
-					IgnoredUnexportedFields: scenario.IgnoreUnexportedFields,
-					MatchFieldsIgnoreCase:   scenario.MatchFieldsIgnoreCase,
+			global := append([]string{"output:package github.com/jmattheis/goverter/execution/" + genPkgName}, scenario.Global...)
+
+			patterns := scenario.Patterns
+			if len(patterns) == 0 {
+				patterns = append(patterns, "github.com/jmattheis/goverter/execution")
+			}
+
+			files, err := generateConvertersRaw(
+				&GenerateConfig{
+					WorkingDir:      execDir,
+					PackagePatterns: patterns,
+					Global: config.RawLines{
+						Lines:    global,
+						Location: "scenario global",
+					},
 				})
 
-			body, _ := ioutil.ReadFile(genFile)
+			actualOutputFiles := toOutputFiles(execDir, files)
 
 			if os.Getenv("UPDATE_SCENARIO") == "true" && scenario.ErrorStartsWith == "" {
 				if err != nil {
-					scenario.Success = ""
+					scenario.Success = []*OutputFile{}
 					scenario.Error = replaceAbsolutePath(curPath, fmt.Sprint(err))
 				} else {
-					scenario.Success = string(body)
+					scenario.Success = toOutputFiles(execDir, files)
 					scenario.Error = ""
 				}
 				newBytes, err := yaml.Marshal(&scenario)
 				if assert.NoError(t, err) {
-					ioutil.WriteFile(scenarioFileName, newBytes, os.ModePerm)
+					os.WriteFile(scenarioFileName, newBytes, os.ModePerm)
 				}
 			}
 
@@ -91,8 +96,11 @@ func TestScenario(t *testing.T) {
 
 			require.NoError(t, err)
 			require.NotEmpty(t, scenario.Success, "scenario.Success may not be empty")
-			require.Equal(t, scenario.Success, string(body))
-			require.NoError(t, compile(genFile), "generated converter doesn't build")
+			require.Equal(t, scenario.Success, actualOutputFiles)
+
+			err = writeFiles(files)
+			require.NoError(t, err)
+			require.NoError(t, compile(execDir), "generated converter doesn't build")
 		})
 		if os.Getenv("SKIP_CLEAN") != "true" {
 			clearDir(execDir)
@@ -104,9 +112,9 @@ func replaceAbsolutePath(curPath, body string) string {
 	return strings.ReplaceAll(body, curPath, "/ABSOLUTE")
 }
 
-func compile(file string) error {
-	cmd := exec.Command("go", "build", "")
-	cmd.Dir = filepath.Dir(file)
+func compile(dir string) error {
+	cmd := exec.Command("go", "build", "./...")
+	cmd.Dir = dir
 	_, err := cmd.Output()
 	if err != nil {
 		if exit, ok := err.(*exec.ExitError); ok {
@@ -116,19 +124,51 @@ func compile(file string) error {
 	return err
 }
 
+func toOutputFiles(execDir string, files map[string][]byte) []*OutputFile {
+	output := []*OutputFile{}
+	for fileName, content := range files {
+		rel, err := filepath.Rel(execDir, fileName)
+		if err != nil {
+			panic("could not create relpath")
+		}
+		output = append(output, &OutputFile{Name: rel, Content: string(content)})
+	}
+	sort.Slice(output, func(i, j int) bool {
+		return output[i].Name < output[j].Name
+	})
+	return output
+}
+
 type Scenario struct {
-	Input   map[string]string `yaml:"input"`
-	Extends []string          `yaml:"extends,omitempty"`
+	Input  map[string]string `yaml:"input"`
+	Global []string          `yaml:"global,omitempty"`
 
-	// set to test code generation with fmt.Errorf per field
-	WrapErrors             bool `yaml:"wrapErrors,omitempty"`
-	IgnoreUnexportedFields bool `yaml:"ignore_unexported_fields,omitempty"`
-	MatchFieldsIgnoreCase  bool `yaml:"match_fields_ignore_case,omitempty"`
-
-	Success string `yaml:"success,omitempty"`
+	Patterns []string      `yaml:"patterns,omitempty"`
+	Success  []*OutputFile `yaml:"success,omitempty"`
 	// for error cases, use either Error or ErrorStartsWith, not both
 	Error           string `yaml:"error,omitempty"`
 	ErrorStartsWith string `yaml:"error_starts_with,omitempty"`
+}
+
+type OutputFile struct {
+	Name    string
+	Content string
+}
+
+func (f *OutputFile) MarshalYAML() (interface{}, error) {
+	return map[string]string{f.Name: f.Content}, nil
+}
+
+func (f *OutputFile) UnmarshalYAML(value *yaml.Node) error {
+	v := map[string]string{}
+	err := value.Decode(&v)
+
+	for name, content := range v {
+		f.Name = name
+		f.Content = content
+	}
+
+	return err
 }
 
 func getCurrentPath() string {

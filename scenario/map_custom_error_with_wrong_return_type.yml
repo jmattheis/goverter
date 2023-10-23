@@ -4,7 +4,7 @@ input:
 
         // goverter:converter
         type Converter interface {
-            // goverter:mapExtend Score DefaultName
+            // goverter:map . Score | DefaultName
             Convert(source Input) Output
         }
 

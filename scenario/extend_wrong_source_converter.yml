@@ -10,7 +10,11 @@ input:
             return 0
         }
 error: |-
-    Error while parsing extend in
+    error parsing 'goverter:extend' at
+        /ABSOLUTE/execution/input.go:5:1
         github.com/jmattheis/goverter/execution.Converter
 
-    the first parameter must be of type github.com/jmattheis/goverter/execution.Converter
+    error parsing type:
+        func github.com/jmattheis/goverter/execution.HelloWorld(int, int) int
+
+    first parameter must be of type github.com/jmattheis/goverter/execution.Converter but was int when having two parameters

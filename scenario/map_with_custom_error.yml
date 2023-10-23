@@ -42,7 +42,7 @@ error: |-
     |
     | github.com/jmattheis/goverter/execution.Output
 
-    cannot not use
+    cannot use
     	func github.com/jmattheis/goverter/execution.Enhance(s int) string
     because source type mismatch
 

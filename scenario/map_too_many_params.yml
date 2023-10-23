@@ -9,4 +9,9 @@ input:
                 ConvertString(source string) string
             }
         )
-error: '/ABSOLUTE/execution/input.go:3:1: type Converter: parsing method ConvertString: invalid goverter:map too many fields'
+error: |-
+    error parsing 'goverter:map' at
+        /ABSOLUTE/execution/input.go:7:9
+        func (github.com/jmattheis/goverter/execution.Converter).ConvertString(source string) string
+
+    too many fields expected at most 2 fields got 3: a b c
