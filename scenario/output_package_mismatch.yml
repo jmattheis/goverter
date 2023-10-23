@@ -3,13 +3,13 @@ input:
         package structs
 
         // goverter:converter
-        // goverter:outputPackage pkg1
+        // goverter:output:package pkg1
         type Converter interface {
             Convert(source Input) Output
         }
 
         // goverter:converter
-        // goverter:outputPackage pkg2
+        // goverter:output:package pkg2
         type Converter2 interface {
             Convert(source Input) Output
         }

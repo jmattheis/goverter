@@ -85,14 +85,8 @@ Examples:
   %s gen ./example/simple ./example/complex
   %s gen ./example/...
   %s gen github.com/jmattheis/goverter/example/simple
-  %s gen -g ignoreMissing -g 'output ./generated/generated.go'  ./simple
-
-Output:
-  The output setting is relative to the conversion interface. If you want it
-  relative to the current working directory you can use the magic @cwd path.
-
-  %s gen -g 'output @cwd/generated'  ./simple
+  %s gen -g 'ignoreMissing no' -g 'skipCopySameType' ./simple
 
 Documentation:
-  Full documentation is available here: https://goverter.jmattheis.de`, cmd, cmd, cmd, cmd, cmd, cmd)
+  Full documentation is available here: https://goverter.jmattheis.de`, cmd, cmd, cmd, cmd, cmd)
 }

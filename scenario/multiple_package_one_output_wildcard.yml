@@ -14,7 +14,7 @@ input:
         import model "github.com/jmattheis/goverter/execution/model"
 
         // goverter:converter
-        // goverter:output ../generated/output.go
+        // goverter:output:file ../generated/output.go
         type Converter interface {
             Convert(source model.Input) model.Output
         }
@@ -24,7 +24,7 @@ input:
         import model "github.com/jmattheis/goverter/execution/model"
 
         // goverter:converter
-        // goverter:output ../generated/output.go
+        // goverter:output:file ../generated/output.go
         type Converter2 interface {
             Convert(source model.Input) model.Output
         }

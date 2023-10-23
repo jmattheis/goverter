@@ -3,7 +3,7 @@ input:
         package pkg
 
         // goverter:converter
-        // goverter:outputPackage github.com/jmattheis/goverter/execution/generated:myname
+        // goverter:output:package github.com/jmattheis/goverter/execution/generated:myname
         type Converter2 interface {
             Convert(source Input) Output
         }

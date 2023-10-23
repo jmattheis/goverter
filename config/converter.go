@@ -85,9 +85,9 @@ func parseConverterLine(c *Converter, loader *pkgload.PackageLoader, value strin
 		// only a marker interface
 	case "name":
 		c.Name, err = parseString(rest)
-	case "output":
+	case "output:file":
 		c.OutputFile, err = parseString(rest)
-	case "outputPackage":
+	case "output:package":
 		c.OutputPackage, err = parseString(rest)
 	case "extend":
 		var methods []*method.Definition

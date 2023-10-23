@@ -3,7 +3,7 @@ input:
         package pkg1
 
         // goverter:converter
-        // goverter:output @cwd/generated/output.go
+        // goverter:output:file @cwd/generated/output.go
         type Converter interface {
             Convert(source Input) Output
         }

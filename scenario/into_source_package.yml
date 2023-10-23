@@ -4,8 +4,8 @@ input:
 
         // goverter:converter
         // goverter:extend StringPToString
-        // goverter:output ./generated.go
-        // goverter:outputPackage github.com/jmattheis/goverter/execution:structs
+        // goverter:output:file ./generated.go
+        // goverter:output:package github.com/jmattheis/goverter/execution:structs
         type Converter interface {
             ConvertPerson(source Input) Output
         }

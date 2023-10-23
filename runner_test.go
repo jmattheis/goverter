@@ -48,7 +48,7 @@ func TestScenario(t *testing.T) {
 			}
 			genPkgName := "generated"
 
-			global := append([]string{"outputPackage github.com/jmattheis/goverter/execution/" + genPkgName}, scenario.Global...)
+			global := append([]string{"output:package github.com/jmattheis/goverter/execution/" + genPkgName}, scenario.Global...)
 
 			patterns := scenario.Patterns
 			if len(patterns) == 0 {
