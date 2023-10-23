@@ -1,21 +1,21 @@
-## Method
+`extend [PACKAGE:]TYPE...` can be defined as [CLI argument](config/define.md#cli) or
+[converter comment](config/define.md#converter).
 
 If a type cannot be converted automatically, you can manually define an
-implementation with `goverter:extend` for the missing mapping. Keep in mind,
+implementation with `:extend` for the missing mapping. Keep in mind,
 Goverter will use the custom implementation every time, when the source and
 target type matches.
 
-You can pass multiple extend methods to `goverter:extend`, or define the
-comment multiple times.
+See [signatures](#signature) for possible method signatures.
 
-Note: The function name can be a regular expression:
 
-```go
-// search for conversion methods that start with SQLStringTo in converter's package
-// goverter:extend SQLStringTo.*
-// the example below enables strconv.ParseBool method
-// goverter:extend strconv:Parse.*
-```
+## extend TYPE
+
+`extend TYPE` allows you to reference a method in the local package. E.g:
+
+
+`TYPE` can be a regex if you want to include multiple methods from the same
+package. E.g. `extend IntTo.*`
 
 <!-- tabs:start -->
 
@@ -63,6 +63,7 @@ func (c *ConverterImpl) Convert(source example.Input) example.Output {
 ```
 
 <!-- tabs:end -->
+
 
 <details>
   <summary>Complex example (click to expand)</summary>
@@ -127,7 +128,62 @@ func (c *ConverterImpl) exampleInputPersonToExampleOutputPerson(source example.I
 
 <!-- tabs:end -->
 
+
 </details>
+
+## extend PACKAGE:TYPE
+
+You can extend methods from external packages by separating the package path
+with `:` from the method.
+
+`TYPE` can be a regex if you want to include multiple methods from the same
+package. E.g. `extend strconv:A.*`
+
+
+<!-- tabs:start -->
+
+#### **input.go**
+
+```go
+package example
+
+// goverter:converter
+// goverter:extend strconv:Atoi
+type Converter interface {
+	Convert(Input) (Output, error)
+}
+
+type Input struct{ Value string }
+type Output struct{ Value int }
+```
+
+#### **generated/generated.go**
+
+```go
+package generated
+
+import (
+	example "goverter/example"
+	"strconv"
+)
+
+type ConverterImpl struct{}
+
+func (c *ConverterImpl) Convert(source example.Input) (example.Output, error) {
+	var exampleOutput example.Output
+	xint, err := strconv.Atoi(source.Value)
+	if err != nil {
+		return exampleOutput, err
+	}
+	exampleOutput.Value = xint
+	return exampleOutput, nil
+}
+```
+
+<!-- tabs:end -->
+
+
+## Signatures
 
 ### Method with converter
 
@@ -237,7 +293,7 @@ func (c *ConverterImpl) exampleDogToExampleAnimal(source example.Dog) example.An
 ### Method with error
 
 Sometimes, custom conversion may fail, in this case Goverter allows you to
-define a second return parameter which must be type
+define a second return parameter which must of type `error`
 
 ```go
 func IntToString(i int) (string, error) {
@@ -295,212 +351,3 @@ func (c *ConverterImpl) Convert(source example.Input) (example.Output, error) {
 <!-- tabs:end -->
 
 </details>
-
-### External Method
-
-You can extend methods from external packages by separating the package path
-with `:` from the method.
-
-```go
-// goverter:converter
-// goverter:extend strconv:Atoi
-// goverter:extend github.com/google/uuid:Atoi
-type Converter interface {
-	Convert(Input) (Output, error)
-}
-```
-
-<details>
-  <summary>Example (click to expand)</summary>
-
-<!-- tabs:start -->
-
-#### **input.go**
-
-```go
-package example
-
-// goverter:converter
-// goverter:extend strconv:Atoi
-type Converter interface {
-	Convert(Input) (Output, error)
-}
-
-type Input struct{ Value string }
-type Output struct{ Value int }
-```
-
-#### **generated/generated.go**
-
-```go
-package generated
-
-import (
-	example "goverter/example"
-	"strconv"
-)
-
-type ConverterImpl struct{}
-
-func (c *ConverterImpl) Convert(source example.Input) (example.Output, error) {
-	var exampleOutput example.Output
-	xint, err := strconv.Atoi(source.Value)
-	if err != nil {
-		return exampleOutput, err
-	}
-	exampleOutput.Value = xint
-	return exampleOutput, nil
-}
-```
-
-<!-- tabs:end -->
-
-</details>
-
-## Mapping Method
-
-Supported in Goverter v0.12.0.
-
-To define a custom conversion method for one specific field, you can use:
-
-```
-goverter:map [Mapping] | [Mapping Method]
-```
-
-As `[Mapping]` you can use everything that's described in
-[Mapping](/conversion/mapping.md).
-
-The `[Mapping Method]` may have:
-
--   no parameters
--   one parameter passing the source of the conversion
--   two parameters passing the converter interface and the source of the conversion
-
-You can extend methods from external packages by separating the package path
-with `:` from the method.
-
-<!-- tabs:start -->
-
-#### **input.go**
-
-```go
-package example
-
-// goverter:converter
-type Converter interface {
-    // goverter:map URL | PrependHTTPS
-    // goverter:map . FullName | GetFullName
-    // goverter:map Age | DefaultAge
-    // goverter:map Value | strconv:Itoa
-    Convert(Input) (Output, error)
-}
-
-type Input struct{
-    URL string
-
-    FirstName string
-    LastName  string
-
-    Value int
-}
-type Output struct{
-    URL      string
-    FullName string
-    Age      int
-
-    Value string
-}
-
-func GetFullName(input Input) string {
-    return input.FirstName + " " + input.LastName
-}
-
-func PrependHTTPS(url string) string {
-    return "https://" + url
-}
-
-func DefaultAge() int {
-    return 42
-}
-```
-
-#### **generated/generated.go**
-
-```go
-package generated
-
-import (
-	example "goverter/example"
-	"strconv"
-)
-
-type ConverterImpl struct{}
-
-func (c *ConverterImpl) Convert(source example.Input) (example.Output, error) {
-	var exampleOutput example.Output
-	exampleOutput.URL = example.PrependHTTPS(source.URL)
-	exampleOutput.FullName = example.GetFullName(source)
-	exampleOutput.Age = example.DefaultAge()
-	exampleOutput.Value = strconv.Itoa(source.Value)
-	return exampleOutput, nil
-}
-```
-
-<!-- tabs:end -->
-
-### Mapping Method with error
-
-The `[Mapping Method]` can optionally return an error as second return
-parameter.
-
-<!-- tabs:start -->
-
-#### **input.go**
-
-```go
-package example
-
-import "strconv"
-
-// goverter:converter
-type Converter interface {
-	// goverter:map NumberString Number | ParseInt
-	Convert(Input) (Output, error)
-}
-
-type Input struct {
-	Name  string
-	NumberString string
-}
-type Output struct {
-	Name  string
-	Number int
-}
-
-func ParseInt(s string) (int, error) {
-	return strconv.Atoi(s)
-}
-```
-
-#### **generated/generated.go**
-
-```go
-package generated
-
-import example "goverter/example"
-
-type ConverterImpl struct{}
-
-func (c *ConverterImpl) Convert(source example.Input) (example.Output, error) {
-	var exampleOutput example.Output
-	exampleOutput.Name = source.Name
-	xint, err := example.ParseInt(source.NumberString)
-	if err != nil {
-		return exampleOutput, err
-	}
-	exampleOutput.Number = xint
-	return exampleOutput, nil
-}
-```
-
-<!-- tabs:end -->

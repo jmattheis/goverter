@@ -19,7 +19,7 @@ do is create an interface and execute goverter. The project is meant as
 alternative to [jinzhu/copier](https://github.com/jinzhu/copier) that doesn't
 use reflection.
 
-## Usage
+## Getting Started
 
 1. Ensure your `go version` is 1.16 or above
 
@@ -29,7 +29,8 @@ use reflection.
     $ go mod init module-name
     ```
 
-1. Create your converter interface and mark it with a comment containing `goverter:converter`
+1. Create your converter interface and mark it with a comment containing
+   [`goverter:converter`](https://goverter.jmattheis.de/#/config/converter)
 
     `input.go`
 
@@ -59,7 +60,7 @@ use reflection.
     }
     ```
 
-    See [Conversion](https://goverter.jmattheis.de/#/conversion) for more information.
+    See [Configuration](https://goverter.jmattheis.de/#/config) for more information.
 
 1. Run `goverter`:
 
@@ -67,7 +68,8 @@ use reflection.
     $ go run github.com/jmattheis/goverter/cmd/goverter@GITHUB_VERSION ./
     ```
 
-    See [Installation](https://goverter.jmattheis.de/#/install) for more information.
+    See [Installation](https://goverter.jmattheis.de/#/install) and
+    [CLI](https://goverter.jmattheis.de/#/cli) for more information.
 
 1. goverter created a file at `./generated/generated.go`, it may look like this:
 
@@ -95,3 +97,5 @@ use reflection.
         return exampleOutputList
     }
     ```
+
+    See [Generation](https://goverter.jmattheis.de/#/generation) for more information.

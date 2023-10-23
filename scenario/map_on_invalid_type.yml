@@ -20,4 +20,4 @@ error: |-
         func (github.com/jmattheis/goverter/execution.Converter).ConvertPerson(source []github.com/jmattheis/goverter/execution.Person) []github.com/jmattheis/goverter/execution.APIPerson
 
     Field mappings like goverter:map or goverter:ignore may only be set on struct or struct pointers.
-    See https://goverter.jmattheis.de/#/conversion/configure-nested
+    See https://goverter.jmattheis.de/#/config/nested

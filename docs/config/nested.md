@@ -1,9 +1,8 @@
-If you want to add a [Manual Mapping
-(`goverter:map`)](/conversion/mapping?id=manual) or [Ignore a field
-(`goverter:ignore`)](/conversion/mapping?id=ignore) on a nested type like a map
-or slice, then you've to define another converter method.
+If you want to [`map`](config/map.md) or [`ignore`](config/ignore.md) on a
+nested type like a map or slice, then you've to define another converter method.
 
-Example, you've want to `goverter:map` the `NestedInput.LastName` to `NestedOutput.Surname` for this method.
+Example, you've want to `map` the `NestedInput.LastName` to
+`NestedOutput.Surname` for this method.
 
 ```go
 package example
@@ -31,6 +30,7 @@ type NestedOutput struct {
 ```
 
 You can't do it like this:
+
 ```go
 // goverter:converter
 type Converter interface {
@@ -38,9 +38,10 @@ type Converter interface {
     Convert([]Input) []Output
 }
 ```
+
 because Goverter doesn't doesn't apply the mapping to all sub conversions, as
-this could cause unexpected behavior. The correct way would be to define
-another conversion method like this:
+this could cause unexpected behavior. The correct way would be to define another
+conversion method like this:
 
 <!-- tabs:start -->
 

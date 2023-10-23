@@ -160,13 +160,13 @@ func splitCustomMethod(fullMethod string) (path, name string, err error) {
 			// example: goverter:extend :MyLocalConvert
 			// the purpose of the ':' in this case is confusing, do not allow such case
 			return "", "", fmt.Errorf(`package path must not be empty in the custom method "%s".
-See https://goverter.jmattheis.de/#/conversion/custom`, fullMethod)
+See https://goverter.jmattheis.de/#/config/extend`, fullMethod)
 		}
 	}
 
 	if name == "" {
 		return "", "", fmt.Errorf(`method name pattern is required in the custom method "%s".
-See https://goverter.jmattheis.de/#/conversion/custom`, fullMethod)
+See https://goverter.jmattheis.de/#/config/extend`, fullMethod)
 	}
 	return
 }

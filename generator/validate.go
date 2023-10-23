@@ -11,7 +11,7 @@ func validateMethods(lookup map[xtype.Signature]*generatedMethod) error {
 		if genMethod.Explicit && len(genMethod.Fields) > 0 {
 			isTargetStructPointer := genMethod.Target.Pointer && genMethod.Parameters.Target.PointerInner.Struct
 			if !genMethod.Target.Struct && !isTargetStructPointer {
-				return fmt.Errorf("Invalid struct field mapping on method:\n    %s\n\nField mappings like goverter:map or goverter:ignore may only be set on struct or struct pointers.\nSee https://goverter.jmattheis.de/#/conversion/configure-nested", genMethod.ID)
+				return fmt.Errorf("Invalid struct field mapping on method:\n    %s\n\nField mappings like goverter:map or goverter:ignore may only be set on struct or struct pointers.\nSee https://goverter.jmattheis.de/#/config/nested", genMethod.ID)
 			}
 			if overlapping, ok := findOverlappingExplicitStructMethod(lookup, genMethod); ok {
 				return fmt.Errorf("Overlapping field mapping found.\n\nPlease move the field related goverter:* comments from this method:\n    %s\n\nto this method:\n    %s\n\nGoverter will use %s inside the implementation of %s, thus, field related settings would be ignored.", genMethod.ID, overlapping.ID, overlapping.Name, genMethod.Name)

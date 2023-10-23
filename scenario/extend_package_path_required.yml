@@ -12,4 +12,4 @@ error: |-
         github.com/jmattheis/goverter/execution.Converter
 
     package path must not be empty in the custom method ":Convert".
-    See https://goverter.jmattheis.de/#/conversion/custom
+    See https://goverter.jmattheis.de/#/config/extend
