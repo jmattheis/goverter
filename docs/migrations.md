@@ -2,8 +2,8 @@
 
 ### Removed goverter:mapExtend
 
-`goverter:mapExtend FIELD METHOD` can be migrated to `goverter:map . FIELD | METHOD`
-
+`goverter:mapExtend FIELD METHOD` can be migrated to
+`goverter:map . FIELD | METHOD`
 
 ### Removed goverter:mapIdentity
 
@@ -40,3 +40,8 @@ $ goverter gen -g wrapErrors -g ignoreUnexported github.com/jmattheis/goverter/e
 | `-packageName NAME`                    | `-g 'output:package :NAME'` (NOT RECOMMENDED) See [output](config/output.md)     |
 | `-packagePath PATH`                    | `-g 'output:package PATH'` (NOT RECOMMENDED) See [output](config/output.md)      |
 | `-packagePath PATH -packageName NAME`  | `-g 'output:package PATH:NAME'` (NOT RECOMMENDED) See [output](config/output.md) |
+
+The handling of `output` was changed, it is now _relative_ to the converter
+interface. If you want to create the file relative to the current working
+directory use @cwd/ at the start of the output path. See
+[output](config/output.md).
