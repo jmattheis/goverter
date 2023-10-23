@@ -3,7 +3,7 @@ input:
         package structs
         // goverter:converter
         type Converter interface {
-            // goverter:mapExtend Animals Combine
+            // goverter:map . Animals | Combine
             Convert(source *Input) *Output
             ConvertDogs([]Dog) []Animal
             ConvertCats([]Cat) []Animal

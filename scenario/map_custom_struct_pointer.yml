@@ -3,7 +3,7 @@ input:
         package structs
         // goverter:converter
         type Converter interface {
-            // goverter:mapExtend Age DefaultAge
+            // goverter:map . Age | DefaultAge
             Convert(source *Input) *Output
         }
         type Input struct {

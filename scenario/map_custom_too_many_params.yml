@@ -4,7 +4,7 @@ input:
 
         // goverter:converter
         type Converter interface {
-            // goverter:mapExtend Age ExtendMethod
+            // goverter:map . Age | ExtendMethod
             Convert(source Input) Output
         }
 
@@ -19,7 +19,7 @@ input:
             return target
         }
 error: |-
-    error parsing 'goverter:mapExtend' at
+    error parsing 'goverter:map' at
         /ABSOLUTE/execution/input.go:6:5
         func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
 

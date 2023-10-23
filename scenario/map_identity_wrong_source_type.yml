@@ -4,7 +4,7 @@ input:
 
         // goverter:converter
         type Converter interface {
-            // goverter:mapExtend Score Identity
+            // goverter:map . Score | Identity
             Convert(source Input) Output
         }
 

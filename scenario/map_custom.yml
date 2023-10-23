@@ -4,7 +4,7 @@ input:
 
         // goverter:converter
         type Converter interface {
-            // goverter:mapExtend FullName ExtendFullName
+            // goverter:map . FullName | ExtendFullName
             Convert(source Input) Output
         }
 

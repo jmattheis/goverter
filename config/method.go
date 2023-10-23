@@ -71,14 +71,6 @@ func parseMethodLine(loader *pkgload.PackageLoader, c *Converter, m *Method, val
 		var s string
 		s, err = parseString(rest)
 		m.AutoMap = append(m.AutoMap, strings.TrimSpace(s))
-	case "mapExtend":
-		fields := strings.Fields(rest)
-		if len(fields) != 2 {
-			return fmt.Errorf("must have two parameter")
-		}
-		f := m.Field(fields[0])
-		f.Function, err = parseMapExtend(loader, c, fields[1])
-		f.Source = "."
 	default:
 		err = parseCommon(&m.Common, cmd, rest)
 	}
