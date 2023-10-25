@@ -12,6 +12,7 @@ These settings can only be defined as [CLI argument](config/define.md#cli) or
 - [`name NAME` rename generated struct](config/name.md)
 - [`output:file FILE` set the output directory for a converter](config/output.md#file)
 - [`output:package [PACKAGE:]NAME` set the output package for a converter](config/output.md#package)
+- [`struct:comment COMMENT` add comments to generated struct](config/struct.md#structcomment-comment)
 
 ### Method:
 

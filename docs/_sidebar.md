@@ -16,6 +16,7 @@
   - [name](config/name.md)
   - [output](config/output.md)
   - [skipCopySameType](config/skipCopySameType.md)
+  - [struct](config/struct.md)
   - [useZeroValueOnPointerInconsistency](config/useZeroValueOnPointerInconsistency.md)
   - [wrapErrors](config/wrapErrors.md)
 - [Migrations](migrations.md)
