@@ -2,6 +2,7 @@ package generator
 
 import (
 	"fmt"
+	"go/types"
 	"sort"
 	"strings"
 
@@ -98,6 +99,7 @@ func (g *generator) buildMethod(genMethod *generatedMethod, errWrapper builder.E
 		SeenNamed:    map[string]struct{}{},
 		TargetType:   genMethod.Target,
 		Signature:    genMethod.Signature(),
+		HasMethod:    g.hasMethod,
 	}
 
 	var funcBlock []jen.Code
@@ -290,15 +292,17 @@ func (g *generator) Build(
 		if err := g.buildMethod(genMethod, errWrapper); err != nil {
 			return nil, nil, err
 		}
-		// try again to trigger the found method thingy above
-		return g.Build(ctx, sourceID, source, target, errWrapper)
+		return g.CallMethod(ctx, genMethod.Definition, sourceID, source, target, errWrapper)
 	}
 
-	for _, rule := range BuildSteps {
-		if rule.Matches(ctx, source, target) {
-			return rule.Build(g, ctx, sourceID, source, target)
-		}
-	}
+	return g.buildNoLookup(ctx, sourceID, source, target)
+}
 
-	return nil, nil, builder.NewError(fmt.Sprintf("TypeMismatch: Cannot convert %s to %s", source.T, target.T))
+func (g *generator) hasMethod(source, target types.Type) bool {
+	signature := xtype.Signature{Source: source.String(), Target: target.String()}
+	_, ok := g.extend[signature]
+	if !ok {
+		_, ok = g.lookup[signature]
+	}
+	return ok
 }
