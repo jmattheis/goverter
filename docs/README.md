@@ -65,7 +65,7 @@ use reflection.
 1. Run `goverter`:
 
     ```bash
-    $ go run github.com/jmattheis/goverter/cmd/goverter@GITHUB_VERSION ./
+    $ go run github.com/jmattheis/goverter/cmd/goverter@GITHUB_VERSION gen ./
     ```
 
     See [Installation](https://goverter.jmattheis.de/#/install) and
