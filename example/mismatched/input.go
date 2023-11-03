@@ -1,4 +1,3 @@
-//go:generate go run github.com/jmattheis/goverter/cmd/goverter github.com/jmattheis/goverter/example/mismatched
 package mismatched
 
 /*

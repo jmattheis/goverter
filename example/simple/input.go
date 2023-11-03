@@ -1,4 +1,3 @@
-//go:generate go run github.com/jmattheis/goverter/cmd/goverter github.com/jmattheis/goverter/example/simple
 package simple
 
 // goverter:converter
