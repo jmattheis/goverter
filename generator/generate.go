@@ -1,6 +1,8 @@
 package generator
 
 import (
+	"strings"
+
 	"github.com/dave/jennifer/jen"
 	"github.com/jmattheis/goverter/builder"
 	"github.com/jmattheis/goverter/config"
@@ -49,6 +51,9 @@ func generateConverter(converter *config.Converter, c Config, f *jen.File) error
 		return err
 	}
 
+	if len(converter.Comments) > 0 {
+		f.Comment(strings.Join(converter.Comments, "\n"))
+	}
 	f.Type().Id(converter.Name).Struct()
 
 	if err := gen.buildMethods(f); err != nil {

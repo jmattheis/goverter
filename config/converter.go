@@ -28,6 +28,7 @@ type ConverterConfig struct {
 	OutputFile    string
 	OutputPackage string
 	Extend        []*method.Definition
+	Comments      []string
 }
 
 func parseGlobal(loader *pkgload.PackageLoader, global RawLines) (*ConverterConfig, error) {
@@ -89,6 +90,8 @@ func parseConverterLine(c *Converter, loader *pkgload.PackageLoader, value strin
 		c.OutputFile, err = parseString(rest)
 	case "output:package":
 		c.OutputPackage, err = parseString(rest)
+	case "struct:comment":
+		c.Comments = append(c.Comments, rest)
 	case "extend":
 		var methods []*method.Definition
 		methods, err = parseExtend(loader, c, strings.Fields(rest))
