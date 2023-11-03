@@ -9,6 +9,7 @@ type Common struct {
 	IgnoreMissing                      bool
 	SkipCopySameType                   bool
 	UseZeroValueOnPointerInconsistency bool
+	UseUnderlyingTypeMethods           bool
 }
 
 func parseCommon(c *Common, cmd, rest string) (err error) {
@@ -25,6 +26,8 @@ func parseCommon(c *Common, cmd, rest string) (err error) {
 		c.SkipCopySameType, err = parseBool(rest)
 	case "useZeroValueOnPointerInconsistency":
 		c.UseZeroValueOnPointerInconsistency, err = parseBool(rest)
+	case "useUnderlyingTypeMethods":
+		c.UseUnderlyingTypeMethods, err = parseBool(rest)
 	case "":
 		err = fmt.Errorf("missing setting key")
 	default:

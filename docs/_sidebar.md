@@ -17,6 +17,7 @@
   - [output](config/output.md)
   - [skipCopySameType](config/skipCopySameType.md)
   - [struct](config/struct.md)
+  - [useUnderlyingTypeMethods](config/useUnderlyingTypeMethods.md)
   - [useZeroValueOnPointerInconsistency](config/useZeroValueOnPointerInconsistency.md)
   - [wrapErrors](config/wrapErrors.md)
 - [Migrations](migrations.md)

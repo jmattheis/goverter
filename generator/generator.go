@@ -2,6 +2,7 @@ package generator
 
 import (
 	"fmt"
+	"go/types"
 	"sort"
 	"strings"
 
@@ -98,6 +99,7 @@ func (g *generator) buildMethod(genMethod *generatedMethod, errWrapper builder.E
 		SeenNamed:    map[string]struct{}{},
 		TargetType:   genMethod.Target,
 		Signature:    genMethod.Signature(),
+		HasMethod:    g.hasMethod,
 	}
 
 	var funcBlock []jen.Code
@@ -294,4 +296,13 @@ func (g *generator) Build(
 	}
 
 	return g.buildNoLookup(ctx, sourceID, source, target)
+}
+
+func (g *generator) hasMethod(source, target types.Type) bool {
+	signature := xtype.Signature{Source: source.String(), Target: target.String()}
+	_, ok := g.extend[signature]
+	if !ok {
+		_, ok = g.lookup[signature]
+	}
+	return ok
 }

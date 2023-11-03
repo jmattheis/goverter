@@ -1,0 +1,48 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        // goverter:extend ConvertUnderlying
+        type Converter interface {
+            // goverter:useUnderlyingTypeMethods
+            Convert(source Input) Output
+        }
+
+        func ConvertUnderlying(s int) (string, error) {
+            return "", nil
+        }
+
+        type InputID  int
+        type OutputID string
+
+        type Input struct  { ID InputID  }
+        type Output struct { ID OutputID }
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+
+    | github.com/jmattheis/goverter/execution.Input
+    |
+    |      | github.com/jmattheis/goverter/execution.InputID
+    |      |
+    |      | | int
+    |      | |
+    source.ID*
+    target.ID*
+    |      | |
+    |      | | string
+    |      |
+    |      | github.com/jmattheis/goverter/execution.OutputID
+    |
+    | github.com/jmattheis/goverter/execution.Output
+
+    ReturnTypeMismatch: Cannot use
+
+        func github.com/jmattheis/goverter/execution.ConvertUnderlying(s int) (string, error)
+
+    in
+
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+
+    because no error is returned as second return parameter

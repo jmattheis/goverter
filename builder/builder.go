@@ -1,6 +1,8 @@
 package builder
 
 import (
+	"go/types"
+
 	"github.com/dave/jennifer/jen"
 	"github.com/jmattheis/goverter/config"
 	"github.com/jmattheis/goverter/method"
@@ -40,6 +42,7 @@ type MethodContext struct {
 	FieldsTarget string
 	Signature    xtype.Signature
 	TargetType   *xtype.Type
+	HasMethod    func(types.Type, types.Type) bool
 	SeenNamed    map[string]struct{}
 
 	TargetVar *jen.Statement
