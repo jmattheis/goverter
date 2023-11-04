@@ -32,12 +32,6 @@ error: |-
     source.Nested.Name.Oops
     target
     |
-    |
-    |
-    |
-    |
-    |
-    |
     | github.com/jmattheis/goverter/execution.Output
 
     Cannot access 'Oops' on int.

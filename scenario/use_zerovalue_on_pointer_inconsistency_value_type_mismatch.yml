@@ -28,8 +28,6 @@ error: |-
     source.FirstName*
     target.FirstName
     |      |
-    |      |
-    |      |
     |      | int
     |
     | github.com/jmattheis/goverter/execution.APIPerson

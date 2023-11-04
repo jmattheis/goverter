@@ -30,8 +30,6 @@ error: |-
     |
     |      | github.com/jmattheis/goverter/execution.InputNested
     |      |
-    |      |
-    |      |
     source.Nested.???
     target.Nested.Id
     |      |      |

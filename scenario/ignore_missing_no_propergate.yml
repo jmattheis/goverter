@@ -29,8 +29,6 @@ error: |-
     |
     |      | github.com/jmattheis/goverter/execution.NestedInput
     |      |
-    |      |
-    |      |
     source.Nested.???
     target.Nested.Age
     |      |      |

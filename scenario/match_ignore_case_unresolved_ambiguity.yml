@@ -21,8 +21,6 @@ error: |-
 
     | github.com/jmattheis/goverter/execution.Input
     |
-    |
-    |
     source.???
     target.Myid
     |      |

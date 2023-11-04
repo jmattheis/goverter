@@ -33,10 +33,6 @@ error: |-
     source.Name :DefaultName()
     target.Score
     |      |
-    |      |
-    |      |
-    |      |
-    |      |
     |      | int
     |
     | github.com/jmattheis/goverter/execution.Output

@@ -30,8 +30,6 @@ error: |-
     source.Address
     target
     |
-    |
-    |
     | github.com/jmattheis/goverter/execution.FlatPerson
 
     Address is not a struct or struct pointer

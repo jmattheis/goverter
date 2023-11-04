@@ -36,8 +36,6 @@ error: |-
     |              |
     |              | string
     |
-    |
-    |
     | github.com/jmattheis/goverter/execution.FlatPerson
 
     TypeMismatch: Cannot convert *string to string

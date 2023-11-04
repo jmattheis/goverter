@@ -34,10 +34,6 @@ error: |-
     source.Relative:Enhance(source)
     target.Absolute
     |      |
-    |      |
-    |      |
-    |      |
-    |      |
     |      | string
     |
     | github.com/jmattheis/goverter/execution.Output
