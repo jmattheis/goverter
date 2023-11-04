@@ -150,7 +150,7 @@ func splitCustomMethod(fullMethod string) (path, name string, err error) {
 	parts := strings.SplitN(fullMethod, ":", 2)
 	switch len(parts) {
 	case 0:
-		return "", "", fmt.Errorf("Invalid custom method: %s", fullMethod)
+		return "", "", fmt.Errorf("invalid custom method: %s", fullMethod)
 	case 1:
 		name = parts[0]
 	case 2:
@@ -200,7 +200,7 @@ func parseMapExtend(loader *pkgload.PackageLoader, c *Converter, fullMethod stri
 			return nil, err
 		}
 		if len(pkgs) != 1 {
-			return nil, fmt.Errorf("'%s' package path matches multiple packages, it must match exactly one.", fullMethod)
+			return nil, fmt.Errorf("'%s' package path matches multiple packages, it must match exactly one", fullMethod)
 		}
 		useScope = pkgs[0].Types.Scope()
 	}
