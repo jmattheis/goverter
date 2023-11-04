@@ -43,9 +43,4 @@ error: |-
     |
     | github.com/jmattheis/goverter/execution.APIPerson
 
-    cannot use
-    	func github.com/jmattheis/goverter/execution.ToFullName(input *github.com/jmattheis/goverter/execution.Person) string
-    because source type mismatch
-
-    Extend method param type: *github.com/jmattheis/goverter/execution.Person
-    Converter source type: github.com/jmattheis/goverter/execution.Person
+    Method source type mismatches with conversion source: *github.com/jmattheis/goverter/execution.Person != github.com/jmattheis/goverter/execution.Person

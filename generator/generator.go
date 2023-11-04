@@ -150,9 +150,36 @@ func (g *generator) CallMethod(
 	if definition.SelfAsFirstParameter {
 		params = append(params, jen.Id(xtype.ThisVar))
 	}
-	if sourceID != nil {
+	if definition.Source != nil {
 		params = append(params, sourceID.Code.Clone())
+
+		if definition.Source.T.String() != source.T.String() {
+			cause := fmt.Sprintf("Method source type mismatches with conversion source: %s != %s", definition.Source.T.String(), source.T.String())
+			return nil, nil, builder.NewError(cause).Lift(&builder.Path{
+				Prefix:     "(",
+				SourceID:   "source)",
+				SourceType: definition.Source.T.String(),
+			}).Lift(&builder.Path{
+				Prefix:     ":",
+				SourceID:   definition.Name,
+				SourceType: definition.ID,
+			})
+		}
 	}
+
+	if definition.Target.T.String() != target.T.String() {
+		cause := fmt.Sprintf("Method return type mismatches with target: %s != %s", definition.Target.T.String(), target.T.String())
+		return nil, nil, builder.NewError(cause).Lift(&builder.Path{
+			Prefix:     "(",
+			SourceID:   ")",
+			SourceType: definition.Parameters.Target.T.String(),
+		}).Lift(&builder.Path{
+			Prefix:     ":",
+			SourceID:   definition.Name,
+			SourceType: definition.ID,
+		})
+	}
+
 	if definition.ReturnError {
 		current := g.lookup[ctx.Signature]
 		if !current.ReturnError {
