@@ -38,4 +38,9 @@ error: |-
     |
     | github.com/jmattheis/goverter/execution.Output
 
+    Error using method:
+        func github.com/jmattheis/goverter/execution.Enhance(s int) string
+    in conversion method:
+        func (github.com/jmattheis/goverter/execution.Converter).ConvertPerson(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+
     Method source type mismatches with conversion source: int != string

@@ -32,4 +32,9 @@ error: |-
     |
     | github.com/jmattheis/goverter/execution.Output
 
+    Error using method:
+        func github.com/jmattheis/goverter/execution.NewOutput(string) github.com/jmattheis/goverter/execution.Output
+    in conversion method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+
     Method source type mismatches with conversion source: string != github.com/jmattheis/goverter/execution.Input

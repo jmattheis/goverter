@@ -37,12 +37,9 @@ error: |-
     |
     | github.com/jmattheis/goverter/execution.Output
 
-    ReturnTypeMismatch: Cannot use
-
+    Error using method:
         func github.com/jmattheis/goverter/execution.ConvertUnderlying(s int) (string, error)
-
-    in
-
+    in conversion method:
         func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
 
-    because no error is returned as second return parameter
+    Used method returns error but conversion method does not

@@ -150,12 +150,18 @@ func (g *generator) CallMethod(
 	if definition.SelfAsFirstParameter {
 		params = append(params, jen.Id(xtype.ThisVar))
 	}
+
+	formatErr := func(s string) *builder.Error {
+		current := g.lookup[ctx.Signature]
+		return builder.NewError(fmt.Sprintf("Error using method:\n    %s\nin conversion method:\n    %s\n\n%s", definition.ReturnTypeOriginID, current.ID, s))
+	}
+
 	if definition.Source != nil {
 		params = append(params, sourceID.Code.Clone())
 
 		if definition.Source.T.String() != source.T.String() {
 			cause := fmt.Sprintf("Method source type mismatches with conversion source: %s != %s", definition.Source.T.String(), source.T.String())
-			return nil, nil, builder.NewError(cause).Lift(&builder.Path{
+			return nil, nil, formatErr(cause).Lift(&builder.Path{
 				Prefix:     "(",
 				SourceID:   "source)",
 				SourceType: definition.Source.T.String(),
@@ -169,7 +175,7 @@ func (g *generator) CallMethod(
 
 	if definition.Target.T.String() != target.T.String() {
 		cause := fmt.Sprintf("Method return type mismatches with target: %s != %s", definition.Target.T.String(), target.T.String())
-		return nil, nil, builder.NewError(cause).Lift(&builder.Path{
+		return nil, nil, formatErr(cause).Lift(&builder.Path{
 			Prefix:     "(",
 			SourceID:   ")",
 			SourceType: definition.Parameters.Target.T.String(),
@@ -184,7 +190,7 @@ func (g *generator) CallMethod(
 		current := g.lookup[ctx.Signature]
 		if !current.ReturnError {
 			if current.Explicit {
-				return nil, nil, builder.NewError(fmt.Sprintf("ReturnTypeMismatch: Cannot use\n\n    %s\n\nin\n\n    %s\n\nbecause no error is returned as second return parameter", definition.ReturnTypeOriginID, current.ID))
+				return nil, nil, formatErr("Used method returns error but conversion method does not")
 			}
 			current.ReturnError = true
 			current.ReturnTypeOriginID = definition.ID

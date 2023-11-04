@@ -39,4 +39,9 @@ error: |-
     |
     | github.com/jmattheis/goverter/execution.APIPerson
 
+    Error using method:
+        func github.com/jmattheis/goverter/execution.ToFullName(input *github.com/jmattheis/goverter/execution.Person) string
+    in conversion method:
+        func (github.com/jmattheis/goverter/execution.Converter).ConvertPerson(source github.com/jmattheis/goverter/execution.Person) github.com/jmattheis/goverter/execution.APIPerson
+
     Method source type mismatches with conversion source: *github.com/jmattheis/goverter/execution.Person != github.com/jmattheis/goverter/execution.Person
