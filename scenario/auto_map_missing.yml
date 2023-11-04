@@ -35,8 +35,6 @@ error: |-
     source.Abc
     target
     |
-    |
-    |
     | github.com/jmattheis/goverter/execution.FlatPerson
 
     "Abc" does not exist

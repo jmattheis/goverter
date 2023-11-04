@@ -48,12 +48,6 @@ error: |-
     |                          |
     |                          | *string
     |
-    |
-    |
-    |
-    |
-    |
-    |
     | github.com/jmattheis/goverter/execution.Output
 
     TypeMismatch: Cannot convert time.Time to string

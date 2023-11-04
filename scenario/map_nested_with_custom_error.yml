@@ -44,15 +44,7 @@ error: |-
     source.A.B.Relative:ToAbsolute(source)
     target    .Absolute
     |          |
-    |          |
-    |          |
-    |          |
-    |          |
     |          | string
-    |
-    |
-    |
-    |
     |
     | github.com/jmattheis/goverter/execution.Output
 

@@ -30,8 +30,6 @@ error: |-
 
     | github.com/jmattheis/goverter/execution.Person
     |
-    |
-    |
     source.???
     target.Street
     |      |

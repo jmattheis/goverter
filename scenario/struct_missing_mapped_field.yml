@@ -26,8 +26,6 @@ error: |-
     source.Name3
     target
     |
-    |
-    |
     | github.com/jmattheis/goverter/execution.Output
 
     Cannot find the mapped field on the source entry: "Name3" does not exist.

@@ -35,10 +35,6 @@ error: |-
     source.        :ToFullName(source)
     target.FullName
     |      |
-    |      |
-    |      |
-    |      |
-    |      |
     |      | string
     |
     | github.com/jmattheis/goverter/execution.APIPerson

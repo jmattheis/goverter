@@ -31,10 +31,6 @@ error: |-
     source:NewOutput()
     target
     |
-    |
-    |
-    |
-    |
     | github.com/jmattheis/goverter/execution.Output
 
     Method return type mismatches with target: string != github.com/jmattheis/goverter/execution.Output

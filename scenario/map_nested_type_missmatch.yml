@@ -32,8 +32,6 @@ error: |-
     |             |
     |             | string
     |
-    |
-    |
     | github.com/jmattheis/goverter/execution.Output
 
     TypeMismatch: Cannot convert int to string

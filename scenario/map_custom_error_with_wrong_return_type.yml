@@ -24,18 +24,12 @@ error: |-
 
     | github.com/jmattheis/goverter/execution.Input
     |
-    |
-    |
     |            | func github.com/jmattheis/goverter/execution.DefaultName() string
     |            |
     |            |           | string
     |            |           |
     source.     :DefaultName()
     target.Score
-    |      |
-    |      |
-    |      |
-    |      |
     |      |
     |      | int
     |
