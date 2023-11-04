@@ -1,22 +1,21 @@
 input:
     input.go: |
-        package structs
+        package execution
 
         // goverter:converter
         type Converter interface {
-            // goverter:map . Score | DefaultName
+            // goverter:default NewOutput
             Convert(source Input) Output
         }
 
         type Input struct {
-            Name string
+            ID int
         }
         type Output struct {
-            Name string
-            Score int
+            ID int
         }
-        func DefaultName() string {
-            return "Joe"
+        func NewOutput(string) Output {
+            return Output{}
         }
 error: |-
     Error while creating converter method:
@@ -24,21 +23,17 @@ error: |-
 
     | github.com/jmattheis/goverter/execution.Input
     |
+    |      | func github.com/jmattheis/goverter/execution.NewOutput(string) github.com/jmattheis/goverter/execution.Output
+    |      |
+    |      |         | string
+    |      |         |
+    source:NewOutput(source)
+    target
     |
     |
-    |            | func github.com/jmattheis/goverter/execution.DefaultName() string
-    |            |
-    |            |           | string
-    |            |           |
-    source.     :DefaultName()
-    target.Score
-    |      |
-    |      |
-    |      |
-    |      |
-    |      |
-    |      | int
+    |
+    |
     |
     | github.com/jmattheis/goverter/execution.Output
 
-    Method return type mismatches with target: string != int
+    Method source type mismatches with conversion source: string != github.com/jmattheis/goverter/execution.Input

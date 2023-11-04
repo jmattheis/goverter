@@ -24,10 +24,9 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 		return nil, sourceID, nil
 	}
 
-	name := ctx.Name(target.ID())
-	ctx.SetErrorTargetVar(jen.Id(name))
-	stmt := []jen.Code{
-		jen.Var().Id(name).Add(target.TypeAsJen()),
+	stmt, nameVar, err := buildTargetVar(gen, ctx, sourceID, source, target)
+	if err != nil {
+		return nil, nil, err
 	}
 
 	additionalFieldSources, err := parseAutoMap(ctx, source)
@@ -82,7 +81,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 				return nil, nil, err.Lift(lift...)
 			}
 			stmt = append(stmt, fieldStmt...)
-			stmt = append(stmt, jen.Id(name).Dot(targetField.Name()).Op("=").Add(fieldID.Code))
+			stmt = append(stmt, nameVar.Clone().Dot(targetField.Name()).Op("=").Add(fieldID.Code))
 		} else {
 			def := fieldMapping.Function
 
@@ -98,55 +97,35 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 				sourceLift = mapLift
 				stmt = append(stmt, mapStmt...)
 
-				switch {
-				case def.Source.T.String() == nextSource.T.String():
-					functionCallSourceID = xtype.VariableID(nextID.Clone())
-					functionCallSourceType = nextSource
-				case fieldMapping.Source == "." && sourceID.ParentPointer != nil &&
-					def.Source.T.String() == source.AsPointer().T.String():
+				if fieldMapping.Source == "." && sourceID.ParentPointer != nil &&
+					def.Source.T.String() == source.AsPointer().T.String() {
 					functionCallSourceID = sourceID.ParentPointer
 					functionCallSourceType = source.AsPointer()
-				default:
-					cause := fmt.Sprintf("cannot use\n\t%s\nbecause source type mismatch\n\nExtend method param type: %s\nConverter source type: %s", def.ID, def.Source.T.String(), nextSource.T.String())
-					return nil, nil, NewError(cause).Lift(&Path{
-						Prefix:     "(",
-						SourceID:   "source)",
-						SourceType: def.Source.T.String(),
-					}).Lift(&Path{
-						Prefix:     ":",
-						SourceID:   def.Name,
-						SourceType: def.ID,
-					}).Lift(sourceLift...)
+				} else {
+					functionCallSourceID = xtype.VariableID(nextID.Clone())
+					functionCallSourceType = nextSource
 				}
+			} else {
+				sourceLift = append(sourceLift, &Path{
+					Prefix:     ".",
+					TargetID:   targetField.Name(),
+					TargetType: targetFieldType.T.String(),
+				})
 			}
 
-			if def.Target.T.String() != targetFieldType.T.String() {
-				cause := fmt.Sprintf("Extend method return type mismatches with target: %s != %s", def.Target.T.String(), targetFieldType.T.String())
-				return nil, nil, NewError(cause).Lift(&Path{
-					Prefix:     ".",
-					SourceID:   "()",
-					SourceType: def.Parameters.Target.T.String(),
-					TargetID:   targetField.Name(),
-					TargetType: targetField.Type().String(),
-				}).Lift(&Path{
-					Prefix:     ":",
-					SourceID:   def.Name,
-					SourceType: def.ID,
-				}).Lift(sourceLift...)
-			}
 			callStmt, callReturnID, err := gen.CallMethod(ctx, fieldMapping.Function, functionCallSourceID, functionCallSourceType, targetFieldType, errWrapper)
 			if err != nil {
 				return nil, nil, err.Lift(sourceLift...)
 			}
 			stmt = append(stmt, callStmt...)
-			stmt = append(stmt, jen.Id(name).Dot(targetField.Name()).Op("=").Add(callReturnID.Code))
+			stmt = append(stmt, nameVar.Clone().Dot(targetField.Name()).Op("=").Add(callReturnID.Code))
 		}
 	}
 	if !usedSourceID {
 		stmt = append(stmt, jen.Id("_").Op("=").Add(sourceID.Code.Clone()))
 	}
 
-	return stmt, xtype.VariableID(jen.Id(name)), nil
+	return stmt, xtype.VariableID(nameVar), nil
 }
 
 func mapField(

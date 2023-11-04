@@ -41,9 +41,4 @@ error: |-
     |
     | github.com/jmattheis/goverter/execution.Output
 
-    cannot use
-    	func github.com/jmattheis/goverter/execution.Identity(source int) int
-    because source type mismatch
-
-    Extend method param type: int
-    Converter source type: github.com/jmattheis/goverter/execution.Input
+    Method source type mismatches with conversion source: int != github.com/jmattheis/goverter/execution.Input

@@ -42,9 +42,4 @@ error: |-
     |
     | github.com/jmattheis/goverter/execution.Output
 
-    cannot use
-    	func github.com/jmattheis/goverter/execution.Enhance(s int) string
-    because source type mismatch
-
-    Extend method param type: int
-    Converter source type: string
+    Method source type mismatches with conversion source: int != string

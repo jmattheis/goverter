@@ -19,6 +19,7 @@ These settings can only be defined as [CLI argument](config/define.md#cli) or
 These settings can only be defined as [method comment](config/define.md#method).
 
 - [`autoMap PATH` automatically match fields from a sub struct to the target struct](config/autoMap.md)
+- [`default [PACKAGE:]TYPE` define default target value](config/default.md)
 - [`ignore FIELD...` ignore fields for a struct](config/ignore.md)
 - [`map [SOURCE-PATH] TARGET [| METHOD]` struct mappings](config/map.md)
   - [`map SOURCE-FIELD TARGET` define a field mapping](config/map.md#map-source-field-target)

@@ -4,7 +4,7 @@ input:
 
         // goverter:converter
         type Converter interface {
-            // goverter:map . Score | DefaultName
+            // goverter:map Name Score | DefaultName
             Convert(source Input) Output
         }
 
@@ -15,7 +15,7 @@ input:
             Name string
             Score int
         }
-        func DefaultName() string {
+        func DefaultName(string) string {
             return "Joe"
         }
 error: |-
@@ -24,13 +24,13 @@ error: |-
 
     | github.com/jmattheis/goverter/execution.Input
     |
-    |
-    |
-    |            | func github.com/jmattheis/goverter/execution.DefaultName() string
-    |            |
-    |            |           | string
-    |            |           |
-    source.     :DefaultName()
+    |      | string
+    |      |
+    |      |     | func github.com/jmattheis/goverter/execution.DefaultName(string) string
+    |      |     |
+    |      |     |           | string
+    |      |     |           |
+    source.Name :DefaultName()
     target.Score
     |      |
     |      |
