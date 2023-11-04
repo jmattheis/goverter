@@ -24,10 +24,9 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 		return nil, sourceID, nil
 	}
 
-	name := ctx.Name(target.ID())
-	ctx.SetErrorTargetVar(jen.Id(name))
-	stmt := []jen.Code{
-		jen.Var().Id(name).Add(target.TypeAsJen()),
+	stmt, nameVar, err := buildTargetVar(gen, ctx, sourceID, source, target)
+	if err != nil {
+		return nil, nil, err
 	}
 
 	additionalFieldSources, err := parseAutoMap(ctx, source)
@@ -82,7 +81,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 				return nil, nil, err.Lift(lift...)
 			}
 			stmt = append(stmt, fieldStmt...)
-			stmt = append(stmt, jen.Id(name).Dot(targetField.Name()).Op("=").Add(fieldID.Code))
+			stmt = append(stmt, nameVar.Clone().Dot(targetField.Name()).Op("=").Add(fieldID.Code))
 		} else {
 			def := fieldMapping.Function
 
@@ -119,14 +118,14 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 				return nil, nil, err.Lift(sourceLift...)
 			}
 			stmt = append(stmt, callStmt...)
-			stmt = append(stmt, jen.Id(name).Dot(targetField.Name()).Op("=").Add(callReturnID.Code))
+			stmt = append(stmt, nameVar.Clone().Dot(targetField.Name()).Op("=").Add(callReturnID.Code))
 		}
 	}
 	if !usedSourceID {
 		stmt = append(stmt, jen.Id("_").Op("=").Add(sourceID.Code.Clone()))
 	}
 
-	return stmt, xtype.VariableID(jen.Id(name)), nil
+	return stmt, xtype.VariableID(nameVar), nil
 }
 
 func mapField(

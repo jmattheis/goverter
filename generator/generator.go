@@ -191,22 +191,13 @@ func (g *generator) CallMethod(
 			current.Dirty = true
 		}
 
-		var errBlock []jen.Code
-		if ctx.TargetVar == nil {
-			innerName := ctx.Name("errValue")
-			errBlock = []jen.Code{
-				jen.Var().Id(innerName).Add(ctx.TargetType.TypeAsJen()),
-				jen.Return(jen.Id(innerName), g.wrap(ctx, errWrapper, jen.Id("err"))),
-			}
-		} else {
-			errBlock = []jen.Code{
-				jen.Return(ctx.TargetVar, g.wrap(ctx, errWrapper, jen.Id("err"))),
-			}
-		}
 		name := ctx.Name(target.ID())
+		ctx.SetErrorTargetVar(jen.Id(name))
+
 		stmt := []jen.Code{
 			jen.List(jen.Id(name), jen.Id("err")).Op(":=").Add(definition.Call.Clone().Call(params...)),
-			jen.If(jen.Id("err").Op("!=").Nil()).Block(errBlock...),
+			jen.If(jen.Id("err").Op("!=").Nil()).Block(
+				jen.Return(ctx.TargetVar, g.wrap(ctx, errWrapper, jen.Id("err")))),
 		}
 		return stmt, xtype.VariableID(jen.Id(name)), nil
 	}

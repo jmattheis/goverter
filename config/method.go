@@ -12,8 +12,9 @@ import (
 type Method struct {
 	*method.Definition
 	Common
-	AutoMap []string
-	Fields  map[string]*FieldMapping
+	Constructor *method.Definition
+	AutoMap     []string
+	Fields      map[string]*FieldMapping
 }
 
 type FieldMapping struct {
@@ -71,6 +72,8 @@ func parseMethodLine(loader *pkgload.PackageLoader, c *Converter, m *Method, val
 		var s string
 		s, err = parseString(rest)
 		m.AutoMap = append(m.AutoMap, strings.TrimSpace(s))
+	case "default":
+		m.Constructor, err = parseOneMethod(loader, c, rest)
 	default:
 		err = parseCommon(&m.Common, cmd, rest)
 	}
@@ -88,13 +91,13 @@ func parseMethodMap(loader *pkgload.PackageLoader, c *Converter, m *Method, rema
 	switch len(fields) {
 	case 1:
 		if custom != "" {
-			m.Field(fields[0]).Function, err = parseMapExtend(loader, c, custom)
+			m.Field(fields[0]).Function, err = parseOneMethod(loader, c, custom)
 		}
 	case 2:
 		f := m.Field(fields[1])
 		f.Source = fields[0]
 		if custom != "" {
-			f.Function, err = parseMapExtend(loader, c, custom)
+			f.Function, err = parseOneMethod(loader, c, custom)
 		}
 	case 0:
 		err = fmt.Errorf("missing target field")

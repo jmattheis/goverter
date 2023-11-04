@@ -7,6 +7,7 @@
   - [Nested settings](config/nested.md)
   - [autoMap](config/autoMap.md)
   - [converter](config/converter.md)
+  - [default](config/default.md)
   - [extend](config/extend.md)
   - [ignore](config/ignore.md)
   - [ignoreMissing](config/ignoreMissing.md)

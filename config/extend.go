@@ -185,8 +185,8 @@ func parseExtendScopeMethod(scope *types.Scope, methodName string, opts *ParseEx
 	})
 }
 
-// parseExtend prepares an extend conversion method using its name and a scope to search.
-func parseMapExtend(loader *pkgload.PackageLoader, c *Converter, fullMethod string) (*method.Definition, error) {
+// parseOneMethod parses fullMethod.
+func parseOneMethod(loader *pkgload.PackageLoader, c *Converter, fullMethod string) (*method.Definition, error) {
 	pkgPath, name, err := splitCustomMethod(fullMethod)
 	if err != nil {
 		return nil, err
