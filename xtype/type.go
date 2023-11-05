@@ -43,6 +43,8 @@ type Type struct {
 	MapValue      *Type
 	Basic         bool
 	BasicType     *types.Basic
+	Signature     bool
+	SignatureType *types.Signature
 }
 
 func (t *Type) AsPointer() *Type {
@@ -209,6 +211,9 @@ func TypeOf(t types.Type) *Type {
 	case *types.Interface:
 		rt.Interface = true
 		rt.InterfaceType = value
+	case *types.Signature:
+		rt.Signature = true
+		rt.SignatureType = value
 	default:
 		panic("unknown types.Type " + t.String())
 	}

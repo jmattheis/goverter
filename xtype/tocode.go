@@ -25,6 +25,8 @@ func toCode(t types.Type) *jen.Statement {
 		return toCodeStruct(cast)
 	case *types.Interface:
 		return toCodeInterface(cast)
+	case *types.Signature:
+		return jen.Func().Add(toCodeSignature(cast))
 	}
 	panic("unsupported type " + t.String())
 }
@@ -45,10 +47,10 @@ func toCodeInterface(t *types.Interface) *jen.Statement {
 
 func toCodeFunc(t *types.Func) *jen.Statement {
 	sig := t.Type().(*types.Signature)
-	return toCodeSignature(t.Name(), sig)
+	return jen.Id(t.Name()).Add(toCodeSignature(sig))
 }
 
-func toCodeSignature(name string, t *types.Signature) *jen.Statement {
+func toCodeSignature(t *types.Signature) *jen.Statement {
 	jenParams := []jen.Code{}
 	params := t.Params()
 	for i := 0; i < params.Len(); i++ {
@@ -60,7 +62,7 @@ func toCodeSignature(name string, t *types.Signature) *jen.Statement {
 	for i := 0; i < results.Len(); i++ {
 		jenResults = append(jenResults, toCode(results.At(i).Type()))
 	}
-	return jen.Id(name).Params(jenParams...).Params(jenResults...)
+	return jen.Params(jenParams...).Params(jenResults...)
 }
 
 func toCodeNamed(t *types.Named) *jen.Statement {

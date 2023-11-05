@@ -1,0 +1,20 @@
+input:
+    input.go: |
+        package primitive
+
+        // goverter:converter
+        type Converter interface {
+            ConvertString(source func() string) func() string
+        }
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).ConvertString(source func() string) func() string
+
+    | func() string
+    |
+    source
+    target
+    |
+    | func() string
+
+    TypeMismatch: Cannot convert func() string to func() string
