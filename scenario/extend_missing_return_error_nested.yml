@@ -40,7 +40,5 @@ error: |-
 
     Error using method:
         func github.com/jmattheis/goverter/execution.ZeroConvert(*int) (int, error)
-    in conversion method:
-        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
 
     Used method returns error but conversion method does not

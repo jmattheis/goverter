@@ -152,38 +152,21 @@ func (g *generator) CallMethod(
 	}
 
 	formatErr := func(s string) *builder.Error {
-		current := g.lookup[ctx.Signature]
-		return builder.NewError(fmt.Sprintf("Error using method:\n    %s\nin conversion method:\n    %s\n\n%s", definition.ReturnTypeOriginID, current.ID, s))
+		return builder.NewError(fmt.Sprintf("Error using method:\n    %s\n\n%s", definition.ReturnTypeOriginID, s))
 	}
 
 	if definition.Source != nil {
 		params = append(params, sourceID.Code.Clone())
 
-			cause := fmt.Sprintf("Method source type mismatches with conversion source: %s != %s", definition.Source.T.String(), source.T.String())
-			return nil, nil, formatErr(cause).Lift(&builder.Path{
-				Prefix:     "(",
-				SourceID:   "source)",
-				SourceType: definition.Source.T.String(),
-			}).Lift(&builder.Path{
-				Prefix:     ":",
-				SourceID:   definition.Name,
-				SourceType: definition.ID,
-			})
 		if definition.Source.String != source.String {
+			cause := fmt.Sprintf("Method source type mismatches with conversion source: %s != %s", definition.Source.String, source.String)
+			return nil, nil, formatErr(cause)
 		}
 	}
 
-		cause := fmt.Sprintf("Method return type mismatches with target: %s != %s", definition.Target.T.String(), target.T.String())
-		return nil, nil, formatErr(cause).Lift(&builder.Path{
-			Prefix:     "(",
-			SourceID:   ")",
-			SourceType: definition.Parameters.Target.T.String(),
-		}).Lift(&builder.Path{
-			Prefix:     ":",
-			SourceID:   definition.Name,
-			SourceType: definition.ID,
-		})
 	if definition.Target.String != target.String {
+		cause := fmt.Sprintf("Method return type mismatches with target: %s != %s", definition.Target.String, target.String)
+		return nil, nil, formatErr(cause)
 	}
 
 	if definition.ReturnError {

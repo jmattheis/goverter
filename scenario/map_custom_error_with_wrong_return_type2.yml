@@ -26,11 +26,7 @@ error: |-
     |
     |      | string
     |      |
-    |      |     | func github.com/jmattheis/goverter/execution.DefaultName(string) string
-    |      |     |
-    |      |     |           | string
-    |      |     |           |
-    source.Name :DefaultName()
+    source.Name
     target.Score
     |      |
     |      | int
@@ -39,7 +35,5 @@ error: |-
 
     Error using method:
         func github.com/jmattheis/goverter/execution.DefaultName(string) string
-    in conversion method:
-        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
 
     Method return type mismatches with target: string != int

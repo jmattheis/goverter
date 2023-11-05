@@ -26,11 +26,7 @@ error: |-
     |
     |      | goverter:map . Score
     |      |
-    |      |     | func github.com/jmattheis/goverter/execution.Identity(source int) int
-    |      |     |
-    |      |     |        | int
-    |      |     |        |
-    source.     :Identity(source)
+    source.
     target.Score
     |      |
     |      | int
@@ -39,7 +35,5 @@ error: |-
 
     Error using method:
         func github.com/jmattheis/goverter/execution.Identity(source int) int
-    in conversion method:
-        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
 
     Method source type mismatches with conversion source: int != github.com/jmattheis/goverter/execution.Input

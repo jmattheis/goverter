@@ -24,18 +24,12 @@ error: |-
 
     | *github.com/jmattheis/goverter/execution.Input
     |
-    |      | func github.com/jmattheis/goverter/execution.NewOutput() string
-    |      |
-    |      |         | string
-    |      |         |
-    source:NewOutput()
+    source
     target
     |
     | github.com/jmattheis/goverter/execution.Output
 
     Error using method:
         func github.com/jmattheis/goverter/execution.NewOutput() string
-    in conversion method:
-        func (github.com/jmattheis/goverter/execution.Converter).Convert(source *github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
 
     Method return type mismatches with target: string != github.com/jmattheis/goverter/execution.Output
