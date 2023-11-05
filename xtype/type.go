@@ -18,11 +18,12 @@ type Signature struct {
 }
 
 func SignatureOf(source, target *Type) Signature {
-	return Signature{Source: source.T.String(), Target: target.T.String()}
+	return Signature{Source: source.String, Target: target.String}
 }
 
 // Type is a helper wrapper for types.Type.
 type Type struct {
+	String        string
 	T             types.Type
 	Interface     bool
 	InterfaceType *types.Interface
@@ -164,6 +165,7 @@ func OtherID(code *jen.Statement) *JenID {
 func TypeOf(t types.Type) *Type {
 	rt := &Type{}
 	rt.T = t
+	rt.String = t.String()
 	switch value := t.(type) {
 	case *types.Pointer:
 		rt.Pointer = true
@@ -186,7 +188,8 @@ func TypeOf(t types.Type) *Type {
 		rt.ListInner = TypeOf(value.Elem())
 	case *types.Named:
 		underlying := TypeOf(value.Underlying())
-		underlying.T = value
+		underlying.T = rt.T
+		underlying.String = rt.String
 		underlying.Named = true
 		underlying.NamedType = value
 		return underlying

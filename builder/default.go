@@ -7,8 +7,8 @@ import (
 
 func buildTargetVar(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *jen.Statement, *Error) {
 	if ctx.Conf.Constructor == nil ||
-		ctx.Conf.Source.T.String() != source.T.String() ||
-		ctx.Conf.Target.T.String() != target.T.String() {
+		ctx.Conf.Source.String != source.String ||
+		ctx.Conf.Target.String != target.String {
 		name := ctx.Name(target.ID())
 		variable := jen.Var().Id(name).Add(target.TypeAsJen())
 		ctx.SetErrorTargetVar(jen.Id(name))

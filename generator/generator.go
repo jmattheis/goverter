@@ -48,8 +48,8 @@ func (g *generator) buildMethods(f *jen.File) error {
 			err = err.Lift(&builder.Path{
 				SourceID:   "source",
 				TargetID:   "target",
-				SourceType: genMethod.Source.T.String(),
-				TargetType: genMethod.Target.T.String(),
+				SourceType: genMethod.Source.String,
+				TargetType: genMethod.Target.String,
 			})
 			return fmt.Errorf("Error while creating converter method:\n    %s\n\n%s", genMethod.ID, builder.ToString(err))
 		}
@@ -87,9 +87,9 @@ func (g *generator) buildMethod(genMethod *generatedMethod, errWrapper builder.E
 		returns = append(returns, jen.Id("error"))
 	}
 
-	fieldsTarget := genMethod.Target.T.String()
+	fieldsTarget := genMethod.Target.String
 	if genMethod.Target.Pointer && genMethod.Target.PointerInner.Struct {
-		fieldsTarget = genMethod.Target.PointerInner.T.String()
+		fieldsTarget = genMethod.Target.PointerInner.String
 	}
 
 	ctx := &builder.MethodContext{
@@ -159,7 +159,6 @@ func (g *generator) CallMethod(
 	if definition.Source != nil {
 		params = append(params, sourceID.Code.Clone())
 
-		if definition.Source.T.String() != source.T.String() {
 			cause := fmt.Sprintf("Method source type mismatches with conversion source: %s != %s", definition.Source.T.String(), source.T.String())
 			return nil, nil, formatErr(cause).Lift(&builder.Path{
 				Prefix:     "(",
@@ -170,10 +169,10 @@ func (g *generator) CallMethod(
 				SourceID:   definition.Name,
 				SourceType: definition.ID,
 			})
+		if definition.Source.String != source.String {
 		}
 	}
 
-	if definition.Target.T.String() != target.T.String() {
 		cause := fmt.Sprintf("Method return type mismatches with target: %s != %s", definition.Target.T.String(), target.T.String())
 		return nil, nil, formatErr(cause).Lift(&builder.Path{
 			Prefix:     "(",
@@ -184,6 +183,7 @@ func (g *generator) CallMethod(
 			SourceID:   definition.Name,
 			SourceType: definition.ID,
 		})
+	if definition.Target.String != target.String {
 	}
 
 	if definition.ReturnError {
@@ -288,7 +288,7 @@ func (g *generator) Build(
 		case source.Pointer && source.PointerInner.Named && !source.PointerInner.Basic:
 			createSubMethod = true
 		}
-		if ctx.Conf.SkipCopySameType && source.T.String() == target.T.String() {
+		if ctx.Conf.SkipCopySameType && source.String == target.String {
 			createSubMethod = false
 		}
 	}

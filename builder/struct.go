@@ -49,7 +49,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 		}
 
 		if !targetField.Exported() {
-			cause := unexportedStructError(targetField.Name(), source.T.String(), target.T.String())
+			cause := unexportedStructError(targetField.Name(), source.String, target.String)
 			return nil, nil, NewError(cause).Lift(&Path{
 				Prefix:     ".",
 				SourceID:   "???",
@@ -98,7 +98,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 				stmt = append(stmt, mapStmt...)
 
 				if fieldMapping.Source == "." && sourceID.ParentPointer != nil &&
-					def.Source.T.String() == source.AsPointer().T.String() {
+					def.Source.String == source.AsPointer().String {
 					functionCallSourceID = sourceID.ParentPointer
 					functionCallSourceType = source.AsPointer()
 				} else {
@@ -109,7 +109,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 				sourceLift = append(sourceLift, &Path{
 					Prefix:     ".",
 					TargetID:   targetField.Name(),
-					TargetType: targetFieldType.T.String(),
+					TargetType: targetFieldType.String,
 				})
 			}
 
@@ -207,7 +207,7 @@ func mapField(
 			liftPath := &Path{
 				Prefix:     ".",
 				SourceID:   sourceMatch.Name,
-				SourceType: nextSource.T.String(),
+				SourceType: nextSource.String,
 			}
 
 			if i == len(path)-1 {
@@ -269,7 +269,7 @@ func parseAutoMap(ctx *MethodContext, source *xtype.Type) ([]xtype.FieldSources,
 			lift = append(lift, &Path{
 				Prefix:     ".",
 				SourceID:   field.Name,
-				SourceType: field.Type.T.String(),
+				SourceType: field.Type.String,
 			})
 			innerSource = field.Type
 

@@ -23,9 +23,9 @@ func (*Map) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, sour
 	if err != nil {
 		return nil, nil, err.Lift(&Path{
 			SourceID:   "[]",
-			SourceType: "<mapkey> " + source.MapKey.T.String(),
+			SourceType: "<mapkey> " + source.MapKey.String,
 			TargetID:   "[]",
-			TargetType: "<mapkey> " + target.MapKey.T.String(),
+			TargetType: "<mapkey> " + target.MapKey.String,
 		})
 	}
 	valueStmt, valueKey, err := gen.Build(
@@ -33,9 +33,9 @@ func (*Map) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, sour
 	if err != nil {
 		return nil, nil, err.Lift(&Path{
 			SourceID:   "[]",
-			SourceType: "<mapvalue> " + source.MapValue.T.String(),
+			SourceType: "<mapvalue> " + source.MapValue.String,
 			TargetID:   "[]",
-			TargetType: "<mapvalue> " + target.MapValue.T.String(),
+			TargetType: "<mapvalue> " + target.MapValue.String,
 		})
 	}
 	block = append(block, valueStmt...)

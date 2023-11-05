@@ -36,9 +36,9 @@ func (*Pointer) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, 
 	if err != nil {
 		return nil, nil, err.Lift(&Path{
 			SourceID:   "*",
-			SourceType: source.PointerInner.T.String(),
+			SourceType: source.PointerInner.String,
 			TargetID:   "*",
-			TargetType: target.PointerInner.T.String(),
+			TargetType: target.PointerInner.String,
 		})
 	}
 	ifBlock = append(ifBlock, nextBlock...)
@@ -84,7 +84,7 @@ func (*SourcePointer) Build(gen Generator, ctx *MethodContext, sourceID *xtype.J
 	if err != nil {
 		return nil, nil, err.Lift(&Path{
 			SourceID:   "*",
-			SourceType: source.PointerInner.T.String(),
+			SourceType: source.PointerInner.String,
 		})
 	}
 
@@ -112,9 +112,9 @@ func (*TargetPointer) Build(gen Generator, ctx *MethodContext, sourceID *xtype.J
 	if err != nil {
 		return nil, nil, err.Lift(&Path{
 			SourceID:   "*",
-			SourceType: source.T.String(),
+			SourceType: source.String,
 			TargetID:   "*",
-			TargetType: target.PointerInner.T.String(),
+			TargetType: target.PointerInner.String,
 		})
 	}
 	if id.Variable {

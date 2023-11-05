@@ -38,9 +38,9 @@ func (*UseUnderlyingTypeMethods) Build(gen Generator, ctx *MethodContext, source
 	if err != nil {
 		return nil, nil, err.Lift(&Path{
 			SourceID:   "*",
-			SourceType: innerSource.T.String(),
+			SourceType: innerSource.String,
 			TargetID:   "*",
-			TargetType: innerTarget.T.String(),
+			TargetType: innerTarget.String,
 		})
 	}
 

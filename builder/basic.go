@@ -39,9 +39,9 @@ func (*BasicTargetPointerRule) Build(gen Generator, ctx *MethodContext, sourceID
 	if err != nil {
 		return nil, nil, err.Lift(&Path{
 			SourceID:   "*",
-			SourceType: source.T.String(),
+			SourceType: source.String,
 			TargetID:   "*",
-			TargetType: target.PointerInner.T.String(),
+			TargetType: target.PointerInner.String,
 		})
 	}
 	stmt = append(stmt, jen.Id(name).Op(":=").Add(id.Code))

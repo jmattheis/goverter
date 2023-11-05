@@ -26,9 +26,9 @@ func (*List) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, sou
 	if err != nil {
 		return nil, nil, err.Lift(&Path{
 			SourceID:   "[]",
-			SourceType: source.ListInner.T.String(),
+			SourceType: source.ListInner.String,
 			TargetID:   "[]",
-			TargetType: target.ListInner.T.String(),
+			TargetType: target.ListInner.String,
 		})
 	}
 	forBlock = append(forBlock, jen.Id(targetSlice).Index(jen.Id(index)).Op("=").Add(newID.Code))

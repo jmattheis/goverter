@@ -72,7 +72,7 @@ func (ctx *MethodContext) SetErrorTargetVar(m *jen.Statement) {
 }
 
 func (ctx *MethodContext) Field(target *xtype.Type, name string) *config.FieldMapping {
-	if ctx.FieldsTarget != target.T.String() {
+	if ctx.FieldsTarget != target.String {
 		return emptyMapping
 	}
 
