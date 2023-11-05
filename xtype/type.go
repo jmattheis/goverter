@@ -43,10 +43,23 @@ type Type struct {
 	MapValue      *Type
 	Basic         bool
 	BasicType     *types.Basic
+	Signature     bool
+	SignatureType *types.Signature
+	Func          bool
+	FuncType      *types.Func
 }
 
 func (t *Type) AsPointer() *Type {
 	return TypeOf(types.NewPointer(t.T))
+}
+
+func (t *Type) inStruct(source *Type, field string) *Type {
+	if t.Signature && source.Named {
+		t.FuncType = types.NewFunc(-1, source.NamedType.Obj().Pkg(), field, t.SignatureType)
+		t.Func = true
+	}
+
+	return t
 }
 
 // StructField holds the type of a struct field and its name.
@@ -69,22 +82,36 @@ func (t Type) findAllFields(path []string, name string, ignoreCase bool, ignored
 	}
 
 	var matches []*StructField
-	for y := 0; y < t.StructType.NumFields(); y++ {
-		m := t.StructType.Field(y)
-		if ignored(m.Name()) {
-			continue
+	handle := func(obj types.Object) *StructField {
+		if ignored(obj.Name()) {
+			return nil
 		}
-		if m.Name() == name {
+
+		exact := obj.Name() == name
+		if exact || (ignoreCase && strings.EqualFold(obj.Name(), name)) {
 			// exact match takes precedence over case-insensitive match
 			newPath := append([]string{}, path...)
-			newPath = append(newPath, m.Name())
-			return &StructField{Path: newPath, Type: TypeOf(m.Type())}, nil
+			newPath = append(newPath, obj.Name())
+			f := &StructField{Path: newPath, Type: TypeOf(obj.Type()).inStruct(&t, obj.Name())}
+			if exact {
+				return f
+			}
+			matches = append(matches, f)
 		}
-		if ignoreCase && strings.EqualFold(m.Name(), name) {
-			newPath := append([]string{}, path...)
-			newPath = append(newPath, m.Name())
-			matches = append(matches, &StructField{Path: newPath, Type: TypeOf(m.Type())})
-			// keep going to ensure struct does not have another case-insensitive match
+		return nil
+	}
+
+	for y := 0; y < t.StructType.NumFields(); y++ {
+		if exact := handle(t.StructType.Field(y)); exact != nil {
+			return exact, matches
+		}
+	}
+
+	if t.Named {
+		for y := 0; y < t.NamedType.NumMethods(); y++ {
+			if exact := handle(t.NamedType.Method(y)); exact != nil {
+				return exact, matches
+			}
 		}
 	}
 
@@ -151,6 +178,16 @@ type JenID struct {
 	Variable      bool
 }
 
+func (j *JenID) Pointer(t *Type, namer func(string) string) ([]jen.Code, *JenID) {
+	if j.Variable {
+		return nil, OtherID(jen.Op("&").Add(j.Code.Clone()))
+	}
+
+	name := namer(t.ID())
+	stmt := []jen.Code{jen.Id(name).Op(":=").Add(j.Code.Clone())}
+	return stmt, OtherID(jen.Op("&").Id(name))
+}
+
 // VariableID is used, when the ID can be referenced. F.ex it is not a function call.
 func VariableID(code *jen.Statement) *JenID {
 	return &JenID{Code: code, Variable: true}
@@ -199,6 +236,9 @@ func TypeOf(t types.Type) *Type {
 	case *types.Interface:
 		rt.Interface = true
 		rt.InterfaceType = value
+	case *types.Signature:
+		rt.Signature = true
+		rt.SignatureType = value
 	default:
 		panic("unknown types.Type " + t.String())
 	}

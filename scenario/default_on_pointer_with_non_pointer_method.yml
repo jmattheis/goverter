@@ -29,12 +29,12 @@ success:
         type ConverterImpl struct{}
 
         func (c *ConverterImpl) Convert(source *execution.Input) *execution.Output {
-        	pExecutionOutputVal := execution.NewOutput()
-        	pExecutionOutput := &pExecutionOutputVal
+        	executionOutput := execution.NewOutput()
+        	pExecutionOutput := &executionOutput
         	if source != nil {
-        		var executionOutput execution.Output
-        		executionOutput.Name = (*source).Name
-        		pExecutionOutput = &executionOutput
+        		var executionOutput2 execution.Output
+        		executionOutput2.Name = (*source).Name
+        		pExecutionOutput = &executionOutput2
         	}
         	return pExecutionOutput
         }

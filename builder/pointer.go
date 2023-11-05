@@ -22,8 +22,6 @@ func (*Pointer) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, 
 		return nil, nil, err
 	}
 
-	ifBlock := []jen.Code{}
-
 	valueSourceID := jen.Op("*").Add(sourceID.Code.Clone())
 	if !source.PointerInner.Basic {
 		valueSourceID = jen.Parens(valueSourceID)
@@ -41,14 +39,11 @@ func (*Pointer) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, 
 			TargetType: target.PointerInner.String,
 		})
 	}
-	ifBlock = append(ifBlock, nextBlock...)
-	if id.Variable {
-		ifBlock = append(ifBlock, outerVar.Clone().Op("=").Op("&").Add(id.Code.Clone()))
-	} else {
-		tempName := ctx.Name(target.PointerInner.ID())
-		ifBlock = append(ifBlock, jen.Id(tempName).Op(":=").Add(id.Code.Clone()))
-		ifBlock = append(ifBlock, outerVar.Clone().Op("=").Op("&").Id(tempName))
-	}
+
+	pstmt, tmpID := id.Pointer(target.PointerInner, ctx.Name)
+
+	ifBlock := append(nextBlock, pstmt...)
+	ifBlock = append(ifBlock, outerVar.Clone().Op("=").Add(tmpID.Code))
 
 	stmt = append(stmt,
 		jen.If(sourceID.Code.Clone().Op("!=").Nil()).Block(ifBlock...),
@@ -117,10 +112,8 @@ func (*TargetPointer) Build(gen Generator, ctx *MethodContext, sourceID *xtype.J
 			TargetType: target.PointerInner.String,
 		})
 	}
-	if id.Variable {
-		return stmt, xtype.OtherID(jen.Op("&").Add(id.Code)), nil
-	}
-	tempName := ctx.Name(target.PointerInner.ID())
-	stmt = append(stmt, jen.Id(tempName).Op(":=").Add(id.Code))
-	return stmt, xtype.OtherID(jen.Op("&").Id(tempName)), nil
+
+	pstmt, nextID := id.Pointer(target.PointerInner, ctx.Name)
+	stmt = append(stmt, pstmt...)
+	return stmt, nextID, nil
 }

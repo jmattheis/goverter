@@ -1,0 +1,60 @@
+input:
+    input.go: |
+        package structs
+
+        import "time"
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:map Nested.Inner.Inner2.Name Name | MapName
+            Convert(source Input) Output
+        }
+
+        func MapName(string) string {
+            return ""
+        }
+
+        type Input struct {
+            Nested *InputNested
+        }
+        type InputNested struct {
+            Inner InputNestedNested
+        }
+        type InputNestedNested struct {
+            Inner2 *InputNestedNestedNested
+        }
+        type InputNestedNestedNested struct {
+        }
+        func (InputNestedNestedNested) Name() time.Time {
+            return time.Now()
+        }
+        type Output struct {
+            Name *string
+        }
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+
+    | github.com/jmattheis/goverter/execution.Input
+    |
+    |      | *github.com/jmattheis/goverter/execution.InputNested
+    |      |
+    |      |      | github.com/jmattheis/goverter/execution.InputNestedNested
+    |      |      |
+    |      |      |     | *github.com/jmattheis/goverter/execution.InputNestedNestedNested
+    |      |      |     |
+    |      |      |     |      | func() time.Time
+    |      |      |     |      |
+    |      |      |     |      |    | *time.Time (It is a pointer because the nested property in the goverter:map was a pointer)
+    |      |      |     |      |    |
+    source.Nested.Inner.Inner2.Name()
+    target                    .Name
+    |                          |
+    |                          | *string
+    |
+    | github.com/jmattheis/goverter/execution.Output
+
+    Error using method:
+        func github.com/jmattheis/goverter/execution.MapName(string) string
+
+    Method source type mismatches with conversion source: string != *time.Time

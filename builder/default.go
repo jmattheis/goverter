@@ -27,13 +27,9 @@ func buildTargetVar(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, so
 	}
 
 	if toPointer {
-		variable := nextID.Code
-		if !nextID.Variable {
-			name := ctx.Name(target.ID() + "Val")
-			stmt = append(stmt, jen.Id(name).Op(":=").Add(nextID.Code))
-			variable = jen.Id(name)
-		}
-		nextID = xtype.OtherID(jen.Op("&").Add(variable))
+		pstmt, pointerID := nextID.Pointer(callTarget, ctx.Name)
+		stmt = append(stmt, pstmt...)
+		nextID = pointerID
 	}
 
 	if nextID.Variable {
