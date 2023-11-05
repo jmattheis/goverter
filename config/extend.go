@@ -181,7 +181,7 @@ func parseExtendScopeMethod(scope *types.Scope, methodName string, opts *ParseEx
 		ErrorPrefix: "error parsing type",
 		Obj:         obj,
 		Converter:   opts.ConverterInterface,
-		EmptySource: false,
+		Params:      method.ParamsRequired,
 	})
 }
 
@@ -214,6 +214,6 @@ func parseOneMethod(loader *pkgload.PackageLoader, c *Converter, fullMethod stri
 		ErrorPrefix: "error parsing type",
 		Obj:         obj,
 		Converter:   c.Type,
-		EmptySource: true,
+		Params:      method.ParamsOptional,
 	})
 }

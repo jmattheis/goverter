@@ -8,13 +8,21 @@ import (
 	"github.com/jmattheis/goverter/xtype"
 )
 
+type ParamType int
+
+const (
+	ParamsRequired ParamType = iota
+	ParamsOptional
+	ParamsNone
+)
+
 type ParseOpts struct {
 	Obj       types.Object
 	Converter types.Type
 
 	ErrorPrefix  string
-	EmptySource  bool
 	ConvFunction bool
+	Params       ParamType
 }
 
 // Parse parses an function into a Definition.
@@ -64,9 +72,12 @@ func Parse(opts *ParseOpts) (*Definition, error) {
 		methodDef.Call = jen.Qual(fn.Pkg().Path(), fn.Name())
 	}
 
+	if opts.Params == ParamsNone && sig.Params().Len() > 0 {
+		return nil, formatErr("must have no parameters")
+	}
+
 	switch sig.Params().Len() {
 	case 2:
-
 		if opts.Converter == nil {
 			// converterInterface is used when searching for methods in the local package only
 			return nil, formatErr("must have one parameter when using extend with a package")
@@ -82,7 +93,7 @@ func Parse(opts *ParseOpts) (*Definition, error) {
 	case 1:
 		methodDef.Parameters.Source = xtype.TypeOf(sig.Params().At(0).Type())
 	case 0:
-		if !opts.EmptySource {
+		if opts.Params == ParamsRequired {
 			return nil, formatErr("must have at least one parameter")
 		}
 	default:

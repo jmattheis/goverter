@@ -37,7 +37,7 @@ func parseMethod(loader *pkgload.PackageLoader, c *Converter, fn *types.Func, ra
 		Obj:          fn,
 		ErrorPrefix:  "error parsing converter method",
 		Converter:    nil,
-		EmptySource:  false,
+		Params:       method.ParamsRequired,
 		ConvFunction: true,
 	})
 	if err != nil {

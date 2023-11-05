@@ -1,0 +1,38 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        type Converter interface {
+            Convert(source Input) Output
+        }
+
+        type Input struct {
+            Name string
+        }
+        func (Input) Age() (int, error) {
+            return 42, nil
+        }
+        type Output struct {
+            Name string
+            Age int
+        }
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+
+    | github.com/jmattheis/goverter/execution.Input
+    |
+    |      | func() (int, error)
+    |      |
+    source.Age
+    target.Age
+    |      |
+    |      | int
+    |
+    | github.com/jmattheis/goverter/execution.Output
+
+    Error using method:
+        func (github.com/jmattheis/goverter/execution.Input).Age() (int, error)
+
+    Used method returns error but conversion method does not

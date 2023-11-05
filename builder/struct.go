@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/dave/jennifer/jen"
+	"github.com/jmattheis/goverter/method"
 	"github.com/jmattheis/goverter/xtype"
 )
 
@@ -76,7 +77,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 			}
 			stmt = append(stmt, mapStmt...)
 
-			fieldStmt, fieldID, err := gen.Build(ctx, xtype.VariableID(nextID), nextSource, targetFieldType, errWrapper)
+			fieldStmt, fieldID, err := gen.Build(ctx, nextID, nextSource, targetFieldType, errWrapper)
 			if err != nil {
 				return nil, nil, err.Lift(lift...)
 			}
@@ -102,7 +103,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 					functionCallSourceID = sourceID.ParentPointer
 					functionCallSourceType = source.AsPointer()
 				} else {
-					functionCallSourceID = xtype.VariableID(nextID.Clone())
+					functionCallSourceID = nextID
 					functionCallSourceType = nextSource
 				}
 			} else {
@@ -135,7 +136,7 @@ func mapField(
 	sourceID *xtype.JenID,
 	source, target *xtype.Type,
 	additionalFieldSources []xtype.FieldSources,
-) (*jen.Statement, *xtype.Type, []jen.Code, []*Path, bool, *Error) {
+) (*xtype.JenID, *xtype.Type, []jen.Code, []*Path, bool, *Error) {
 	lift := []*Path{}
 	ignored := func(name string) bool {
 		return ctx.Field(target, name).Ignore
@@ -151,7 +152,7 @@ func mapField(
 			TargetID:   targetField.Name(),
 			TargetType: targetField.Type().String(),
 		})
-		return sourceID.Code, source, nil, lift, false, nil
+		return sourceID, source, nil, lift, false, nil
 	}
 
 	var path []string
@@ -178,13 +179,12 @@ func mapField(
 
 	var condition *jen.Statement
 
-	stmt := []jen.Code{}
-	nextID := sourceID.Code
+	nextIDCode := sourceID.Code
 	nextSource := source
 
 	for i := 0; i < len(path); i++ {
 		if nextSource.Pointer {
-			addCondition := nextID.Clone().Op("!=").Nil()
+			addCondition := nextIDCode.Clone().Op("!=").Nil()
 			if condition == nil {
 				condition = addCondition
 			} else {
@@ -203,7 +203,7 @@ func mapField(
 		sourceMatch, err := xtype.FindExactField(nextSource, path[i])
 		if err == nil {
 			nextSource = sourceMatch.Type
-			nextID = nextID.Clone().Dot(sourceMatch.Name)
+			nextIDCode = nextIDCode.Clone().Dot(sourceMatch.Name)
 			liftPath := &Path{
 				Prefix:     ".",
 				SourceID:   sourceMatch.Name,
@@ -213,9 +213,6 @@ func mapField(
 			if i == len(path)-1 {
 				liftPath.TargetID = targetField.Name()
 				liftPath.TargetType = targetField.Type().String()
-				if condition != nil && !nextSource.Pointer {
-					liftPath.SourceType = fmt.Sprintf("*%s (It is a pointer because the nested property in the goverter:map was a pointer)", liftPath.SourceType)
-				}
 			}
 			lift = append(lift, liftPath)
 			continue
@@ -228,27 +225,65 @@ func mapField(
 			SourceType: "???",
 		}).Lift(lift...)
 	}
+
+	returnID := xtype.VariableID(nextIDCode)
+	innerStmt := []jen.Code{}
+	if nextSource.Func {
+		def, err := method.Parse(&method.ParseOpts{
+			Obj:         nextSource.FuncType,
+			Converter:   nil,
+			ErrorPrefix: "Error parsing struct method",
+			Params:      method.ParamsNone,
+		})
+		if err != nil {
+			return nil, nil, nil, nil, false, NewError(err.Error()).Lift(lift...)
+		}
+		def.Call = nextIDCode
+
+		methodCallInner, callID, callErr := gen.CallMethod(ctx, def, nil, nil, def.Target, NoWrap)
+		if callErr != nil {
+			return nil, nil, nil, nil, false, callErr.Lift(lift...)
+		}
+		innerStmt = methodCallInner
+		nextSource = def.Target
+		returnID = callID
+		lift = append(lift, &Path{
+			Prefix:     "(",
+			SourceID:   ")",
+			SourceType: def.Target.String,
+		})
+	}
+
+	if condition != nil && !nextSource.Pointer {
+		lift[len(lift)-1].SourceType = fmt.Sprintf("*%s (It is a pointer because the nested property in the goverter:map was a pointer)",
+			lift[len(lift)-1].SourceType)
+	}
+
+	stmt := []jen.Code{}
 	if condition != nil {
 		pointerNext := nextSource
 		if !nextSource.Pointer {
-			pointerNext = xtype.TypeOf(types.NewPointer(nextSource.T))
+			pointerNext = nextSource.AsPointer()
 		}
 		tempName := ctx.Name(pointerNext.ID())
 		stmt = append(stmt, jen.Var().Id(tempName).Add(pointerNext.TypeAsJen()))
+
 		if nextSource.Pointer {
-			stmt = append(stmt, jen.If(condition).Block(
-				jen.Id(tempName).Op("=").Add(nextID.Clone()),
-			))
+			innerStmt = append(innerStmt, jen.Id(tempName).Op("=").Add(returnID.Code))
 		} else {
-			stmt = append(stmt, jen.If(condition).Block(
-				jen.Id(tempName).Op("=").Op("&").Add(nextID.Clone()),
-			))
+			pstmt, pointerID := returnID.Pointer(nextSource, ctx.Name)
+			innerStmt = append(innerStmt, pstmt...)
+			innerStmt = append(innerStmt, jen.Id(tempName).Op("=").Add(pointerID.Code))
 		}
+
+		stmt = append(stmt, jen.If(condition).Block(innerStmt...))
 		nextSource = pointerNext
-		nextID = jen.Id(tempName)
+		returnID = xtype.VariableID(jen.Id(tempName))
+	} else {
+		stmt = append(stmt, innerStmt...)
 	}
 
-	return nextID, nextSource, stmt, lift, false, nil
+	return returnID, nextSource, stmt, lift, false, nil
 }
 
 func parseAutoMap(ctx *MethodContext, source *xtype.Type) ([]xtype.FieldSources, *Error) {
