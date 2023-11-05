@@ -151,6 +151,16 @@ type JenID struct {
 	Variable      bool
 }
 
+func (j *JenID) Pointer(t *Type, namer func(string) string) ([]jen.Code, *JenID) {
+	if j.Variable {
+		return nil, OtherID(jen.Op("&").Add(j.Code.Clone()))
+	}
+
+	name := namer(t.ID())
+	stmt := []jen.Code{jen.Id(name).Op(":=").Add(j.Code.Clone())}
+	return stmt, OtherID(jen.Op("&").Id(name))
+}
+
 // VariableID is used, when the ID can be referenced. F.ex it is not a function call.
 func VariableID(code *jen.Statement) *JenID {
 	return &JenID{Code: code, Variable: true}
