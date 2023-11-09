@@ -23,4 +23,5 @@
   - [wrapErrors](config/wrapErrors.md)
 - [Migrations](migrations.md)
 - [Alternatives](alternatives.md)
+- [FAQ](faq.md)
 - [GitHub](https://github.com/jmattheis/goverter)
