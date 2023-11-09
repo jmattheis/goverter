@@ -8,11 +8,11 @@ configure the full package path in
 E.g.
 ```go
 // goverter:converter
-// goverter:package github.com/jmattehis/goverter/example/sample
+// goverter:package github.com/jmattheis/goverter/example/sample
 type Converter interface {}
 ```
 
-Afterwards, gotify should correctly import types in the same package.
+Afterwards, goverter should correctly import types in the same package.
 
 ## import cycle not allowed
 
