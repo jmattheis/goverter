@@ -1,0 +1,32 @@
+input:
+    input.go: |
+        package universe
+
+        // goverter:converter
+        type Converter interface {
+            AToB(A) B
+        }
+
+        type A struct {
+            Property int
+        }
+
+        type B struct {
+            Property error
+        }
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).AToB(github.com/jmattheis/goverter/execution.A) github.com/jmattheis/goverter/execution.B
+
+    | github.com/jmattheis/goverter/execution.A
+    |
+    |      | int
+    |      |
+    source.Property
+    target.Property
+    |      |
+    |      | error
+    |
+    | github.com/jmattheis/goverter/execution.B
+
+    TypeMismatch: Cannot convert int to error
