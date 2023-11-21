@@ -258,8 +258,14 @@ func (t *Type) UnescapedID() string {
 
 func (t *Type) asID(seeNamed, escapeReserved bool) string {
 	if seeNamed && t.Named {
-		pkgName := t.NamedType.Obj().Pkg().Name()
-		name := pkgName + t.NamedType.Obj().Name()
+		pkg := t.NamedType.Obj().Pkg()
+		name := t.NamedType.Obj().Name()
+		switch {
+		case pkg != nil:
+			name = pkg.Name() + name
+		case escapeReserved:
+			name = "x" + name
+		}
 		return name
 	}
 	if t.List {
