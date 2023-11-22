@@ -97,7 +97,7 @@ func parseConverterLine(c *Converter, loader *pkgload.PackageLoader, value strin
 		methods, err = parseExtend(loader, c, strings.Fields(rest))
 		c.Extend = append(c.Extend, methods...)
 	default:
-		err = parseCommon(&c.Common, cmd, rest)
+		_, err = parseCommon(&c.Common, cmd, rest)
 	}
 	return
 }

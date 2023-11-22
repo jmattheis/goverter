@@ -3,6 +3,7 @@ package config
 import "fmt"
 
 type Common struct {
+	FieldSettings                      []string
 	WrapErrors                         bool
 	IgnoreUnexported                   bool
 	MatchIgnoreCase                    bool
@@ -12,15 +13,18 @@ type Common struct {
 	UseUnderlyingTypeMethods           bool
 }
 
-func parseCommon(c *Common, cmd, rest string) (err error) {
+func parseCommon(c *Common, cmd, rest string) (fieldSetting bool, err error) {
 	switch cmd {
 	case "wrapErrors":
 		c.WrapErrors, err = parseBool(rest)
 	case "ignoreUnexported":
+		fieldSetting = true
 		c.IgnoreUnexported, err = parseBool(rest)
 	case "matchIgnoreCase":
+		fieldSetting = true
 		c.MatchIgnoreCase, err = parseBool(rest)
 	case "ignoreMissing":
+		fieldSetting = true
 		c.IgnoreMissing, err = parseBool(rest)
 	case "skipCopySameType":
 		c.SkipCopySameType, err = parseBool(rest)
