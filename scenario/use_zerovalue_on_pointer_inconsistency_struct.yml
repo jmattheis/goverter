@@ -41,16 +41,13 @@ success:
         func (c *ConverterImpl) pStructsPersonInfoToStructsAPIPersonInfo(source *execution.PersonInfo) execution.APIPersonInfo {
         	var structsAPIPersonInfo execution.APIPersonInfo
         	if source != nil {
-        		structsAPIPersonInfo = c.structsPersonInfoToStructsAPIPersonInfo((*source))
+        		var structsAPIPersonInfo2 execution.APIPersonInfo
+        		var xstring string
+        		if (*source).FirstName != nil {
+        			xstring = *(*source).FirstName
+        		}
+        		structsAPIPersonInfo2.FirstName = xstring
+        		structsAPIPersonInfo = structsAPIPersonInfo2
         	}
-        	return structsAPIPersonInfo
-        }
-        func (c *ConverterImpl) structsPersonInfoToStructsAPIPersonInfo(source execution.PersonInfo) execution.APIPersonInfo {
-        	var structsAPIPersonInfo execution.APIPersonInfo
-        	var xstring string
-        	if source.FirstName != nil {
-        		xstring = *source.FirstName
-        	}
-        	structsAPIPersonInfo.FirstName = xstring
         	return structsAPIPersonInfo
         }

@@ -247,14 +247,14 @@ func (g *generator) Build(
 		return g.CallMethod(ctx, genMethod.Definition, sourceID, source, target, errWrapper)
 	}
 
-	hasPointerStructMethod := false
+	isCurrentPointerStructMethod := false
 	if source.Struct && target.Struct {
-		pointerSignature := xtype.SignatureOf(source.AsPointer(), target.AsPointer())
-
-		_, hasPointerStructMethod = g.extend[pointerSignature]
-		if !hasPointerStructMethod {
-			_, hasPointerStructMethod = g.lookup[pointerSignature]
-		}
+		// This checks if we are currently inside the generation of one of the following combinations.
+		// *Source -> Target
+		//  Source -> *Target
+		// *Source -> *Target
+		isCurrentPointerStructMethod = ctx.Signature.Source == source.AsPointerType().String() ||
+			ctx.Signature.Target == target.AsPointerType().String()
 	}
 
 	createSubMethod := false
@@ -262,7 +262,7 @@ func (g *generator) Build(
 	if ctx.HasSeen(source) {
 		g.lookup[ctx.Signature].Dirty = true
 		createSubMethod = true
-	} else if !hasPointerStructMethod {
+	} else if !isCurrentPointerStructMethod {
 		switch {
 		case source.Named && !source.Basic:
 			createSubMethod = true
