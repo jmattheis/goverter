@@ -1,0 +1,50 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        type Converter interface {
+            Convert2(Input2) Output2
+
+            // goverter:map FullName Name
+            Convert(source Input) *Output
+        }
+        type Input struct {
+            FullName string
+        }
+        type Input2 struct {
+            Value Input
+        }
+        type Output2 struct {
+            Value Output
+        }
+        type Output struct {
+            Name string
+        }
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert2(github.com/jmattheis/goverter/execution.Input2) github.com/jmattheis/goverter/execution.Output2
+
+    | github.com/jmattheis/goverter/execution.Input2
+    |
+    |      | github.com/jmattheis/goverter/execution.Input
+    |      |
+    source.Value
+    target.Value
+    |      |
+    |      | github.com/jmattheis/goverter/execution.Output
+    |
+    | github.com/jmattheis/goverter/execution.Output2
+
+    Overlapping struct settings found.
+
+    Move these field related settings:
+        goverter:map FullName Name
+
+    from this method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) *github.com/jmattheis/goverter/execution.Output
+
+    To a method you have to create with the following signature:
+        func(github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+
+    Goverter will not use Convert inside the current conversion method, thus, field related settings would be ignored.

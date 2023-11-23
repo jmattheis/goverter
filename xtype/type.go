@@ -50,7 +50,11 @@ type Type struct {
 }
 
 func (t *Type) AsPointer() *Type {
-	return TypeOf(types.NewPointer(t.T))
+	return TypeOf(t.AsPointerType())
+}
+
+func (t *Type) AsPointerType() *types.Pointer {
+	return types.NewPointer(t.T)
 }
 
 func (t *Type) inStruct(source *Type, field string) *Type {

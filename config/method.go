@@ -12,9 +12,12 @@ import (
 type Method struct {
 	*method.Definition
 	Common
+
 	Constructor *method.Definition
 	AutoMap     []string
 	Fields      map[string]*FieldMapping
+
+	RawFieldSettings []string
 }
 
 type FieldMapping struct {
@@ -60,22 +63,29 @@ func parseMethod(loader *pkgload.PackageLoader, c *Converter, fn *types.Func, ra
 
 func parseMethodLine(loader *pkgload.PackageLoader, c *Converter, m *Method, value string) (err error) {
 	cmd, rest := parseCommand(value)
+	fieldSetting := false
 	switch cmd {
 	case "map":
+		fieldSetting = true
 		err = parseMethodMap(loader, c, m, rest)
 	case "ignore":
+		fieldSetting = true
 		fields := strings.Fields(rest)
 		for _, f := range fields {
 			m.Field(f).Ignore = true
 		}
 	case "autoMap":
+		fieldSetting = true
 		var s string
 		s, err = parseString(rest)
 		m.AutoMap = append(m.AutoMap, strings.TrimSpace(s))
 	case "default":
 		m.Constructor, err = parseOneMethod(loader, c, rest)
 	default:
-		err = parseCommon(&m.Common, cmd, rest)
+		fieldSetting, err = parseCommon(&m.Common, cmd, rest)
+	}
+	if fieldSetting {
+		m.RawFieldSettings = append(m.RawFieldSettings, value)
 	}
 	return err
 }

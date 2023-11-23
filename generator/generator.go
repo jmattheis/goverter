@@ -136,7 +136,22 @@ func (g *generator) buildNoLookup(ctx *builder.MethodContext, sourceID *xtype.Je
 			return rule.Build(g, ctx, sourceID, source, target)
 		}
 	}
-	return nil, nil, builder.NewError(fmt.Sprintf("TypeMismatch: Cannot convert %s to %s", source.T, target.T))
+
+	if source.Pointer && !target.Pointer {
+		return nil, nil, builder.NewError(fmt.Sprintf(`TypeMismatch: Cannot convert %s to %s
+It is unclear how nil should be handled in the pointer to non pointer conversion.
+
+You can enable useZeroValueOnPointerInconsistency to instruct goverter to use the zero value if source is nil
+https://goverter.jmattheis.de/#/config/useZeroValueOnPointerInconsistency
+
+or you can define a custom conversion method with extend:
+https://goverter.jmattheis.de/#/config/extend`, source.T, target.T))
+	}
+
+	return nil, nil, builder.NewError(fmt.Sprintf(`TypeMismatch: Cannot convert %s to %s
+
+You can define a custom conversion method with extend:
+https://goverter.jmattheis.de/#/config/extend`, source.T, target.T))
 }
 
 func (g *generator) CallMethod(
@@ -247,14 +262,14 @@ func (g *generator) Build(
 		return g.CallMethod(ctx, genMethod.Definition, sourceID, source, target, errWrapper)
 	}
 
-	hasPointerStructMethod := false
+	isCurrentPointerStructMethod := false
 	if source.Struct && target.Struct {
-		pointerSignature := xtype.SignatureOf(source.AsPointer(), target.AsPointer())
-
-		_, hasPointerStructMethod = g.extend[pointerSignature]
-		if !hasPointerStructMethod {
-			_, hasPointerStructMethod = g.lookup[pointerSignature]
-		}
+		// This checks if we are currently inside the generation of one of the following combinations.
+		// *Source -> Target
+		//  Source -> *Target
+		// *Source -> *Target
+		isCurrentPointerStructMethod = ctx.Signature.Source == source.AsPointerType().String() ||
+			ctx.Signature.Target == target.AsPointerType().String()
 	}
 
 	createSubMethod := false
@@ -262,7 +277,7 @@ func (g *generator) Build(
 	if ctx.HasSeen(source) {
 		g.lookup[ctx.Signature].Dirty = true
 		createSubMethod = true
-	} else if !hasPointerStructMethod {
+	} else if !isCurrentPointerStructMethod {
 		switch {
 		case source.Named && !source.Basic:
 			createSubMethod = true
@@ -278,31 +293,52 @@ func (g *generator) Build(
 	ctx.MarkSeen(source)
 
 	if createSubMethod {
-		name := g.namer.Name(source.UnescapedID() + "To" + strings.Title(target.UnescapedID()))
-
-		genMethod := &generatedMethod{
-			Method: &config.Method{
-				Common: g.conf.Common,
-				Definition: &method.Definition{
-					ID:   name,
-					Name: name,
-					Call: jen.Id(xtype.ThisVar).Dot(name),
-					Parameters: method.Parameters{
-						Source: xtype.TypeOf(source.T),
-						Target: xtype.TypeOf(target.T),
-					},
-				},
-			},
-		}
-
-		g.lookup[signature] = genMethod
-		if err := g.buildMethod(genMethod, errWrapper); err != nil {
-			return nil, nil, err
-		}
-		return g.CallMethod(ctx, genMethod.Definition, sourceID, source, target, errWrapper)
+		return g.createSubMethod(ctx, sourceID, source, target, errWrapper)
 	}
 
 	return g.buildNoLookup(ctx, sourceID, source, target)
+}
+
+func (g *generator) createSubMethod(ctx *builder.MethodContext, sourceID *xtype.JenID, source, target *xtype.Type, errWrapper builder.ErrorWrapper) ([]jen.Code, *xtype.JenID, *builder.Error) {
+	if def, ok := g.getOverlappingStructDefinition(source, target); ok {
+		return nil, nil, builder.NewError(fmt.Sprintf(`Overlapping struct settings found.
+
+Move these field related settings:
+    goverter:%s
+
+from this method:
+    %s
+
+To a method you have to create with the following signature:
+    func(%s) %s
+
+Goverter will not use %s inside the current conversion method, thus, field related settings would be ignored.`, strings.Join(def.RawFieldSettings, "\n    goverter:"), def.ID, source.String, target.String, def.Name))
+	}
+
+	signature := xtype.SignatureOf(source, target)
+
+	name := g.namer.Name(source.UnescapedID() + "To" + strings.Title(target.UnescapedID()))
+
+	genMethod := &generatedMethod{
+		Method: &config.Method{
+			Common: g.conf.Common,
+			Definition: &method.Definition{
+				ID:   name,
+				Name: name,
+				Call: jen.Id(xtype.ThisVar).Dot(name),
+				Parameters: method.Parameters{
+					Source: xtype.TypeOf(source.T),
+					Target: xtype.TypeOf(target.T),
+				},
+			},
+		},
+	}
+
+	g.lookup[signature] = genMethod
+	if err := g.buildMethod(genMethod, errWrapper); err != nil {
+		return nil, nil, err
+	}
+	return g.CallMethod(ctx, genMethod.Definition, sourceID, source, target, errWrapper)
 }
 
 func (g *generator) hasMethod(source, target types.Type) bool {
@@ -312,4 +348,23 @@ func (g *generator) hasMethod(source, target types.Type) bool {
 		_, ok = g.lookup[signature]
 	}
 	return ok
+}
+
+func (g *generator) getOverlappingStructDefinition(source, target *xtype.Type) (*generatedMethod, bool) {
+	if !source.Struct || !target.Struct {
+		return nil, false
+	}
+
+	overlapping := []xtype.Signature{
+		{Source: source.AsPointerType().String(), Target: target.String},
+		{Source: source.AsPointerType().String(), Target: target.AsPointerType().String()},
+		{Source: source.String, Target: target.AsPointerType().String()},
+	}
+
+	for _, sig := range overlapping {
+		if def, ok := g.lookup[sig]; ok && len(def.RawFieldSettings) > 0 {
+			return def, true
+		}
+	}
+	return nil, false
 }

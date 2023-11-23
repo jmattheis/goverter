@@ -33,12 +33,9 @@ success:
         func (c *ConverterImpl) Convert(source *execution.Input) execution.Output {
         	executionOutput := execution.NewOutput()
         	if source != nil {
-        		executionOutput = c.executionInputToExecutionOutput((*source))
+        		var executionOutput2 execution.Output
+        		executionOutput2.ID = (*source).ID
+        		executionOutput = executionOutput2
         	}
-        	return executionOutput
-        }
-        func (c *ConverterImpl) executionInputToExecutionOutput(source execution.Input) execution.Output {
-        	var executionOutput execution.Output
-        	executionOutput.ID = source.ID
         	return executionOutput
         }

@@ -45,3 +45,10 @@ error: |-
     | github.com/jmattheis/goverter/execution.APIPerson
 
     TypeMismatch: Cannot convert *string to string
+    It is unclear how nil should be handled in the pointer to non pointer conversion.
+
+    You can enable useZeroValueOnPointerInconsistency to instruct goverter to use the zero value if source is nil
+    https://goverter.jmattheis.de/#/config/useZeroValueOnPointerInconsistency
+
+    or you can define a custom conversion method with extend:
+    https://goverter.jmattheis.de/#/config/extend

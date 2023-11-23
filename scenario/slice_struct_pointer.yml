@@ -49,18 +49,16 @@ success:
         func (c *ConverterImpl) pSlicesInputToPSlicesOutput(source *execution.Input) *execution.Output {
         	var pSlicesOutput *execution.Output
         	if source != nil {
-        		slicesOutput := c.slicesInputToSlicesOutput((*source))
+        		var slicesOutput execution.Output
+        		slicesOutput.Name = (*source).Name
+        		slicesOutput.Age = (*source).Age
         		pSlicesOutput = &slicesOutput
         	}
         	return pSlicesOutput
         }
         func (c *ConverterImpl) slicesInputToPSlicesOutput(source execution.Input) *execution.Output {
-        	slicesOutput := c.slicesInputToSlicesOutput(source)
-        	return &slicesOutput
-        }
-        func (c *ConverterImpl) slicesInputToSlicesOutput(source execution.Input) execution.Output {
         	var slicesOutput execution.Output
         	slicesOutput.Name = source.Name
         	slicesOutput.Age = source.Age
-        	return slicesOutput
+        	return &slicesOutput
         }

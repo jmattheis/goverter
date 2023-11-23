@@ -5,6 +5,7 @@ input:
         // goverter:converter
         type Converter interface {
             // goverter:ignore Age
+            // goverter:map Name Name
             Convert(source *Input) (*Output)
 
             ConvertSub(source Input) (Output)
@@ -20,7 +21,11 @@ input:
 error: |-
     Overlapping field mapping found.
 
-    Please move the field related goverter:* comments from this method:
+    Please move these field related settings:
+        goverter:ignore Age
+        goverter:map Name Name
+
+    from this method:
         func (github.com/jmattheis/goverter/execution.Converter).Convert(source *github.com/jmattheis/goverter/execution.Input) *github.com/jmattheis/goverter/execution.Output
 
     to this method:
