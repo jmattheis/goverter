@@ -136,7 +136,22 @@ func (g *generator) buildNoLookup(ctx *builder.MethodContext, sourceID *xtype.Je
 			return rule.Build(g, ctx, sourceID, source, target)
 		}
 	}
-	return nil, nil, builder.NewError(fmt.Sprintf("TypeMismatch: Cannot convert %s to %s", source.T, target.T))
+
+	if source.Pointer && !target.Pointer {
+		return nil, nil, builder.NewError(fmt.Sprintf(`TypeMismatch: Cannot convert %s to %s
+It is unclear how nil should be handled in the pointer to non pointer conversion.
+
+You can enable useZeroValueOnPointerInconsistency to instruct goverter to use the zero value if source is nil
+https://goverter.jmattheis.de/#/config/useZeroValueOnPointerInconsistency
+
+or you can define a custom conversion method with extend:
+https://goverter.jmattheis.de/#/config/extend`, source.T, target.T))
+	}
+
+	return nil, nil, builder.NewError(fmt.Sprintf(`TypeMismatch: Cannot convert %s to %s
+
+You can define a custom conversion method with extend:
+https://goverter.jmattheis.de/#/config/extend`, source.T, target.T))
 }
 
 func (g *generator) CallMethod(

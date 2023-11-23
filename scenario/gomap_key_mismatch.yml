@@ -22,3 +22,6 @@ error: |-
     | map[int]int
 
     TypeMismatch: Cannot convert string to int
+
+    You can define a custom conversion method with extend:
+    https://goverter.jmattheis.de/#/config/extend

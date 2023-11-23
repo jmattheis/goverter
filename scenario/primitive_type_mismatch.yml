@@ -18,3 +18,6 @@ error: |-
     | int8
 
     TypeMismatch: Cannot convert int16 to int8
+
+    You can define a custom conversion method with extend:
+    https://goverter.jmattheis.de/#/config/extend

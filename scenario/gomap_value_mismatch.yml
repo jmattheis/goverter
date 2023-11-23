@@ -22,3 +22,6 @@ error: |-
     | map[int]int64
 
     TypeMismatch: Cannot convert int to int64
+
+    You can define a custom conversion method with extend:
+    https://goverter.jmattheis.de/#/config/extend
