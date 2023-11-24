@@ -22,6 +22,8 @@ type ParseExtendOptions struct {
 	// NamePattern is the regexp pattern to search for within the PkgPath above or
 	// (if PkgPath is empty) within the Scope.
 	NamePattern *regexp.Regexp
+	// OutputPackagePath where the method will be accessed
+	OutputPackagePath string
 }
 
 // parseExtend prepares a list of extend methods for use.
@@ -42,6 +44,7 @@ func parseExtend(loader *pkgload.PackageLoader, c *Converter, methods []string) 
 			PkgPath:            pkgPath,
 			NamePattern:        pattern,
 			ConverterInterface: c.Type,
+			OutputPackagePath:  c.OutputPackagePath,
 			ConverterScope:     c.Scope,
 		}
 
@@ -178,10 +181,11 @@ func parseExtendScopeMethod(scope *types.Scope, methodName string, opts *ParseEx
 		return nil, fmt.Errorf("%s does not exist in scope", methodName)
 	}
 	return method.Parse(&method.ParseOpts{
-		ErrorPrefix: "error parsing type",
-		Obj:         obj,
-		Converter:   opts.ConverterInterface,
-		Params:      method.ParamsRequired,
+		ErrorPrefix:       "error parsing type",
+		Obj:               obj,
+		OutputPackagePath: opts.OutputPackagePath,
+		Converter:         opts.ConverterInterface,
+		Params:            method.ParamsRequired,
 	})
 }
 
@@ -211,9 +215,10 @@ func parseOneMethod(loader *pkgload.PackageLoader, c *Converter, fullMethod stri
 	}
 
 	return method.Parse(&method.ParseOpts{
-		ErrorPrefix: "error parsing type",
-		Obj:         obj,
-		Converter:   c.Type,
-		Params:      method.ParamsOptional,
+		ErrorPrefix:       "error parsing type",
+		Obj:               obj,
+		Converter:         c.Type,
+		OutputPackagePath: c.OutputPackagePath,
+		Params:            method.ParamsOptional,
 	})
 }

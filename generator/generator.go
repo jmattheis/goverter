@@ -93,13 +93,14 @@ func (g *generator) buildMethod(genMethod *generatedMethod, errWrapper builder.E
 	}
 
 	ctx := &builder.MethodContext{
-		Namer:        namer.New(),
-		Conf:         genMethod.Method,
-		FieldsTarget: fieldsTarget,
-		SeenNamed:    map[string]struct{}{},
-		TargetType:   genMethod.Target,
-		Signature:    genMethod.Signature(),
-		HasMethod:    g.hasMethod,
+		Namer:             namer.New(),
+		Conf:              genMethod.Method,
+		FieldsTarget:      fieldsTarget,
+		SeenNamed:         map[string]struct{}{},
+		TargetType:        genMethod.Target,
+		Signature:         genMethod.Signature(),
+		HasMethod:         g.hasMethod,
+		OutputPackagePath: g.conf.OutputPackagePath,
 	}
 
 	var funcBlock []jen.Code

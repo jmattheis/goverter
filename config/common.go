@@ -38,5 +38,5 @@ func parseCommon(c *Common, cmd, rest string) (fieldSetting bool, err error) {
 		err = fmt.Errorf("unknown setting: %s", cmd)
 	}
 
-	return
+	return fieldSetting, err
 }

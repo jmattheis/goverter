@@ -1,8 +1,7 @@
 input:
-    generated/convert.go: |
-        package generated
-        // we do not allow use of unexported intToString today, even though the
-        // generated code can access it since it is placed in the same package
+    external/convert.go: |
+        package external
+
         func intToString(int) string {
             return ""
         }
@@ -11,7 +10,7 @@ input:
 
         // goverter:converter
         // the next line enables string converters from local package
-        // goverter:extend github.com/jmattheis/goverter/execution/generated:intToString
+        // goverter:extend github.com/jmattheis/goverter/execution/external:intToString
         type Converter interface {
             Convert(source Input) Output
         }
@@ -28,6 +27,6 @@ error: |-
         github.com/jmattheis/goverter/execution.Converter
 
     error parsing type:
-        func github.com/jmattheis/goverter/execution/generated.intToString(int) string
+        func github.com/jmattheis/goverter/execution/external.intToString(int) string
 
     must be exported
