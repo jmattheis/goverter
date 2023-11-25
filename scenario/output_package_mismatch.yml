@@ -22,14 +22,14 @@ input:
         }
 error: |-
     Error creating converters
-        /ABSOLUTE/execution/input.go
+        @workdir/input.go
         github.com/jmattheis/goverter/execution.Converter
     and
-        /ABSOLUTE/execution/input.go
+        @workdir/input.go
         github.com/jmattheis/goverter/execution.Converter2
 
     Cannot use different packages
         pkg1
         pkg2
     in the same output file:
-        /ABSOLUTE/execution/generated/generated.go
+        @workdir/generated/generated.go

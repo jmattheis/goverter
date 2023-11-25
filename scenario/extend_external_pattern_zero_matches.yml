@@ -9,7 +9,7 @@ input:
         }
 error: |-
     error parsing 'goverter:extend' at
-        /ABSOLUTE/execution/input.go:6:1
+        @workdir/input.go:6:1
         github.com/jmattheis/goverter/execution.Converter
 
     package strconv does not have methods with names that match

@@ -17,7 +17,7 @@ input:
         }
 error: |-
     error parsing 'goverter:map' at
-        /ABSOLUTE/execution/input.go:6:5
+        @workdir/input.go:6:5
         func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
 
     PluckAgeInt does not exist in scope

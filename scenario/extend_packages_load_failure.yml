@@ -8,7 +8,7 @@ input:
         }
 error_starts_with: |-
     error parsing 'goverter:extend' at
-        /ABSOLUTE/execution/input.go:5:1
+        @workdir/input.go:5:1
         github.com/jmattheis/goverter/execution.Converter
 
     packages load failed on "notaquery=abc": invalid query type "notaquery"
