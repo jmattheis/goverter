@@ -90,7 +90,7 @@ use reflection.
 1. Run `goverter`:
 
     ```bash
-    $ go run github.com/jmattheis/goverter/cmd/goverter@v1.0.0 gen ./
+    $ go run github.com/jmattheis/goverter/cmd/goverter@v1.2.0 gen ./
     ```
 
     See [Installation](https://goverter.jmattheis.de/#/install) and
