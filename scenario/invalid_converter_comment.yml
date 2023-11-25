@@ -11,4 +11,4 @@ input:
 
             }
         )
-error: '/ABSOLUTE/execution/input.go:4:1: found goverter:converter on type but it has multiple interfaces inside'
+error: '@workdir/input.go:4:1: found goverter:converter on type but it has multiple interfaces inside'

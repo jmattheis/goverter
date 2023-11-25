@@ -11,7 +11,7 @@ input:
         )
 error: |-
     error parsing 'goverter:oops' at
-        /ABSOLUTE/execution/input.go:7:9
+        @workdir/input.go:7:9
         func (github.com/jmattheis/goverter/execution.Converter).ConvertString(source string) string
 
     unknown setting: oops

@@ -4,4 +4,4 @@ input:
 
         // goverter:converter
         type Converter struct {}
-error: '/ABSOLUTE/execution/input.go:4:1: goverter:converter may only be applied to type interface declarations '
+error: '@workdir/input.go:4:1: goverter:converter may only be applied to type interface declarations '

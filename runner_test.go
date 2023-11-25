@@ -2,7 +2,6 @@ package goverter
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -18,32 +17,39 @@ import (
 )
 
 func TestScenario(t *testing.T) {
-	curPath := getCurrentPath()
-	scenarios := filepath.Join(curPath, "scenario")
-	execDir := filepath.Join(curPath, "execution")
-	files, err := ioutil.ReadDir(scenarios)
+	rootDir := getCurrentPath()
+	scenarioDir := filepath.Join(rootDir, "scenario")
+	workDir := filepath.Join(rootDir, "execution")
+	scenarioFiles, err := os.ReadDir(scenarioDir)
 	require.NoError(t, err)
+	require.NoError(t, clearDir(workDir))
 
-	require.NoError(t, os.MkdirAll(execDir, os.ModePerm))
-	require.NoError(t, clearDir(execDir))
-
-	for _, file := range files {
+	for _, file := range scenarioFiles {
 		require.False(t, file.IsDir(), "should not be a directory")
+		file := file
 
-		t.Run(file.Name(), func(t *testing.T) {
-			scenarioFileName := filepath.Join(scenarios, file.Name())
-			scenarioBytes, err := ioutil.ReadFile(scenarioFileName)
+		testName := strings.TrimSuffix(file.Name(), filepath.Ext(file.Name()))
+
+		t.Run(testName, func(t *testing.T) {
+			t.Parallel()
+			testWorkDir := filepath.Join(workDir, testName)
+			require.NoError(t, os.MkdirAll(testWorkDir, os.ModePerm))
+			require.NoError(t, clearDir(testWorkDir))
+			scenarioFilePath := filepath.Join(scenarioDir, file.Name())
+			scenarioFileBytes, err := os.ReadFile(scenarioFilePath)
 			require.NoError(t, err)
 
 			scenario := Scenario{}
-			err = yaml.Unmarshal(scenarioBytes, &scenario)
+			err = yaml.Unmarshal(scenarioFileBytes, &scenario)
+			require.NoError(t, err)
+			err = os.WriteFile(filepath.Join(testWorkDir, "go.mod"), []byte("module github.com/jmattheis/goverter/execution\ngo 1.16"), os.ModePerm)
 			require.NoError(t, err)
 
 			for name, content := range scenario.Input {
-				inPath := filepath.Join(execDir, name)
+				inPath := filepath.Join(testWorkDir, name)
 				err = os.MkdirAll(filepath.Dir(inPath), os.ModePerm)
 				require.NoError(t, err)
-				err = os.WriteFile(filepath.Join(execDir, name), []byte(content), os.ModePerm)
+				err = os.WriteFile(filepath.Join(testWorkDir, name), []byte(content), os.ModePerm)
 				require.NoError(t, err)
 			}
 			genPkgName := "generated"
@@ -57,7 +63,7 @@ func TestScenario(t *testing.T) {
 
 			files, err := generateConvertersRaw(
 				&GenerateConfig{
-					WorkingDir:      execDir,
+					WorkingDir:      testWorkDir,
 					PackagePatterns: patterns,
 					Global: config.RawLines{
 						Lines:    global,
@@ -65,32 +71,32 @@ func TestScenario(t *testing.T) {
 					},
 				})
 
-			actualOutputFiles := toOutputFiles(execDir, files)
-
-			if os.Getenv("UPDATE_SCENARIO") == "true" && scenario.ErrorStartsWith == "" {
-				if err != nil {
-					scenario.Success = []*OutputFile{}
-					scenario.Error = replaceAbsolutePath(curPath, fmt.Sprint(err))
-				} else {
-					scenario.Success = toOutputFiles(execDir, files)
-					scenario.Error = ""
-				}
-				newBytes, err := yaml.Marshal(&scenario)
-				if assert.NoError(t, err) {
-					os.WriteFile(scenarioFileName, newBytes, os.ModePerm)
-				}
-			}
+			actualOutputFiles := toOutputFiles(testWorkDir, files)
 
 			if scenario.ErrorStartsWith != "" {
 				require.Error(t, err)
-				strErr := replaceAbsolutePath(curPath, fmt.Sprint(err))
+				strErr := replaceAbsolutePath(testWorkDir, fmt.Sprint(err))
 				require.Equal(t, scenario.ErrorStartsWith, strErr[:len(scenario.ErrorStartsWith)])
 				return
 			}
 
+			if os.Getenv("UPDATE_SCENARIO") == "true" {
+				if err != nil {
+					scenario.Success = []*OutputFile{}
+					scenario.Error = replaceAbsolutePath(testWorkDir, fmt.Sprint(err))
+				} else {
+					scenario.Success = toOutputFiles(testWorkDir, files)
+					scenario.Error = ""
+				}
+				newBytes, err := yaml.Marshal(&scenario)
+				if assert.NoError(t, err) {
+					os.WriteFile(scenarioFilePath, newBytes, os.ModePerm)
+				}
+			}
+
 			if scenario.Error != "" {
 				require.Error(t, err)
-				require.Equal(t, scenario.Error, replaceAbsolutePath(curPath, fmt.Sprint(err)))
+				require.Equal(t, scenario.Error, replaceAbsolutePath(testWorkDir, fmt.Sprint(err)))
 				return
 			}
 
@@ -100,16 +106,13 @@ func TestScenario(t *testing.T) {
 
 			err = writeFiles(files)
 			require.NoError(t, err)
-			require.NoError(t, compile(execDir), "generated converter doesn't build")
+			require.NoError(t, compile(testWorkDir), "generated converter doesn't build")
 		})
-		if os.Getenv("SKIP_CLEAN") != "true" {
-			clearDir(execDir)
-		}
 	}
 }
 
 func replaceAbsolutePath(curPath, body string) string {
-	return strings.ReplaceAll(body, curPath, "/ABSOLUTE")
+	return strings.ReplaceAll(body, curPath, "@workdir")
 }
 
 func compile(dir string) error {
