@@ -38,12 +38,13 @@ type Generator interface {
 // MethodContext exposes information for the current method.
 type MethodContext struct {
 	*namer.Namer
-	Conf         *config.Method
-	FieldsTarget string
-	Signature    xtype.Signature
-	TargetType   *xtype.Type
-	HasMethod    func(types.Type, types.Type) bool
-	SeenNamed    map[string]struct{}
+	Conf              *config.Method
+	FieldsTarget      string
+	OutputPackagePath string
+	Signature         xtype.Signature
+	TargetType        *xtype.Type
+	HasMethod         func(types.Type, types.Type) bool
+	SeenNamed         map[string]struct{}
 
 	TargetVar *jen.Statement
 }

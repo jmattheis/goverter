@@ -37,11 +37,12 @@ func (m *Method) Field(targetName string) *FieldMapping {
 
 func parseMethod(loader *pkgload.PackageLoader, c *Converter, fn *types.Func, rawMethod RawLines) (*Method, error) {
 	def, err := method.Parse(&method.ParseOpts{
-		Obj:          fn,
-		ErrorPrefix:  "error parsing converter method",
-		Converter:    nil,
-		Params:       method.ParamsRequired,
-		ConvFunction: true,
+		Obj:               fn,
+		ErrorPrefix:       "error parsing converter method",
+		Converter:         nil,
+		OutputPackagePath: c.OutputPackagePath,
+		Params:            method.ParamsRequired,
+		ConvFunction:      true,
 	})
 	if err != nil {
 		return nil, err

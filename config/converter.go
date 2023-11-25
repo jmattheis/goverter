@@ -9,8 +9,8 @@ import (
 )
 
 var DefaultConfig = ConverterConfig{
-	OutputFile:    "./generated/generated.go",
-	OutputPackage: ":generated",
+	OutputFile:        "./generated/generated.go",
+	OutputPackageName: "generated",
 }
 
 type Converter struct {
@@ -24,11 +24,19 @@ type Converter struct {
 
 type ConverterConfig struct {
 	Common
-	Name          string
-	OutputFile    string
-	OutputPackage string
-	Extend        []*method.Definition
-	Comments      []string
+	Name              string
+	OutputFile        string
+	OutputPackagePath string
+	OutputPackageName string
+	Extend            []*method.Definition
+	Comments          []string
+}
+
+func (conf *ConverterConfig) PackageID() string {
+	if conf.OutputPackageName == "" {
+		return conf.OutputPackagePath
+	}
+	return conf.OutputPackagePath + ":" + conf.OutputPackageName
 }
 
 func parseGlobal(loader *pkgload.PackageLoader, global RawLines) (*ConverterConfig, error) {
@@ -89,7 +97,18 @@ func parseConverterLine(c *Converter, loader *pkgload.PackageLoader, value strin
 	case "output:file":
 		c.OutputFile, err = parseString(rest)
 	case "output:package":
-		c.OutputPackage, err = parseString(rest)
+		c.OutputPackageName = ""
+		var pkg string
+		pkg, err = parseString(rest)
+
+		parts := strings.SplitN(pkg, ":", 2)
+		switch len(parts) {
+		case 2:
+			c.OutputPackageName = parts[1]
+			fallthrough
+		case 1:
+			c.OutputPackagePath = parts[0]
+		}
 	case "struct:comment":
 		c.Comments = append(c.Comments, rest)
 	case "extend":
@@ -99,5 +118,5 @@ func parseConverterLine(c *Converter, loader *pkgload.PackageLoader, value strin
 	default:
 		_, err = parseCommon(&c.Common, cmd, rest)
 	}
-	return
+	return err
 }

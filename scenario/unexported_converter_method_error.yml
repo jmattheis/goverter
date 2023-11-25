@@ -1,0 +1,20 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        type Converter interface {
+            convert(source Input) Output
+        }
+
+        type Input struct {
+            Age int
+        }
+        type Output struct {
+            Age int
+        }
+error: |-
+    error parsing converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+
+    must be exported

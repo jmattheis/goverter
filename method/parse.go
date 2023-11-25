@@ -17,8 +17,9 @@ const (
 )
 
 type ParseOpts struct {
-	Obj       types.Object
-	Converter types.Type
+	Obj               types.Object
+	Converter         types.Type
+	OutputPackagePath string
 
 	ErrorPrefix  string
 	ConvFunction bool
@@ -36,7 +37,7 @@ func Parse(opts *ParseOpts) (*Definition, error) {
 		return nil, formatErr("must be a function")
 	}
 
-	if !fn.Exported() {
+	if !xtype.Accessible(fn, opts.OutputPackagePath) {
 		return nil, formatErr("must be exported")
 	}
 

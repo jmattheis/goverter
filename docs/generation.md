@@ -45,7 +45,7 @@ Definition:
     - for each TargetField(TF) in CT:
       - if `TF` is [`ignore`](config/ignore.md)d
         - skip
-      - if `TF` is unexported and
+      - if `TF` is unaccessible and
         [`ignoreUnexported`](config/ignoreUnexported.md) is not enabled:
         - error: cannot use unexported types
       - get SourceField(SF)

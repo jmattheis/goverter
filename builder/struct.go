@@ -49,7 +49,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 			continue
 		}
 
-		if !targetField.Exported() {
+		if !xtype.Accessible(targetField, ctx.OutputPackagePath) {
 			cause := unexportedStructError(targetField.Name(), source.String, target.String)
 			return nil, nil, NewError(cause).Lift(&Path{
 				Prefix:     ".",
@@ -230,10 +230,11 @@ func mapField(
 	innerStmt := []jen.Code{}
 	if nextSource.Func {
 		def, err := method.Parse(&method.ParseOpts{
-			Obj:         nextSource.FuncType,
-			Converter:   nil,
-			ErrorPrefix: "Error parsing struct method",
-			Params:      method.ParamsNone,
+			Obj:               nextSource.FuncType,
+			Converter:         nil,
+			OutputPackagePath: ctx.OutputPackagePath,
+			ErrorPrefix:       "Error parsing struct method",
+			Params:            method.ParamsNone,
 		})
 		if err != nil {
 			return nil, nil, nil, nil, false, NewError(err.Error()).Lift(lift...)

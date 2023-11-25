@@ -1,7 +1,7 @@
 input:
-    external/method.go: |
-        package external
-        func IntToString(int) string {
+    generated/method.go: |
+        package generated
+        func intToString(int) string {
             return ""
         }
     input.go: |
@@ -9,7 +9,7 @@ input:
 
         // goverter:converter
         type Converter interface {
-            // goverter:map Age | github.com/jmattheis/goverter/execution/external:IntToString
+            // goverter:map Age | github.com/jmattheis/goverter/execution/generated:intToString
             Convert(source Input) Output
         }
 
@@ -25,15 +25,12 @@ success:
 
         package generated
 
-        import (
-        	execution "github.com/jmattheis/goverter/execution"
-        	external "github.com/jmattheis/goverter/execution/external"
-        )
+        import execution "github.com/jmattheis/goverter/execution"
 
         type ConverterImpl struct{}
 
         func (c *ConverterImpl) Convert(source execution.Input) execution.Output {
         	var executionOutput execution.Output
-        	executionOutput.Age = external.IntToString(source.Age)
+        	executionOutput.Age = intToString(source.Age)
         	return executionOutput
         }
