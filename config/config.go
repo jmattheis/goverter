@@ -23,10 +23,14 @@ type RawConverter struct {
 type Raw struct {
 	Converters []RawConverter
 	Global     RawLines
+
+	WorkDir              string
+	BuildTags            string
+	OuputBuildConstraint string
 }
 
-func Parse(workDir string, raw *Raw) ([]*Converter, error) {
-	loader, err := pkgload.New(workDir, getPackages(raw))
+func Parse(raw *Raw) ([]*Converter, error) {
+	loader, err := pkgload.New(raw.WorkDir, raw.BuildTags, getPackages(raw))
 	if err != nil {
 		return nil, err
 	}

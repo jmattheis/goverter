@@ -34,15 +34,43 @@ func TestError(t *testing.T) {
 }
 
 func TestSuccess(t *testing.T) {
-	actual, err := cli.Parse([]string{"goverter", "gen", "-g", "g1", "-global", "g2", "-g", "g3 oops", "pattern1", "pattern2"})
+	actual, err := cli.Parse([]string{
+		"goverter",
+		"gen",
+		"-build-tags", "",
+		"-output-constraint", "",
+		"-g", "g1",
+		"-global", "g2",
+		"-g", "g3 oops",
+		"pattern1", "pattern2",
+	})
 	require.NoError(t, err)
 
 	expected := &goverter.GenerateConfig{
-		PackagePatterns: []string{"pattern1", "pattern2"},
-		WorkingDir:      "",
+		PackagePatterns:       []string{"pattern1", "pattern2"},
+		WorkingDir:            "",
+		OutputBuildConstraint: "",
+		BuildTags:             "",
 		Global: config.RawLines{
 			Location: "command line (-g, -global)",
 			Lines:    []string{"g1", "g2", "g3 oops"},
+		},
+	}
+	require.Equal(t, expected, actual)
+}
+
+func TestDefault(t *testing.T) {
+	actual, err := cli.Parse([]string{"goverter", "gen", "pattern"})
+	require.NoError(t, err)
+
+	expected := &goverter.GenerateConfig{
+		PackagePatterns:       []string{"pattern"},
+		WorkingDir:            "",
+		OutputBuildConstraint: "!goverter",
+		BuildTags:             "goverter",
+		Global: config.RawLines{
+			Location: "command line (-g, -global)",
+			Lines:    nil,
 		},
 	}
 	require.Equal(t, expected, actual)
