@@ -99,7 +99,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 				stmt = append(stmt, mapStmt...)
 
 				if fieldMapping.Source == "." && sourceID.ParentPointer != nil &&
-					def.Source.String == source.AsPointer().String {
+					def.Source.AssignableTo(source.AsPointer()) {
 					functionCallSourceID = sourceID.ParentPointer
 					functionCallSourceType = source.AsPointer()
 				} else {
