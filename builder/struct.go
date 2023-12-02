@@ -99,7 +99,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 				stmt = append(stmt, mapStmt...)
 
 				if fieldMapping.Source == "." && sourceID.ParentPointer != nil &&
-					def.Source.String == source.AsPointer().String {
+					def.Source.AssignableTo(source.AsPointer()) {
 					functionCallSourceID = sourceID.ParentPointer
 					functionCallSourceType = source.AsPointer()
 				} else {
@@ -229,8 +229,7 @@ func mapField(
 	returnID := xtype.VariableID(nextIDCode)
 	innerStmt := []jen.Code{}
 	if nextSource.Func {
-		def, err := method.Parse(&method.ParseOpts{
-			Obj:               nextSource.FuncType,
+		def, err := method.Parse(nextSource.FuncType, &method.ParseOpts{
 			Converter:         nil,
 			OutputPackagePath: ctx.OutputPackagePath,
 			ErrorPrefix:       "Error parsing struct method",

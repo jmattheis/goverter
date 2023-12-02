@@ -9,6 +9,11 @@ import (
 	"github.com/jmattheis/goverter/pkgload"
 )
 
+const (
+	configMap     = "map"
+	configDefault = "default"
+)
+
 type Method struct {
 	*method.Definition
 	Common
@@ -36,8 +41,7 @@ func (m *Method) Field(targetName string) *FieldMapping {
 }
 
 func parseMethod(loader *pkgload.PackageLoader, c *Converter, fn *types.Func, rawMethod RawLines) (*Method, error) {
-	def, err := method.Parse(&method.ParseOpts{
-		Obj:               fn,
+	def, err := method.Parse(fn, &method.ParseOpts{
 		ErrorPrefix:       "error parsing converter method",
 		Converter:         nil,
 		OutputPackagePath: c.OutputPackagePath,
@@ -66,9 +70,25 @@ func parseMethodLine(loader *pkgload.PackageLoader, c *Converter, m *Method, val
 	cmd, rest := parseCommand(value)
 	fieldSetting := false
 	switch cmd {
-	case "map":
+	case configMap:
 		fieldSetting = true
-		err = parseMethodMap(loader, c, m, rest)
+		var source, target, custom string
+		source, target, custom, err = parseMethodMap(rest)
+		if err != nil {
+			return err
+		}
+		f := m.Field(target)
+		f.Source = source
+
+		if custom != "" {
+			opts := &method.ParseOpts{
+				ErrorPrefix:       "error parsing type",
+				OutputPackagePath: c.OutputPackagePath,
+				Converter:         c.Type,
+				Params:            method.ParamsOptional,
+			}
+			f.Function, err = loader.GetOne(c.Package, custom, opts)
+		}
 	case "ignore":
 		fieldSetting = true
 		fields := strings.Fields(rest)
@@ -80,8 +100,14 @@ func parseMethodLine(loader *pkgload.PackageLoader, c *Converter, m *Method, val
 		var s string
 		s, err = parseString(rest)
 		m.AutoMap = append(m.AutoMap, strings.TrimSpace(s))
-	case "default":
-		m.Constructor, err = parseOneMethod(loader, c, rest)
+	case configDefault:
+		opts := &method.ParseOpts{
+			ErrorPrefix:       "error parsing type",
+			OutputPackagePath: c.OutputPackagePath,
+			Converter:         c.Type,
+			Params:            method.ParamsOptional,
+		}
+		m.Constructor, err = loader.GetOne(c.Package, rest, opts)
 	default:
 		fieldSetting, err = parseCommon(&m.Common, cmd, rest)
 	}
@@ -91,29 +117,23 @@ func parseMethodLine(loader *pkgload.PackageLoader, c *Converter, m *Method, val
 	return err
 }
 
-func parseMethodMap(loader *pkgload.PackageLoader, c *Converter, m *Method, remaining string) (err error) {
+func parseMethodMap(remaining string) (source, target, custom string, err error) {
 	parts := strings.SplitN(remaining, "|", 2)
-	fields := strings.Fields(parts[0])
-	custom := ""
 	if len(parts) == 2 {
 		custom = strings.TrimSpace(parts[1])
 	}
 
+	fields := strings.Fields(parts[0])
 	switch len(fields) {
 	case 1:
-		if custom != "" {
-			m.Field(fields[0]).Function, err = parseOneMethod(loader, c, custom)
-		}
+		target = fields[0]
 	case 2:
-		f := m.Field(fields[1])
-		f.Source = fields[0]
-		if custom != "" {
-			f.Function, err = parseOneMethod(loader, c, custom)
-		}
+		source = fields[0]
+		target = fields[1]
 	case 0:
 		err = fmt.Errorf("missing target field")
 	default:
 		err = fmt.Errorf("too many fields expected at most 2 fields got %d: %s", len(fields), remaining)
 	}
-	return err
+	return source, target, custom, err
 }

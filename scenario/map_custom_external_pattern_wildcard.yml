@@ -24,4 +24,4 @@ error: |-
         @workdir/input.go:6:5
         func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
 
-    'github.com/jmattheis/goverter/...:IntToString' package path matches multiple packages, it must match exactly one
+    package wildcard pattern ... is not supported: "github.com/jmattheis/goverter/...:IntToString"

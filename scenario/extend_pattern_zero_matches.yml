@@ -11,4 +11,5 @@ error: |-
         @workdir/input.go:5:1
         github.com/jmattheis/goverter/execution.Converter
 
-    local package does not have methods with names that match the golang regexp pattern "HelloWorld.*" and a convert signature
+    package github.com/jmattheis/goverter/execution does not have methods with names that match
+    the golang regexp pattern "HelloWorld.*" and a convert signature

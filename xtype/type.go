@@ -49,6 +49,10 @@ type Type struct {
 	FuncType      *types.Func
 }
 
+func (t *Type) AssignableTo(other *Type) bool {
+	return types.AssignableTo(t.T, other.T)
+}
+
 func (t *Type) AsPointer() *Type {
 	return TypeOf(t.AsPointerType())
 }

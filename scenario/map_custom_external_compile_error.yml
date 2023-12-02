@@ -24,5 +24,7 @@ error: |-
         @workdir/input.go:6:5
         func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
 
-    failed to load package "github.com/jmattheis/goverter/execution/external", try adding a blank import for it: -: # github.com/jmattheis/goverter/execution/external
+    failed to load package "github.com/jmattheis/goverter/execution/external":
+    -: # github.com/jmattheis/goverter/execution/external
     external/method.go:3:12: cannot use 5 (untyped int constant) as string value in return statement
+    @workdir/external/method.go:3:12: cannot use 5 (untyped int constant) as string value in return statement
