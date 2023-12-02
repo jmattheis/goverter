@@ -11,4 +11,5 @@ error: |-
         @workdir/input.go:5:1
         github.com/jmattheis/goverter/execution.Converter
 
-    no packages were loaded for "file=/nonexisting", make sure it is a valid golang package
+    failed to load package "file=/nonexisting":
+    -: malformed import path "file=/nonexisting": invalid char '='

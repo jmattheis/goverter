@@ -17,7 +17,6 @@ const (
 )
 
 type ParseOpts struct {
-	Obj               types.Object
 	Converter         types.Type
 	OutputPackagePath string
 
@@ -27,12 +26,12 @@ type ParseOpts struct {
 }
 
 // Parse parses an function into a Definition.
-func Parse(opts *ParseOpts) (*Definition, error) {
+func Parse(obj types.Object, opts *ParseOpts) (*Definition, error) {
 	formatErr := func(s string) error {
-		return fmt.Errorf("%s:\n    %s\n\n%s", opts.ErrorPrefix, opts.Obj.String(), s)
+		return fmt.Errorf("%s:\n    %s\n\n%s", opts.ErrorPrefix, obj.String(), s)
 	}
 
-	fn, ok := opts.Obj.(*types.Func)
+	fn, ok := obj.(*types.Func)
 	if !ok {
 		return nil, formatErr("must be a function")
 	}

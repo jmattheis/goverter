@@ -11,4 +11,4 @@ error: |-
         @workdir/input.go:5:1
         github.com/jmattheis/goverter/execution.Converter
 
-    HelloWorld does not exist in scope
+    "HelloWorld" does not exist in package "github.com/jmattheis/goverter/execution"

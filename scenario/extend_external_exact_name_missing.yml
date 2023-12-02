@@ -11,4 +11,4 @@ error: |-
         @workdir/input.go:5:1
         github.com/jmattheis/goverter/execution.Converter
 
-    ParseSomething does not exist in scope
+    "ParseSomething" does not exist in package "strconv"

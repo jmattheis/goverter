@@ -8,6 +8,10 @@ import (
 	"github.com/jmattheis/goverter/pkgload"
 )
 
+const (
+	configExtend = "extend"
+)
+
 var DefaultConfig = ConverterConfig{
 	OutputFile:        "./generated/generated.go",
 	OutputPackageName: "generated",
@@ -15,10 +19,9 @@ var DefaultConfig = ConverterConfig{
 
 type Converter struct {
 	ConverterConfig
+	Package    string
 	FileSource string
 	Type       types.Type
-	Interface  *types.Interface
-	Scope      *types.Scope
 	Methods    map[string]*Method
 }
 
@@ -46,15 +49,18 @@ func parseGlobal(loader *pkgload.PackageLoader, global RawLines) (*ConverterConf
 }
 
 func parseConverter(loader *pkgload.PackageLoader, rawConverter *RawConverter, global ConverterConfig) (*Converter, error) {
-	namedType := rawConverter.Scope.Lookup(rawConverter.InterfaceName).Type()
+	v, err := loader.GetOneRaw(rawConverter.Package, rawConverter.InterfaceName)
+	if err != nil {
+		return nil, err
+	}
+	namedType := v.Type()
 	interfaceType := namedType.Underlying().(*types.Interface)
 
 	c := &Converter{
 		ConverterConfig: global,
 		Type:            namedType,
-		Interface:       interfaceType,
-		Scope:           rawConverter.Scope,
 		FileSource:      rawConverter.FileSource,
+		Package:         rawConverter.Package,
 		Methods:         map[string]*Method{},
 	}
 	if c.Name == "" {
@@ -65,8 +71,8 @@ func parseConverter(loader *pkgload.PackageLoader, rawConverter *RawConverter, g
 		return nil, err
 	}
 
-	for i := 0; i < c.Interface.NumMethods(); i++ {
-		fun := c.Interface.Method(i)
+	for i := 0; i < interfaceType.NumMethods(); i++ {
+		fun := interfaceType.Method(i)
 		def, err := parseMethod(loader, c, fun, rawConverter.Methods[fun.Name()])
 		if err != nil {
 			return nil, err
@@ -111,10 +117,21 @@ func parseConverterLine(c *Converter, loader *pkgload.PackageLoader, value strin
 		}
 	case "struct:comment":
 		c.Comments = append(c.Comments, rest)
-	case "extend":
-		var methods []*method.Definition
-		methods, err = parseExtend(loader, c, strings.Fields(rest))
-		c.Extend = append(c.Extend, methods...)
+	case configExtend:
+		for _, name := range strings.Fields(rest) {
+			opts := &method.ParseOpts{
+				ErrorPrefix:       "error parsing type",
+				OutputPackagePath: c.OutputPackagePath,
+				Converter:         c.Type,
+				Params:            method.ParamsRequired,
+			}
+			var defs []*method.Definition
+			defs, err = loader.GetMatching(c.Package, name, opts)
+			if err != nil {
+				break
+			}
+			c.Extend = append(c.Extend, defs...)
+		}
 	default:
 		_, err = parseCommon(&c.Common, cmd, rest)
 	}

@@ -7,7 +7,6 @@ import (
 	"github.com/jmattheis/goverter/comments"
 	"github.com/jmattheis/goverter/config"
 	"github.com/jmattheis/goverter/generator"
-	"github.com/jmattheis/goverter/pkgload"
 )
 
 // GenerateConfig the config for generating a converter.
@@ -39,9 +38,8 @@ func generateConvertersRaw(c *GenerateConfig) (map[string][]byte, error) {
 		return nil, err
 	}
 
-	converters, err := config.Parse(&config.Raw{
+	converters, err := config.Parse(c.WorkingDir, &config.Raw{
 		Converters: rawConverters,
-		Loader:     pkgload.New(c.WorkingDir),
 		Global:     c.Global,
 	})
 	if err != nil {

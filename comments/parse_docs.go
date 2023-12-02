@@ -58,7 +58,7 @@ requires the type information from the compiled sources.`, pkg.PkgPath, pkg.Erro
 		for _, file := range pkg.Syntax {
 			for _, decl := range file.Decls {
 				if genDecl, ok := decl.(*ast.GenDecl); ok {
-					converters, err := parseGenDecl(pkg.Fset, pkg.Types.Scope(), genDecl)
+					converters, err := parseGenDecl(pkg.Fset, pkg.Types, genDecl)
 					if err != nil {
 						location := pkg.Fset.Position(genDecl.Pos()).String()
 						return rawConverters, fmt.Errorf("%s: %s", location, err)
@@ -71,7 +71,7 @@ requires the type information from the compiled sources.`, pkg.PkgPath, pkg.Erro
 	return rawConverters, nil
 }
 
-func parseGenDecl(fset *token.FileSet, scope *types.Scope, decl *ast.GenDecl) ([]config.RawConverter, error) {
+func parseGenDecl(fset *token.FileSet, pkg *types.Package, decl *ast.GenDecl) ([]config.RawConverter, error) {
 	declDocs := decl.Doc.Text()
 
 	if strings.Contains(declDocs, converterMarker) {
@@ -99,7 +99,7 @@ func parseGenDecl(fset *token.FileSet, scope *types.Scope, decl *ast.GenDecl) ([
 			InterfaceName: typeName,
 			Converter:     converterLines,
 			Methods:       methods,
-			Scope:         scope,
+			Package:       pkg.Path(),
 		}
 		return []config.RawConverter{converter}, nil
 	}
@@ -124,7 +124,7 @@ func parseGenDecl(fset *token.FileSet, scope *types.Scope, decl *ast.GenDecl) ([
 				InterfaceName: typeName,
 				Converter:     lines,
 				Methods:       methods,
-				Scope:         scope,
+				Package:       pkg.Path(),
 			})
 		}
 	}

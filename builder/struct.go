@@ -229,8 +229,7 @@ func mapField(
 	returnID := xtype.VariableID(nextIDCode)
 	innerStmt := []jen.Code{}
 	if nextSource.Func {
-		def, err := method.Parse(&method.ParseOpts{
-			Obj:               nextSource.FuncType,
+		def, err := method.Parse(nextSource.FuncType, &method.ParseOpts{
 			Converter:         nil,
 			OutputPackagePath: ctx.OutputPackagePath,
 			ErrorPrefix:       "Error parsing struct method",

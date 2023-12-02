@@ -73,13 +73,6 @@ func TestScenario(t *testing.T) {
 
 			actualOutputFiles := toOutputFiles(testWorkDir, files)
 
-			if scenario.ErrorStartsWith != "" {
-				require.Error(t, err)
-				strErr := replaceAbsolutePath(testWorkDir, fmt.Sprint(err))
-				require.Equal(t, scenario.ErrorStartsWith, strErr[:len(scenario.ErrorStartsWith)])
-				return
-			}
-
 			if os.Getenv("UPDATE_SCENARIO") == "true" {
 				if err != nil {
 					scenario.Success = []*OutputFile{}
@@ -148,9 +141,8 @@ type Scenario struct {
 
 	Patterns []string      `yaml:"patterns,omitempty"`
 	Success  []*OutputFile `yaml:"success,omitempty"`
-	// for error cases, use either Error or ErrorStartsWith, not both
-	Error           string `yaml:"error,omitempty"`
-	ErrorStartsWith string `yaml:"error_starts_with,omitempty"`
+
+	Error string `yaml:"error,omitempty"`
 }
 
 type OutputFile struct {

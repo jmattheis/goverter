@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"go/types"
 	"sort"
 
 	"github.com/jmattheis/goverter/pkgload"
@@ -14,7 +13,7 @@ type RawLines struct {
 }
 
 type RawConverter struct {
-	Scope         *types.Scope
+	Package       string
 	InterfaceName string
 	Converter     RawLines
 	Methods       map[string]RawLines
@@ -22,20 +21,24 @@ type RawConverter struct {
 }
 
 type Raw struct {
-	Loader     *pkgload.PackageLoader
 	Converters []RawConverter
 	Global     RawLines
 }
 
-func Parse(raw *Raw) ([]*Converter, error) {
-	global, err := parseGlobal(raw.Loader, raw.Global)
+func Parse(workDir string, raw *Raw) ([]*Converter, error) {
+	loader, err := pkgload.New(workDir, getPackages(raw))
+	if err != nil {
+		return nil, err
+	}
+
+	global, err := parseGlobal(loader, raw.Global)
 	if err != nil {
 		return nil, err
 	}
 
 	converters := []*Converter{}
 	for _, rawConverter := range raw.Converters {
-		converter, err := parseConverter(raw.Loader, &rawConverter, *global)
+		converter, err := parseConverter(loader, &rawConverter, *global)
 		if err != nil {
 			return nil, err
 		}
