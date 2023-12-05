@@ -132,6 +132,10 @@ func (g *generator) buildMethod(genMethod *generatedMethod, errWrapper builder.E
 }
 
 func (g *generator) buildNoLookup(ctx *builder.MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *builder.Error) {
+	if err := g.getOverlappingStructDefinition(ctx, source, target); err != nil {
+		return nil, nil, err
+	}
+
 	for _, rule := range BuildSteps {
 		if rule.Matches(ctx, source, target) {
 			return rule.Build(g, ctx, sourceID, source, target)
@@ -301,21 +305,6 @@ func (g *generator) Build(
 }
 
 func (g *generator) createSubMethod(ctx *builder.MethodContext, sourceID *xtype.JenID, source, target *xtype.Type, errWrapper builder.ErrorWrapper) ([]jen.Code, *xtype.JenID, *builder.Error) {
-	if def, ok := g.getOverlappingStructDefinition(source, target); ok {
-		return nil, nil, builder.NewError(fmt.Sprintf(`Overlapping struct settings found.
-
-Move these field related settings:
-    goverter:%s
-
-from this method:
-    %s
-
-To a method you have to create with the following signature:
-    func(%s) %s
-
-Goverter will not use %s inside the current conversion method, thus, field related settings would be ignored.`, strings.Join(def.RawFieldSettings, "\n    goverter:"), def.ID, source.String, target.String, def.Name))
-	}
-
 	signature := xtype.SignatureOf(source, target)
 
 	name := g.namer.Name(source.UnescapedID() + "To" + strings.Title(target.UnescapedID()))
@@ -351,9 +340,9 @@ func (g *generator) hasMethod(source, target types.Type) bool {
 	return ok
 }
 
-func (g *generator) getOverlappingStructDefinition(source, target *xtype.Type) (*generatedMethod, bool) {
+func (g *generator) getOverlappingStructDefinition(ctx *builder.MethodContext, source, target *xtype.Type) *builder.Error {
 	if !source.Struct || !target.Struct {
-		return nil, false
+		return nil
 	}
 
 	overlapping := []xtype.Signature{
@@ -363,9 +352,27 @@ func (g *generator) getOverlappingStructDefinition(source, target *xtype.Type) (
 	}
 
 	for _, sig := range overlapping {
+		if ctx.Signature == sig {
+			continue
+		}
 		if def, ok := g.lookup[sig]; ok && len(def.RawFieldSettings) > 0 {
-			return def, true
+			var toMethod string
+			if def, ok := g.lookup[ctx.Signature]; ok && def.Explicit {
+				toMethod = fmt.Sprintf("to the %q method.", def.Name)
+			} else {
+				toMethod = fmt.Sprintf("to a newly created method with this signature:\n    func(%s) %s", source.String, target.String)
+			}
+
+			return builder.NewError(fmt.Sprintf(`Overlapping struct settings found.
+
+Move these field related settings:
+    goverter:%s
+
+from the %q method %s
+
+Goverter won't use %q inside the current conversion method
+and therefore the defined field settings would be ignored.`, strings.Join(def.RawFieldSettings, "\n    goverter:"), def.Name, toMethod, def.Name))
 		}
 	}
-	return nil, false
+	return nil
 }

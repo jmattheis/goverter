@@ -3,20 +3,21 @@ input:
         package structs
 
         // goverter:converter
+        // goverter:useZeroValueOnPointerInconsistency
         type Converter interface {
             Convert2(Input2) Output2
 
             // goverter:map FullName Name
-            Convert(source Input) *Output
+            Convert(source *Input) Output
         }
         type Input struct {
             FullName string
         }
         type Input2 struct {
-            Value Input
+            Value *Input
         }
         type Output2 struct {
-            Value Output
+            Value *Output
         }
         type Output struct {
             Name string
@@ -27,12 +28,16 @@ error: |-
 
     | github.com/jmattheis/goverter/execution.Input2
     |
-    |      | github.com/jmattheis/goverter/execution.Input
+    |      | *github.com/jmattheis/goverter/execution.Input
     |      |
-    source.Value
-    target.Value
+    |      |    | github.com/jmattheis/goverter/execution.Input
+    |      |    |
+    source.Value*
+    target.Value*
+    |      |    |
+    |      |    | github.com/jmattheis/goverter/execution.Output
     |      |
-    |      | github.com/jmattheis/goverter/execution.Output
+    |      | *github.com/jmattheis/goverter/execution.Output
     |
     | github.com/jmattheis/goverter/execution.Output2
 
