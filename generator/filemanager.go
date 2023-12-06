@@ -64,5 +64,10 @@ func getOutputDir(c *config.Converter, cwd string) string {
 	if strings.HasPrefix(c.OutputFile, "@cwd/") {
 		return filepath.Join(cwd, strings.TrimPrefix(c.OutputFile, "@cwd/"))
 	}
+
+	if strings.HasPrefix(c.OutputFile, "/") {
+		return c.OutputFile
+	}
+
 	return filepath.Join(filepath.Dir(c.FileSource), c.OutputFile)
 }
