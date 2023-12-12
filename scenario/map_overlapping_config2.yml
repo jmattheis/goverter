@@ -17,15 +17,26 @@ input:
             Name string
         }
 error: |-
-    Overlapping field mapping found.
-
-    Please move these field related settings:
-        goverter:ignore Age
-
-    from this method:
-        func (github.com/jmattheis/goverter/execution.Converter).Convert(source *github.com/jmattheis/goverter/execution.Input) *github.com/jmattheis/goverter/execution.Output
-
-    to this method:
+    Error while creating converter method:
         func (github.com/jmattheis/goverter/execution.Converter).ConvertSub(source github.com/jmattheis/goverter/execution.Input) *github.com/jmattheis/goverter/execution.Output
 
-    Goverter will use ConvertSub inside the implementation of Convert, thus, field related settings would be ignored.
+    | github.com/jmattheis/goverter/execution.Input
+    |
+    |     | github.com/jmattheis/goverter/execution.Input
+    |     |
+    source*
+    target*
+    |     |
+    |     | github.com/jmattheis/goverter/execution.Output
+    |
+    | *github.com/jmattheis/goverter/execution.Output
+
+    Overlapping struct settings found.
+
+    Move these field related settings:
+        goverter:ignore Age
+
+    from the "Convert" method to the "ConvertSub" method.
+
+    Goverter won't use "Convert" inside the current conversion method
+    and therefore the defined field settings would be ignored.

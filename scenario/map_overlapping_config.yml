@@ -19,16 +19,23 @@ input:
             Age int
         }
 error: |-
-    Overlapping field mapping found.
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).ConvertSub(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
 
-    Please move these field related settings:
+    | github.com/jmattheis/goverter/execution.Input
+    |
+    source
+    target
+    |
+    | github.com/jmattheis/goverter/execution.Output
+
+    Overlapping struct settings found.
+
+    Move these field related settings:
         goverter:ignore Age
         goverter:map Name Name
 
-    from this method:
-        func (github.com/jmattheis/goverter/execution.Converter).Convert(source *github.com/jmattheis/goverter/execution.Input) *github.com/jmattheis/goverter/execution.Output
+    from the "Convert" method to the "ConvertSub" method.
 
-    to this method:
-        func (github.com/jmattheis/goverter/execution.Converter).ConvertSub(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
-
-    Goverter will use ConvertSub inside the implementation of Convert, thus, field related settings would be ignored.
+    Goverter won't use "Convert" inside the current conversion method
+    and therefore the defined field settings would be ignored.
