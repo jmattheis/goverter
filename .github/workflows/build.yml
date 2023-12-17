@@ -23,3 +23,17 @@ jobs:
           go-version: 1.16.x
       - uses: actions/checkout@v3
       - run: go build ./cmd/goverter
+  build_docs:
+    if: github.ref != 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 20
+          cache: yarn
+          cache-dependency-path: docs/yarn.lock
+      - working-directory: docs
+        run: |
+          yarn install --frozen-lockfile
+          yarn docs:build
