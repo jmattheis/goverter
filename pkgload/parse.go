@@ -25,13 +25,13 @@ func ParseMethodString(cwd, fullMethod string) (pkg, name string, err error) {
 			// example: goverter:extend :MyLocalConvert
 			// the purpose of the ':' in this case is confusing, do not allow such case
 			return pkg, name, fmt.Errorf(`package path must not be empty in the custom method %q.
-See https://goverter.jmattheis.de/#/config/extend`, fullMethod)
+See https://goverter.jmattheis.de/reference/extend`, fullMethod)
 		}
 	}
 
 	if name == "" {
 		return pkg, name, fmt.Errorf(`method name pattern is required in the custom method %q.
-See https://goverter.jmattheis.de/#/config/extend`, fullMethod)
+See https://goverter.jmattheis.de/reference/extend`, fullMethod)
 	}
 	if strings.Contains(pkg, "...") {
 		return pkg, name, fmt.Errorf(`package wildcard pattern ... is not supported: %q`, fullMethod)

@@ -20,4 +20,4 @@ error: |-
     TypeMismatch: Cannot convert func() string to func() string
 
     You can define a custom conversion method with extend:
-    https://goverter.jmattheis.de/#/config/extend
+    https://goverter.jmattheis.de/reference/extend

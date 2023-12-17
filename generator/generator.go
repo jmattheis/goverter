@@ -147,16 +147,16 @@ func (g *generator) buildNoLookup(ctx *builder.MethodContext, sourceID *xtype.Je
 It is unclear how nil should be handled in the pointer to non pointer conversion.
 
 You can enable useZeroValueOnPointerInconsistency to instruct goverter to use the zero value if source is nil
-https://goverter.jmattheis.de/#/config/useZeroValueOnPointerInconsistency
+https://goverter.jmattheis.de/reference/useZeroValueOnPointerInconsistency
 
 or you can define a custom conversion method with extend:
-https://goverter.jmattheis.de/#/config/extend`, source.T, target.T))
+https://goverter.jmattheis.de/reference/extend`, source.T, target.T))
 	}
 
 	return nil, nil, builder.NewError(fmt.Sprintf(`TypeMismatch: Cannot convert %s to %s
 
 You can define a custom conversion method with extend:
-https://goverter.jmattheis.de/#/config/extend`, source.T, target.T))
+https://goverter.jmattheis.de/reference/extend`, source.T, target.T))
 }
 
 func (g *generator) CallMethod(
