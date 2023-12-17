@@ -312,5 +312,5 @@ Explicitly define the mapping via goverter:map. Example:
 
     goverter:map %s %s
 
-See https://goverter.jmattheis.de/#/config/map`, name, strings.Join(ambNames, ", "), ambNames[0], name)
+See https://goverter.jmattheis.de/reference/map`, name, strings.Join(ambNames, ", "), ambNames[0], name)
 }

@@ -48,7 +48,7 @@ error: |-
     It is unclear how nil should be handled in the pointer to non pointer conversion.
 
     You can enable useZeroValueOnPointerInconsistency to instruct goverter to use the zero value if source is nil
-    https://goverter.jmattheis.de/#/config/useZeroValueOnPointerInconsistency
+    https://goverter.jmattheis.de/reference/useZeroValueOnPointerInconsistency
 
     or you can define a custom conversion method with extend:
-    https://goverter.jmattheis.de/#/config/extend
+    https://goverter.jmattheis.de/reference/extend

@@ -27,9 +27,9 @@ do is create an interface and execute goverter. The project is meant as
 alternative to [jinzhu/copier](https://github.com/jinzhu/copier) that doesn't
 use reflection.
 
-[Installation](https://goverter.jmattheis.de/#/install) ᛫
-[CLI](https://goverter.jmattheis.de/#/cli) ᛫
-[Config](https://goverter.jmattheis.de/#/config/)
+[Installation](https://goverter.jmattheis.de/guide/install) ᛫
+[CLI](https://goverter.jmattheis.de/reference/cli) ᛫
+[Config](https://goverter.jmattheis.de/reference/settings)
 
 ## Features
 
@@ -39,8 +39,8 @@ use reflection.
 - [Deep copies](https://en.wikipedia.org/wiki/Object_copying#Deep_copy) per
   default and supports [shallow
   copying](https://en.wikipedia.org/wiki/Object_copying#Shallow_copy)
-- **Customizable**: [You can implement custom converter methods](https://goverter.jmattheis.de/#/config/extend)
-- [Clear errors when generating the conversion methods](https://goverter.jmattheis.de/#/generation?id=error-early) if
+- **Customizable**: [You can implement custom converter methods](https://goverter.jmattheis.de/reference/extend)
+- [Clear errors when generating the conversion methods](https://goverter.jmattheis.de/guide/error-early) if
   - the target struct has unmapped fields
   - types cannot be converted without losing information
 
@@ -55,7 +55,7 @@ use reflection.
     ```
 
 1. Create your converter interface and mark it with a comment containing
-   [`goverter:converter`](https://goverter.jmattheis.de/#/config/converter)
+   [`goverter:converter`](https://goverter.jmattheis.de/reference/converter)
 
     `input.go`
 
@@ -85,16 +85,17 @@ use reflection.
     }
     ```
 
-    See [Configuration](https://goverter.jmattheis.de/#/config) for more information.
+    See [Settings](https://goverter.jmattheis.de/reference/settings) for more information.
 
 1. Run `goverter`:
 
     ```bash
-    $ go run github.com/jmattheis/goverter/cmd/goverter@v1.2.0 gen ./
+    $ go run github.com/jmattheis/goverter/cmd/goverter@latest gen ./
     ```
 
-    See [Installation](https://goverter.jmattheis.de/#/install) and
-    [CLI](https://goverter.jmattheis.de/#/cli) for more information.
+    It's recommended to use an explicit version instead of `latest`. See
+    [Installation](https://goverter.jmattheis.de/guide/install) and
+    [CLI](https://goverter.jmattheis.de/reference/cli) for more information.
 
 1. goverter created a file at `./generated/generated.go`, it may look like this:
 
@@ -123,7 +124,7 @@ use reflection.
     }
     ```
 
-    See [Generation](https://goverter.jmattheis.de/#/generation) for more information.
+    See [Generation](https://goverter.jmattheis.de/explanation/generation) for more information.
 
 ## Versioning
 

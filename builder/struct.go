@@ -329,9 +329,9 @@ func unexportedStructError(targetField, sourceType, targetType string) string {
 Possible solutions:
 
 * Ignore the given field:
-  https://goverter.jmattheis.de/#/config/ignore
+  https://goverter.jmattheis.de/reference/ignore
 
 * Create a custom converter function:
-  https://goverter.jmattheis.de/#/config/extend
-  https://goverter.jmattheis.de/#/config/map`, targetField)
+  https://goverter.jmattheis.de/reference/extend
+  https://goverter.jmattheis.de/reference/map`, targetField)
 }

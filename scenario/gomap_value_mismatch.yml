@@ -24,4 +24,4 @@ error: |-
     TypeMismatch: Cannot convert int to int64
 
     You can define a custom conversion method with extend:
-    https://goverter.jmattheis.de/#/config/extend
+    https://goverter.jmattheis.de/reference/extend

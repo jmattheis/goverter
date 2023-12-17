@@ -84,7 +84,7 @@ OPTIONS:
 
   -g [value], -global [value]:
       apply settings to all defined converters. For a list of available
-      settings see: https://goverter.jmattheis.de/#/config/
+      settings see: https://goverter.jmattheis.de/reference/settings
 
   -h, --help:
       display this help page
