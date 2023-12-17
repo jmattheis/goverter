@@ -3,3 +3,7 @@
 /c.out
 /coverage.txt
 /.vscode
+
+node_modules/
+/docs/.vitepress/cache
+/docs/.vitepress/dist

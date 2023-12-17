@@ -1,48 +1,12 @@
-<p align="center">
-    <img width="300" src=".github/logo.svg" />
-</p>
-
-<h1 align="center">goverter</h1>
-<p align="center"><i>a "type-safe Go converter" generator</i></p>
-<p align="center">
-    <a href="https://github.com/jmattheis/goverter/actions/workflows/build.yml">
-        <img alt="Build Status" src="https://github.com/jmattheis/goverter/actions/workflows/build.yml/badge.svg">
-    </a>
-     <a href="https://codecov.io/gh/jmattheis/goverter">
-        <img alt="codecov" src="https://codecov.io/gh/jmattheis/goverter/branch/main/graph/badge.svg">
-    </a>
-    <a href="https://goreportcard.com/report/github.com/jmattheis/goverter">
-        <img alt="Go Report Card" src="https://goreportcard.com/badge/github.com/jmattheis/goverter">
-    </a>
-    <a href="https://pkg.go.dev/github.com/jmattheis/goverter">
-        <img alt="Go Reference" src="https://pkg.go.dev/badge/github.com/jmattheis/goverter.svg">
-    </a>
-    <a href="https://github.com/jmattheis/goverter/releases/latest">
-        <img alt="latest release" src="https://img.shields.io/github/release/jmattheis/goverter.svg">
-    </a>
-</p>
+<script setup>
+import { data as libVersion } from './version.data.js'
+</script>
+# Goverter
 
 goverter is a tool for creating type-safe converters. All you have to
 do is create an interface and execute goverter. The project is meant as
 alternative to [jinzhu/copier](https://github.com/jinzhu/copier) that doesn't
 use reflection.
-
-[Installation](https://goverter.jmattheis.de/guide/install) ᛫
-[CLI](https://goverter.jmattheis.de/reference/cli) ᛫
-[Config](https://goverter.jmattheis.de/reference/settings)
-
-## Features
-
-- **Fast execution**: No reflection is used at runtime
-- Automatically converts builtin types: slices, maps, named types, primitive
-  types, pointers, structs with same fields
-- [Deep copies](https://en.wikipedia.org/wiki/Object_copying#Deep_copy) per
-  default and supports [shallow
-  copying](https://en.wikipedia.org/wiki/Object_copying#Shallow_copy)
-- **Customizable**: [You can implement custom converter methods](https://goverter.jmattheis.de/reference/extend)
-- [Clear errors when generating the conversion methods](https://goverter.jmattheis.de/guide/error-early) if
-  - the target struct has unmapped fields
-  - types cannot be converted without losing information
 
 ## Getting Started
 
@@ -89,8 +53,8 @@ use reflection.
 
 1. Run `goverter`:
 
-    ```bash
-    $ go run github.com/jmattheis/goverter/cmd/goverter@latest gen ./
+    ```bash-vue
+    $ go run github.com/jmattheis/goverter/cmd/goverter@{{ libVersion }} gen ./
     ```
 
     It's recommended to use an explicit version instead of `latest`. See
@@ -125,14 +89,3 @@ use reflection.
     ```
 
     See [Generation](https://goverter.jmattheis.de/explanation/generation) for more information.
-
-## Versioning
-
-goverter uses [SemVer](http://semver.org/) for versioning the cli.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE)
-file for details
-
-_Logo by [MariaLetta](https://github.com/MariaLetta)_
