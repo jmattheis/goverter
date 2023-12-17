@@ -24,6 +24,7 @@ type ParseDocsConfig struct {
 	PackagePattern []string
 	// WorkingDir is a directory to invoke the tool on. If omitted, current directory is used.
 	WorkingDir string
+	BuildTags  string
 }
 
 // Converter defines a converter that was marked with converterMarker.
@@ -40,6 +41,9 @@ func ParseDocs(c ParseDocsConfig) ([]config.RawConverter, error) {
 		Mode: packages.NeedSyntax | packages.NeedCompiledGoFiles | packages.NeedTypes |
 			packages.NeedModule | packages.NeedFiles | packages.NeedName | packages.NeedImports,
 		Dir: c.WorkingDir,
+	}
+	if c.BuildTags != "" {
+		loadCfg.BuildFlags = append(loadCfg.BuildFlags, "-tags", c.BuildTags)
 	}
 	pkgs, err := packages.Load(loadCfg, c.PackagePattern...)
 	if err != nil {

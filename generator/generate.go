@@ -10,7 +10,8 @@ import (
 
 // Config the generate config.
 type Config struct {
-	WorkingDir string
+	WorkingDir      string
+	BuildConstraint string
 }
 
 // BuildSteps that'll used for generation.
@@ -32,7 +33,7 @@ func Generate(converters []*config.Converter, c Config) (map[string][]byte, erro
 	manager := &fileManager{Files: map[string]*managedFile{}}
 
 	for _, converter := range converters {
-		jenFile, err := manager.Get(converter, c.WorkingDir)
+		jenFile, err := manager.Get(converter, c)
 		if err != nil {
 			return nil, err
 		}

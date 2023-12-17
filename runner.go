@@ -17,6 +17,10 @@ type GenerateConfig struct {
 	WorkingDir string
 	// Global are the global config commands that will be applied to all converters
 	Global config.RawLines
+	// BuildTags is a comma separated list passed to -tags when scanning for conversion interfaces.
+	BuildTags string
+	// OutputBuildConstraint will be added as go:build constraints to all files.
+	OutputBuildConstraint string
 }
 
 // GenerateConverters generates converters.
@@ -31,6 +35,7 @@ func GenerateConverters(c *GenerateConfig) error {
 
 func generateConvertersRaw(c *GenerateConfig) (map[string][]byte, error) {
 	rawConverters, err := comments.ParseDocs(comments.ParseDocsConfig{
+		BuildTags:      c.BuildTags,
 		PackagePattern: c.PackagePatterns,
 		WorkingDir:     c.WorkingDir,
 	})
@@ -38,15 +43,22 @@ func generateConvertersRaw(c *GenerateConfig) (map[string][]byte, error) {
 		return nil, err
 	}
 
-	converters, err := config.Parse(c.WorkingDir, &config.Raw{
+	converters, err := config.Parse(&config.Raw{
+		BuildTags:  c.BuildTags,
+		WorkDir:    c.WorkingDir,
 		Converters: rawConverters,
 		Global:     c.Global,
+
+		OuputBuildConstraint: c.OutputBuildConstraint,
 	})
 	if err != nil {
 		return nil, err
 	}
 
-	return generator.Generate(converters, generator.Config{WorkingDir: c.WorkingDir})
+	return generator.Generate(converters, generator.Config{
+		WorkingDir:      c.WorkingDir,
+		BuildConstraint: c.OutputBuildConstraint,
+	})
 }
 
 func writeFiles(files map[string][]byte) error {

@@ -52,9 +52,7 @@ func TestScenario(t *testing.T) {
 				err = os.WriteFile(filepath.Join(testWorkDir, name), []byte(content), os.ModePerm)
 				require.NoError(t, err)
 			}
-			genPkgName := "generated"
-
-			global := append([]string{"output:package github.com/jmattheis/goverter/execution/" + genPkgName}, scenario.Global...)
+			global := append([]string{"output:package github.com/jmattheis/goverter/execution/generated"}, scenario.Global...)
 
 			patterns := scenario.Patterns
 			if len(patterns) == 0 {
@@ -63,8 +61,10 @@ func TestScenario(t *testing.T) {
 
 			files, err := generateConvertersRaw(
 				&GenerateConfig{
-					WorkingDir:      testWorkDir,
-					PackagePatterns: patterns,
+					WorkingDir:            testWorkDir,
+					PackagePatterns:       patterns,
+					OutputBuildConstraint: scenario.BuildConstraint,
+					BuildTags:             "goverter",
 					Global: config.RawLines{
 						Lines:    global,
 						Location: "scenario global",
@@ -138,6 +138,8 @@ func toOutputFiles(execDir string, files map[string][]byte) []*OutputFile {
 type Scenario struct {
 	Input  map[string]string `yaml:"input"`
 	Global []string          `yaml:"global,omitempty"`
+
+	BuildConstraint string `yaml:"build_constraint,omitempty"`
 
 	Patterns []string      `yaml:"patterns,omitempty"`
 	Success  []*OutputFile `yaml:"success,omitempty"`

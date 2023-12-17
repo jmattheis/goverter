@@ -10,11 +10,11 @@ import (
 	"golang.org/x/tools/go/packages"
 )
 
-func New(workDir string, paths []string) (*PackageLoader, error) {
+func New(workDir, buildTags string, paths []string) (*PackageLoader, error) {
 	loader := &PackageLoader{
 		lookup: map[string]*packages.Package{},
 	}
-	err := loader.load(workDir, paths)
+	err := loader.load(workDir, buildTags, paths)
 	return loader, err
 }
 
@@ -128,10 +128,13 @@ func (g *PackageLoader) getOneParsed(pkgName, name string, opts *method.ParseOpt
 }
 
 // loadPackages is used to load extend packages, with caching support.
-func (g *PackageLoader) load(workDir string, paths []string) error {
+func (g *PackageLoader) load(workDir, buildTags string, paths []string) error {
 	packagesCfg := &packages.Config{
 		Mode: packages.NeedName | packages.NeedTypes | packages.NeedTypesInfo,
 		Dir:  workDir,
+	}
+	if buildTags != "" {
+		packagesCfg.BuildFlags = append(packagesCfg.BuildFlags, "-tags", buildTags)
 	}
 	pkgs, err := packages.Load(packagesCfg, paths...)
 	if err != nil {
