@@ -22,6 +22,7 @@ export default defineConfig({
     ],
   ],
   themeConfig: {
+    logo: "favicon.svg",
     editLink: {
       pattern: "https://github.com/jmattheis/goverter/tree/main/docs/:path",
     },
@@ -99,6 +100,7 @@ export default defineConfig({
         items: [{ text: "Generation", link: "/explanation/generation" }],
       },
       { text: "FAQ", link: "/faq" },
+      { text: "Changelog", link: "/changelog" },
       { text: "Alternatives", link: "/alternatives" },
       { text: "GitHub", link: "https://github.com/jmattheis/goverter" },
     ],
