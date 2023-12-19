@@ -147,9 +147,6 @@ func mapField(
 	additionalFieldSources []xtype.FieldSources,
 ) (*xtype.JenID, *xtype.Type, []jen.Code, []*Path, bool, *Error) {
 	lift := []*Path{}
-	ignored := func(name string) bool {
-		return ctx.Field(target, name).Ignore
-	}
 
 	def := ctx.Field(target, targetField.Name())
 	pathString := def.Source
@@ -166,7 +163,7 @@ func mapField(
 
 	var path []string
 	if pathString == "" {
-		sourceMatch, err := xtype.FindField(targetField.Name(), ctx.Conf.MatchIgnoreCase, ignored, source, additionalFieldSources)
+		sourceMatch, err := xtype.FindField(targetField.Name(), ctx.Conf.MatchIgnoreCase, source, additionalFieldSources)
 		if err != nil {
 			cause := fmt.Sprintf("Cannot match the target field with the source entry: %s.", err.Error())
 			skip := false

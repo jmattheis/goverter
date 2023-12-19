@@ -84,17 +84,13 @@ type SimpleStructField struct {
 // StructField returns the type of a struct field and its name upon successful match or
 // an error if it is not found. This method will also return a detailed error if matchIgnoreCase
 // is enabled and there are multiple non-exact matches.
-func (t Type) findAllFields(path []string, name string, ignoreCase bool, ignored func(name string) bool) (*StructField, []*StructField) {
+func (t Type) findAllFields(path []string, name string, ignoreCase bool) (*StructField, []*StructField) {
 	if !t.Struct {
 		panic("trying to get field of non struct")
 	}
 
 	var matches []*StructField
 	handle := func(obj types.Object) *StructField {
-		if ignored(obj.Name()) {
-			return nil
-		}
-
 		exact := obj.Name() == name
 		if exact || (ignoreCase && strings.EqualFold(obj.Name(), name)) {
 			// exact match takes precedence over case-insensitive match
@@ -132,7 +128,7 @@ type FieldSources struct {
 }
 
 func FindExactField(source *Type, name string) (*SimpleStructField, error) {
-	exactMatch, _ := source.findAllFields(nil, name, false, func(name string) bool { return false })
+	exactMatch, _ := source.findAllFields(nil, name, false)
 	if exactMatch == nil {
 		return nil, fmt.Errorf("%q does not exist", name)
 	}
@@ -145,15 +141,15 @@ func (err *NoMatchError) Error() string {
 	return fmt.Sprintf("\"%s\" does not exist", err.Field)
 }
 
-func FindField(name string, ignoreCase bool, ignored func(name string) bool, source *Type, additionalFieldSources []FieldSources) (*StructField, error) {
-	exactMatch, ignoreCaseMatches := source.findAllFields(nil, name, ignoreCase, ignored)
+func FindField(name string, ignoreCase bool, source *Type, additionalFieldSources []FieldSources) (*StructField, error) {
+	exactMatch, ignoreCaseMatches := source.findAllFields(nil, name, ignoreCase)
 	var exactMatches []*StructField
 	if exactMatch != nil {
 		exactMatches = append(exactMatches, exactMatch)
 	}
 
 	for _, source := range additionalFieldSources {
-		sourceExactMatch, sourceIgnoreCaseMatches := source.Type.findAllFields(source.Path, name, ignoreCase, ignored)
+		sourceExactMatch, sourceIgnoreCaseMatches := source.Type.findAllFields(source.Path, name, ignoreCase)
 		if sourceExactMatch != nil {
 			exactMatches = append(exactMatches, sourceExactMatch)
 		}
