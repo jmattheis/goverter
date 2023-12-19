@@ -1,0 +1,28 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:map Name Nested.Name
+            Convert(source Input) Output
+        }
+
+        type Input struct {
+            Name string
+            Age int
+        }
+        type Output struct {
+            Age int
+            Nested Nested
+        }
+        type Nested struct {
+            Name string
+        }
+error: |-
+    error parsing 'goverter:map' at
+        @workdir/input.go:6:5
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+
+    the mapping target "Nested.Name" must be a field name but was a path.
+    Dots "." are not allowed.
