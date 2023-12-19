@@ -4,7 +4,7 @@ input:
 
         // goverter:converter
         type Converter interface {
-            // goverter:ignore Age
+            // goverter:ignore Name
             Convert(source *Input) (*Output)
 
             ConvertSub(source Input) (*Output)
@@ -34,7 +34,7 @@ error: |-
     Overlapping struct settings found.
 
     Move these field related settings:
-        goverter:ignore Age
+        goverter:ignore Name
 
     from the "Convert" method to the "ConvertSub" method.
 

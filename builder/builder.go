@@ -84,4 +84,19 @@ func (ctx *MethodContext) Field(target *xtype.Type, name string) *config.FieldMa
 	return prop
 }
 
-var emptyMapping *config.FieldMapping = &config.FieldMapping{}
+func (ctx *MethodContext) DefinedFields(target *xtype.Type) map[string]struct{} {
+	if ctx.FieldsTarget != target.String {
+		return emptyFields
+	}
+
+	f := map[string]struct{}{}
+	for name := range ctx.Conf.Fields {
+		f[name] = struct{}{}
+	}
+	return f
+}
+
+var (
+	emptyMapping *config.FieldMapping = &config.FieldMapping{}
+	emptyFields                       = map[string]struct{}{}
+)

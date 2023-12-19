@@ -35,10 +35,11 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 		return nil, nil, err
 	}
 
+	definedFields := ctx.DefinedFields(target)
 	usedSourceID := false
-
 	for i := 0; i < target.StructType.NumFields(); i++ {
 		targetField := target.StructType.Field(i)
+		delete(definedFields, targetField.Name())
 
 		fieldMapping := ctx.Field(target, targetField.Name())
 
@@ -124,6 +125,14 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 	}
 	if !usedSourceID {
 		stmt = append(stmt, jen.Id("_").Op("=").Add(sourceID.Code.Clone()))
+	}
+
+	for name := range definedFields {
+		return nil, nil, NewError(fmt.Sprintf("Field %q does not exist.\nRemove or adjust field settings referencing this field.", name)).Lift(&Path{
+			Prefix:     ".",
+			TargetID:   name,
+			TargetType: "???",
+		})
 	}
 
 	return stmt, xtype.VariableID(nameVar), nil

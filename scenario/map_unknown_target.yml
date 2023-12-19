@@ -1,0 +1,33 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:map Name Typo
+            Convert(source Input) Output
+        }
+
+        type Input struct {
+            Name string
+            Age int
+        }
+        type Output struct {
+            Age int
+            Name string
+        }
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+
+    | github.com/jmattheis/goverter/execution.Input
+    |
+    source.
+    target.Typo
+    |      |
+    |      | ???
+    |
+    | github.com/jmattheis/goverter/execution.Output
+
+    Field "Typo" does not exist.
+    Remove or adjust field settings referencing this field.
