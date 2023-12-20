@@ -47,6 +47,10 @@ export default defineConfig({
           { text: "Installation", link: "/guide/install" },
           { text: "Configure Nested", link: "/guide/configure-nested" },
           { text: "Error early", link: "/guide/error-early" },
+          {
+            text: "Output into same package",
+            link: "/guide/output-same-package",
+          },
           { text: "Migrations", link: "/guide/migration" },
         ],
       },

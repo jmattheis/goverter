@@ -1,25 +1,15 @@
 # Frequently Asked Questions
 
-## Generate code into the same package
+[[toc]]
 
-Internally Goverter cannot automatically infer the target package path. This
-path is required to correctly import relative types. To fix this you have to
-configure the full package path in
-[`output:package`](reference/output.md#outputpackage).
+## How to generate code into the same package
 
-E.g.
-```go
-// goverter:converter
-// goverter:package github.com/jmattheis/goverter/example/sample
-type Converter interface {}
-```
+See [this guide.](./guide/output-same-package.md)
 
-Afterwards, goverter should correctly import types in the same package.
+## How to fix `import cycle not allowed`
 
-## import cycle not allowed
+See [this guide.](./guide/output-same-package.md)
 
-See [Generate code into the same package](#generate-code-into-the-same-package)
-
-## Generate only shallow copy
+## How to generate shallow copies
 
 See [`skipCopySameType`](reference/skipCopySameType.md).
