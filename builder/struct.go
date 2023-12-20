@@ -35,10 +35,11 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 		return nil, nil, err
 	}
 
+	definedFields := ctx.DefinedFields(target)
 	usedSourceID := false
-
 	for i := 0; i < target.StructType.NumFields(); i++ {
 		targetField := target.StructType.Field(i)
+		delete(definedFields, targetField.Name())
 
 		fieldMapping := ctx.Field(target, targetField.Name())
 
@@ -126,6 +127,14 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 		stmt = append(stmt, jen.Id("_").Op("=").Add(sourceID.Code.Clone()))
 	}
 
+	for name := range definedFields {
+		return nil, nil, NewError(fmt.Sprintf("Field %q does not exist.\nRemove or adjust field settings referencing this field.", name)).Lift(&Path{
+			Prefix:     ".",
+			TargetID:   name,
+			TargetType: "???",
+		})
+	}
+
 	return stmt, xtype.VariableID(nameVar), nil
 }
 
@@ -138,9 +147,6 @@ func mapField(
 	additionalFieldSources []xtype.FieldSources,
 ) (*xtype.JenID, *xtype.Type, []jen.Code, []*Path, bool, *Error) {
 	lift := []*Path{}
-	ignored := func(name string) bool {
-		return ctx.Field(target, name).Ignore
-	}
 
 	def := ctx.Field(target, targetField.Name())
 	pathString := def.Source
@@ -157,7 +163,7 @@ func mapField(
 
 	var path []string
 	if pathString == "" {
-		sourceMatch, err := xtype.FindField(targetField.Name(), ctx.Conf.MatchIgnoreCase, ignored, source, additionalFieldSources)
+		sourceMatch, err := xtype.FindField(targetField.Name(), ctx.Conf.MatchIgnoreCase, source, additionalFieldSources)
 		if err != nil {
 			cause := fmt.Sprintf("Cannot match the target field with the source entry: %s.", err.Error())
 			skip := false

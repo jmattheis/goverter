@@ -1,4 +1,4 @@
-# name
+# Setting: name
 
 `name NAME` can be defined as [CLI argument](./define-settings.md#cli) or
 [converter comment](./define-settings.md#converter).

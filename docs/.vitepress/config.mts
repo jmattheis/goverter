@@ -22,10 +22,18 @@ export default defineConfig({
     ],
   ],
   themeConfig: {
+    logo: "favicon.svg",
     editLink: {
       pattern: "https://github.com/jmattheis/goverter/tree/main/docs/:path",
     },
-    search: { provider: "local" },
+    search: {
+      provider: "algolia",
+      options: {
+        appId: "ET81SWAMKQ",
+        apiKey: "d21d3398e70912a7e1ef0eee97ee1376",
+        indexName: "goverter-jmattheis",
+      },
+    },
     nav: [
       { text: "Getting Started", link: "/" },
       { text: "Settings", link: "/reference/settings" },
@@ -99,6 +107,7 @@ export default defineConfig({
         items: [{ text: "Generation", link: "/explanation/generation" }],
       },
       { text: "FAQ", link: "/faq" },
+      { text: "Changelog", link: "/changelog" },
       { text: "Alternatives", link: "/alternatives" },
       { text: "GitHub", link: "https://github.com/jmattheis/goverter" },
     ],

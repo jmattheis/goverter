@@ -1,4 +1,4 @@
-# map
+# Setting: map
 
 `map [SOURCE-PATH] TARGET [| METHOD]` can be defined as [method comment](./define-settings.md#method).
 

@@ -1,4 +1,4 @@
-# struct
+# Setting: struct
 
 ## struct:comment COMMENT
 

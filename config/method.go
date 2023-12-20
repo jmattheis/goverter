@@ -135,5 +135,8 @@ func parseMethodMap(remaining string) (source, target, custom string, err error)
 	default:
 		err = fmt.Errorf("too many fields expected at most 2 fields got %d: %s", len(fields), remaining)
 	}
+	if err == nil && strings.ContainsRune(target, '.') {
+		err = fmt.Errorf("the mapping target %q must be a field name but was a path.\nDots \".\" are not allowed.", target)
+	}
 	return source, target, custom, err
 }

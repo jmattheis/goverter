@@ -1,4 +1,4 @@
-# autoMap
+# Setting: autoMap
 
 `autoMap PATH` can be defined as [method comment](./define-settings.md#method).
 
