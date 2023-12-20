@@ -1,4 +1,4 @@
-# converter
+# Setting: converter
 
 `converter` accepts no arguments and can be defined as [converter
 comment](./define-settings.md#converter).

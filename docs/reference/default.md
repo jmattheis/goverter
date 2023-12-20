@@ -1,4 +1,4 @@
-# default
+# Setting: default
 
 `default [PACKAGE:]METHOD` can be defined as [method
 comment](./define-settings.md#method).

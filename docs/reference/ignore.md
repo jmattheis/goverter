@@ -1,4 +1,4 @@
-# ignore
+# Setting: ignore
 
 `ignore FIELD...` can be defined as [method comment](./define-settings.md#method).
 

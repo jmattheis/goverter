@@ -1,4 +1,4 @@
-# skipCopySameType
+# Setting: skipCopySameType
 
 `skipCopySameType [yes,no]` is a [boolean setting](./define-settings.md#boolean)
 and can be defined as [CLI argument](./define-settings.md#cli), [converter

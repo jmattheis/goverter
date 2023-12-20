@@ -1,4 +1,4 @@
-# output
+# Setting: output
 
 ## output:file
 

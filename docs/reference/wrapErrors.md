@@ -1,4 +1,4 @@
-# wrapErrors
+# Setting: wrapErrors
 
 `wrapErrors [yes,no]` is a
 [boolean setting](./define-settings.md#boolean) and can be defined as
