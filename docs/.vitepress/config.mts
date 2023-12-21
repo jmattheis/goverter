@@ -45,11 +45,19 @@ export default defineConfig({
         items: [
           { text: "Getting Started", link: "/" },
           { text: "Installation", link: "/guide/install" },
-          { text: "Configure Nested", link: "/guide/configure-nested" },
           { text: "Error early", link: "/guide/error-early" },
           {
             text: "Output into same package",
             link: "/guide/output-same-package",
+          },
+          {
+            text: "Structs",
+            items: [
+              { text: "Basics", link: "/guide/struct" },
+              { text: "Unexported field", link: "/guide/unexported-field" },
+              { text: "Configure Nested", link: "/guide/configure-nested" },
+              { text: "Embedded", link: "/guide/embedded-structs" },
+            ],
           },
           { text: "Migrations", link: "/guide/migration" },
         ],

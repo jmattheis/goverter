@@ -332,12 +332,5 @@ func parseAutoMap(ctx *MethodContext, source *xtype.Type) ([]xtype.FieldSources,
 func unexportedStructError(targetField, sourceType, targetType string) string {
 	return fmt.Sprintf(`Cannot set value for unexported field "%s".
 
-Possible solutions:
-
-* Ignore the given field:
-  https://goverter.jmattheis.de/reference/ignore
-
-* Create a custom converter function:
-  https://goverter.jmattheis.de/reference/extend
-  https://goverter.jmattheis.de/reference/map`, targetField)
+See https://goverter.jmattheis.de/guide/unexported-field`, targetField)
 }
