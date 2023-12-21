@@ -43,6 +43,8 @@ use reflection.
 - [Clear errors when generating the conversion methods](https://goverter.jmattheis.de/guide/error-early) if
   - the target struct has unmapped fields
   - types cannot be converted without losing information
+- Detailed [documentation](https://goverter.jmattheis.de/) with a lot examples
+- Thoroughly tested, see [our test scenarios](./scenario)
 
 ## Getting Started
 
