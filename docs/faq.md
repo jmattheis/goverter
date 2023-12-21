@@ -1,25 +1,23 @@
 # Frequently Asked Questions
 
-## Generate code into the same package
+[[toc]]
 
-Internally Goverter cannot automatically infer the target package path. This
-path is required to correctly import relative types. To fix this you have to
-configure the full package path in
-[`output:package`](reference/output.md#outputpackage).
+## How to convert structs
 
-E.g.
-```go
-// goverter:converter
-// goverter:package github.com/jmattheis/goverter/example/sample
-type Converter interface {}
-```
+See [Guide: Struct](./guide/struct.md)
 
-Afterwards, goverter should correctly import types in the same package.
+## TypeMismatch: Cannot convert interface{} to interface{}
 
-## import cycle not allowed
+See below
 
-See [Generate code into the same package](#generate-code-into-the-same-package)
+## TypeMismatch: Cannot convert any to any
 
-## Generate only shallow copy
+Goverter doesn't know how to convert `any` to `any` or `interface{}` to
+`interface{}`, you need to define the mapping yourself. If you only want to
+pass the value without any conversion you can define it like this:
 
-See [`skipCopySameType`](reference/skipCopySameType.md).
+::: details Example (click me)
+::: code-group
+<<< @../../example/any-to-any/input.go
+<<< @../../example/any-to-any/generated/generated.go [generated/generated.go]
+:::

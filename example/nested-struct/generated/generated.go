@@ -7,24 +7,14 @@ import nestedstruct "github.com/jmattheis/goverter/example/nested-struct"
 
 type ConverterImpl struct{}
 
-func (c *ConverterImpl) Convert(source []nestedstruct.Input) []nestedstruct.Output {
-	var exampleOutputList []nestedstruct.Output
-	if source != nil {
-		exampleOutputList = make([]nestedstruct.Output, len(source))
-		for i := 0; i < len(source); i++ {
-			exampleOutputList[i] = c.exampleInputToExampleOutput(source[i])
-		}
-	}
-	return exampleOutputList
+func (c *ConverterImpl) Convert(source nestedstruct.Input) nestedstruct.Output {
+	var exampleOutput nestedstruct.Output
+	exampleOutput.Name = source.Name
+	exampleOutput.Nested = c.ConvertNested(source.Nested)
+	return exampleOutput
 }
 func (c *ConverterImpl) ConvertNested(source nestedstruct.NestedInput) nestedstruct.NestedOutput {
 	var exampleNestedOutput nestedstruct.NestedOutput
 	exampleNestedOutput.Surname = source.LastName
 	return exampleNestedOutput
-}
-func (c *ConverterImpl) exampleInputToExampleOutput(source nestedstruct.Input) nestedstruct.Output {
-	var exampleOutput nestedstruct.Output
-	exampleOutput.Name = source.Name
-	exampleOutput.Nested = c.ConvertNested(source.Nested)
-	return exampleOutput
 }
