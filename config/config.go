@@ -46,14 +46,9 @@ func Parse(raw *Raw) ([]*Converter, error) {
 
 	ctx := &context{Loader: loader, EnumTransformers: raw.EnumTransformers}
 
-	global, err := parseGlobal(ctx, raw.Global)
-	if err != nil {
-		return nil, err
-	}
-
 	converters := []*Converter{}
 	for _, rawConverter := range raw.Converters {
-		converter, err := parseConverter(ctx, &rawConverter, *global)
+		converter, err := parseConverter(loader, &rawConverter, raw.Global)
 		if err != nil {
 			return nil, err
 		}

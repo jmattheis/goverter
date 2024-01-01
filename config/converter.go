@@ -43,13 +43,7 @@ func (conf *ConverterConfig) PackageID() string {
 	return conf.OutputPackagePath + ":" + conf.OutputPackageName
 }
 
-func parseGlobal(ctx *context, global RawLines) (*ConverterConfig, error) {
-	c := Converter{ConverterConfig: DefaultConfig}
-	err := parseConverterLines(ctx, &c, "global", global)
-	return &c.ConverterConfig, err
-}
-
-func parseConverter(ctx *context, rawConverter *RawConverter, global ConverterConfig) (*Converter, error) {
+func parseConverter(ctx *context, rawConverter *RawConverter, global RawLines) (*Converter, error) {
 	v, err := ctx.Loader.GetOneRaw(rawConverter.Package, rawConverter.InterfaceName)
 	if err != nil {
 		return nil, err
@@ -58,7 +52,7 @@ func parseConverter(ctx *context, rawConverter *RawConverter, global ConverterCo
 	interfaceType := namedType.Underlying().(*types.Interface)
 
 	c := &Converter{
-		ConverterConfig: global,
+		ConverterConfig: DefaultConfig,
 		Type:            namedType,
 		FileSource:      rawConverter.FileSource,
 		Package:         rawConverter.Package,
@@ -68,6 +62,9 @@ func parseConverter(ctx *context, rawConverter *RawConverter, global ConverterCo
 		c.Name = rawConverter.InterfaceName + "Impl"
 	}
 
+	if err := parseConverterLines(ctx, c, "global", global); err != nil {
+		return nil, err
+	}
 	if err := parseConverterLines(ctx, c, c.Type.String(), rawConverter.Converter); err != nil {
 		return nil, err
 	}
