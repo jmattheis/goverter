@@ -35,14 +35,9 @@ func Parse(raw *Raw) ([]*Converter, error) {
 		return nil, err
 	}
 
-	global, err := parseGlobal(loader, raw.Global)
-	if err != nil {
-		return nil, err
-	}
-
 	converters := []*Converter{}
 	for _, rawConverter := range raw.Converters {
-		converter, err := parseConverter(loader, &rawConverter, *global)
+		converter, err := parseConverter(loader, &rawConverter, raw.Global)
 		if err != nil {
 			return nil, err
 		}
