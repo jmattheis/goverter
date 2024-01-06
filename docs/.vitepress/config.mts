@@ -109,7 +109,7 @@ export default defineConfig({
                 text: "useZeroValueOnPointerInconsistency",
                 link: "/reference/useZeroValueOnPointerInconsistency",
               },
-              { text: "wrapErrors", link: "/referenceut/wrapErrors" },
+              { text: "wrapErrors", link: "/reference/wrapErrors" },
             ],
           },
         ],
