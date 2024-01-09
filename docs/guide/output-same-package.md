@@ -57,7 +57,7 @@ Constraint](../reference/build-constraint.md) to the newly added file like this:
 <<< @../../example/samepackage/generated.go
 :::
 
-or by defining a global varibale with the type of the interface and then
+or by defining a global variable with the type of the interface and then
 assigning it in a different file containing a [Build
 Constraint](../reference/build-constraint.md).
 
