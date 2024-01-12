@@ -38,9 +38,8 @@ type Converter struct {
 // ParseDocs parses the docs for the given pattern.
 func ParseDocs(c ParseDocsConfig) ([]config.RawConverter, error) {
 	loadCfg := &packages.Config{
-		Mode: packages.NeedSyntax | packages.NeedCompiledGoFiles | packages.NeedTypes |
-			packages.NeedModule | packages.NeedFiles | packages.NeedName | packages.NeedImports,
-		Dir: c.WorkingDir,
+		Mode: packages.NeedName | packages.NeedTypes | packages.NeedTypesInfo | packages.NeedSyntax,
+		Dir:  c.WorkingDir,
 	}
 	if c.BuildTags != "" {
 		loadCfg.BuildFlags = append(loadCfg.BuildFlags, "-tags", c.BuildTags)
