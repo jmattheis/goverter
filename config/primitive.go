@@ -13,23 +13,28 @@ func parseCommand(value string) (string, string) {
 	return parts[0], ""
 }
 
-func parseBool(remaining string) (bool, error) {
+func parseEnum(name string, empty bool, remaining string, values ...string) (string, error) {
 	fields := strings.Fields(remaining)
+
 	switch {
-	case len(fields) == 0:
-		return true, nil
+	case len(fields) == 0 && empty:
+		return "", nil
 	case len(fields) == 1:
-		switch fields[0] {
-		case "yes":
-			return true, nil
-		case "no":
-			return false, nil
-		default:
-			return false, fmt.Errorf("invalid boolean value: '%s' must be one of 'yes', 'no'", fields[0])
+		for _, value := range values {
+			if fields[0] == value {
+				return value, nil
+			}
 		}
+
+		return "", fmt.Errorf("invalid %s value: '%s' must be one of '%s'", name, fields[0], strings.Join(values, "', '"))
 	default:
-		return false, fmt.Errorf("expected at most one value but got %d: %#v", len(fields), fields)
+		return "", fmt.Errorf("invalid %s value: expected one value but got %d: %s", name, len(fields), fields)
 	}
+}
+
+func parseBool(remaining string) (bool, error) {
+	val, err := parseEnum("boolean", true, remaining, "yes", "no")
+	return val == "" || val == "yes", err
 }
 
 func parseString(remaining string) (string, error) {
