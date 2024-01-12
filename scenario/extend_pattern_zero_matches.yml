@@ -8,7 +8,7 @@ input:
         }
 error: |-
     error parsing 'goverter:extend' at
-        @workdir/input.go:5:1
+        @workdir/input.go:5
         github.com/jmattheis/goverter/execution.Converter
 
     package github.com/jmattheis/goverter/execution does not have methods with names that match

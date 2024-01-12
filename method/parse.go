@@ -17,6 +17,7 @@ const (
 )
 
 type ParseOpts struct {
+	Location          string
 	Converter         types.Type
 	OutputPackagePath string
 
@@ -29,7 +30,11 @@ type ParseOpts struct {
 // Parse parses an function into a Definition.
 func Parse(obj types.Object, opts *ParseOpts) (*Definition, error) {
 	formatErr := func(s string) error {
-		return fmt.Errorf("%s:\n    %s\n\n%s", opts.ErrorPrefix, obj.String(), s)
+		loc := ""
+		if opts.Location != "" {
+			loc = opts.Location + "\n    "
+		}
+		return fmt.Errorf("%s:\n    %s%s\n\n%s", opts.ErrorPrefix, loc, obj.String(), s)
 	}
 
 	fn, ok := obj.(*types.Func)

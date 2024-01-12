@@ -29,6 +29,7 @@ input:
         const Green Color = "green"
 error: |-
     Error while creating converter method:
+        @workdir/input.go:12
         func (github.com/jmattheis/goverter/execution.Converter).Convert(github.com/jmattheis/goverter/execution/input.Color) (github.com/jmattheis/goverter/execution/output.Color, error)
 
     | github.com/jmattheis/goverter/execution/input.Color

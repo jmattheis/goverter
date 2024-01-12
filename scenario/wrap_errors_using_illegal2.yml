@@ -10,7 +10,7 @@ input:
         }
 error: |-
     error parsing 'goverter:wrapErrors' at
-        @workdir/input.go:7:1
+        @workdir/input.go:7
         github.com/jmattheis/goverter/execution.Converter
 
     cannot be used in combination with wrapErrorsUsing

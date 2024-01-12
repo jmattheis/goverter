@@ -93,13 +93,13 @@ func parseGenDecl(fset *token.FileSet, pkg *types.Package, decl *ast.GenDecl) ([
 		typeName := typeSpec.Name.String()
 
 		location := fset.Position(decl.Pos())
-		converterLines := parseRawLines(location.String(), declDocs)
+		converterLines := parseRawLines(fileWithLine(location), declDocs)
 		methods, err := parseInterface(fset, interfaceType)
 		if err != nil {
 			return nil, fmt.Errorf("type %s: %s", typeName, err)
 		}
 		converter := config.RawConverter{
-			FileSource:    location.Filename,
+			FileName:      location.Filename,
 			InterfaceName: typeName,
 			Converter:     converterLines,
 			Methods:       methods,
@@ -118,13 +118,13 @@ func parseGenDecl(fset *token.FileSet, pkg *types.Package, decl *ast.GenDecl) ([
 			}
 			typeName := typeSpec.Name.String()
 			location := fset.Position(interfaceType.Pos())
-			lines := parseRawLines(location.String(), typeSpec.Doc.Text())
+			lines := parseRawLines(fileWithLine(location), typeSpec.Doc.Text())
 			methods, err := parseInterface(fset, interfaceType)
 			if err != nil {
 				return nil, fmt.Errorf("type %s: %s", typeName, err)
 			}
 			converters = append(converters, config.RawConverter{
-				FileSource:    location.Filename,
+				FileName:      location.Filename,
 				InterfaceName: typeName,
 				Converter:     lines,
 				Methods:       methods,
@@ -144,8 +144,8 @@ func parseInterface(location *token.FileSet, inter *ast.InterfaceType) (map[stri
 		}
 		name := method.Names[0].String()
 
-		location := location.Position(method.Pos()).String()
-		result[name] = parseRawLines(location, method.Doc.Text())
+		location := location.Position(method.Pos())
+		result[name] = parseRawLines(fileWithLine(location), method.Doc.Text())
 	}
 	return result, nil
 }
@@ -161,4 +161,8 @@ func parseRawLines(location, comment string) config.RawLines {
 		}
 	}
 	return raw
+}
+
+func fileWithLine(p token.Position) string {
+	return fmt.Sprintf("%s:%d", p.Filename, p.Line)
 }

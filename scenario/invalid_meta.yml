@@ -8,7 +8,7 @@ input:
         }
 error: |-
     error parsing 'goverter:not_existing' at
-        @workdir/input.go:5:1
+        @workdir/input.go:5
         github.com/jmattheis/goverter/execution.Converter
 
     unknown setting: not_existing

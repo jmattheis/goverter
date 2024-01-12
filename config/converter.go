@@ -20,10 +20,12 @@ var DefaultConfig = ConverterConfig{
 
 type Converter struct {
 	ConverterConfig
-	Package    string
-	FileSource string
-	Type       types.Type
-	Methods    map[string]*Method
+	Package  string
+	FileName string
+	Type     types.Type
+	Methods  map[string]*Method
+
+	Location string
 }
 
 type ConverterConfig struct {
@@ -54,9 +56,10 @@ func parseConverter(ctx *context, rawConverter *RawConverter, global RawLines) (
 	c := &Converter{
 		ConverterConfig: DefaultConfig,
 		Type:            namedType,
-		FileSource:      rawConverter.FileSource,
+		FileName:        rawConverter.FileName,
 		Package:         rawConverter.Package,
 		Methods:         map[string]*Method{},
+		Location:        rawConverter.Converter.Location,
 	}
 	if c.Name == "" {
 		c.Name = rawConverter.InterfaceName + "Impl"

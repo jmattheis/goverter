@@ -9,7 +9,7 @@ input:
         )
 error: |-
     error parsing 'goverter:' at
-        @workdir/input.go:6:15
+        @workdir/input.go:6
         github.com/jmattheis/goverter/execution.Converter
 
     missing setting key

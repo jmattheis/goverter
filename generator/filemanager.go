@@ -45,7 +45,7 @@ func (m *fileManager) Get(conv *config.Converter, cfg Config) (*jen.File, error)
 
 	if f.PackageID != conv.PackageID() {
 		return nil, fmt.Errorf("Error creating converters\n    %s\n    %s\nand\n    %s\n    %s\n\nCannot use different packages\n    %s\n    %s\nin the same output file:\n    %s",
-			conv.FileSource, conv.Type, f.Initial.FileSource, f.Initial.Type, conv.PackageID(), f.Initial.PackageID(), output)
+			conv.Location, conv.Type, f.Initial.Location, f.Initial.Type, conv.PackageID(), f.Initial.PackageID(), output)
 	}
 
 	return f.Content, nil
@@ -72,5 +72,5 @@ func getOutputDir(c *config.Converter, cwd string) string {
 		return c.OutputFile
 	}
 
-	return filepath.Join(filepath.Dir(c.FileSource), c.OutputFile)
+	return filepath.Join(filepath.Dir(c.FileName), c.OutputFile)
 }

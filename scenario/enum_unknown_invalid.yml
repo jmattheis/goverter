@@ -24,7 +24,7 @@ input:
         const Green Color = "green"
 error: |-
     error parsing 'goverter:enum:unknown' at
-        @workdir/input.go:10:1
+        @workdir/input.go:10
         github.com/jmattheis/goverter/execution.Converter
 
     invalid enum action "@oops", must be one of "@panic", "@ignore", or "@error"

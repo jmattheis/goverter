@@ -22,7 +22,7 @@ input:
         }
 error: |-
     error parsing 'goverter:map' at
-        @workdir/input.go:6:5
+        @workdir/input.go:6
         func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
 
     failed to load package "github.com/jmattheis/goverter/execution/external":

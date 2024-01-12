@@ -18,7 +18,7 @@ type RawConverter struct {
 	InterfaceName string
 	Converter     RawLines
 	Methods       map[string]RawLines
-	FileSource    string
+	FileName      string
 }
 
 type Raw struct {

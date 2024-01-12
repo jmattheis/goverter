@@ -26,7 +26,7 @@ input:
         const Green Color = "green"
 error: |-
     error parsing 'goverter:enum:map' at
-        @workdir/input.go:12:5
+        @workdir/input.go:12
         func (github.com/jmattheis/goverter/execution.Converter).Convert(github.com/jmattheis/goverter/execution/input.Color) github.com/jmattheis/goverter/execution/output.Color
 
     invalid fields
