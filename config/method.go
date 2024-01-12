@@ -23,6 +23,8 @@ type Method struct {
 	Fields      map[string]*FieldMapping
 
 	RawFieldSettings []string
+
+	Location string
 }
 
 type FieldMapping struct {
@@ -43,6 +45,7 @@ func (m *Method) Field(targetName string) *FieldMapping {
 func parseMethod(loader *pkgload.PackageLoader, c *Converter, fn *types.Func, rawMethod RawLines) (*Method, error) {
 	def, err := method.Parse(fn, &method.ParseOpts{
 		ErrorPrefix:       "error parsing converter method",
+		FileSource:        rawMethod.Location,
 		Converter:         nil,
 		OutputPackagePath: c.OutputPackagePath,
 		Params:            method.ParamsRequired,
@@ -56,6 +59,7 @@ func parseMethod(loader *pkgload.PackageLoader, c *Converter, fn *types.Func, ra
 		Definition: def,
 		Common:     c.Common,
 		Fields:     map[string]*FieldMapping{},
+		Location:   rawMethod.Location,
 	}
 
 	for _, value := range rawMethod.Lines {

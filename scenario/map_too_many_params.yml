@@ -11,7 +11,7 @@ input:
         )
 error: |-
     error parsing 'goverter:map' at
-        @workdir/input.go:7:9
+        @workdir/input.go:7
         func (github.com/jmattheis/goverter/execution.Converter).ConvertString(source string) string
 
     too many fields expected at most 2 fields got 3: a b c

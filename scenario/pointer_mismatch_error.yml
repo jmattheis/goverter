@@ -16,6 +16,7 @@ input:
         }
 error: |-
     Error while creating converter method:
+        @workdir/input.go:5
         func (github.com/jmattheis/goverter/execution.Converter).ConvertPerson(source github.com/jmattheis/goverter/execution.Person) github.com/jmattheis/goverter/execution.APIPerson
 
     | github.com/jmattheis/goverter/execution.Person

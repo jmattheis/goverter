@@ -22,10 +22,10 @@ input:
         }
 error: |-
     Error creating converters
-        @workdir/input.go
+        @workdir/input.go:5
         github.com/jmattheis/goverter/execution.Converter
     and
-        @workdir/input.go
+        @workdir/input.go:11
         github.com/jmattheis/goverter/execution.Converter2
 
     Cannot use different packages

@@ -17,7 +17,7 @@ input:
         }
 error: |-
     error parsing 'goverter:map' at
-        @workdir/input.go:6:5
+        @workdir/input.go:6
         func (github.com/jmattheis/goverter/execution.Converter).ConvertPerson(source github.com/jmattheis/goverter/execution.Person) github.com/jmattheis/goverter/execution.APIPerson
 
     missing target field

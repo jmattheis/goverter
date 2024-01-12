@@ -12,7 +12,7 @@ input:
         type Output struct { Name string }
 error: |-
     error parsing 'goverter:useZeroValueOnPointerInconsistency' at
-        @workdir/input.go:5:1
+        @workdir/input.go:5
         github.com/jmattheis/goverter/execution.Converter
 
     invalid boolean value: 'abc' must be one of 'yes', 'no'

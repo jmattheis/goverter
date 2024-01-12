@@ -8,7 +8,7 @@ input:
         }
 error: |-
     error parsing 'goverter:extend' at
-        @workdir/input.go:5:1
+        @workdir/input.go:5
         github.com/jmattheis/goverter/execution.Converter
 
     failed to load package "file=/nonexisting":

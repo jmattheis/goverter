@@ -8,6 +8,7 @@ input:
         }
 error: |-
     Error while creating converter method:
+        @workdir/input.go:5
         func (github.com/jmattheis/goverter/execution.Converter).Convert(source map[int]int) map[int]int64
 
     | map[int]int

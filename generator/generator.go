@@ -51,7 +51,7 @@ func (g *generator) buildMethods(f *jen.File) error {
 				SourceType: genMethod.Source.String,
 				TargetType: genMethod.Target.String,
 			})
-			return fmt.Errorf("Error while creating converter method:\n    %s\n\n%s", genMethod.ID, builder.ToString(err))
+			return fmt.Errorf("Error while creating converter method:\n    %s\n    %s\n\n%s", genMethod.Location, genMethod.ID, builder.ToString(err))
 		}
 	}
 	for _, genMethod := range g.lookup {

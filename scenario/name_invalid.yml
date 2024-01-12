@@ -8,7 +8,7 @@ input:
         }
 error: |-
     error parsing 'goverter:name' at
-        @workdir/input.go:5:1
+        @workdir/input.go:5
         github.com/jmattheis/goverter/execution.Converter
 
     must have one value but got 2: "a b"
