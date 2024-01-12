@@ -66,7 +66,6 @@ func TestScenario(t *testing.T) {
 				err = os.WriteFile(filepath.Join(testWorkDir, name), []byte(content), 0o644)
 				require.NoError(t, err)
 			}
-			global := append([]string{"output:package github.com/jmattheis/goverter/execution/generated"}, scenario.Global...)
 
 			patterns := scenario.Patterns
 			if len(patterns) == 0 {
@@ -80,7 +79,7 @@ func TestScenario(t *testing.T) {
 					OutputBuildConstraint: scenario.BuildConstraint,
 					BuildTags:             "goverter",
 					Global: config.RawLines{
-						Lines:    global,
+						Lines:    scenario.Global,
 						Location: "scenario global",
 					},
 				})

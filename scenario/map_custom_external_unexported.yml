@@ -8,6 +8,7 @@ input:
         package execution
 
         // goverter:converter
+        // goverter:output:package github.com/jmattheis/goverter/execution/generated
         type Converter interface {
             // goverter:map Age | github.com/jmattheis/goverter/execution/generated:intToString
             Convert(source Input) Output
