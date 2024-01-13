@@ -1,0 +1,29 @@
+input:
+    input.go: |
+        package fmtfunc
+
+        // goverter:converter
+        // goverter:extend Custom
+        // goverter:output:format function
+        type Converter interface {
+            ConvertPerson(source Input) Output
+        }
+
+        func Custom(c Converter, s string) uint {
+            return 1
+        }
+
+        type Input struct {
+            Value    string
+        }
+
+        type Output struct {
+            Value   uint
+        }
+error: |-
+    error parsing 'goverter:output:format' at
+        @workdir/input.go:6
+        github.com/jmattheis/goverter/execution.Converter
+
+    Cannot change output:format after extend functions have been added.
+    Move the extend below the output:format setting.

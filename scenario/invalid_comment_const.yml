@@ -4,4 +4,4 @@ input:
 
         // goverter:converter
         const x = 5
-error: '@workdir/input.go:4:1: goverter:converter may only be applied to type declarations '
+error: '@workdir/input.go:4:1: goverter:converter must be defined on "type"-block but was "const"'

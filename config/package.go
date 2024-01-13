@@ -9,11 +9,11 @@ import (
 func getPackages(raw *Raw) []string {
 	lookup := map[string]struct{}{}
 	for _, c := range raw.Converters {
-		lookup[c.Package] = struct{}{}
-		registerConverterLines(lookup, c.Package, c.Converter)
-		registerConverterLines(lookup, c.Package, raw.Global)
+		lookup[c.PackagePath] = struct{}{}
+		registerConverterLines(lookup, c.PackagePath, c.Converter)
+		registerConverterLines(lookup, c.PackagePath, raw.Global)
 		for _, m := range c.Methods {
-			registerMethodLines(lookup, c.Package, m)
+			registerMethodLines(lookup, c.PackagePath, m)
 		}
 	}
 

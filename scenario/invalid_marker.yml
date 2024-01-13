@@ -1,0 +1,12 @@
+input:
+    input.go: |
+        package example
+
+        // goverter:variables
+        type Converter interface {
+            ConvertPerson(source Input) Output
+        }
+
+        type Input struct { Name    string }
+        type Output struct { Name   string }
+error: '@workdir/input.go:4:1: goverter:converter must be defined on "var"-block but was "type"'

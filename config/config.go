@@ -14,7 +14,8 @@ type RawLines struct {
 }
 
 type RawConverter struct {
-	Package       string
+	PackagePath   string
+	PackageName   string
 	InterfaceName string
 	Converter     RawLines
 	Methods       map[string]RawLines
@@ -48,7 +49,7 @@ func Parse(raw *Raw) ([]*Converter, error) {
 
 	converters := []*Converter{}
 	for _, rawConverter := range raw.Converters {
-		converter, err := parseConverter(loader, &rawConverter, raw.Global)
+		converter, err := parseConverter(ctx, &rawConverter, raw.Global)
 		if err != nil {
 			return nil, err
 		}

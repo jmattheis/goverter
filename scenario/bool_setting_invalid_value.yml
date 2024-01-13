@@ -15,4 +15,4 @@ error: |-
         @workdir/input.go:5
         github.com/jmattheis/goverter/execution.Converter
 
-    invalid boolean value: 'abc' must be one of 'yes', 'no'
+    invalid boolean value: 'abc' must be one of ["yes" "no"]
