@@ -8,6 +8,7 @@ import (
 
 	"github.com/dave/jennifer/jen"
 	"github.com/jmattheis/goverter/config"
+	"github.com/jmattheis/goverter/namer"
 )
 
 type fileManager struct {
@@ -18,9 +19,10 @@ type managedFile struct {
 	PackageID string
 	Initial   *config.Converter
 	Content   *jen.File
+	Namer     *namer.Namer
 }
 
-func (m *fileManager) Get(conv *config.Converter, cfg Config) (*jen.File, error) {
+func (m *fileManager) Get(conv *config.Converter, cfg Config) (*jen.File, *namer.Namer, error) {
 	output := getOutputDir(conv, cfg.WorkingDir)
 
 	f, ok := m.Files[output]
@@ -28,6 +30,7 @@ func (m *fileManager) Get(conv *config.Converter, cfg Config) (*jen.File, error)
 		f = &managedFile{
 			PackageID: conv.PackageID(),
 			Initial:   conv,
+			Namer:     namer.New(),
 		}
 
 		if conv.OutputPackageName == "" {
@@ -44,11 +47,11 @@ func (m *fileManager) Get(conv *config.Converter, cfg Config) (*jen.File, error)
 	}
 
 	if f.PackageID != conv.PackageID() {
-		return nil, fmt.Errorf("Error creating converters\n    %s\n    %s\nand\n    %s\n    %s\n\nCannot use different packages\n    %s\n    %s\nin the same output file:\n    %s",
-			conv.Location, conv.Type, f.Initial.Location, f.Initial.Type, conv.PackageID(), f.Initial.PackageID(), output)
+		return nil, nil, fmt.Errorf("Error creating converters\n    %s\n    %s\nand\n    %s\n    %s\n\nCannot use different packages\n    %s\n    %s\nin the same output file:\n    %s",
+			conv.Location, conv.IDString(), f.Initial.Location, f.Initial.IDString(), conv.PackageID(), f.Initial.PackageID(), output)
 	}
 
-	return f.Content, nil
+	return f.Content, f.Namer, nil
 }
 
 func (m *fileManager) renderFiles() (map[string][]byte, error) {

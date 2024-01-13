@@ -1,7 +1,9 @@
 package config
 
 import (
+	"fmt"
 	"go/types"
+	"path/filepath"
 	"strings"
 
 	"github.com/jmattheis/goverter/method"
@@ -12,19 +14,49 @@ const (
 	configExtend = "extend"
 )
 
-var DefaultConfig = ConverterConfig{
+type Format string
+
+func (f Format) Struct() bool {
+	return f == FormatStruct
+}
+
+const (
+	FormatStruct    Format = "struct"
+	FormatVariables Format = "variables"
+)
+
+var DefaultConfigInterface = ConverterConfig{
 	OutputFile:        "./generated/generated.go",
 	OutputPackageName: "generated",
+	OutputFormat:      FormatStruct,
+}
+
+var DefaultConfigVariables = ConverterConfig{
+	OutputFormat: FormatVariables,
 }
 
 type Converter struct {
 	ConverterConfig
 	Package  string
 	FileName string
-	Type     types.Type
+	typ      types.Type
 	Methods  map[string]*Method
 
 	Location string
+}
+
+func (c *Converter) requireStruct() error {
+	if c.OutputFormat.Struct() {
+		return nil
+	}
+	return fmt.Errorf("not allowed when using goverter:variables")
+}
+
+func (c *Converter) IDString() string {
+	if c.typ == nil {
+		return "var definition"
+	}
+	return c.typ.String()
 }
 
 type ConverterConfig struct {
@@ -33,6 +65,7 @@ type ConverterConfig struct {
 	OutputFile        string
 	OutputPackagePath string
 	OutputPackageName string
+	OutputFormat      Format
 	Extend            []*method.Definition
 	Comments          []string
 }
@@ -44,42 +77,56 @@ func (conf *ConverterConfig) PackageID() string {
 	return conf.OutputPackagePath + ":" + conf.OutputPackageName
 }
 
+func defaultOutputFile(name string) string {
+	f := filepath.Base(name)
+	ext := filepath.Ext(f)
+	return strings.TrimSuffix(f, ext) + ".gen" + ext
+}
+
 func parseConverter(loader *pkgload.PackageLoader, rawConverter *RawConverter, global RawLines) (*Converter, error) {
-	v, err := loader.GetOneRaw(rawConverter.Package, rawConverter.InterfaceName)
+	c, err := initConverter(loader, rawConverter)
 	if err != nil {
 		return nil, err
-	}
-	namedType := v.Type()
-	interfaceType := namedType.Underlying().(*types.Interface)
-
-	c := &Converter{
-		ConverterConfig: DefaultConfig,
-		Type:            namedType,
-		FileName:        rawConverter.FileName,
-		Package:         rawConverter.Package,
-		Methods:         map[string]*Method{},
-		Location:        rawConverter.Converter.Location,
-	}
-	if c.Name == "" {
-		c.Name = rawConverter.InterfaceName + "Impl"
 	}
 
 	if err := parseConverterLines(c, "global", loader, global); err != nil {
 		return nil, err
 	}
-	if err := parseConverterLines(c, c.Type.String(), loader, rawConverter.Converter); err != nil {
+	if err := parseConverterLines(c, c.IDString(), loader, rawConverter.Converter); err != nil {
 		return nil, err
 	}
 
-	for i := 0; i < interfaceType.NumMethods(); i++ {
-		fun := interfaceType.Method(i)
-		def, err := parseMethod(loader, c, fun, rawConverter.Methods[fun.Name()])
+	err = parseMethods(loader, rawConverter, c)
+	return c, err
+}
+
+func initConverter(loader *pkgload.PackageLoader, rawConverter *RawConverter) (*Converter, error) {
+	c := &Converter{
+		FileName: rawConverter.FileName,
+		Package:  rawConverter.PackagePath,
+		Methods:  map[string]*Method{},
+		Location: rawConverter.Converter.Location,
+	}
+
+	if rawConverter.InterfaceName != "" {
+		c.ConverterConfig = DefaultConfigInterface
+		v, err := loader.GetOneRaw(c.Package, rawConverter.InterfaceName)
 		if err != nil {
 			return nil, err
 		}
-		c.Methods[fun.Name()] = def
+
+		c.OutputFile = "./generated/generated.go"
+		c.OutputPackageName = "generated"
+		c.typ = v.Type()
+		c.Name = rawConverter.InterfaceName + "Impl"
+		c.OutputFormat = FormatStruct
+		return c, nil
 	}
 
+	c.OutputFormat = FormatVariables
+	c.OutputFile = defaultOutputFile(rawConverter.FileName)
+	c.OutputPackageName = rawConverter.PackageName
+	c.OutputPackagePath = rawConverter.PackagePath
 	return c, nil
 }
 
@@ -96,9 +143,12 @@ func parseConverterLines(c *Converter, source string, loader *pkgload.PackageLoa
 func parseConverterLine(c *Converter, loader *pkgload.PackageLoader, value string) (err error) {
 	cmd, rest := parseCommand(value)
 	switch cmd {
-	case "converter":
+	case "converter", "variables":
 		// only a marker interface
 	case "name":
+		if err = c.requireStruct(); err != nil {
+			return err
+		}
 		c.Name, err = parseString(rest)
 	case "output:file":
 		c.OutputFile, err = parseString(rest)
@@ -116,13 +166,16 @@ func parseConverterLine(c *Converter, loader *pkgload.PackageLoader, value strin
 			c.OutputPackagePath = parts[0]
 		}
 	case "struct:comment":
+		if err = c.requireStruct(); err != nil {
+			return err
+		}
 		c.Comments = append(c.Comments, rest)
 	case configExtend:
 		for _, name := range strings.Fields(rest) {
 			opts := &method.ParseOpts{
 				ErrorPrefix:       "error parsing type",
 				OutputPackagePath: c.OutputPackagePath,
-				Converter:         c.Type,
+				Converter:         c.typ,
 				Params:            method.ParamsRequired,
 			}
 			var defs []*method.Definition

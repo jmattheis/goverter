@@ -42,14 +42,41 @@ func (m *Method) Field(targetName string) *FieldMapping {
 	return target
 }
 
-func parseMethod(loader *pkgload.PackageLoader, c *Converter, fn *types.Func, rawMethod RawLines) (*Method, error) {
-	def, err := method.Parse(fn, &method.ParseOpts{
+func parseMethods(loader *pkgload.PackageLoader, rawConverter *RawConverter, c *Converter) error {
+	if c.OutputFormat.Struct() {
+		interf := c.typ.Underlying().(*types.Interface)
+		for i := 0; i < interf.NumMethods(); i++ {
+			fun := interf.Method(i)
+			def, err := parseMethod(loader, c, fun, rawConverter.Methods[fun.Name()])
+			if err != nil {
+				return err
+			}
+			c.Methods[fun.Name()] = def
+		}
+		return nil
+	}
+	for name, lines := range rawConverter.Methods {
+		fun, err := loader.GetOneRaw(c.Package, name)
+		if err != nil {
+			return err
+		}
+		def, err := parseMethod(loader, c, fun, lines)
+		if err != nil {
+			return err
+		}
+		c.Methods[fun.Name()] = def
+	}
+	return nil
+}
+
+func parseMethod(loader *pkgload.PackageLoader, c *Converter, obj types.Object, rawMethod RawLines) (*Method, error) {
+	def, err := method.Parse(obj, &method.ParseOpts{
 		ErrorPrefix:       "error parsing converter method",
-		FileSource:        rawMethod.Location,
+		Location:          rawMethod.Location,
 		Converter:         nil,
 		OutputPackagePath: c.OutputPackagePath,
 		Params:            method.ParamsRequired,
-		ConvFunction:      true,
+		Generated:         true,
 	})
 	if err != nil {
 		return nil, err
@@ -64,7 +91,7 @@ func parseMethod(loader *pkgload.PackageLoader, c *Converter, fn *types.Func, ra
 
 	for _, value := range rawMethod.Lines {
 		if err := parseMethodLine(loader, c, m, value); err != nil {
-			return m, formatLineError(rawMethod, fn.String(), value, err) // TODO get method type
+			return m, formatLineError(rawMethod, obj.String(), value, err)
 		}
 	}
 	return m, nil
@@ -88,7 +115,7 @@ func parseMethodLine(loader *pkgload.PackageLoader, c *Converter, m *Method, val
 			opts := &method.ParseOpts{
 				ErrorPrefix:       "error parsing type",
 				OutputPackagePath: c.OutputPackagePath,
-				Converter:         c.Type,
+				Converter:         c.typ,
 				Params:            method.ParamsOptional,
 			}
 			f.Function, err = loader.GetOne(c.Package, custom, opts)
@@ -108,7 +135,7 @@ func parseMethodLine(loader *pkgload.PackageLoader, c *Converter, m *Method, val
 		opts := &method.ParseOpts{
 			ErrorPrefix:       "error parsing type",
 			OutputPackagePath: c.OutputPackagePath,
-			Converter:         c.Type,
+			Converter:         c.typ,
 			Params:            method.ParamsOptional,
 		}
 		m.Constructor, err = loader.GetOne(c.Package, rest, opts)

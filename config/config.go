@@ -13,7 +13,8 @@ type RawLines struct {
 }
 
 type RawConverter struct {
-	Package       string
+	PackagePath   string
+	PackageName   string
 	InterfaceName string
 	Converter     RawLines
 	Methods       map[string]RawLines

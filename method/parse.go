@@ -21,9 +21,11 @@ type ParseOpts struct {
 	Converter         types.Type
 	OutputPackagePath string
 
-	ErrorPrefix  string
-	ConvFunction bool
-	Params       ParamType
+	ErrorPrefix string
+	Params      ParamType
+
+	Generated  bool
+	CustomCall *jen.Statement
 }
 
 // Parse parses an function into a Definition.
@@ -36,18 +38,13 @@ func Parse(obj types.Object, opts *ParseOpts) (*Definition, error) {
 		return fmt.Errorf("%s:\n    %s%s\n\n%s", opts.ErrorPrefix, loc, obj.String(), s)
 	}
 
-	fn, ok := obj.(*types.Func)
-	if !ok {
-		return nil, formatErr("must be a function")
-	}
-
-	if !xtype.Accessible(fn, opts.OutputPackagePath) {
+	if !xtype.Accessible(obj, opts.OutputPackagePath) {
 		return nil, formatErr("must be exported")
 	}
 
-	sig, ok := fn.Type().(*types.Signature)
+	sig, ok := obj.Type().(*types.Signature)
 	if !ok {
-		return nil, formatErr("must have a signature")
+		return nil, formatErr("must be a function")
 	}
 	if sig.Results().Len() == 0 || sig.Results().Len() > 2 {
 		return nil, formatErr("must have one or two returns")
@@ -62,19 +59,18 @@ func Parse(obj types.Object, opts *ParseOpts) (*Definition, error) {
 	}
 
 	methodDef := &Definition{
-		ID:                 fn.String(),
-		ReturnTypeOriginID: fn.String(),
+		ID:                 obj.String(),
+		ReturnTypeOriginID: obj.String(),
+		Generated:          opts.Generated,
+		CustomCall:         opts.CustomCall,
 		Parameters: Parameters{
 			ReturnError: returnError,
 			Target:      xtype.TypeOf(sig.Results().At(0).Type()),
 		},
-		Name: fn.Name(),
+		Name: obj.Name(),
 	}
-
-	if opts.ConvFunction {
-		methodDef.Call = jen.Id(xtype.ThisVar).Dot(fn.Name())
-	} else {
-		methodDef.Call = jen.Qual(fn.Pkg().Path(), fn.Name())
+	if pkg := obj.Pkg(); pkg != nil {
+		methodDef.Package = pkg.Path()
 	}
 
 	if opts.Params == ParamsNone && sig.Params().Len() > 0 {

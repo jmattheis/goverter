@@ -72,8 +72,35 @@ func (g *generator) appendGenerated(f *jen.File) {
 		return genMethods[i].Name < genMethods[j].Name
 	})
 
+	if g.conf.OutputFormat == config.FormatStruct {
+		if len(g.conf.Comments) > 0 {
+			f.Comment(strings.Join(g.conf.Comments, "\n"))
+		}
+		f.Type().Id(g.conf.Name).Struct()
+	}
+
+	var init []jen.Code
+	var funcs []jen.Code
+
 	for _, def := range genMethods {
-		f.Add(def.Jen)
+		switch g.conf.OutputFormat {
+		case config.FormatStruct:
+			funcs = append(funcs, jen.Func().Params(jen.Id(xtype.ThisVar).Op("*").Id(g.conf.Name)).Id(def.Name).Add(def.Jen))
+		case config.FormatVariables:
+			if def.Explicit {
+				init = append(init, jen.Qual(def.Package, def.Name).Op("=").Func().Add(def.Jen))
+			} else {
+				funcs = append(funcs, jen.Func().Id(def.Name).Add(def.Jen))
+			}
+		}
+	}
+
+	if len(init) > 0 {
+		f.Func().Id("init").Params().Block(init...)
+	}
+
+	for _, fn := range funcs {
+		f.Add(fn)
 	}
 }
 
@@ -124,8 +151,7 @@ func (g *generator) buildMethod(genMethod *generatedMethod, errWrapper builder.E
 		funcBlock = append(stmt, jen.Return(ret...))
 	}
 
-	genMethod.Jen = jen.Func().Params(jen.Id(xtype.ThisVar).Op("*").Id(g.conf.Name)).Id(genMethod.Name).
-		Params(jen.Id("source").Add(source.TypeAsJen())).Params(returns...).
+	genMethod.Jen = jen.Params(jen.Id("source").Add(source.TypeAsJen())).Params(returns...).
 		Block(funcBlock...)
 
 	return nil
@@ -189,6 +215,7 @@ func (g *generator) CallMethod(
 		return nil, nil, formatErr(cause)
 	}
 
+	qual := definition.Qual(g.conf.OutputFormat.Struct())
 	if definition.ReturnError {
 		current := g.lookup[ctx.Signature]
 		if !current.ReturnError {
@@ -204,13 +231,13 @@ func (g *generator) CallMethod(
 		ctx.SetErrorTargetVar(jen.Id(name))
 
 		stmt := []jen.Code{
-			jen.List(jen.Id(name), jen.Id("err")).Op(":=").Add(definition.Call.Clone().Call(params...)),
+			jen.List(jen.Id(name), jen.Id("err")).Op(":=").Add(qual.Call(params...)),
 			jen.If(jen.Id("err").Op("!=").Nil()).Block(
 				jen.Return(ctx.TargetVar, g.wrap(ctx, errWrapper, jen.Id("err")))),
 		}
 		return stmt, xtype.VariableID(jen.Id(name)), nil
 	}
-	id := xtype.OtherID(definition.Call.Clone().Call(params...))
+	id := xtype.OtherID(qual.Call(params...))
 	return nil, id, nil
 }
 
@@ -230,7 +257,7 @@ func (g *generator) delegateMethod(
 	}
 	current := g.lookup[ctx.Signature]
 
-	returns := []jen.Code{delegateTo.Call.Clone().Call(params...)}
+	returns := []jen.Code{delegateTo.Qual(g.conf.OutputFormat.Struct()).Clone().Call(params...)}
 
 	if delegateTo.ReturnError {
 		if !current.ReturnError {
@@ -313,9 +340,10 @@ func (g *generator) createSubMethod(ctx *builder.MethodContext, sourceID *xtype.
 		Method: &config.Method{
 			Common: g.conf.Common,
 			Definition: &method.Definition{
-				ID:   name,
-				Name: name,
-				Call: jen.Id(xtype.ThisVar).Dot(name),
+				ID:        name,
+				Package:   g.conf.OutputPackagePath,
+				Name:      name,
+				Generated: true,
 				Parameters: method.Parameters{
 					Source: xtype.TypeOf(source.T),
 					Target: xtype.TypeOf(target.T),

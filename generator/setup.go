@@ -7,7 +7,7 @@ import (
 	"github.com/jmattheis/goverter/xtype"
 )
 
-func setupGenerator(converter *config.Converter) *generator {
+func setupGenerator(converter *config.Converter, n *namer.Namer) *generator {
 	extend := map[xtype.Signature]*method.Definition{}
 	for _, def := range converter.Extend {
 		extend[def.Signature()] = def
@@ -23,7 +23,7 @@ func setupGenerator(converter *config.Converter) *generator {
 	}
 
 	gen := generator{
-		namer:  namer.New(),
+		namer:  n,
 		conf:   converter,
 		lookup: lookup,
 		extend: extend,

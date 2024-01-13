@@ -28,7 +28,7 @@ func parseEnum(name string, empty bool, remaining string, values ...string) (str
 
 		return "", fmt.Errorf("invalid %s value: '%s' must be one of '%s'", name, fields[0], strings.Join(values, "', '"))
 	default:
-		return "", fmt.Errorf("invalid %s value: expected one value but got %d: %s",name, len(fields), fields)
+		return "", fmt.Errorf("invalid %s value: expected one value but got %d: %s", name, len(fields), fields)
 	}
 }
 

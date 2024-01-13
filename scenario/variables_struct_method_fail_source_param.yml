@@ -1,0 +1,39 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:variables
+        var (
+            Convert func(source Input) Output
+        )
+
+        type Input struct {
+            Name string
+        }
+        func (Input) Age(s string) int {
+            return 42
+        }
+        type Output struct {
+            Name string
+            Age int
+        }
+error: |-
+    Error while creating converter method:
+        @workdir/input.go:5
+        var github.com/jmattheis/goverter/execution.Convert func(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+
+    | github.com/jmattheis/goverter/execution.Input
+    |
+    |      | func(s string) int
+    |      |
+    source.Age
+    target.Age
+    |      |
+    |      | int
+    |
+    | github.com/jmattheis/goverter/execution.Output
+
+    Error parsing struct method:
+        func (github.com/jmattheis/goverter/execution.Input).Age(s string) int
+
+    must have no parameters
