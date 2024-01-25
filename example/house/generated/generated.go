@@ -25,9 +25,12 @@ func (c *ConverterImpl) ConvertApartment(source house.DBApartment) house.APIApar
 func (c *ConverterImpl) ConvertHouse(source house.DBHouse) house.APIHouse {
 	var houseAPIHouse house.APIHouse
 	houseAPIHouse.Address = source.Address
-	mapHouseAPIRoomNRHouseAPIApartment := make(map[house.APIRoomNR]house.APIApartment, len(source.Apartments))
-	for key, value := range source.Apartments {
-		mapHouseAPIRoomNRHouseAPIApartment[house.APIRoomNR(key)] = c.ConvertApartment(value)
+	var mapHouseAPIRoomNRHouseAPIApartment map[house.APIRoomNR]house.APIApartment
+	if source.Apartments != nil {
+		mapHouseAPIRoomNRHouseAPIApartment = make(map[house.APIRoomNR]house.APIApartment, len(source.Apartments))
+		for key, value := range source.Apartments {
+			mapHouseAPIRoomNRHouseAPIApartment[house.APIRoomNR(key)] = c.ConvertApartment(value)
+		}
 	}
 	houseAPIHouse.Apartments = mapHouseAPIRoomNRHouseAPIApartment
 	return houseAPIHouse

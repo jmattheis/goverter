@@ -16,22 +16,28 @@ success:
         type ConverterImpl struct{}
 
         func (c *ConverterImpl) Convert(source map[string]int) map[string]*int {
-        	mapStringPInt := make(map[string]*int, len(source))
-        	for key, value := range source {
-        		pInt := value
-        		mapStringPInt[key] = &pInt
+        	var mapStringPInt map[string]*int
+        	if source != nil {
+        		mapStringPInt = make(map[string]*int, len(source))
+        		for key, value := range source {
+        			pInt := value
+        			mapStringPInt[key] = &pInt
+        		}
         	}
         	return mapStringPInt
         }
         func (c *ConverterImpl) Convert2(source map[string]*int) map[string]*int {
-        	mapStringPInt := make(map[string]*int, len(source))
-        	for key, value := range source {
-        		var pInt *int
-        		if value != nil {
-        			xint := *value
-        			pInt = &xint
+        	var mapStringPInt map[string]*int
+        	if source != nil {
+        		mapStringPInt = make(map[string]*int, len(source))
+        		for key, value := range source {
+        			var pInt *int
+        			if value != nil {
+        				xint := *value
+        				pInt = &xint
+        			}
+        			mapStringPInt[key] = pInt
         		}
-        		mapStringPInt[key] = pInt
         	}
         	return mapStringPInt
         }

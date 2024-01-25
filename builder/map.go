@@ -42,9 +42,12 @@ func (*Map) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, sour
 	block = append(block, jen.Id(targetMap).Index(newKey.Code).Op("=").Add(valueKey.Code))
 
 	stmt := []jen.Code{
-		jen.Id(targetMap).Op(":=").Make(target.TypeAsJen(), jen.Len(sourceID.Code.Clone())),
-		jen.For(jen.List(jen.Id(key), jen.Id(value)).Op(":=").Range().Add(sourceID.Code)).
-			Block(block...),
+		jen.Var().Add(jen.Id(targetMap), target.TypeAsJen()),
+		jen.If(sourceID.Code.Clone().Op("!=").Nil()).Block(
+			jen.Id(targetMap).Op("=").Make(target.TypeAsJen(), jen.Len(sourceID.Code.Clone())),
+			jen.For(jen.List(jen.Id(key), jen.Id(value)).Op(":=").Range().Add(sourceID.Code)).
+				Block(block...),
+		),
 	}
 
 	return stmt, xtype.VariableID(jen.Id(targetMap)), nil

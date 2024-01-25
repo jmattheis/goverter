@@ -44,9 +44,12 @@ success:
         	return unnamedList
         }
         func (c *ConverterImpl) Convert2(source map[string]struct{}) map[string]struct{} {
-        	mapStringUnnamed := make(map[string]struct{}, len(source))
-        	for key, value := range source {
-        		mapStringUnnamed[key] = value
+        	var mapStringUnnamed map[string]struct{}
+        	if source != nil {
+        		mapStringUnnamed = make(map[string]struct{}, len(source))
+        		for key, value := range source {
+        			mapStringUnnamed[key] = value
+        		}
         	}
         	return mapStringUnnamed
         }
@@ -61,11 +64,14 @@ success:
         func (c *ConverterImpl) Convert5(source map[string]struct {
         	Name string
         }) map[string]struct{} {
-        	mapStringUnnamed := make(map[string]struct{}, len(source))
-        	for key, value := range source {
-        		var unnamed struct{}
-        		_ = value
-        		mapStringUnnamed[key] = unnamed
+        	var mapStringUnnamed map[string]struct{}
+        	if source != nil {
+        		mapStringUnnamed = make(map[string]struct{}, len(source))
+        		for key, value := range source {
+        			var unnamed struct{}
+        			_ = value
+        			mapStringUnnamed[key] = unnamed
+        		}
         	}
         	return mapStringUnnamed
         }
@@ -74,37 +80,50 @@ success:
         }) map[string]struct {
         	name string
         } {
-        	mapStringUnnamed := make(map[string]struct {
+        	var mapStringUnnamed map[string]struct {
         		name string
-        	}, len(source))
-        	for key, value := range source {
-        		var unnamed struct {
+        	}
+        	if source != nil {
+        		mapStringUnnamed = make(map[string]struct {
         			name string
+        		}, len(source))
+        		for key, value := range source {
+        			var unnamed struct {
+        				name string
+        			}
+        			_ = value
+        			mapStringUnnamed[key] = unnamed
         		}
-        		_ = value
-        		mapStringUnnamed[key] = unnamed
         	}
         	return mapStringUnnamed
         }
         func (c *ConverterImpl) Convert7(source map[struct{}]struct{}) map[struct{}]struct{} {
-        	mapUnnamedUnnamed := make(map[struct{}]struct{}, len(source))
-        	for key, value := range source {
-        		mapUnnamedUnnamed[key] = value
+        	var mapUnnamedUnnamed map[struct{}]struct{}
+        	if source != nil {
+        		mapUnnamedUnnamed = make(map[struct{}]struct{}, len(source))
+        		for key, value := range source {
+        			mapUnnamedUnnamed[key] = value
+        		}
         	}
         	return mapUnnamedUnnamed
         }
         func (c *ConverterImpl) Convert8(source map[struct{}]struct{}) map[struct {
         	name string
         }]struct{} {
-        	mapUnnamedUnnamed := make(map[struct {
+        	var mapUnnamedUnnamed map[struct {
         		name string
-        	}]struct{}, len(source))
-        	for key, value := range source {
-        		var unnamed struct {
+        	}]struct{}
+        	if source != nil {
+        		mapUnnamedUnnamed = make(map[struct {
         			name string
+        		}]struct{}, len(source))
+        		for key, value := range source {
+        			var unnamed struct {
+        				name string
+        			}
+        			_ = key
+        			mapUnnamedUnnamed[unnamed] = value
         		}
-        		_ = key
-        		mapUnnamedUnnamed[unnamed] = value
         	}
         	return mapUnnamedUnnamed
         }
@@ -113,21 +132,28 @@ success:
         }]struct {
         	name string
         } {
-        	mapUnnamedUnnamed := make(map[struct {
+        	var mapUnnamedUnnamed map[struct {
         		name string
         	}]struct {
         		name string
-        	}, len(source))
-        	for key, value := range source {
-        		var unnamed struct {
+        	}
+        	if source != nil {
+        		mapUnnamedUnnamed = make(map[struct {
         			name string
-        		}
-        		_ = key
-        		var unnamed2 struct {
+        		}]struct {
         			name string
+        		}, len(source))
+        		for key, value := range source {
+        			var unnamed struct {
+        				name string
+        			}
+        			_ = key
+        			var unnamed2 struct {
+        				name string
+        			}
+        			_ = value
+        			mapUnnamedUnnamed[unnamed] = unnamed2
         		}
-        		_ = value
-        		mapUnnamedUnnamed[unnamed] = unnamed2
         	}
         	return mapUnnamedUnnamed
         }

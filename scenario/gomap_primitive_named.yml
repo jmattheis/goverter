@@ -21,30 +21,42 @@ success:
         type ConverterImpl struct{}
 
         func (c *ConverterImpl) Convert(source map[string]execution.ID) map[string]string {
-        	mapStringString := make(map[string]string, len(source))
-        	for key, value := range source {
-        		mapStringString[key] = string(value)
+        	var mapStringString map[string]string
+        	if source != nil {
+        		mapStringString = make(map[string]string, len(source))
+        		for key, value := range source {
+        			mapStringString[key] = string(value)
+        		}
         	}
         	return mapStringString
         }
         func (c *ConverterImpl) Convert2(source map[execution.ID]string) map[string]string {
-        	mapStringString := make(map[string]string, len(source))
-        	for key, value := range source {
-        		mapStringString[string(key)] = value
+        	var mapStringString map[string]string
+        	if source != nil {
+        		mapStringString = make(map[string]string, len(source))
+        		for key, value := range source {
+        			mapStringString[string(key)] = value
+        		}
         	}
         	return mapStringString
         }
         func (c *ConverterImpl) Convert3(source map[string]string) map[execution.ID]string {
-        	mapSlicesIDString := make(map[execution.ID]string, len(source))
-        	for key, value := range source {
-        		mapSlicesIDString[execution.ID(key)] = value
+        	var mapSlicesIDString map[execution.ID]string
+        	if source != nil {
+        		mapSlicesIDString = make(map[execution.ID]string, len(source))
+        		for key, value := range source {
+        			mapSlicesIDString[execution.ID(key)] = value
+        		}
         	}
         	return mapSlicesIDString
         }
         func (c *ConverterImpl) Convert4(source map[string]string) map[execution.ID]execution.ID {
-        	mapSlicesIDSlicesID := make(map[execution.ID]execution.ID, len(source))
-        	for key, value := range source {
-        		mapSlicesIDSlicesID[execution.ID(key)] = execution.ID(value)
+        	var mapSlicesIDSlicesID map[execution.ID]execution.ID
+        	if source != nil {
+        		mapSlicesIDSlicesID = make(map[execution.ID]execution.ID, len(source))
+        		for key, value := range source {
+        			mapSlicesIDSlicesID[execution.ID(key)] = execution.ID(value)
+        		}
         	}
         	return mapSlicesIDSlicesID
         }
