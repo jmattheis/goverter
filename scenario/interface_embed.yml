@@ -31,11 +31,16 @@ success:
         }) map[string]interface {
         	io.Writer
         } {
-        	mapStringUnknown := make(map[string]interface {
+        	var mapStringUnknown map[string]interface {
         		io.Writer
-        	}, len(source))
-        	for key, value := range source {
-        		mapStringUnknown[key] = execution.ConvertInterface(value)
+        	}
+        	if source != nil {
+        		mapStringUnknown = make(map[string]interface {
+        			io.Writer
+        		}, len(source))
+        		for key, value := range source {
+        			mapStringUnknown[key] = execution.ConvertInterface(value)
+        		}
         	}
         	return mapStringUnknown
         }

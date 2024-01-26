@@ -22,9 +22,12 @@ success:
         type ConverterImpl struct{}
 
         func (c *ConverterImpl) Convert(source map[string]interface{}) map[string]interface{} {
-        	mapStringUnknown := make(map[string]interface{}, len(source))
-        	for key, value := range source {
-        		mapStringUnknown[key] = execution.ConvertInterface(value)
+        	var mapStringUnknown map[string]interface{}
+        	if source != nil {
+        		mapStringUnknown = make(map[string]interface{}, len(source))
+        		for key, value := range source {
+        			mapStringUnknown[key] = execution.ConvertInterface(value)
+        		}
         	}
         	return mapStringUnknown
         }

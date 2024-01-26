@@ -30,11 +30,16 @@ success:
         }) map[string]interface {
         	Test2()
         } {
-        	mapStringUnknown := make(map[string]interface {
+        	var mapStringUnknown map[string]interface {
         		Test2()
-        	}, len(source))
-        	for key, value := range source {
-        		mapStringUnknown[key] = execution.ConvertInterface(value)
+        	}
+        	if source != nil {
+        		mapStringUnknown = make(map[string]interface {
+        			Test2()
+        		}, len(source))
+        		for key, value := range source {
+        			mapStringUnknown[key] = execution.ConvertInterface(value)
+        		}
         	}
         	return mapStringUnknown
         }

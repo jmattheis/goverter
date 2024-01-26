@@ -45,12 +45,18 @@ success:
         	io.Writer
         	Test() bool
         } {
-        	mapStringUnknown := make(map[string]interface {
+        	var mapStringUnknown map[string]interface {
         		io.Writer
         		Test() bool
-        	}, len(source))
-        	for key, value := range source {
-        		mapStringUnknown[key] = execution.ConvertInterface(value)
+        	}
+        	if source != nil {
+        		mapStringUnknown = make(map[string]interface {
+        			io.Writer
+        			Test() bool
+        		}, len(source))
+        		for key, value := range source {
+        			mapStringUnknown[key] = execution.ConvertInterface(value)
+        		}
         	}
         	return mapStringUnknown
         }
