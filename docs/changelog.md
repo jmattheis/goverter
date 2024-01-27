@@ -4,6 +4,12 @@ import GH from './GH.vue';
 
 # Changelog
 
+## v1.3.1
+
+Fix `nil` map conversion. A `nil` map of will be converted to a `nil` map of
+the target type. Previously, the target map was instantiated via `make` with a
+0 size. <GH issue="126" pr="127"/>
+
 ## v1.3.0
 
 - Fix absolute paths in [`output:file`](reference/output) <GH pr="116"/>
