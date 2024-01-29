@@ -63,10 +63,10 @@ func generateConvertersRaw(c *GenerateConfig) (map[string][]byte, error) {
 
 func writeFiles(files map[string][]byte) error {
 	for path, content := range files {
-		if err := os.MkdirAll(filepath.Dir(path), os.ModePerm); err != nil {
+		if err := os.MkdirAll(filepath.Dir(path), 0o755); err != nil {
 			return err
 		}
-		if err := os.WriteFile(path, content, os.ModePerm); err != nil {
+		if err := os.WriteFile(path, content, 0o644); err != nil {
 			return err
 		}
 	}
