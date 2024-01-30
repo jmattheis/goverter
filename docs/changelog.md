@@ -4,11 +4,18 @@ import GH from './GH.vue';
 
 # Changelog
 
+## v1.3.2
+
+Change generated directory permissions from `777` -> `755` and generated file
+permissions from `777` -> `644`. This only affects newly created files and
+directories. Existing files and directories will keep their current
+permissions. <GH issue="128" pr="129"/>
+
 ## v1.3.1
 
-Fix `nil` map conversion. A `nil` map of will be converted to a `nil` map of
-the target type. Previously, the target map was instantiated via `make` with a
-0 size. <GH issue="126" pr="127"/>
+Fix `nil` map conversion. A `nil` map of will be converted to a `nil` map of the
+target type. Previously, the target map was instantiated via `make` with a 0
+size. <GH issue="126" pr="127"/>
 
 ## v1.3.0
 
