@@ -14,15 +14,14 @@ func (*List) Matches(_ *MethodContext, source, target *xtype.Type) bool {
 }
 
 // Build creates conversion source code for the given source and target type.
-func (*List) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *Error) {
+func (*List) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type, path ErrorPath) ([]jen.Code, *xtype.JenID, *Error) {
 	ctx.SetErrorTargetVar(jen.Nil())
 	targetSlice := ctx.Name(target.ID())
 	index := ctx.Index()
 
 	indexedSource := xtype.VariableID(sourceID.Code.Clone().Index(jen.Id(index)))
 
-	errWrapper := Wrap("error setting index %d", jen.Id(index))
-	forBlock, newID, err := gen.Build(ctx, indexedSource, source.ListInner, target.ListInner, errWrapper)
+	forBlock, newID, err := gen.Build(ctx, indexedSource, source.ListInner, target.ListInner, path.Index(jen.Id(index)))
 	if err != nil {
 		return nil, nil, err.Lift(&Path{
 			SourceID:   "[]",

@@ -19,13 +19,13 @@ func (*Struct) Matches(_ *MethodContext, source, target *xtype.Type) bool {
 }
 
 // Build creates conversion source code for the given source and target type.
-func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *Error) {
+func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type, errPath ErrorPath) ([]jen.Code, *xtype.JenID, *Error) {
 	// Optimization for golang sets
 	if !source.Named && !target.Named && source.StructType.NumFields() == 0 && target.StructType.NumFields() == 0 {
 		return nil, sourceID, nil
 	}
 
-	stmt, nameVar, err := buildTargetVar(gen, ctx, sourceID, source, target)
+	stmt, nameVar, err := buildTargetVar(gen, ctx, sourceID, source, target, errPath)
 	if err != nil {
 		return nil, nil, err
 	}
@@ -61,15 +61,11 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 		}
 
 		targetFieldType := xtype.TypeOf(targetField.Type())
-
-		// To find out the source code for an error message like "error setting field PostalCode", people sometimes
-		// search their codebase/repo for the exact message match, in full. Inline the error message AS IS into the
-		// generated code to satisfy this search and speed up the troubleshooting efforts.
-		errWrapper := Wrap("error setting field " + targetField.Name())
+		targetFieldPath := errPath.Field(targetField.Name())
 
 		if fieldMapping.Function == nil {
 			usedSourceID = true
-			nextID, nextSource, mapStmt, lift, skip, err := mapField(gen, ctx, targetField, sourceID, source, target, additionalFieldSources)
+			nextID, nextSource, mapStmt, lift, skip, err := mapField(gen, ctx, targetField, sourceID, source, target, additionalFieldSources, targetFieldPath)
 			if skip {
 				continue
 			}
@@ -78,7 +74,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 			}
 			stmt = append(stmt, mapStmt...)
 
-			fieldStmt, fieldID, err := gen.Build(ctx, nextID, nextSource, targetFieldType, errWrapper)
+			fieldStmt, fieldID, err := gen.Build(ctx, nextID, nextSource, targetFieldType, targetFieldPath)
 			if err != nil {
 				return nil, nil, err.Lift(lift...)
 			}
@@ -92,7 +88,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 			var functionCallSourceType *xtype.Type
 			if def.Source != nil {
 				usedSourceID = true
-				nextID, nextSource, mapStmt, mapLift, _, err := mapField(gen, ctx, targetField, sourceID, source, target, additionalFieldSources)
+				nextID, nextSource, mapStmt, mapLift, _, err := mapField(gen, ctx, targetField, sourceID, source, target, additionalFieldSources, targetFieldPath)
 				if err != nil {
 					return nil, nil, err
 				}
@@ -115,7 +111,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 				})
 			}
 
-			callStmt, callReturnID, err := gen.CallMethod(ctx, fieldMapping.Function, functionCallSourceID, functionCallSourceType, targetFieldType, errWrapper)
+			callStmt, callReturnID, err := gen.CallMethod(ctx, fieldMapping.Function, functionCallSourceID, functionCallSourceType, targetFieldType, targetFieldPath)
 			if err != nil {
 				return nil, nil, err.Lift(sourceLift...)
 			}
@@ -145,9 +141,9 @@ func mapField(
 	sourceID *xtype.JenID,
 	source, target *xtype.Type,
 	additionalFieldSources []xtype.FieldSources,
+	errPath ErrorPath,
 ) (*xtype.JenID, *xtype.Type, []jen.Code, []*Path, bool, *Error) {
 	lift := []*Path{}
-
 	def := ctx.Field(target, targetField.Name())
 	pathString := def.Source
 	if pathString == "." {
@@ -170,7 +166,7 @@ func mapField(
 			if ctx.Conf.IgnoreMissing {
 				_, skip = err.(*xtype.NoMatchError)
 			}
-			return nil, nil, nil, nil, skip, NewError(cause).Lift(&Path{
+			return nil, nil, nil, nil,  skip, NewError(cause).Lift(&Path{
 				Prefix:     ".",
 				SourceID:   "???",
 				TargetID:   targetField.Name(),
@@ -246,7 +242,7 @@ func mapField(
 		}
 		def.Call = nextIDCode
 
-		methodCallInner, callID, callErr := gen.CallMethod(ctx, def, nil, nil, def.Target, NoWrap)
+		methodCallInner, callID, callErr := gen.CallMethod(ctx, def, nil, nil, def.Target, errPath)
 		if callErr != nil {
 			return nil, nil, nil, nil, false, callErr.Lift(lift...)
 		}
