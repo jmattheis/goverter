@@ -1,3 +1,4 @@
+version_dependent: true
 input:
     external/method.go: |
         package external
