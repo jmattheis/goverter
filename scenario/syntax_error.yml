@@ -1,3 +1,4 @@
+version_dependent: true
 input:
     input.go: |
         package err

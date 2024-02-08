@@ -4,6 +4,10 @@ import GH from './GH.vue';
 
 # Changelog
 
+## Unreleased
+
+- Require go1.18 for building Goverter
+
 ## v1.3.2
 
 Change generated directory permissions from `777` -> `755` and generated file

@@ -16,6 +16,11 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+var (
+	UpdateScenario       = os.Getenv("UPDATE_SCENARIO") == "true"
+	SkipVersionDependent = os.Getenv("SKIP_VERSION_DEPENDENT") == "true"
+)
+
 func TestScenario(t *testing.T) {
 	rootDir := getCurrentPath()
 	scenarioDir := filepath.Join(rootDir, "scenario")
@@ -42,7 +47,13 @@ func TestScenario(t *testing.T) {
 			scenario := Scenario{}
 			err = yaml.Unmarshal(scenarioFileBytes, &scenario)
 			require.NoError(t, err)
-			err = os.WriteFile(filepath.Join(testWorkDir, "go.mod"), []byte("module github.com/jmattheis/goverter/execution\ngo 1.16"), os.ModePerm)
+
+			if SkipVersionDependent && scenario.VersionDependent {
+				t.SkipNow()
+				return
+			}
+
+			err = os.WriteFile(filepath.Join(testWorkDir, "go.mod"), []byte("module github.com/jmattheis/goverter/execution\ngo 1.18"), os.ModePerm)
 			require.NoError(t, err)
 
 			for name, content := range scenario.Input {
@@ -73,7 +84,7 @@ func TestScenario(t *testing.T) {
 
 			actualOutputFiles := toOutputFiles(testWorkDir, files)
 
-			if os.Getenv("UPDATE_SCENARIO") == "true" {
+			if UpdateScenario {
 				if err != nil {
 					scenario.Success = []*OutputFile{}
 					scenario.Error = replaceAbsolutePath(testWorkDir, fmt.Sprint(err))
@@ -136,6 +147,8 @@ func toOutputFiles(execDir string, files map[string][]byte) []*OutputFile {
 }
 
 type Scenario struct {
+	VersionDependent bool `yaml:"version_dependent,omitempty"`
+
 	Input  map[string]string `yaml:"input"`
 	Global []string          `yaml:"global,omitempty"`
 
