@@ -3,6 +3,7 @@ on: [push, pull_request]
 
 jobs:
   lint:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.repository != github.event.pull_request.head.repo.full_name)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/setup-go@v5
@@ -13,6 +14,7 @@ jobs:
         with:
           version: v1.55.2
   test:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.repository != github.event.pull_request.head.repo.full_name)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/setup-go@v5
@@ -23,6 +25,7 @@ jobs:
       - run: go test -coverpkg ./...  -coverprofile=coverage.txt -covermode=atomic ./...
       - uses: codecov/codecov-action@v4
   test_go118:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.repository != github.event.pull_request.head.repo.full_name)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/setup-go@v5
@@ -34,7 +37,7 @@ jobs:
         env:
           SKIP_VERSION_DEPENDENT: 'true'
   build_docs:
-    if: github.ref != 'refs/heads/main'
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.repository != github.event.pull_request.head.repo.full_name)
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
