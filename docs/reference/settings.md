@@ -45,3 +45,4 @@ These settings can be defined as [CLI argument](./define-settings.md#cli),
 - [`useUnderlyingTypeMethods [yes|no]` use underlying types when looking for existing methods](./useUnderlyingTypeMethods.md)
 - [`useZeroValueOnPointerInconsistency [yes|no]` Use zero values for `*S` to `T` conversions](./useZeroValueOnPointerInconsistency.md)
 - [`wrapErrors [yes,no]` wrap errors with extra information](./wrapErrors.md)
+- [`wrapErrorsUsing [PACKAGE]` wrap errors using a custom implementation](./wrapErrorsUsing.md)

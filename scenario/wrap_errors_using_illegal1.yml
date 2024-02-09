@@ -1,0 +1,16 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        // goverter:extend strconv:Atoi
+        // goverter:wrapErrors
+        // goverter:wrapErrorsUsing github.com/jmattheis/goverter/execution/patherr
+        type Converter interface {
+        }
+error: |-
+    error parsing 'goverter:wrapErrorsUsing' at
+        @workdir/input.go:7:1
+        github.com/jmattheis/goverter/execution.Converter
+
+    cannot be used in combination with wrapErrors

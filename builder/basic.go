@@ -15,7 +15,7 @@ func (*Basic) Matches(_ *MethodContext, source, target *xtype.Type) bool {
 }
 
 // Build creates conversion source code for the given source and target type.
-func (*Basic) Build(_ Generator, _ *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *Error) {
+func (*Basic) Build(_ Generator, _ *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type, errPath ErrorPath) ([]jen.Code, *xtype.JenID, *Error) {
 	if target.Named || (!target.Named && source.Named) {
 		return nil, xtype.OtherID(target.TypeAsJen().Call(sourceID.Code)), nil
 	}
@@ -31,11 +31,11 @@ func (*BasicTargetPointerRule) Matches(_ *MethodContext, source, target *xtype.T
 }
 
 // Build creates conversion source code for the given source and target type.
-func (*BasicTargetPointerRule) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *Error) {
+func (*BasicTargetPointerRule) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type, errPath ErrorPath) ([]jen.Code, *xtype.JenID, *Error) {
 	name := ctx.Name(target.ID())
 	ctx.SetErrorTargetVar(jen.Nil())
 
-	stmt, id, err := gen.Build(ctx, sourceID, source, target.PointerInner, NoWrap)
+	stmt, id, err := gen.Build(ctx, sourceID, source, target.PointerInner, errPath)
 	if err != nil {
 		return nil, nil, err.Lift(&Path{
 			SourceID:   "*",

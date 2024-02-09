@@ -40,6 +40,7 @@ func Parse(args []string) (*goverter.GenerateConfig, error) {
 
 	buildTags := fs.String("build-tags", "goverter", "")
 	outputConstraint := fs.String("output-constraint", "!goverter", "")
+	cwd := fs.String("cwd", "", "")
 
 	if err := fs.Parse(args[2:]); err != nil {
 		return nil, usageErr(err.Error(), args[0])
@@ -54,6 +55,7 @@ func Parse(args []string) (*goverter.GenerateConfig, error) {
 		PackagePatterns:       patterns,
 		BuildTags:             *buildTags,
 		OutputBuildConstraint: *outputConstraint,
+		WorkingDir:            *cwd,
 		Global: config.RawLines{
 			Lines:    global,
 			Location: "command line (-g, -global)",
@@ -81,6 +83,9 @@ OPTIONS:
       a comma-separated list of additional build tags to consider satisfied
       during the loading of conversion interfaces. See 'go help buildconstraint'.
       Can be disabled by supplying an empty string.
+
+  -cwd [value]:
+      set the working directory
 
   -g [value], -global [value]:
       apply settings to all defined converters. For a list of available

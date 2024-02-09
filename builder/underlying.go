@@ -19,7 +19,7 @@ func (*UseUnderlyingTypeMethods) Matches(ctx *MethodContext, source, target *xty
 }
 
 // Build creates conversion source code for the given source and target type.
-func (*UseUnderlyingTypeMethods) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *Error) {
+func (*UseUnderlyingTypeMethods) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type, errPath ErrorPath) ([]jen.Code, *xtype.JenID, *Error) {
 	sourceUnderlying, targetUnderlying := findUnderlyingExtendMapping(ctx, source, target)
 
 	innerSource := source
@@ -34,7 +34,7 @@ func (*UseUnderlyingTypeMethods) Build(gen Generator, ctx *MethodContext, source
 		innerTarget = xtype.TypeOf(target.NamedType.Underlying())
 	}
 
-	stmt, id, err := gen.Build(ctx, sourceID, innerSource, innerTarget, NoWrap)
+	stmt, id, err := gen.Build(ctx, sourceID, innerSource, innerTarget, errPath)
 	if err != nil {
 		return nil, nil, err.Lift(&Path{
 			SourceID:   "*",

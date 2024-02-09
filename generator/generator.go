@@ -43,7 +43,7 @@ func (g *generator) buildMethods(f *jen.File) error {
 			continue
 		}
 		genMethod.Dirty = false
-		err := g.buildMethod(genMethod, builder.NoWrap)
+		err := g.buildMethod(genMethod)
 		if err != nil {
 			err = err.Lift(&builder.Path{
 				SourceID:   "source",
@@ -77,7 +77,7 @@ func (g *generator) appendGenerated(f *jen.File) {
 	}
 }
 
-func (g *generator) buildMethod(genMethod *generatedMethod, errWrapper builder.ErrorWrapper) *builder.Error {
+func (g *generator) buildMethod(genMethod *generatedMethod) *builder.Error {
 	sourceID := jen.Id("source")
 	source := genMethod.Source
 	target := genMethod.Target
@@ -106,13 +106,13 @@ func (g *generator) buildMethod(genMethod *generatedMethod, errWrapper builder.E
 	var funcBlock []jen.Code
 	if def, ok := g.extend[ctx.Signature]; ok {
 		jenReturn, err := g.delegateMethod(
-			ctx, def, xtype.VariableID(sourceID.Clone()), source, target, errWrapper)
+			ctx, def, xtype.VariableID(sourceID.Clone()), source, target, nil)
 		if err != nil {
 			return err
 		}
 		funcBlock = []jen.Code{jenReturn}
 	} else {
-		stmt, newID, err := g.buildNoLookup(ctx, xtype.VariableID(sourceID.Clone()), source, target)
+		stmt, newID, err := g.buildNoLookup(ctx, xtype.VariableID(sourceID.Clone()), source, target, nil)
 		if err != nil {
 			return err
 		}
@@ -131,14 +131,14 @@ func (g *generator) buildMethod(genMethod *generatedMethod, errWrapper builder.E
 	return nil
 }
 
-func (g *generator) buildNoLookup(ctx *builder.MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *builder.Error) {
+func (g *generator) buildNoLookup(ctx *builder.MethodContext, sourceID *xtype.JenID, source, target *xtype.Type, errPath builder.ErrorPath) ([]jen.Code, *xtype.JenID, *builder.Error) {
 	if err := g.getOverlappingStructDefinition(ctx, source, target); err != nil {
 		return nil, nil, err
 	}
 
 	for _, rule := range BuildSteps {
 		if rule.Matches(ctx, source, target) {
-			return rule.Build(g, ctx, sourceID, source, target)
+			return rule.Build(g, ctx, sourceID, source, target, errPath)
 		}
 	}
 
@@ -164,7 +164,7 @@ func (g *generator) CallMethod(
 	definition *method.Definition,
 	sourceID *xtype.JenID,
 	source, target *xtype.Type,
-	errWrapper builder.ErrorWrapper,
+	errPath builder.ErrorPath,
 ) ([]jen.Code, *xtype.JenID, *builder.Error) {
 	params := []jen.Code{}
 	if definition.SelfAsFirstParameter {
@@ -206,7 +206,7 @@ func (g *generator) CallMethod(
 		stmt := []jen.Code{
 			jen.List(jen.Id(name), jen.Id("err")).Op(":=").Add(definition.Call.Clone().Call(params...)),
 			jen.If(jen.Id("err").Op("!=").Nil()).Block(
-				jen.Return(ctx.TargetVar, g.wrap(ctx, errWrapper, jen.Id("err")))),
+				jen.Return(ctx.TargetVar, g.wrap(ctx, errPath, jen.Id("err")))),
 		}
 		return stmt, xtype.VariableID(jen.Id(name)), nil
 	}
@@ -219,7 +219,7 @@ func (g *generator) delegateMethod(
 	delegateTo *method.Definition,
 	sourceID *xtype.JenID,
 	source, target *xtype.Type,
-	errWrapper builder.ErrorWrapper,
+	errPath builder.ErrorPath,
 ) (*jen.Statement, *builder.Error) {
 	params := []jen.Code{}
 	if delegateTo.SelfAsFirstParameter {
@@ -245,11 +245,15 @@ func (g *generator) delegateMethod(
 }
 
 // wrap invokes the error wrapper if feature is enabled.
-func (g *generator) wrap(ctx *builder.MethodContext, errWrapper builder.ErrorWrapper, errStmt *jen.Statement) *jen.Statement {
-	if ctx.Conf.WrapErrors {
-		return errWrapper(errStmt)
+func (g *generator) wrap(ctx *builder.MethodContext, errPath builder.ErrorPath, errStmt *jen.Statement) *jen.Statement {
+	switch {
+	case ctx.Conf.WrapErrorsUsing != "":
+		return errPath.WrapErrorsUsing(ctx.Conf.WrapErrorsUsing, errStmt)
+	case ctx.Conf.WrapErrors:
+		return errPath.WrapErrors(errStmt)
+	default:
+		return errStmt
 	}
-	return errStmt
 }
 
 // Build builds an implementation for the given source and target type, or uses an existing method for it.
@@ -257,14 +261,14 @@ func (g *generator) Build(
 	ctx *builder.MethodContext,
 	sourceID *xtype.JenID,
 	source, target *xtype.Type,
-	errWrapper builder.ErrorWrapper,
+	errPath builder.ErrorPath,
 ) ([]jen.Code, *xtype.JenID, *builder.Error) {
 	signature := xtype.SignatureOf(source, target)
 	if def, ok := g.extend[signature]; ok {
-		return g.CallMethod(ctx, def, sourceID, source, target, errWrapper)
+		return g.CallMethod(ctx, def, sourceID, source, target, errPath)
 	}
 	if genMethod, ok := g.lookup[signature]; ok {
-		return g.CallMethod(ctx, genMethod.Definition, sourceID, source, target, errWrapper)
+		return g.CallMethod(ctx, genMethod.Definition, sourceID, source, target, errPath)
 	}
 
 	isCurrentPointerStructMethod := false
@@ -298,13 +302,13 @@ func (g *generator) Build(
 	ctx.MarkSeen(source)
 
 	if createSubMethod {
-		return g.createSubMethod(ctx, sourceID, source, target, errWrapper)
+		return g.createSubMethod(ctx, sourceID, source, target, errPath)
 	}
 
-	return g.buildNoLookup(ctx, sourceID, source, target)
+	return g.buildNoLookup(ctx, sourceID, source, target, errPath)
 }
 
-func (g *generator) createSubMethod(ctx *builder.MethodContext, sourceID *xtype.JenID, source, target *xtype.Type, errWrapper builder.ErrorWrapper) ([]jen.Code, *xtype.JenID, *builder.Error) {
+func (g *generator) createSubMethod(ctx *builder.MethodContext, sourceID *xtype.JenID, source, target *xtype.Type, errPAth builder.ErrorPath) ([]jen.Code, *xtype.JenID, *builder.Error) {
 	signature := xtype.SignatureOf(source, target)
 
 	name := g.namer.Name(source.UnescapedID() + "To" + strings.Title(target.UnescapedID()))
@@ -325,10 +329,10 @@ func (g *generator) createSubMethod(ctx *builder.MethodContext, sourceID *xtype.
 	}
 
 	g.lookup[signature] = genMethod
-	if err := g.buildMethod(genMethod, errWrapper); err != nil {
+	if err := g.buildMethod(genMethod); err != nil {
 		return nil, nil, err
 	}
-	return g.CallMethod(ctx, genMethod.Definition, sourceID, source, target, errWrapper)
+	return g.CallMethod(ctx, genMethod.Definition, sourceID, source, target, errPAth)
 }
 
 func (g *generator) hasMethod(source, target types.Type) bool {

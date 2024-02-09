@@ -14,6 +14,6 @@ func (*SkipCopy) Matches(ctx *MethodContext, source, target *xtype.Type) bool {
 }
 
 // Build creates conversion source code for the given source and target type.
-func (*SkipCopy) Build(_ Generator, _ *MethodContext, sourceID *xtype.JenID, _, _ *xtype.Type) ([]jen.Code, *xtype.JenID, *Error) {
+func (*SkipCopy) Build(_ Generator, _ *MethodContext, sourceID *xtype.JenID, _, _ *xtype.Type, _ ErrorPath) ([]jen.Code, *xtype.JenID, *Error) {
 	return nil, sourceID, nil
 }

@@ -5,7 +5,7 @@ import (
 	"github.com/jmattheis/goverter/xtype"
 )
 
-func buildTargetVar(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *jen.Statement, *Error) {
+func buildTargetVar(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type, errPath ErrorPath) ([]jen.Code, *jen.Statement, *Error) {
 	if ctx.Conf.Constructor == nil ||
 		ctx.Conf.Source.String != source.String ||
 		ctx.Conf.Target.String != target.String {
@@ -21,7 +21,7 @@ func buildTargetVar(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, so
 		callTarget = target.PointerInner
 	}
 
-	stmt, nextID, err := gen.CallMethod(ctx, ctx.Conf.Constructor, sourceID, source, callTarget, NoWrap)
+	stmt, nextID, err := gen.CallMethod(ctx, ctx.Conf.Constructor, sourceID, source, callTarget, errPath)
 	if err != nil {
 		return nil, nil, err
 	}

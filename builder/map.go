@@ -14,12 +14,14 @@ func (*Map) Matches(_ *MethodContext, source, target *xtype.Type) bool {
 }
 
 // Build creates conversion source code for the given source and target type.
-func (*Map) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type) ([]jen.Code, *xtype.JenID, *Error) {
+func (*Map) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type, errPath ErrorPath) ([]jen.Code, *xtype.JenID, *Error) {
 	ctx.SetErrorTargetVar(jen.Nil())
 	targetMap := ctx.Name(target.ID())
 	key, value := ctx.Map()
 
-	block, newKey, err := gen.Build(ctx, xtype.VariableID(jen.Id(key)), source.MapKey, target.MapKey, NoWrap)
+	errPath = errPath.Key(jen.Id(key))
+
+	block, newKey, err := gen.Build(ctx, xtype.VariableID(jen.Id(key)), source.MapKey, target.MapKey, errPath)
 	if err != nil {
 		return nil, nil, err.Lift(&Path{
 			SourceID:   "[]",
@@ -29,7 +31,7 @@ func (*Map) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, sour
 		})
 	}
 	valueStmt, valueKey, err := gen.Build(
-		ctx, xtype.VariableID(jen.Id(value)), source.MapValue, target.MapValue, NoWrap)
+		ctx, xtype.VariableID(jen.Id(value)), source.MapValue, target.MapValue, errPath)
 	if err != nil {
 		return nil, nil, err.Lift(&Path{
 			SourceID:   "[]",
