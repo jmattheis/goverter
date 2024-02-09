@@ -246,10 +246,14 @@ func (g *generator) delegateMethod(
 
 // wrap invokes the error wrapper if feature is enabled.
 func (g *generator) wrap(ctx *builder.MethodContext, errPath builder.ErrorPath, errStmt *jen.Statement) *jen.Statement {
-	if ctx.Conf.WrapErrors && len(errPath) != 0 {
+	switch {
+	case ctx.Conf.WrapErrorsUsing != "":
+		return errPath.WrapErrorsUsing(ctx.Conf.WrapErrorsUsing, errStmt)
+	case ctx.Conf.WrapErrors:
 		return errPath.WrapErrors(errStmt)
+	default:
+		return errStmt
 	}
-	return errStmt
 }
 
 // Build builds an implementation for the given source and target type, or uses an existing method for it.

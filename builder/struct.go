@@ -166,7 +166,7 @@ func mapField(
 			if ctx.Conf.IgnoreMissing {
 				_, skip = err.(*xtype.NoMatchError)
 			}
-			return nil, nil, nil, nil,  skip, NewError(cause).Lift(&Path{
+			return nil, nil, nil, nil, skip, NewError(cause).Lift(&Path{
 				Prefix:     ".",
 				SourceID:   "???",
 				TargetID:   targetField.Name(),

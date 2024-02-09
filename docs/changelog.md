@@ -8,6 +8,7 @@ import GH from './GH.vue';
 
 - Require go1.18 for building Goverter
 - Add current working directory `-cwd` option to [CLI](./reference/cli.md)
+- Add [`wrapErrorsUsing`](./reference/wrapErrorsUsing.md)
 
 ## v1.3.2
 
