@@ -20,6 +20,9 @@ OPTIONS:
       during the loading of conversion interfaces. See 'go help buildconstraint'.
       Can be disabled by supplying an empty string.
 
+  -cwd [value]:
+      set the working directory
+
   -g [value], -global [value]:
       apply settings to all defined converters. For a list of available
       settings see: https://goverter.jmattheis.de/reference/settings

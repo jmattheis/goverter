@@ -37,6 +37,7 @@ func TestSuccess(t *testing.T) {
 	actual, err := cli.Parse([]string{
 		"goverter",
 		"gen",
+		"-cwd", "file/path",
 		"-build-tags", "",
 		"-output-constraint", "",
 		"-g", "g1",
@@ -48,7 +49,7 @@ func TestSuccess(t *testing.T) {
 
 	expected := &goverter.GenerateConfig{
 		PackagePatterns:       []string{"pattern1", "pattern2"},
-		WorkingDir:            "",
+		WorkingDir:            "file/path",
 		OutputBuildConstraint: "",
 		BuildTags:             "",
 		Global: config.RawLines{
