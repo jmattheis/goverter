@@ -23,7 +23,11 @@ jobs:
       - uses: actions/checkout@v4
       - run: go build ./cmd/goverter
       - run: go test -coverpkg ./...  -coverprofile=coverage.txt -covermode=atomic ./...
+      - run: grep -v '/example/' coverage.txt > filtered-coverage.txt
       - uses: codecov/codecov-action@v4
+        with:
+          disable_search: true
+          files: ./filtered-coverage.txt
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   test_go118:
