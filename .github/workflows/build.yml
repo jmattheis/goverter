@@ -24,6 +24,8 @@ jobs:
       - run: go build ./cmd/goverter
       - run: go test -coverpkg ./...  -coverprofile=coverage.txt -covermode=atomic ./...
       - uses: codecov/codecov-action@v4
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
   test_go118:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.repository != github.event.pull_request.head.repo.full_name)
     runs-on: ubuntu-latest
