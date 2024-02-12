@@ -27,16 +27,12 @@ success:
 
         func (c *ConverterImpl) ConvertPerson(source execution.Input) execution.Output {
         	var structsOutput execution.Output
-        	var unnamed struct {
-        		Name string
-        	}
         	if source.Thing != nil {
-        		var unnamed2 struct {
+        		var unnamed struct {
         			Name string
         		}
-        		unnamed2.Name = (*source.Thing).Name
-        		unnamed = unnamed2
+        		unnamed.Name = (*source.Thing).Name
+        		structsOutput.Thing = unnamed
         	}
-        	structsOutput.Thing = unnamed
         	return structsOutput
         }

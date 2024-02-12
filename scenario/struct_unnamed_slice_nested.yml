@@ -30,39 +30,29 @@ success:
 
         func (c *ConverterImpl) ConvertHouse(source execution.Input) execution.Output {
         	var structsOutput execution.Output
-        	var unnamedListList [][]struct {
-        		Names []string
-        	}
         	if source.House != nil {
-        		unnamedListList = make([][]struct {
+        		structsOutput.House = make([][]struct {
         			Names []string
         		}, len(source.House))
         		for i := 0; i < len(source.House); i++ {
-        			var unnamedList []struct {
-        				Names []string
-        			}
         			if source.House[i] != nil {
-        				unnamedList = make([]struct {
+        				structsOutput.House[i] = make([]struct {
         					Names []string
         				}, len(source.House[i]))
         				for j := 0; j < len(source.House[i]); j++ {
         					var unnamed struct {
         						Names []string
         					}
-        					var stringList []string
         					if source.House[i][j].Names != nil {
-        						stringList = make([]string, len(source.House[i][j].Names))
+        						unnamed.Names = make([]string, len(source.House[i][j].Names))
         						for k := 0; k < len(source.House[i][j].Names); k++ {
-        							stringList[k] = source.House[i][j].Names[k]
+        							unnamed.Names[k] = source.House[i][j].Names[k]
         						}
         					}
-        					unnamed.Names = stringList
-        					unnamedList[j] = unnamed
+        					structsOutput.House[i][j] = unnamed
         				}
         			}
-        			unnamedListList[i] = unnamedList
         		}
         	}
-        	structsOutput.House = unnamedListList
         	return structsOutput
         }

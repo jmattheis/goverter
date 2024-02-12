@@ -98,6 +98,10 @@ func (*Enum) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, sou
 	return stmt, xtype.VariableID(nameVar), nil
 }
 
+func (s *Enum) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, sourceID *xtype.JenID, source, target *xtype.Type, path ErrorPath) ([]jen.Code, *Error) {
+	return AssignByBuild(s, gen, ctx, assignTo, sourceID, source, target, path)
+}
+
 func caseAction(gen Generator, ctx *MethodContext, nameVar *jen.Statement, target *xtype.Type, targetEnum *xtype.Enum, targetName string, sourceID *xtype.JenID, errPath ErrorPath) (jen.Code, *Error) {
 	if config.IsEnumAction(targetName) {
 		switch targetName {

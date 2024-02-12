@@ -9,7 +9,44 @@ import GH from './GH.vue';
 - Error when the settings [`enum`](reference/enum.md) and
   [`useUnderlyingTypeMethods`](reference/useUnderlyingTypeMethods.md) conflict.
   <GH issue="141" pr="142"/>
-- Add [CLI](./reference/cli.md) commands `help` and `version`. <GH issue="144" pr="145"/>
+- Add [CLI](./reference/cli.md) commands `help` and `version`.
+  <GH issue="144" pr="145"/>
+- Improve generation by assigning variables directly if possible.
+  <GH issue="97" pr="148"/> 
+  :::details Examples
+  ```diff
+   func (c *ConverterImpl) Convert(source execution.Input) execution.Output {
+       var structsOutput execution.Output
+  -    var pString *string
+       if source.Nested.Name != nil {
+           xstring := *source.Nested.Name
+  -        pString = &xstring
+  +        structsOutput.Name = &xstring
+       }
+  -    structsOutput.Name = pString
+       return structsOutput
+   }
+  ```
+  ***
+  ```diff
+   func (c *ConverterImpl) ConvertPToP(source []*int) []*int {
+       var pIntList []*int
+       if source != nil {
+           pIntList = make([]*int, len(source))
+           for i := 0; i < len(source); i++ {
+  -            var pInt *int
+               if source[i] != nil {
+                   xint := *source[i]
+  -                pInt = &xint
+  +                pIntList[i] = &xint
+               }
+  -            pIntList[i] = pInt
+           }
+       }
+       return pIntList
+   }
+  ```
+  :::
 
 ## v1.4.0
 

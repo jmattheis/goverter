@@ -27,10 +27,8 @@ success:
 
         func (c *ConverterImpl) ConvertPerson(source execution.Person) execution.APIPerson {
         	var structsAPIPerson execution.APIPerson
-        	var xstring string
         	if source.FirstName != nil {
-        		xstring = *source.FirstName
+        		structsAPIPerson.FirstName = *source.FirstName
         	}
-        	structsAPIPerson.FirstName = xstring
         	return structsAPIPerson
         }

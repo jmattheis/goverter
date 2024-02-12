@@ -29,11 +29,9 @@ success:
 
         func (c *ConverterImpl) Convert(source execution.Input) execution.Output {
         	var structsOutput execution.Output
-        	var pString *string
         	if source.Nested.Name != nil {
         		xstring := *source.Nested.Name
-        		pString = &xstring
+        		structsOutput.Name = &xstring
         	}
-        	structsOutput.Name = pString
         	return structsOutput
         }

@@ -39,11 +39,9 @@ success:
         	if source.Nested != nil && source.Nested.Inner.Inner2 != nil {
         		pString = source.Nested.Inner.Inner2.Name
         	}
-        	var pString2 *string
         	if pString != nil {
         		xstring := *pString
-        		pString2 = &xstring
+        		structsOutput.Name = &xstring
         	}
-        	structsOutput.Name = pString2
         	return structsOutput
         }

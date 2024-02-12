@@ -119,8 +119,7 @@ func (g *generator) buildMethod(genMethod *generatedMethod) *builder.Error {
 
 	var funcBlock []jen.Code
 	if def, ok := g.extend[ctx.Signature]; ok {
-		jenReturn, err := g.delegateMethod(
-			ctx, def, xtype.VariableID(sourceID.Clone()), source, target, nil)
+		jenReturn, err := g.delegateMethod(ctx, def, xtype.VariableID(sourceID.Clone()))
 		if err != nil {
 			return err
 		}
@@ -156,21 +155,21 @@ func (g *generator) buildNoLookup(ctx *builder.MethodContext, sourceID *xtype.Je
 		}
 	}
 
-	if source.Pointer && !target.Pointer {
-		return nil, nil, builder.NewError(fmt.Sprintf(`TypeMismatch: Cannot convert %s to %s
-It is unclear how nil should be handled in the pointer to non pointer conversion.
+	return nil, nil, typeMismatch(source, target)
+}
 
-You can enable useZeroValueOnPointerInconsistency to instruct goverter to use the zero value if source is nil
-https://goverter.jmattheis.de/reference/useZeroValueOnPointerInconsistency
-
-or you can define a custom conversion method with extend:
-https://goverter.jmattheis.de/reference/extend`, source.T, target.T))
+func (g *generator) assignNoLookup(ctx *builder.MethodContext, assignTo *builder.AssignTo, sourceID *xtype.JenID, source, target *xtype.Type, errPath builder.ErrorPath) ([]jen.Code, *builder.Error) {
+	if err := g.getOverlappingStructDefinition(ctx, source, target); err != nil {
+		return nil, err
 	}
 
-	return nil, nil, builder.NewError(fmt.Sprintf(`TypeMismatch: Cannot convert %s to %s
+	for _, rule := range BuildSteps {
+		if rule.Matches(ctx, source, target) {
+			return rule.Assign(g, ctx, assignTo, sourceID, source, target, errPath)
+		}
+	}
 
-You can define a custom conversion method with extend:
-https://goverter.jmattheis.de/reference/extend`, source.T, target.T))
+	return nil, typeMismatch(source, target)
 }
 
 func (g *generator) CallMethod(
@@ -245,8 +244,6 @@ func (g *generator) delegateMethod(
 	ctx *builder.MethodContext,
 	delegateTo *method.Definition,
 	sourceID *xtype.JenID,
-	source, target *xtype.Type,
-	errPath builder.ErrorPath,
 ) (*jen.Statement, *builder.Error) {
 	params := []jen.Code{}
 	if delegateTo.SelfAsFirstParameter {
@@ -298,6 +295,37 @@ func (g *generator) Build(
 		return g.CallMethod(ctx, genMethod.Definition, sourceID, source, target, errPath)
 	}
 
+	if g.shouldCreateSubMethod(ctx, source, target) {
+		return g.createSubMethod(ctx, sourceID, source, target, errPath)
+	}
+
+	return g.buildNoLookup(ctx, sourceID, source, target, errPath)
+}
+
+// Assign builds an implementation for the given source and target type, or uses an existing method for it.
+func (g *generator) Assign(
+	ctx *builder.MethodContext,
+	assignTo *builder.AssignTo,
+	sourceID *xtype.JenID,
+	source, target *xtype.Type,
+	errPath builder.ErrorPath,
+) ([]jen.Code, *builder.Error) {
+	signature := xtype.SignatureOf(source, target)
+	if def, ok := g.extend[signature]; ok {
+		return builder.ToAssignable(assignTo)(g.CallMethod(ctx, def, sourceID, source, target, errPath))
+	}
+	if genMethod, ok := g.lookup[signature]; ok {
+		return builder.ToAssignable(assignTo)(g.CallMethod(ctx, genMethod.Definition, sourceID, source, target, errPath))
+	}
+
+	if g.shouldCreateSubMethod(ctx, source, target) {
+		return builder.ToAssignable(assignTo)(g.createSubMethod(ctx, sourceID, source, target, errPath))
+	}
+
+	return g.assignNoLookup(ctx, assignTo, sourceID, source, target, errPath)
+}
+
+func (g *generator) shouldCreateSubMethod(ctx *builder.MethodContext, source, target *xtype.Type) bool {
 	isCurrentPointerStructMethod := false
 	if source.Struct && target.Struct {
 		// This checks if we are currently inside the generation of one of the following combinations.
@@ -330,11 +358,7 @@ func (g *generator) Build(
 	}
 	ctx.MarkSeen(source)
 
-	if createSubMethod {
-		return g.createSubMethod(ctx, sourceID, source, target, errPath)
-	}
-
-	return g.buildNoLookup(ctx, sourceID, source, target, errPath)
+	return createSubMethod
 }
 
 func (g *generator) createSubMethod(ctx *builder.MethodContext, sourceID *xtype.JenID, source, target *xtype.Type, errPAth builder.ErrorPath) ([]jen.Code, *xtype.JenID, *builder.Error) {
@@ -414,4 +438,22 @@ and therefore the defined field settings would be ignored.`, strings.Join(def.Ra
 		}
 	}
 	return nil
+}
+
+func typeMismatch(source, target *xtype.Type) *builder.Error {
+	if source.Pointer && !target.Pointer {
+		return builder.NewError(fmt.Sprintf(`TypeMismatch: Cannot convert %s to %s
+It is unclear how nil should be handled in the pointer to non pointer conversion.
+
+You can enable useZeroValueOnPointerInconsistency to instruct goverter to use the zero value if source is nil
+https://goverter.jmattheis.de/reference/useZeroValueOnPointerInconsistency
+
+or you can define a custom conversion method with extend:
+https://goverter.jmattheis.de/reference/extend`, source.T, target.T))
+	}
+
+	return builder.NewError(fmt.Sprintf(`TypeMismatch: Cannot convert %s to %s
+
+You can define a custom conversion method with extend:
+https://goverter.jmattheis.de/reference/extend`, source.T, target.T))
 }

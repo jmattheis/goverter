@@ -43,14 +43,12 @@ success:
         	var skipOutput execution.Output
         	skipOutput.ID = source.ID
         	skipOutput.Map = source.Map
-        	var mapStringSkipID map[string]execution.ID
         	if source.MapDifferentType != nil {
-        		mapStringSkipID = make(map[string]execution.ID, len(source.MapDifferentType))
+        		skipOutput.MapDifferentType = make(map[string]execution.ID, len(source.MapDifferentType))
         		for key, value := range source.MapDifferentType {
-        			mapStringSkipID[key] = execution.ID(value)
+        			skipOutput.MapDifferentType[key] = execution.ID(value)
         		}
         	}
-        	skipOutput.MapDifferentType = mapStringSkipID
         	skipOutput.CreatedAt = c.timeTimeToPTimeTime(source.CreatedAt)
         	skipOutput.Unnamed = source.Unnamed
         	return skipOutput

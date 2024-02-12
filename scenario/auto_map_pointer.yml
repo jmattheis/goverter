@@ -39,11 +39,9 @@ success:
         	if source.Address != nil {
         		pString = &source.Address.Street
         	}
-        	var pString2 *string
         	if pString != nil {
         		xstring := *pString
-        		pString2 = &xstring
+        		exampleFlatPerson.Street = &xstring
         	}
-        	exampleFlatPerson.Street = pString2
         	return exampleFlatPerson
         }

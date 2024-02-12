@@ -35,11 +35,9 @@ success:
         	structsOutput.ID = &pStructsID
         	pString := source.Name
         	structsOutput.Name = &pString
-        	var pInt *int
         	if source.Age != nil {
         		xint := *source.Age
-        		pInt = &xint
+        		structsOutput.Age = &xint
         	}
-        	structsOutput.Age = pInt
         	return structsOutput
         }

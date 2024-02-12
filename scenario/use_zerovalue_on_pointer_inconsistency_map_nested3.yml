@@ -35,10 +35,8 @@ success:
         	if source.Inner != nil {
         		pString = &source.Inner.Name
         	}
-        	var xstring string
         	if pString != nil {
-        		xstring = *pString
+        		structsAPIPerson.Name = *pString
         	}
-        	structsAPIPerson.Name = xstring
         	return structsAPIPerson
         }

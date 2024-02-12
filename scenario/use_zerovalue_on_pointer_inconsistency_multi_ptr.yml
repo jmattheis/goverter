@@ -27,14 +27,12 @@ success:
 
         func (c *ConverterImpl) ConvertHouse(source execution.DBHouseNames) execution.APIHouseNames {
         	var slices_arraysAPIHouseNames execution.APIHouseNames
-        	var xstring string
         	if source.Name != nil {
-        		var xstring2 string
+        		var xstring string
         		if (*source.Name) != nil {
-        			xstring2 = *(*source.Name)
+        			xstring = *(*source.Name)
         		}
-        		xstring = xstring2
+        		slices_arraysAPIHouseNames.Name = xstring
         	}
-        	slices_arraysAPIHouseNames.Name = xstring
         	return slices_arraysAPIHouseNames
         }

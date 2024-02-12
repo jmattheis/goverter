@@ -14,13 +14,13 @@ func (*Pointer) Matches(_ *MethodContext, source, target *xtype.Type) bool {
 }
 
 // Build creates conversion source code for the given source and target type.
-func (*Pointer) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type, errPath ErrorPath) ([]jen.Code, *xtype.JenID, *Error) {
+func (p *Pointer) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type, errPath ErrorPath) ([]jen.Code, *xtype.JenID, *Error) {
 	ctx.SetErrorTargetVar(jen.Nil())
+	return BuildByAssign(p, gen, ctx, sourceID, source, target, errPath)
+}
 
-	stmt, outerVar, err := buildTargetVar(gen, ctx, sourceID, source, target, errPath)
-	if err != nil {
-		return nil, nil, err
-	}
+func (*Pointer) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, sourceID *xtype.JenID, source, target *xtype.Type, errPath ErrorPath) ([]jen.Code, *Error) {
+	ctx.SetErrorTargetVar(jen.Nil())
 
 	valueSourceID := jen.Op("*").Add(sourceID.Code.Clone())
 	if !source.PointerInner.Basic {
@@ -32,7 +32,7 @@ func (*Pointer) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, 
 	nextBlock, id, err := gen.Build(
 		ctx, innerID, source.PointerInner, target.PointerInner, errPath)
 	if err != nil {
-		return nil, nil, err.Lift(&Path{
+		return nil, err.Lift(&Path{
 			SourceID:   "*",
 			SourceType: source.PointerInner.String,
 			TargetID:   "*",
@@ -43,13 +43,18 @@ func (*Pointer) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, 
 	pstmt, tmpID := id.Pointer(target.PointerInner, ctx.Name)
 
 	ifBlock := append(nextBlock, pstmt...)
-	ifBlock = append(ifBlock, outerVar.Clone().Op("=").Add(tmpID.Code))
+	ifBlock = append(ifBlock, assignTo.Stmt.Clone().Op("=").Add(tmpID.Code))
 
-	stmt = append(stmt,
-		jen.If(sourceID.Code.Clone().Op("!=").Nil()).Block(ifBlock...),
-	)
+	var elseCase []jen.Code
+	if assignTo.Must {
+		elseCase = append(elseCase, jen.Else().Block(assignTo.Stmt.Clone().Op("=").Nil()))
+	}
 
-	return stmt, xtype.VariableID(outerVar), err
+	stmt := []jen.Code{
+		jen.If(sourceID.Code.Clone().Op("!=").Nil()).Block(ifBlock...).Add(elseCase...),
+	}
+
+	return stmt, err
 }
 
 // SourcePointer handles type were only the source is a pointer.
@@ -61,9 +66,11 @@ func (*SourcePointer) Matches(ctx *MethodContext, source, target *xtype.Type) bo
 }
 
 // Build creates conversion source code for the given source and target type.
-func (*SourcePointer) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type, path ErrorPath) ([]jen.Code, *xtype.JenID, *Error) {
-	ctx.SetErrorTargetVar(jen.Id(target.ID()))
+func (s *SourcePointer) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type, path ErrorPath) ([]jen.Code, *xtype.JenID, *Error) {
+	return BuildByAssign(s, gen, ctx, sourceID, source, target, path)
+}
 
+func (*SourcePointer) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, sourceID *xtype.JenID, source, target *xtype.Type, path ErrorPath) ([]jen.Code, *Error) {
 	valueSourceID := jen.Op("*").Add(sourceID.Code.Clone())
 	if !source.PointerInner.Basic {
 		valueSourceID = jen.Parens(valueSourceID)
@@ -72,26 +79,21 @@ func (*SourcePointer) Build(gen Generator, ctx *MethodContext, sourceID *xtype.J
 	innerID := xtype.OtherID(valueSourceID)
 	innerID.ParentPointer = sourceID
 
-	stmt, valueVar, err := buildTargetVar(gen, ctx, sourceID, source, target, path)
-	if err != nil {
-		return nil, nil, err
-	}
-
 	nextInner, nextID, err := gen.Build(ctx, innerID, source.PointerInner, target, path)
 	if err != nil {
-		return nil, nil, err.Lift(&Path{
+		return nil, err.Lift(&Path{
 			SourceID:   "*",
 			SourceType: source.PointerInner.String,
 		})
 	}
 
-	stmt = append(stmt,
+	stmt := []jen.Code{
 		jen.If(sourceID.Code.Clone().Op("!=").Nil()).Block(
-			append(nextInner, valueVar.Clone().Op("=").Add(nextID.Code))...,
+			append(nextInner, assignTo.Stmt.Clone().Op("=").Add(nextID.Code))...,
 		),
-	)
+	}
 
-	return stmt, xtype.VariableID(valueVar), nil
+	return stmt, nil
 }
 
 // TargetPointer handles type were only the target is a pointer.
@@ -118,4 +120,8 @@ func (*TargetPointer) Build(gen Generator, ctx *MethodContext, sourceID *xtype.J
 	pstmt, nextID := id.Pointer(target.PointerInner, ctx.Name)
 	stmt = append(stmt, pstmt...)
 	return stmt, nextID, nil
+}
+
+func (tp *TargetPointer) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, sourceID *xtype.JenID, source, target *xtype.Type, path ErrorPath) ([]jen.Code, *Error) {
+	return AssignByBuild(tp, gen, ctx, assignTo, sourceID, source, target, path)
 }

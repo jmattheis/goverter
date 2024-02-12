@@ -62,6 +62,10 @@ You have to disable enum or useUnderlyingTypeMethods to resolve the setting conf
 	return stmt, id, err
 }
 
+func (u *UseUnderlyingTypeMethods) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, sourceID *xtype.JenID, source, target *xtype.Type, errPath ErrorPath) ([]jen.Code, *Error) {
+	return AssignByBuild(u, gen, ctx, assignTo, sourceID, source, target, errPath)
+}
+
 func findUnderlyingExtendMapping(ctx *MethodContext, source, target *xtype.Type) (underlyingSource, underlyingTarget bool) {
 	if source.Named {
 		if ctx.HasMethod(source.NamedType.Underlying(), target.NamedType) {

@@ -20,12 +20,10 @@ success:
         	if source != nil {
         		pIntList = make([]*int, len(source))
         		for i := 0; i < len(source); i++ {
-        			var pInt *int
         			if source[i] != nil {
         				xint := *source[i]
-        				pInt = &xint
+        				pIntList[i] = &xint
         			}
-        			pIntList[i] = pInt
         		}
         	}
         	return pIntList

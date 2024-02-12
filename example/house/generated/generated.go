@@ -12,27 +12,23 @@ func (c *ConverterImpl) ConvertApartment(source house.DBApartment) house.APIApar
 	houseAPIApartment.Position = source.Position
 	houseAPIApartment.Owner = c.ConvertPerson(source.Owner)
 	houseAPIApartment.OwnerName = source.Owner.Name
-	var houseAPIPersonList []house.APIPerson
 	if source.CoResident != nil {
-		houseAPIPersonList = make([]house.APIPerson, len(source.CoResident))
+		houseAPIApartment.CoResident = make([]house.APIPerson, len(source.CoResident))
 		for i := 0; i < len(source.CoResident); i++ {
-			houseAPIPersonList[i] = c.ConvertPerson(source.CoResident[i])
+			houseAPIApartment.CoResident[i] = c.ConvertPerson(source.CoResident[i])
 		}
 	}
-	houseAPIApartment.CoResident = houseAPIPersonList
 	return houseAPIApartment
 }
 func (c *ConverterImpl) ConvertHouse(source house.DBHouse) house.APIHouse {
 	var houseAPIHouse house.APIHouse
 	houseAPIHouse.Address = source.Address
-	var mapHouseAPIRoomNRHouseAPIApartment map[house.APIRoomNR]house.APIApartment
 	if source.Apartments != nil {
-		mapHouseAPIRoomNRHouseAPIApartment = make(map[house.APIRoomNR]house.APIApartment, len(source.Apartments))
+		houseAPIHouse.Apartments = make(map[house.APIRoomNR]house.APIApartment, len(source.Apartments))
 		for key, value := range source.Apartments {
-			mapHouseAPIRoomNRHouseAPIApartment[house.APIRoomNR(key)] = c.ConvertApartment(value)
+			houseAPIHouse.Apartments[house.APIRoomNR(key)] = c.ConvertApartment(value)
 		}
 	}
-	houseAPIHouse.Apartments = mapHouseAPIRoomNRHouseAPIApartment
 	return houseAPIHouse
 }
 func (c *ConverterImpl) ConvertPerson(source house.DBPerson) house.APIPerson {
@@ -41,13 +37,11 @@ func (c *ConverterImpl) ConvertPerson(source house.DBPerson) house.APIPerson {
 	houseAPIPerson.MiddleName = house.SQLStringToPString(source.MiddleName)
 	pString := source.Name
 	houseAPIPerson.FirstName = &pString
-	var houseAPIPersonList []house.APIPerson
 	if source.Friends != nil {
-		houseAPIPersonList = make([]house.APIPerson, len(source.Friends))
+		houseAPIPerson.Friends = make([]house.APIPerson, len(source.Friends))
 		for i := 0; i < len(source.Friends); i++ {
-			houseAPIPersonList[i] = c.ConvertPerson(source.Friends[i])
+			houseAPIPerson.Friends[i] = c.ConvertPerson(source.Friends[i])
 		}
 	}
-	houseAPIPerson.Friends = houseAPIPersonList
 	return houseAPIPerson
 }

@@ -9,11 +9,9 @@ type ConverterImpl struct{}
 
 func (c *ConverterImpl) Convert(source usezerovalueonpointerinconsistency.Input) usezerovalueonpointerinconsistency.Output {
 	var exampleOutput usezerovalueonpointerinconsistency.Output
-	var xstring string
 	if source.Name != nil {
-		xstring = *source.Name
+		exampleOutput.Name = *source.Name
 	}
-	exampleOutput.Name = xstring
 	exampleOutput.Age = source.Age
 	return exampleOutput
 }

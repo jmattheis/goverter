@@ -19,21 +19,17 @@ success:
         	if source != nil {
         		intListListList = make([][][]int, len(source))
         		for i := 0; i < len(source); i++ {
-        			var intListList [][]int
         			if source[i] != nil {
-        				intListList = make([][]int, len(source[i]))
+        				intListListList[i] = make([][]int, len(source[i]))
         				for j := 0; j < len(source[i]); j++ {
-        					var intList []int
         					if source[i][j] != nil {
-        						intList = make([]int, len(source[i][j]))
+        						intListListList[i][j] = make([]int, len(source[i][j]))
         						for k := 0; k < len(source[i][j]); k++ {
-        							intList[k] = source[i][j][k]
+        							intListListList[i][j][k] = source[i][j][k]
         						}
         					}
-        					intListList[j] = intList
         				}
         			}
-        			intListListList[i] = intListList
         		}
         	}
         	return intListListList

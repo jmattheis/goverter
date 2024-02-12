@@ -37,11 +37,9 @@ success:
         		xint := source.Nested.Age()
         		pInt = &xint
         	}
-        	var pInt2 *int
         	if pInt != nil {
         		xint2 := *pInt
-        		pInt2 = &xint2
+        		structsOutput.Age = &xint2
         	}
-        	structsOutput.Age = pInt2
         	return structsOutput
         }

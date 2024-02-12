@@ -19,21 +19,17 @@ success:
         	if source != nil {
         		mapStringMapUintMapBoolString = make(map[string]map[uint]map[bool]string, len(source))
         		for key, value := range source {
-        			var mapUintMapBoolString map[uint]map[bool]string
         			if value != nil {
-        				mapUintMapBoolString = make(map[uint]map[bool]string, len(value))
+        				mapStringMapUintMapBoolString[key] = make(map[uint]map[bool]string, len(value))
         				for key2, value2 := range value {
-        					var mapBoolString map[bool]string
         					if value2 != nil {
-        						mapBoolString = make(map[bool]string, len(value2))
+        						mapStringMapUintMapBoolString[key][key2] = make(map[bool]string, len(value2))
         						for key3, value3 := range value2 {
-        							mapBoolString[key3] = value3
+        							mapStringMapUintMapBoolString[key][key2][key3] = value3
         						}
         					}
-        					mapUintMapBoolString[key2] = mapBoolString
         				}
         			}
-        			mapStringMapUintMapBoolString[key] = mapUintMapBoolString
         		}
         	}
         	return mapStringMapUintMapBoolString

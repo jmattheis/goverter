@@ -40,19 +40,13 @@ success:
 
         func (c *ConverterImpl) Convert(source execution.Input) (execution.Output, error) {
         	var structsOutput execution.Output
-        	var mapStringMapIntUnnamed map[string]map[int]struct {
-        		Age int
-        	}
         	if source.Values != nil {
-        		mapStringMapIntUnnamed = make(map[string]map[int]struct {
+        		structsOutput.Values = make(map[string]map[int]struct {
         			Age int
         		}, len(source.Values))
         		for key, value := range source.Values {
-        			var mapIntUnnamed map[int]struct {
-        				Age int
-        			}
         			if value != nil {
-        				mapIntUnnamed = make(map[int]struct {
+        				structsOutput.Values[key] = make(map[int]struct {
         					Age int
         				}, len(value))
         				for key2, value2 := range value {
@@ -64,35 +58,29 @@ success:
         						return structsOutput, patherr.Wrap(err, patherr.Field("Values"), patherr.Key(key), patherr.Key(key2), patherr.Field("Age"))
         					}
         					unnamed.Age = xint
-        					mapIntUnnamed[key2] = unnamed
+        					structsOutput.Values[key][key2] = unnamed
         				}
         			}
-        			mapStringMapIntUnnamed[key] = mapIntUnnamed
         		}
         	}
-        	structsOutput.Values = mapStringMapIntUnnamed
         	var unnamed2 struct {
         		Names []map[bool]int
         	}
-        	var mapBoolIntList []map[bool]int
         	if source.S.Names != nil {
-        		mapBoolIntList = make([]map[bool]int, len(source.S.Names))
+        		unnamed2.Names = make([]map[bool]int, len(source.S.Names))
         		for i := 0; i < len(source.S.Names); i++ {
-        			var mapBoolInt map[bool]int
         			if source.S.Names[i] != nil {
-        				mapBoolInt = make(map[bool]int, len(source.S.Names[i]))
+        				unnamed2.Names[i] = make(map[bool]int, len(source.S.Names[i]))
         				for key3, value3 := range source.S.Names[i] {
         					xint2, err := strconv.Atoi(value3)
         					if err != nil {
         						return structsOutput, patherr.Wrap(err, patherr.Field("S"), patherr.Field("Names"), patherr.Index(i), patherr.Key(key3))
         					}
-        					mapBoolInt[key3] = xint2
+        					unnamed2.Names[i][key3] = xint2
         				}
         			}
-        			mapBoolIntList[i] = mapBoolInt
         		}
         	}
-        	unnamed2.Names = mapBoolIntList
         	structsOutput.S = unnamed2
         	return structsOutput, nil
         }

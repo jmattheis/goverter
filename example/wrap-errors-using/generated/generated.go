@@ -27,34 +27,30 @@ func (c *ConverterImpl) Convert(source map[int]example.Input) (map[int]example.O
 }
 func (c *ConverterImpl) exampleInputToExampleOutput(source example.Input) (example.Output, error) {
 	var exampleOutput example.Output
-	var exampleOutputList []example.Output
 	if source.Friends != nil {
-		exampleOutputList = make([]example.Output, len(source.Friends))
+		exampleOutput.Friends = make([]example.Output, len(source.Friends))
 		for i := 0; i < len(source.Friends); i++ {
 			exampleOutput2, err := c.exampleInputToExampleOutput(source.Friends[i])
 			if err != nil {
 				return exampleOutput, patherr.Wrap(err, patherr.Field("Friends"), patherr.Index(i))
 			}
-			exampleOutputList[i] = exampleOutput2
+			exampleOutput.Friends[i] = exampleOutput2
 		}
 	}
-	exampleOutput.Friends = exampleOutputList
 	xint, err := strconv.Atoi(source.Age)
 	if err != nil {
 		return exampleOutput, patherr.Wrap(err, patherr.Field("Age"))
 	}
 	exampleOutput.Age = xint
-	var mapStringInt map[string]int
 	if source.Attributes != nil {
-		mapStringInt = make(map[string]int, len(source.Attributes))
+		exampleOutput.Attributes = make(map[string]int, len(source.Attributes))
 		for key, value := range source.Attributes {
 			xint2, err := strconv.Atoi(value)
 			if err != nil {
 				return exampleOutput, patherr.Wrap(err, patherr.Field("Attributes"), patherr.Key(key))
 			}
-			mapStringInt[key] = xint2
+			exampleOutput.Attributes[key] = xint2
 		}
 	}
-	exampleOutput.Attributes = mapStringInt
 	return exampleOutput, nil
 }
