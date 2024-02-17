@@ -31,6 +31,16 @@ type generator struct {
 }
 
 func (g *generator) buildMethods(f *jen.File) error {
+	for g.anyDirty() {
+		if err := g.buildDirtyMethods(); err != nil {
+			return err
+		}
+	}
+	g.appendGenerated(f)
+	return nil
+}
+
+func (g *generator) buildDirtyMethods() error {
 	genMethods := []*generatedMethod{}
 	for _, genMethod := range g.lookup {
 		genMethods = append(genMethods, genMethod)
@@ -39,7 +49,7 @@ func (g *generator) buildMethods(f *jen.File) error {
 		return genMethods[i].Name < genMethods[j].Name
 	})
 	for _, genMethod := range genMethods {
-		if genMethod.Jen != nil && !genMethod.Dirty {
+		if !genMethod.Dirty {
 			continue
 		}
 		genMethod.Dirty = false
@@ -54,13 +64,16 @@ func (g *generator) buildMethods(f *jen.File) error {
 			return fmt.Errorf("Error while creating converter method:\n    %s\n\n%s", genMethod.ID, builder.ToString(err))
 		}
 	}
+	return nil
+}
+
+func (g *generator) anyDirty() bool {
 	for _, genMethod := range g.lookup {
 		if genMethod.Dirty {
-			return g.buildMethods(f)
+			return true
 		}
 	}
-	g.appendGenerated(f)
-	return nil
+	return false
 }
 
 func (g *generator) appendGenerated(f *jen.File) {
