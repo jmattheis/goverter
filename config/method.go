@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/jmattheis/goverter/method"
-	"github.com/jmattheis/goverter/pkgload"
 )
 
 const (
@@ -21,6 +20,7 @@ type Method struct {
 	Constructor *method.Definition
 	AutoMap     []string
 	Fields      map[string]*FieldMapping
+	EnumMapping *EnumMapping
 
 	RawFieldSettings []string
 }
@@ -40,7 +40,7 @@ func (m *Method) Field(targetName string) *FieldMapping {
 	return target
 }
 
-func parseMethod(loader *pkgload.PackageLoader, c *Converter, fn *types.Func, rawMethod RawLines) (*Method, error) {
+func parseMethod(ctx *context, c *Converter, fn *types.Func, rawMethod RawLines) (*Method, error) {
 	def, err := method.Parse(fn, &method.ParseOpts{
 		ErrorPrefix:       "error parsing converter method",
 		Converter:         nil,
@@ -53,20 +53,21 @@ func parseMethod(loader *pkgload.PackageLoader, c *Converter, fn *types.Func, ra
 	}
 
 	m := &Method{
-		Definition: def,
-		Common:     c.Common,
-		Fields:     map[string]*FieldMapping{},
+		Definition:  def,
+		Common:      c.Common,
+		Fields:      map[string]*FieldMapping{},
+		EnumMapping: &EnumMapping{Map: map[string]string{}},
 	}
 
 	for _, value := range rawMethod.Lines {
-		if err := parseMethodLine(loader, c, m, value); err != nil {
+		if err := parseMethodLine(ctx, c, m, value); err != nil {
 			return m, formatLineError(rawMethod, fn.String(), value, err) // TODO get method type
 		}
 	}
 	return m, nil
 }
 
-func parseMethodLine(loader *pkgload.PackageLoader, c *Converter, m *Method, value string) (err error) {
+func parseMethodLine(ctx *context, c *Converter, m *Method, value string) (err error) {
 	cmd, rest := parseCommand(value)
 	fieldSetting := false
 	switch cmd {
@@ -87,7 +88,7 @@ func parseMethodLine(loader *pkgload.PackageLoader, c *Converter, m *Method, val
 				Converter:         c.Type,
 				Params:            method.ParamsOptional,
 			}
-			f.Function, err = loader.GetOne(c.Package, custom, opts)
+			f.Function, err = ctx.Loader.GetOne(c.Package, custom, opts)
 		}
 	case "ignore":
 		fieldSetting = true
@@ -95,6 +96,28 @@ func parseMethodLine(loader *pkgload.PackageLoader, c *Converter, m *Method, val
 		for _, f := range fields {
 			m.Field(f).Ignore = true
 		}
+	case "enum:map":
+		fields := strings.Fields(rest)
+		if len(fields) != 2 {
+			return fmt.Errorf("invalid fields")
+		}
+
+		if IsEnumAction(fields[1]) {
+			err = validateEnumAction(fields[1])
+		}
+
+		m.EnumMapping.Map[fields[0]] = fields[1]
+	case "enum:transform":
+		fields := strings.SplitN(rest, " ", 2)
+
+		config := ""
+		if len(fields) == 2 {
+			config = fields[1]
+		}
+
+		var t ConfiguredTransformer
+		t, err = parseTransformer(ctx, fields[0], config)
+		m.EnumMapping.Transformers = append(m.EnumMapping.Transformers, t)
 	case "autoMap":
 		fieldSetting = true
 		var s string
@@ -107,7 +130,7 @@ func parseMethodLine(loader *pkgload.PackageLoader, c *Converter, m *Method, val
 			Converter:         c.Type,
 			Params:            method.ParamsOptional,
 		}
-		m.Constructor, err = loader.GetOne(c.Package, rest, opts)
+		m.Constructor, err = ctx.Loader.GetOne(c.Package, rest, opts)
 	default:
 		fieldSetting, err = parseCommon(&m.Common, cmd, rest)
 	}

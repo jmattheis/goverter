@@ -4,8 +4,8 @@ import (
 	"go/types"
 	"strings"
 
+	"github.com/jmattheis/goverter/enum"
 	"github.com/jmattheis/goverter/method"
-	"github.com/jmattheis/goverter/pkgload"
 )
 
 const (
@@ -15,6 +15,7 @@ const (
 var DefaultConfig = ConverterConfig{
 	OutputFile:        "./generated/generated.go",
 	OutputPackageName: "generated",
+	Common:            Common{Enum: enum.Config{Enabled: true}},
 }
 
 type Converter struct {
@@ -42,14 +43,14 @@ func (conf *ConverterConfig) PackageID() string {
 	return conf.OutputPackagePath + ":" + conf.OutputPackageName
 }
 
-func parseGlobal(loader *pkgload.PackageLoader, global RawLines) (*ConverterConfig, error) {
+func parseGlobal(ctx *context, global RawLines) (*ConverterConfig, error) {
 	c := Converter{ConverterConfig: DefaultConfig}
-	err := parseConverterLines(&c, "global", loader, global)
+	err := parseConverterLines(ctx, &c, "global", global)
 	return &c.ConverterConfig, err
 }
 
-func parseConverter(loader *pkgload.PackageLoader, rawConverter *RawConverter, global ConverterConfig) (*Converter, error) {
-	v, err := loader.GetOneRaw(rawConverter.Package, rawConverter.InterfaceName)
+func parseConverter(ctx *context, rawConverter *RawConverter, global ConverterConfig) (*Converter, error) {
+	v, err := ctx.Loader.GetOneRaw(rawConverter.Package, rawConverter.InterfaceName)
 	if err != nil {
 		return nil, err
 	}
@@ -67,13 +68,13 @@ func parseConverter(loader *pkgload.PackageLoader, rawConverter *RawConverter, g
 		c.Name = rawConverter.InterfaceName + "Impl"
 	}
 
-	if err := parseConverterLines(c, c.Type.String(), loader, rawConverter.Converter); err != nil {
+	if err := parseConverterLines(ctx, c, c.Type.String(), rawConverter.Converter); err != nil {
 		return nil, err
 	}
 
 	for i := 0; i < interfaceType.NumMethods(); i++ {
 		fun := interfaceType.Method(i)
-		def, err := parseMethod(loader, c, fun, rawConverter.Methods[fun.Name()])
+		def, err := parseMethod(ctx, c, fun, rawConverter.Methods[fun.Name()])
 		if err != nil {
 			return nil, err
 		}
@@ -83,9 +84,9 @@ func parseConverter(loader *pkgload.PackageLoader, rawConverter *RawConverter, g
 	return c, nil
 }
 
-func parseConverterLines(c *Converter, source string, loader *pkgload.PackageLoader, raw RawLines) error {
+func parseConverterLines(ctx *context, c *Converter, source string, raw RawLines) error {
 	for _, value := range raw.Lines {
-		if err := parseConverterLine(c, loader, value); err != nil {
+		if err := parseConverterLine(ctx, c, value); err != nil {
 			return formatLineError(raw, source, value, err)
 		}
 	}
@@ -93,7 +94,7 @@ func parseConverterLines(c *Converter, source string, loader *pkgload.PackageLoa
 	return nil
 }
 
-func parseConverterLine(c *Converter, loader *pkgload.PackageLoader, value string) (err error) {
+func parseConverterLine(ctx *context, c *Converter, value string) (err error) {
 	cmd, rest := parseCommand(value)
 	switch cmd {
 	case "converter":
@@ -117,6 +118,10 @@ func parseConverterLine(c *Converter, loader *pkgload.PackageLoader, value strin
 		}
 	case "struct:comment":
 		c.Comments = append(c.Comments, rest)
+	case "enum:exclude":
+		var pattern enum.IDPattern
+		pattern, err = parseIDPattern(c.Package, rest)
+		c.Enum.Excludes = append(c.Enum.Excludes, pattern)
 	case configExtend:
 		for _, name := range strings.Fields(rest) {
 			opts := &method.ParseOpts{
@@ -126,7 +131,7 @@ func parseConverterLine(c *Converter, loader *pkgload.PackageLoader, value strin
 				Params:            method.ParamsRequired,
 			}
 			var defs []*method.Definition
-			defs, err = loader.GetMatching(c.Package, name, opts)
+			defs, err = ctx.Loader.GetMatching(c.Package, name, opts)
 			if err != nil {
 				break
 			}
