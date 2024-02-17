@@ -24,8 +24,12 @@ error: |-
     |
     |     | github.com/jmattheis/goverter/execution.Input
     |     |
-    source[]
-    target[]
+    |     |  | string
+    |     |  |
+    source[].Name
+    target[].Name
+    |     |  |
+    |     |  | string
     |     |
     |     | github.com/jmattheis/goverter/execution.Output
     |

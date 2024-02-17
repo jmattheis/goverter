@@ -20,7 +20,8 @@ type generatedMethod struct {
 	Explicit bool
 	Dirty    bool
 
-	Jen jen.Code
+	OriginPath []xtype.Signature
+	Jen        jen.Code
 }
 
 type generator struct {
@@ -185,7 +186,7 @@ func (g *generator) CallMethod(
 	}
 
 	formatErr := func(s string) *builder.Error {
-		return builder.NewError(fmt.Sprintf("Error using method:\n    %s\n\n%s", definition.ReturnTypeOriginID, s))
+		return builder.NewError(fmt.Sprintf("Error using method:\n    %s\n\n%s", definition.ID, s))
 	}
 
 	if definition.Source != nil {
@@ -204,13 +205,18 @@ func (g *generator) CallMethod(
 
 	if definition.ReturnError {
 		current := g.lookup[ctx.Signature]
-		if !current.ReturnError {
-			if current.Explicit {
-				return nil, nil, formatErr("Used method returns error but conversion method does not")
+		if !ctx.Conf.ReturnError {
+			for _, path := range append([]xtype.Signature{ctx.Signature}, current.OriginPath...) {
+				check := g.lookup[path]
+				if check.Explicit && !check.ReturnError {
+					return nil, nil, formatErr("Used method returns error but conversion method does not")
+				}
+
+				if !check.ReturnError {
+					current.ReturnError = true
+					current.Dirty = true
+				}
 			}
-			current.ReturnError = true
-			current.ReturnTypeOriginID = definition.ID
-			current.Dirty = true
 		}
 
 		name := ctx.Name(target.ID())
@@ -247,7 +253,7 @@ func (g *generator) delegateMethod(
 
 	if delegateTo.ReturnError {
 		if !current.ReturnError {
-			return nil, builder.NewError(fmt.Sprintf("ReturnTypeMismatch: Cannot use\n\n    %s\n\nin\n\n    %s\n\nbecause no error is returned as second return parameter", delegateTo.ReturnTypeOriginID, current.ID))
+			return nil, builder.NewError(fmt.Sprintf("ReturnTypeMismatch: Cannot use\n\n    %s\n\nin\n\n    %s\n\nbecause no error is returned as second return parameter", delegateTo.OriginID, current.ID))
 		}
 	} else {
 		if current.ReturnError {
@@ -325,14 +331,18 @@ func (g *generator) createSubMethod(ctx *builder.MethodContext, sourceID *xtype.
 	signature := xtype.SignatureOf(source, target)
 
 	name := g.namer.Name(source.UnescapedID() + "To" + strings.Title(target.UnescapedID()))
+	orig := g.lookup[ctx.Signature]
 
+	path := append([]xtype.Signature{ctx.Signature}, orig.OriginPath...)
 	genMethod := &generatedMethod{
+		OriginPath: path,
 		Method: &config.Method{
 			Common: g.conf.Common,
 			Definition: &method.Definition{
-				ID:   name,
-				Name: name,
-				Call: jen.Id(xtype.ThisVar).Dot(name),
+				ID:       name,
+				Name:     name,
+				Call:     jen.Id(xtype.ThisVar).Dot(name),
+				OriginID: ctx.Conf.OriginID,
 				Parameters: method.Parameters{
 					Source: xtype.TypeOf(source.T),
 					Target: xtype.TypeOf(target.T),

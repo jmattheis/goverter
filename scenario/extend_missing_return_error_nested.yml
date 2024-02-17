@@ -5,7 +5,7 @@ input:
         // goverter:converter
         // goverter:extend ZeroConvert EmptyConverter
         type Converter interface {
-            Convert(source Input) Output
+            Convert(source []Input) []Output
         }
 
         func ZeroConvert(*int) (int, error) {
@@ -16,27 +16,41 @@ input:
         }
 
         type Input struct {
+            Nested InputNested
+        }
+        type Output struct {
+            Nested OutputNested
+        }
+        type InputNested struct {
             Name *string
             Age *int
         }
-        type Output struct {
+        type OutputNested struct {
             Name string
             Age int
         }
 error: |-
     Error while creating converter method:
-        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source []github.com/jmattheis/goverter/execution.Input) []github.com/jmattheis/goverter/execution.Output
 
-    | github.com/jmattheis/goverter/execution.Input
+    | []github.com/jmattheis/goverter/execution.Input
     |
-    |      | *int
-    |      |
-    source.Age
-    target.Age
-    |      |
-    |      | int
+    |     | github.com/jmattheis/goverter/execution.Input
+    |     |
+    |     |  | github.com/jmattheis/goverter/execution.InputNested
+    |     |  |
+    |     |  |      | *int
+    |     |  |      |
+    source[].Nested.Age
+    target[].Nested.Age
+    |     |  |      |
+    |     |  |      | int
+    |     |  |
+    |     |  | github.com/jmattheis/goverter/execution.OutputNested
+    |     |
+    |     | github.com/jmattheis/goverter/execution.Output
     |
-    | github.com/jmattheis/goverter/execution.Output
+    | []github.com/jmattheis/goverter/execution.Output
 
     Error using method:
         func github.com/jmattheis/goverter/execution.ZeroConvert(*int) (int, error)

@@ -7,10 +7,10 @@ import (
 
 type Definition struct {
 	Parameters
-	ID                 string
-	Call               *jen.Statement
-	Name               string
-	ReturnTypeOriginID string
+	ID       string
+	OriginID string
+	Call     *jen.Statement
+	Name     string
 }
 
 func (m *Definition) Signature() xtype.Signature {
