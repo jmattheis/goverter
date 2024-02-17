@@ -19,6 +19,7 @@ import (
 var (
 	UpdateScenario       = os.Getenv("UPDATE_SCENARIO") == "true"
 	SkipVersionDependent = os.Getenv("SKIP_VERSION_DEPENDENT") == "true"
+	NoParallel           = os.Getenv("NO_PARALLEL") == "true"
 )
 
 func TestScenario(t *testing.T) {
@@ -36,7 +37,9 @@ func TestScenario(t *testing.T) {
 		testName := strings.TrimSuffix(file.Name(), filepath.Ext(file.Name()))
 
 		t.Run(testName, func(t *testing.T) {
-			t.Parallel()
+			if !NoParallel {
+				t.Parallel()
+			}
 			testWorkDir := filepath.Join(workDir, testName)
 			require.NoError(t, os.MkdirAll(testWorkDir, os.ModePerm))
 			require.NoError(t, clearDir(testWorkDir))
