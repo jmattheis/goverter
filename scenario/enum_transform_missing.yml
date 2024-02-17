@@ -1,0 +1,36 @@
+input:
+    input.go: |
+        package example
+
+        import (
+            input "github.com/jmattheis/goverter/execution/input"
+            output "github.com/jmattheis/goverter/execution/output"
+        )
+
+        // goverter:converter
+        // goverter:enum:unknown @panic
+        type Converter interface {
+            // goverter:enum:transform not-existing
+            Convert(input.Color) output.Color
+        }
+    input/enum.go: |
+        package input
+
+        type Color int
+
+        const (
+            ColorGreen Color = iota
+        )
+    output/enum.go: |
+        package output
+
+        type Color string
+        const (
+            ColGreen Color = "green"
+        )
+error: |-
+    error parsing 'goverter:enum:transform' at
+        @workdir/input.go:12:5
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(github.com/jmattheis/goverter/execution/input.Color) github.com/jmattheis/goverter/execution/output.Color
+
+    transformer "not-existing" does not exist

@@ -1,0 +1,44 @@
+input:
+    input.go: |
+        package example
+
+        import (
+            input "github.com/jmattheis/goverter/execution/input"
+            output "github.com/jmattheis/goverter/execution/output"
+        )
+
+        // goverter:converter
+        // goverter:enum:unknown @panic
+        type Converter interface {
+            // goverter:default DefaultColor
+            Convert(input.Color) (output.Color, error)
+        }
+
+        func DefaultColor() bool {
+            return true
+        }
+    input/enum.go: |
+        package input
+
+        type Color int
+        const Green Color = iota
+    output/enum.go: |
+        package output
+
+        type Color string
+        const Green Color = "green"
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(github.com/jmattheis/goverter/execution/input.Color) (github.com/jmattheis/goverter/execution/output.Color, error)
+
+    | github.com/jmattheis/goverter/execution/input.Color
+    |
+    source
+    target
+    |
+    | github.com/jmattheis/goverter/execution/output.Color
+
+    Error using method:
+        func github.com/jmattheis/goverter/execution.DefaultColor() bool
+
+    Method return type mismatches with target: bool != github.com/jmattheis/goverter/execution/output.Color

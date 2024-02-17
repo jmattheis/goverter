@@ -1,0 +1,36 @@
+input:
+    input.go: |
+        package example
+
+        import (
+            input "github.com/jmattheis/goverter/execution/input"
+            output "github.com/jmattheis/goverter/execution/output"
+        )
+
+        // goverter:converter
+        type Converter interface {
+            Convert(input.Color) (output.Color, error)
+        }
+    input/enum.go: |
+        package input
+
+        type Color int
+        const Green Color = iota
+    output/enum.go: |
+        package output
+
+        type Color string
+        const Green Color = "green"
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(github.com/jmattheis/goverter/execution/input.Color) (github.com/jmattheis/goverter/execution/output.Color, error)
+
+    | github.com/jmattheis/goverter/execution/input.Color
+    |
+    source
+    target
+    |
+    | github.com/jmattheis/goverter/execution/output.Color
+
+    No enum:unknown configured.
+    See https://goverter.jmattheis.de/guide/enum#unknown-enum-values

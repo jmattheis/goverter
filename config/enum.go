@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"regexp"
+	"strings"
 
 	"github.com/jmattheis/goverter/enum"
 	"github.com/jmattheis/goverter/pkgload"
@@ -10,7 +11,7 @@ import (
 
 const (
 	EnumActionPanic  = "@panic"
-	EnumActionError  = "@return-error"
+	EnumActionError  = "@error"
 	EnumActionIgnore = "@ignore"
 )
 
@@ -36,6 +37,10 @@ func parseTransformer(ctx *context, name, config string) (ConfiguredTransformer,
 	}
 
 	return ConfiguredTransformer{Name: name, Transformer: t, Config: config}, nil
+}
+
+func IsEnumAction(s string) bool {
+	return strings.HasPrefix(s, "@")
 }
 
 func validateEnumAction(s string) error {

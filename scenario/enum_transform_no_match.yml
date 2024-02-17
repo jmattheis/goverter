@@ -1,0 +1,38 @@
+input:
+    input.go: |
+        package example
+
+        import (
+            input "github.com/jmattheis/goverter/execution/input"
+            output "github.com/jmattheis/goverter/execution/output"
+        )
+
+        // goverter:converter
+        // goverter:enum:unknown @panic
+        type Converter interface {
+            // goverter:enum:transform regex Green Yellow
+            Convert(input.Color) output.Color
+        }
+    input/enum.go: |
+        package input
+
+        type Color int
+
+        const Green Color = iota
+    output/enum.go: |
+        package output
+
+        type Color string
+        const Blue Color = "blue"
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(github.com/jmattheis/goverter/execution/input.Color) github.com/jmattheis/goverter/execution/output.Color
+
+    | github.com/jmattheis/goverter/execution/input.Color
+    |
+    source
+    target
+    |
+    | github.com/jmattheis/goverter/execution/output.Color
+
+    transformer "regex" with config "Green Yellow" did not return any mapped values. Is there an configuration error?

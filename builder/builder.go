@@ -37,6 +37,10 @@ type Generator interface {
 		sourceID *xtype.JenID,
 		source, target *xtype.Type,
 		path ErrorPath) ([]jen.Code, *xtype.JenID, *Error)
+
+	ReturnError(ctx *MethodContext,
+		path ErrorPath,
+		id *jen.Statement) (jen.Code, bool)
 }
 
 // MethodContext exposes information for the current method.
@@ -95,6 +99,18 @@ func (ctx *MethodContext) DefinedFields(target *xtype.Type) map[string]struct{} 
 
 	f := map[string]struct{}{}
 	for name := range ctx.Conf.Fields {
+		f[name] = struct{}{}
+	}
+	return f
+}
+
+func (ctx *MethodContext) DefinedEnumFields(target *xtype.Type) map[string]struct{} {
+	if ctx.FieldsTarget != target.String {
+		return emptyFields
+	}
+
+	f := map[string]struct{}{}
+	for name := range ctx.Conf.EnumMapping.Map {
 		f[name] = struct{}{}
 	}
 	return f

@@ -204,33 +204,41 @@ func (g *generator) CallMethod(
 	}
 
 	if definition.ReturnError {
-		current := g.lookup[ctx.Signature]
-		if !ctx.Conf.ReturnError {
-			for _, path := range append([]xtype.Signature{ctx.Signature}, current.OriginPath...) {
-				check := g.lookup[path]
-				if check.Explicit && !check.ReturnError {
-					return nil, nil, formatErr("Used method returns error but conversion method does not")
-				}
-
-				if !check.ReturnError {
-					current.ReturnError = true
-					current.Dirty = true
-				}
-			}
-		}
-
 		name := ctx.Name(target.ID())
 		ctx.SetErrorTargetVar(jen.Id(name))
 
+		ret, ok := g.ReturnError(ctx, errPath, jen.Id("err"))
+		if !ok {
+			return nil, nil, formatErr("Used method returns error but conversion method does not")
+		}
+
 		stmt := []jen.Code{
 			jen.List(jen.Id(name), jen.Id("err")).Op(":=").Add(definition.Call.Clone().Call(params...)),
-			jen.If(jen.Id("err").Op("!=").Nil()).Block(
-				jen.Return(ctx.TargetVar, g.wrap(ctx, errPath, jen.Id("err")))),
+			jen.If(jen.Id("err").Op("!=").Nil()).Block(ret),
 		}
 		return stmt, xtype.VariableID(jen.Id(name)), nil
 	}
 	id := xtype.OtherID(definition.Call.Clone().Call(params...))
 	return nil, id, nil
+}
+
+func (g *generator) ReturnError(ctx *builder.MethodContext, errPath builder.ErrorPath, id *jen.Statement) (jen.Code, bool) {
+	current := g.lookup[ctx.Signature]
+	if !ctx.Conf.ReturnError {
+		for _, path := range append([]xtype.Signature{ctx.Signature}, current.OriginPath...) {
+			check := g.lookup[path]
+			if check.Explicit && !check.ReturnError {
+				return nil, false
+			}
+
+			if !check.ReturnError {
+				check.ReturnError = true
+				check.Dirty = true
+			}
+		}
+	}
+
+	return jen.Return(ctx.TargetVar, g.wrap(ctx, errPath, id)), true
 }
 
 func (g *generator) delegateMethod(
@@ -313,6 +321,8 @@ func (g *generator) Build(
 			createSubMethod = true
 		case source.Pointer && source.PointerInner.Named && !source.PointerInner.Basic:
 			createSubMethod = true
+		case source.Enum(&ctx.Conf.Enum).OK && target.Enum(&ctx.Conf.Enum).OK:
+			createSubMethod = true
 		}
 		if ctx.Conf.SkipCopySameType && source.String == target.String {
 			createSubMethod = false
@@ -337,7 +347,9 @@ func (g *generator) createSubMethod(ctx *builder.MethodContext, sourceID *xtype.
 	genMethod := &generatedMethod{
 		OriginPath: path,
 		Method: &config.Method{
-			Common: g.conf.Common,
+			Common:      g.conf.Common,
+			Fields:      map[string]*config.FieldMapping{},
+			EnumMapping: &config.EnumMapping{Map: map[string]string{}},
 			Definition: &method.Definition{
 				ID:       name,
 				Name:     name,

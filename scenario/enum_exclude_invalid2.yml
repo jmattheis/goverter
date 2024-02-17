@@ -1,0 +1,40 @@
+input:
+    input.go: |
+        package example
+
+        import (
+            input "github.com/jmattheis/goverter/execution/input"
+            output "github.com/jmattheis/goverter/execution/output"
+        )
+
+        // goverter:converter
+        // goverter:enum:unknown @panic
+        // goverter:enum:exclude .*:Color(
+        type Converter interface {
+            Convert(input.Color) output.Color
+        }
+    input/enum.go: |
+        package input
+
+        type Color string
+
+        const (
+            Green Color = "green"
+            Blue  Color = "blue"
+            Red   Color = "red"
+        )
+    output/enum.go: |
+        package output
+
+        type Color string
+        const (
+            Green Color = "green"
+            Blue  Color = "blue"
+            Red   Color = "red"
+        )
+error: |-
+    error parsing 'goverter:enum:exclude' at
+        @workdir/input.go:11:1
+        github.com/jmattheis/goverter/execution.Converter
+
+    error parsing regexp: missing closing ): `Color(`

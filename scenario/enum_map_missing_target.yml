@@ -1,0 +1,48 @@
+input:
+    input.go: |
+        package example
+
+        import (
+            input "github.com/jmattheis/goverter/execution/input"
+            output "github.com/jmattheis/goverter/execution/output"
+        )
+
+        // goverter:converter
+        // goverter:enum:unknown @panic
+        type Converter interface {
+            // goverter:enum:map Gray Oops
+            Convert(input.Color) output.Color
+        }
+    input/enum.go: |
+        package input
+
+        type Color int
+
+        const (
+            Green Color = 1
+            Gray  Color = 3
+        )
+    output/enum.go: |
+        package output
+
+        type Color string
+        const (
+            Green Color = "green"
+        )
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(github.com/jmattheis/goverter/execution/input.Color) github.com/jmattheis/goverter/execution/output.Color
+
+    | github.com/jmattheis/goverter/execution/input.Color
+    |
+    |      | constant: 3
+    |      |
+    source.Gray
+    target.Oops
+    |      |
+    |      | ???
+    |
+    | github.com/jmattheis/goverter/execution/output.Color
+
+    Enum Oops does not exist on
+        github.com/jmattheis/goverter/execution/output.Color

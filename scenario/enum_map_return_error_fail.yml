@@ -1,0 +1,47 @@
+input:
+    input.go: |
+        package example
+
+        import (
+            input "github.com/jmattheis/goverter/execution/input"
+            output "github.com/jmattheis/goverter/execution/output"
+        )
+
+        // goverter:converter
+        // goverter:enum:unknown @panic
+        type Converter interface {
+            // goverter:enum:map Gray @error
+            Convert(input.Color) output.Color
+        }
+    input/enum.go: |
+        package input
+
+        type Color int
+
+        const (
+            Green Color = 1
+            Gray  Color = 3
+        )
+    output/enum.go: |
+        package output
+
+        type Color string
+        const (
+            Green Color = "green"
+        )
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(github.com/jmattheis/goverter/execution/input.Color) github.com/jmattheis/goverter/execution/output.Color
+
+    | github.com/jmattheis/goverter/execution/input.Color
+    |
+    |      | constant: 3
+    |      |
+    source.Gray
+    target.@error
+    |      |
+    |      | ???
+    |
+    | github.com/jmattheis/goverter/execution/output.Color
+
+    Cannot return @error because the explicitly defined conversion method doesn't return an error.
