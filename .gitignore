@@ -3,6 +3,7 @@
 /c.out
 /coverage.txt
 /.vscode
+/covdata
 
 node_modules/
 /docs/.vitepress/cache

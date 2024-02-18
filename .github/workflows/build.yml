@@ -42,6 +42,26 @@ jobs:
       - run: go test ./...
         env:
           SKIP_VERSION_DEPENDENT: 'true'
+  generate:
+    if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.repository != github.event.pull_request.head.repo.full_name)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.21.x"
+      - uses: actions/checkout@v4
+      - run: mkdir covdata
+      - run: GOCOVERDIR="$PWD/covdata" go generate ./...
+      - run: go tool covdata textfmt -i=./covdata -o example-coverage.txt
+      - uses: codecov/codecov-action@v4
+        with:
+          disable_search: true
+          files: ./example-coverage.txt
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+      - run: git diff --exit-code
+      - if: failure()
+        run: echo "::error::Check failed, please run 'go generate ./...' and commit the changes."
   build_docs:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.repository != github.event.pull_request.head.repo.full_name)
     runs-on: ubuntu-latest
