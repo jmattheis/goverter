@@ -20,9 +20,10 @@ type ParseOpts struct {
 	Converter         types.Type
 	OutputPackagePath string
 
-	ErrorPrefix  string
-	ConvFunction bool
-	Params       ParamType
+	ErrorPrefix     string
+	Params          ParamType
+	ConvFunction    bool
+	AllowTypeParams bool
 }
 
 // Parse parses an function into a Definition.
@@ -62,8 +63,13 @@ func Parse(obj types.Object, opts *ParseOpts) (*Definition, error) {
 		Parameters: Parameters{
 			ReturnError: returnError,
 			Target:      xtype.TypeOf(sig.Results().At(0).Type()),
+			TypeParams:  sig.TypeParams().Len() > 0,
 		},
 		Name: fn.Name(),
+	}
+
+	if methodDef.TypeParams && !opts.AllowTypeParams {
+		return nil, formatErr("must not be generic")
 	}
 
 	if opts.ConvFunction {

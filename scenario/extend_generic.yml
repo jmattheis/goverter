@@ -1,0 +1,24 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        // goverter:extend Extend
+        type Converter interface {
+            Convert(source Input) (Output, error)
+        }
+
+        func Extend[T any](T) int {
+            return 0
+        }
+        type Input struct { Age string }
+        type Output struct { Age int }
+error: |-
+    error parsing 'goverter:extend' at
+        @workdir/input.go:5:1
+        github.com/jmattheis/goverter/execution.Converter
+
+    error parsing type:
+        func github.com/jmattheis/goverter/execution.Extend[T any](T) int
+
+    must not be generic

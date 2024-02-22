@@ -87,6 +87,7 @@ func parseMethodLine(ctx *context, c *Converter, m *Method, value string) (err e
 				OutputPackagePath: c.OutputPackagePath,
 				Converter:         c.Type,
 				Params:            method.ParamsOptional,
+				AllowTypeParams:   true,
 			}
 			f.Function, err = ctx.Loader.GetOne(c.Package, custom, opts)
 		}
@@ -129,6 +130,7 @@ func parseMethodLine(ctx *context, c *Converter, m *Method, value string) (err e
 			OutputPackagePath: c.OutputPackagePath,
 			Converter:         c.Type,
 			Params:            method.ParamsOptional,
+			AllowTypeParams:   true,
 		}
 		m.Constructor, err = ctx.Loader.GetOne(c.Package, rest, opts)
 	default:
