@@ -18,6 +18,7 @@ type Config struct {
 var BuildSteps = []builder.Builder{
 	&builder.UseUnderlyingTypeMethods{},
 	&builder.SkipCopy{},
+	&builder.Enum{},
 	&builder.BasicTargetPointerRule{},
 	&builder.Pointer{},
 	&builder.SourcePointer{},

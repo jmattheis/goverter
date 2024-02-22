@@ -47,6 +47,8 @@ type Type struct {
 	SignatureType *types.Signature
 	Func          bool
 	FuncType      *types.Func
+
+	enum *Enum
 }
 
 func (t *Type) AssignableTo(other *Type) bool {

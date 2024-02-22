@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/jmattheis/goverter/enum"
 	"github.com/jmattheis/goverter/pkgload"
 )
 
@@ -27,6 +28,14 @@ type Raw struct {
 	WorkDir              string
 	BuildTags            string
 	OuputBuildConstraint string
+
+	EnumTransformers map[string]enum.Transformer
+}
+
+type context struct {
+	Loader *pkgload.PackageLoader
+
+	EnumTransformers map[string]enum.Transformer
 }
 
 func Parse(raw *Raw) ([]*Converter, error) {
@@ -35,14 +44,16 @@ func Parse(raw *Raw) ([]*Converter, error) {
 		return nil, err
 	}
 
-	global, err := parseGlobal(loader, raw.Global)
+	ctx := &context{Loader: loader, EnumTransformers: raw.EnumTransformers}
+
+	global, err := parseGlobal(ctx, raw.Global)
 	if err != nil {
 		return nil, err
 	}
 
 	converters := []*Converter{}
 	for _, rawConverter := range raw.Converters {
-		converter, err := parseConverter(loader, &rawConverter, *global)
+		converter, err := parseConverter(ctx, &rawConverter, *global)
 		if err != nil {
 			return nil, err
 		}

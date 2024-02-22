@@ -1,6 +1,10 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/jmattheis/goverter/enum"
+)
 
 type Common struct {
 	FieldSettings                      []string
@@ -12,6 +16,7 @@ type Common struct {
 	SkipCopySameType                   bool
 	UseZeroValueOnPointerInconsistency bool
 	UseUnderlyingTypeMethods           bool
+	Enum                               enum.Config
 }
 
 func parseCommon(c *Common, cmd, rest string) (fieldSetting bool, err error) {
@@ -41,6 +46,13 @@ func parseCommon(c *Common, cmd, rest string) (fieldSetting bool, err error) {
 		c.UseZeroValueOnPointerInconsistency, err = parseBool(rest)
 	case "useUnderlyingTypeMethods":
 		c.UseUnderlyingTypeMethods, err = parseBool(rest)
+	case "enum":
+		c.Enum.Enabled, err = parseBool(rest)
+	case "enum:unknown":
+		c.Enum.Unknown, err = parseString(rest)
+		if err == nil && IsEnumAction(c.Enum.Unknown) {
+			err = validateEnumAction(c.Enum.Unknown)
+		}
 	case "":
 		err = fmt.Errorf("missing setting key")
 	default:

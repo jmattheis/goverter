@@ -15,4 +15,4 @@ error: |-
         @workdir/input.go:5:1
         github.com/jmattheis/goverter/execution.Converter
 
-    expected at most one value but got 2: []string{"1", "2"}
+    invalid boolean value: expected one value but got 2: [1 2]

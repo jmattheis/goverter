@@ -6,6 +6,7 @@ import (
 
 	"github.com/jmattheis/goverter/comments"
 	"github.com/jmattheis/goverter/config"
+	"github.com/jmattheis/goverter/enum"
 	"github.com/jmattheis/goverter/generator"
 )
 
@@ -21,6 +22,8 @@ type GenerateConfig struct {
 	BuildTags string
 	// OutputBuildConstraint will be added as go:build constraints to all files.
 	OutputBuildConstraint string
+	// EnumTransformers describes additional enum transformers usable in the enum:transform setting.
+	EnumTransformers map[string]enum.Transformer
 }
 
 // GenerateConverters generates converters.
@@ -50,6 +53,8 @@ func generateConvertersRaw(c *GenerateConfig) (map[string][]byte, error) {
 		Global:     c.Global,
 
 		OuputBuildConstraint: c.OutputBuildConstraint,
+
+		EnumTransformers: c.EnumTransformers,
 	})
 	if err != nil {
 		return nil, err

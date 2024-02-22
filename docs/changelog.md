@@ -9,6 +9,13 @@ import GH from './GH.vue';
 - Require go1.18 for building Goverter
 - Add current working directory `-cwd` option to [CLI](./reference/cli.md)
 - Add [`wrapErrorsUsing`](./reference/wrapErrorsUsing.md)
+- Add [`enum`](./reference/enum.md), See [Guide: Enums](guide/enum.md)
+- Fix error messages when there is an return error mismatch
+
+_internals_:
+
+- Require the examples to be up-to-date via CI
+- Fix file permissions in tests
 
 ## v1.3.2
 

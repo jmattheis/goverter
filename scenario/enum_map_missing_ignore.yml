@@ -1,0 +1,45 @@
+input:
+    input.go: |
+        package example
+
+        import (
+            input "github.com/jmattheis/goverter/execution/input"
+            output "github.com/jmattheis/goverter/execution/output"
+        )
+
+        // goverter:converter
+        // goverter:enum:unknown @panic
+        type Converter interface {
+            // goverter:enum:map Grey @ignore
+            Convert(input.Color) output.Color
+        }
+    input/enum.go: |
+        package input
+
+        type Color int
+
+        const (
+            Green Color = 1
+        )
+    output/enum.go: |
+        package output
+
+        type Color string
+        const (
+            Green Color = "green"
+        )
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(github.com/jmattheis/goverter/execution/input.Color) github.com/jmattheis/goverter/execution/output.Color
+
+    | github.com/jmattheis/goverter/execution/input.Color
+    |
+    |      | ???
+    |      |
+    source.Grey
+    target
+    |
+    | github.com/jmattheis/goverter/execution/output.Color
+
+    Configured enum value Grey does not exist on
+        github.com/jmattheis/goverter/execution/input.Color

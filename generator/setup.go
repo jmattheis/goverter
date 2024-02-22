@@ -17,7 +17,7 @@ func setupGenerator(converter *config.Converter) *generator {
 	for _, method := range converter.Methods {
 		lookup[method.Definition.Signature()] = &generatedMethod{
 			Method:   method,
-			Dirty:    false,
+			Dirty:    true,
 			Explicit: true,
 		}
 	}

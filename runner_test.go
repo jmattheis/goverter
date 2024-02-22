@@ -19,6 +19,7 @@ import (
 var (
 	UpdateScenario       = os.Getenv("UPDATE_SCENARIO") == "true"
 	SkipVersionDependent = os.Getenv("SKIP_VERSION_DEPENDENT") == "true"
+	NoParallel           = os.Getenv("NO_PARALLEL") == "true"
 )
 
 func TestScenario(t *testing.T) {
@@ -36,9 +37,11 @@ func TestScenario(t *testing.T) {
 		testName := strings.TrimSuffix(file.Name(), filepath.Ext(file.Name()))
 
 		t.Run(testName, func(t *testing.T) {
-			t.Parallel()
+			if !NoParallel {
+				t.Parallel()
+			}
 			testWorkDir := filepath.Join(workDir, testName)
-			require.NoError(t, os.MkdirAll(testWorkDir, os.ModePerm))
+			require.NoError(t, os.MkdirAll(testWorkDir, 0o755))
 			require.NoError(t, clearDir(testWorkDir))
 			scenarioFilePath := filepath.Join(scenarioDir, file.Name())
 			scenarioFileBytes, err := os.ReadFile(scenarioFilePath)
@@ -53,14 +56,14 @@ func TestScenario(t *testing.T) {
 				return
 			}
 
-			err = os.WriteFile(filepath.Join(testWorkDir, "go.mod"), []byte("module github.com/jmattheis/goverter/execution\ngo 1.18"), os.ModePerm)
+			err = os.WriteFile(filepath.Join(testWorkDir, "go.mod"), []byte("module github.com/jmattheis/goverter/execution\ngo 1.18"), 0o644)
 			require.NoError(t, err)
 
 			for name, content := range scenario.Input {
 				inPath := filepath.Join(testWorkDir, name)
-				err = os.MkdirAll(filepath.Dir(inPath), os.ModePerm)
+				err = os.MkdirAll(filepath.Dir(inPath), 0o755)
 				require.NoError(t, err)
-				err = os.WriteFile(filepath.Join(testWorkDir, name), []byte(content), os.ModePerm)
+				err = os.WriteFile(filepath.Join(testWorkDir, name), []byte(content), 0o644)
 				require.NoError(t, err)
 			}
 			global := append([]string{"output:package github.com/jmattheis/goverter/execution/generated"}, scenario.Global...)
@@ -94,7 +97,7 @@ func TestScenario(t *testing.T) {
 				}
 				newBytes, err := yaml.Marshal(&scenario)
 				if assert.NoError(t, err) {
-					os.WriteFile(scenarioFilePath, newBytes, os.ModePerm)
+					os.WriteFile(scenarioFilePath, newBytes, 0o644)
 				}
 			}
 

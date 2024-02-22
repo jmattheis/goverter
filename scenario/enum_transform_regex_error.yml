@@ -1,0 +1,42 @@
+input:
+    input.go: |
+        package example
+
+        import (
+            input "github.com/jmattheis/goverter/execution/input"
+            output "github.com/jmattheis/goverter/execution/output"
+        )
+
+        // goverter:converter
+        // goverter:enum:unknown @panic
+        type Converter interface {
+            // goverter:enum:transform regex Color( Col$
+            Convert(input.Color) output.Color
+        }
+    input/enum.go: |
+        package input
+
+        type Color int
+
+        const (
+            ColorGreen Color = iota
+        )
+    output/enum.go: |
+        package output
+
+        type Color string
+        const (
+            ColGreen Color = "green"
+        )
+error: |-
+    Error while creating converter method:
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(github.com/jmattheis/goverter/execution/input.Color) github.com/jmattheis/goverter/execution/output.Color
+
+    | github.com/jmattheis/goverter/execution/input.Color
+    |
+    source
+    target
+    |
+    | github.com/jmattheis/goverter/execution/output.Color
+
+    error executing transformer "regex" with config "Color( Col$": invalid pattern "Color(": error parsing regexp: missing closing ): `Color(`

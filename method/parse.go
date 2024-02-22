@@ -57,8 +57,8 @@ func Parse(obj types.Object, opts *ParseOpts) (*Definition, error) {
 	}
 
 	methodDef := &Definition{
-		ID:                 fn.String(),
-		ReturnTypeOriginID: fn.String(),
+		ID:       fn.String(),
+		OriginID: fn.String(),
 		Parameters: Parameters{
 			ReturnError: returnError,
 			Target:      xtype.TypeOf(sig.Results().At(0).Type()),

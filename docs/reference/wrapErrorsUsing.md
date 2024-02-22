@@ -41,8 +41,8 @@ err = Wrap(err, Key("jmattheis"))
 
 Here is an example using
 [github.com/goverter/patherr](https://github.com/goverter/patherr). This is an
-implementation for satisfying the requirements from above. You can use directly
-or as a template for creating your own implementation.
+implementation for satisfying the requirements from above. You can use it
+directly or as a template for creating your own implementation.
 
 ::: code-group 
 <<< @../../example/wrap-errors-using/input.go 

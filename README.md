@@ -27,6 +27,7 @@ do is create an interface and execute goverter. The project is meant as
 alternative to [jinzhu/copier](https://github.com/jinzhu/copier) that doesn't
 use reflection.
 
+[Getting Started](https://goverter.jmattheis.de/guide/getting-started) ᛫
 [Installation](https://goverter.jmattheis.de/guide/install) ᛫
 [CLI](https://goverter.jmattheis.de/reference/cli) ᛫
 [Config](https://goverter.jmattheis.de/reference/settings)
@@ -36,6 +37,7 @@ use reflection.
 - **Fast execution**: No reflection is used at runtime
 - Automatically converts builtin types: slices, maps, named types, primitive
   types, pointers, structs with same fields
+- [Enum support](https://goverter.jmattheis.de/guide/enum)
 - [Deep copies](https://en.wikipedia.org/wiki/Object_copying#Deep_copy) per
   default and supports [shallow
   copying](https://en.wikipedia.org/wiki/Object_copying#Shallow_copy)
@@ -46,87 +48,64 @@ use reflection.
 - Detailed [documentation](https://goverter.jmattheis.de/) with a lot examples
 - Thoroughly tested, see [our test scenarios](./scenario)
 
-## Getting Started
+## Example
 
-1. Ensure your `go version` is 1.16 or above
+Given this converter:
 
-1. Create a go modules project if you haven't done so already
+```go
+package example
 
-    ```bash
-    $ go mod init module-name
-    ```
+// goverter:converter
+type Converter interface {
+    ConvertItems(source []Input) []Output
 
-1. Create your converter interface and mark it with a comment containing
-   [`goverter:converter`](https://goverter.jmattheis.de/reference/converter)
+    // goverter:ignore Irrelevant
+    // goverter:map Nested.AgeInYears Age
+    Convert(source Input) Output
+}
 
-    `input.go`
+type Input struct {
+    Name string
+    Nested InputNested
+}
+type InputNested struct {
+    AgeInYears int
+}
+type Output struct {
+    Name string
+    Age int
+    Irrelevant bool
+}
+```
 
-    ```go
-    package example
+Goverter will generated these conversion methods:
 
-    // goverter:converter
-    type Converter interface {
-      ConvertItems(source []Input) []Output
+```go
+package generated
 
-      // goverter:ignore Irrelevant
-      // goverter:map Nested.AgeInYears Age
-      Convert(source Input) Output
-    }
+import example "goverter/example"
 
-    type Input struct {
-      Name string
-      Nested InputNested
-    }
-    type InputNested struct {
-      AgeInYears int
-    }
-    type Output struct {
-      Name string
-      Age int
-      Irrelevant bool
-    }
-    ```
+type ConverterImpl struct{}
 
-    See [Settings](https://goverter.jmattheis.de/reference/settings) for more information.
-
-1. Run `goverter`:
-
-    ```bash
-    $ go run github.com/jmattheis/goverter/cmd/goverter@latest gen ./
-    ```
-
-    It's recommended to use an explicit version instead of `latest`. See
-    [Installation](https://goverter.jmattheis.de/guide/install) and
-    [CLI](https://goverter.jmattheis.de/reference/cli) for more information.
-
-1. goverter created a file at `./generated/generated.go`, it may look like this:
-
-    ```go
-    package generated
-
-    import example "goverter/example"
-
-    type ConverterImpl struct{}
-
-    func (c *ConverterImpl) Convert(source example.Input) example.Output {
-        var exampleOutput example.Output
-        exampleOutput.Name = source.Name
-        exampleOutput.Age = source.Nested.AgeInYears
-        return exampleOutput
-    }
-    func (c *ConverterImpl) ConvertItems(source []example.Input) []example.Output {
-        var exampleOutputList []example.Output
-        if source != nil {
-            exampleOutputList = make([]example.Output, len(source))
-            for i := 0; i < len(source); i++ {
-                exampleOutputList[i] = c.Convert(source[i])
-            }
+func (c *ConverterImpl) Convert(source example.Input) example.Output {
+    var exampleOutput example.Output
+    exampleOutput.Name = source.Name
+    exampleOutput.Age = source.Nested.AgeInYears
+    return exampleOutput
+}
+func (c *ConverterImpl) ConvertItems(source []example.Input) []example.Output {
+    var exampleOutputList []example.Output
+    if source != nil {
+        exampleOutputList = make([]example.Output, len(source))
+        for i := 0; i < len(source); i++ {
+            exampleOutputList[i] = c.Convert(source[i])
         }
-        return exampleOutputList
     }
-    ```
+    return exampleOutputList
+}
+```
 
-    See [Generation](https://goverter.jmattheis.de/explanation/generation) for more information.
+See [Getting Started](https://goverter.jmattheis.de/guide/getting-started).
 
 ## Versioning
 
