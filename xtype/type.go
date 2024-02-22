@@ -245,6 +245,8 @@ func TypeOf(t types.Type) *Type {
 	case *types.Signature:
 		rt.Signature = true
 		rt.SignatureType = value
+	case *types.TypeParam:
+		// ignore
 	default:
 		panic("unknown types.Type " + t.String())
 	}

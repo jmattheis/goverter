@@ -11,6 +11,8 @@ import GH from './GH.vue';
 - Add [`wrapErrorsUsing`](./reference/wrapErrorsUsing.md)
 - Add [`enum`](./reference/enum.md), See [Guide: Enums](guide/enum.md)
 - Fix error messages when there is an return error mismatch
+- Fix panic when using type params in [`extend`](./reference/extend),
+  [`map`](./reference/map) or [`default`](./reference/default).
 
 _internals_:
 

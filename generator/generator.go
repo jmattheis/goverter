@@ -192,13 +192,13 @@ func (g *generator) CallMethod(
 	if definition.Source != nil {
 		params = append(params, sourceID.Code.Clone())
 
-		if !source.AssignableTo(definition.Source) {
+		if !source.AssignableTo(definition.Source) && !definition.TypeParams {
 			cause := fmt.Sprintf("Method source type mismatches with conversion source: %s != %s", definition.Source.String, source.String)
 			return nil, nil, formatErr(cause)
 		}
 	}
 
-	if !definition.Target.AssignableTo(target) {
+	if !definition.Target.AssignableTo(target) && !definition.TypeParams {
 		cause := fmt.Sprintf("Method return type mismatches with target: %s != %s", definition.Target.String, target.String)
 		return nil, nil, formatErr(cause)
 	}
