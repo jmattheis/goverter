@@ -83,7 +83,7 @@ of these actions.
 ## Mapping enum keys
 
 If your source and target enum have differently named keys, you can use
-[`enum:map`](../reference/enum.md#enummap-source-target) to define the mapping.
+[`enum:map`](../reference/enum.md#enum-map-source-target) to define the mapping.
 
 ::: details Example (click me)
 ::: code-group
