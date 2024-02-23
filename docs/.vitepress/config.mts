@@ -41,6 +41,7 @@ export default defineConfig({
     ],
     sidebar: [
       { text: "Intro", link: "/" },
+      { text: "Use-Cases", link: "/use-case" },
       {
         text: "Guides",
         items: [

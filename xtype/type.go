@@ -206,9 +206,15 @@ func OtherID(code *jen.Statement) *JenID {
 
 // TypeOf creates a Type.
 func TypeOf(t types.Type) *Type {
+	t = Unalias(t)
 	rt := &Type{}
 	rt.T = t
 	rt.String = t.String()
+	applyTo(rt, t)
+	return rt
+}
+
+func applyTo(rt *Type, t types.Type) {
 	switch value := t.(type) {
 	case *types.Pointer:
 		rt.Pointer = true
@@ -230,12 +236,9 @@ func TypeOf(t types.Type) *Type {
 		rt.ListFixed = true
 		rt.ListInner = TypeOf(value.Elem())
 	case *types.Named:
-		underlying := TypeOf(value.Underlying())
-		underlying.T = rt.T
-		underlying.String = rt.String
-		underlying.Named = true
-		underlying.NamedType = value
-		return underlying
+		rt.Named = true
+		rt.NamedType = value
+		applyTo(rt, value.Underlying())
 	case *types.Struct:
 		rt.Struct = true
 		rt.StructType = value
@@ -250,7 +253,6 @@ func TypeOf(t types.Type) *Type {
 	default:
 		panic("unknown types.Type " + t.String())
 	}
-	return rt
 }
 
 // ID returns a deteministically generated id that may be used as variable.
