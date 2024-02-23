@@ -118,7 +118,8 @@ transformer](../reference/enum.md#enum-transform-custom)
 
 ## Disable enum detection and conversion
 
-To disable enum detection and conversion, add `enum no` to the converter.
+To disable enum detection and conversion, add `enum no` to the converter or a
+method converting enums.
 
 ::: details Example (click me)
 ::: code-group
