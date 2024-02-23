@@ -11,7 +11,7 @@ be:
 Sometimes you have different database and API types because they are:
 
 * Generated with e.g. via [sqlc-dev/sqlc](https://github.com/sqlc-dev/sqlc),
-  [volatiletech/sqlboiler](https://github.com/volatiletech/sqlboiler)
+  [volatiletech/sqlboiler](https://github.com/volatiletech/sqlboiler),
   [99designs/gqlgen](https://github.com/99designs/gqlgen),
   [protobuf](https://protobuf.dev/getting-started/gotutorial/) or
   [deepmap/oapi-codegen](https://github.com/deepmap/oapi-codegen)

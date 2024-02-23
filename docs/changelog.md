@@ -4,20 +4,23 @@ import GH from './GH.vue';
 
 # Changelog
 
-## Unreleased
+## v1.4.0
 
-- Require go1.18 for building Goverter
-- Add current working directory `-cwd` option to [CLI](./reference/cli.md)
-- Add [`wrapErrorsUsing`](./reference/wrapErrorsUsing.md)
-- Add [`enum`](./reference/enum.md), See [Guide: Enums](guide/enum.md)
-- Fix error messages when there is an return error mismatch
+- Add [Enum Support](guide/enum.md) <GH issue="61" pr="136"/>. Can be disabled
+  via [`enum no`](./guide/enum.md#disable-enum-detection-and-conversion).
+- Add [`wrapErrorsUsing`](./reference/wrapErrorsUsing.md) <GH pr="134"/>
+- Fix panic with go1.22 <GH issue="135" pr="133"/>
+- Require go1.18 for building Goverter <GH pr="133"/>
+- Add current working directory `-cwd` option to [CLI](./reference/cli.md) <GH pr="134"/>
+- Fix error messages when there is an return error mismatch <GH pr="136"/>
 - Fix panic when using type params in [`extend`](./reference/extend),
-  [`map`](./reference/map) or [`default`](./reference/default).
+  [`map`](./reference/map) or [`default`](./reference/default). <GH issue="138" pr="139"/>
+- Fix `types.Alias`. See [golang#63223](https://github.com/golang/go/issues/63223)
 
 _internals_:
 
-- Require the examples to be up-to-date via CI
-- Fix file permissions in tests
+- Require the examples to be up-to-date via CI <GH pr="136"/>
+- Fix file permissions in tests <GH pr="136"/>
 
 ## v1.3.2
 
