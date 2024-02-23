@@ -66,12 +66,7 @@ func toCodeSignature(t *types.Signature) *jen.Statement {
 }
 
 func toCodeNamed(t *types.Named) *jen.Statement {
-	var name *jen.Statement
-	if t.Obj().Pkg() == nil {
-		name = jen.Id(t.Obj().Name())
-	} else {
-		name = jen.Qual(t.Obj().Pkg().Path(), t.Obj().Name())
-	}
+	name := toCodeObj(t.Obj())
 
 	args := t.TypeArgs()
 	if args.Len() == 0 {
@@ -84,6 +79,13 @@ func toCodeNamed(t *types.Named) *jen.Statement {
 	}
 
 	return name.Index(jen.List(jenArgs...))
+}
+
+func toCodeObj(obj types.Object) *jen.Statement {
+	if obj.Pkg() == nil {
+		return jen.Id(obj.Name())
+	}
+	return jen.Qual(obj.Pkg().Path(), obj.Name())
 }
 
 func toCodeStruct(t *types.Struct) *jen.Statement {
