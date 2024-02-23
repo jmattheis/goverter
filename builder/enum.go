@@ -67,7 +67,7 @@ func (*Enum) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, sou
 
 	enumUnknown := ctx.Conf.Common.Enum.Unknown
 	if enumUnknown == "" {
-		return nil, nil, NewError("No enum:unknown configured.\nSee https://goverter.jmattheis.de/guide/enum#unknown-enum-values")
+		return nil, nil, NewError("Enum detected but enum:unknown is not configured.\nSee https://goverter.jmattheis.de/guide/enum")
 	}
 
 	body, err := caseAction(gen, ctx, nameVar, target, targetEnum, enumUnknown, sourceID, path)
@@ -114,7 +114,7 @@ func caseAction(gen Generator, ctx *MethodContext, nameVar *jen.Statement, targe
 	}
 	_, ok := targetEnum.Members[targetName]
 	if !ok {
-		return nil, NewError(fmt.Sprintf("Enum %s does not exist on\n    %s", targetName, target.String))
+		return nil, NewError(fmt.Sprintf("Enum %s does not exist on\n    %s\n\nSee https://goverter.jmattheis.de/guide/enum", targetName, target.String))
 	}
 
 	targetQual := jen.Qual(target.NamedType.Obj().Pkg().Path(), targetName)

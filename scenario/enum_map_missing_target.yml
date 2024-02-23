@@ -46,3 +46,5 @@ error: |-
 
     Enum Oops does not exist on
         github.com/jmattheis/goverter/execution/output.Color
+
+    See https://goverter.jmattheis.de/guide/enum
