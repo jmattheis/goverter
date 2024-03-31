@@ -14,6 +14,10 @@ type Enum struct{}
 
 // Matches returns true, if the builder can create handle the given types.
 func (*Enum) Matches(ctx *MethodContext, source, target *xtype.Type) bool {
+	return isEnum(ctx, source, target)
+}
+
+func isEnum(ctx *MethodContext, source, target *xtype.Type) bool {
 	return ctx.Conf.Enum.Enabled &&
 		source.Enum(&ctx.Conf.Enum).OK &&
 		target.Enum(&ctx.Conf.Enum).OK

@@ -1,6 +1,8 @@
 package builder
 
 import (
+	"fmt"
+
 	"github.com/dave/jennifer/jen"
 	"github.com/jmattheis/goverter/xtype"
 )
@@ -20,6 +22,15 @@ func (*UseUnderlyingTypeMethods) Matches(ctx *MethodContext, source, target *xty
 
 // Build creates conversion source code for the given source and target type.
 func (*UseUnderlyingTypeMethods) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type, errPath ErrorPath) ([]jen.Code, *xtype.JenID, *Error) {
+	if isEnum(ctx, source, target) {
+		return nil, nil, NewError(fmt.Sprintf(`The conversion between the types
+    %s
+    %s
+
+does qualify for enum conversion but also match an extend method via useUnderlyingTypeMethods.
+You have to disable enum or useUnderlyingTypeMethods to resolve the setting conflict.`, source.String, target.String))
+	}
+
 	sourceUnderlying, targetUnderlying := findUnderlyingExtendMapping(ctx, source, target)
 
 	innerSource := source
