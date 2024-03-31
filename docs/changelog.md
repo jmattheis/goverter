@@ -4,6 +4,12 @@ import GH from './GH.vue';
 
 # Changelog
 
+## unreleased
+
+- Error when the settings [`enum`](reference/enum.md) and
+  [`useUnderlyingTypeMethods`](reference/useUnderlyingTypeMethods.md) conflict.
+  <GH issue="141" pr="142"/>
+
 ## v1.4.0
 
 - Add [Enum Support](guide/enum.md) <GH issue="61" pr="136"/>. Can be disabled
