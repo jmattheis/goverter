@@ -12,7 +12,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: golangci/golangci-lint-action@v3
         with:
-          version: v1.55.2
+          version: v1.57.2
   test:
     if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.repository != github.event.pull_request.head.repo.full_name)
     runs-on: ubuntu-latest
