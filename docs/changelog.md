@@ -9,6 +9,7 @@ import GH from './GH.vue';
 - Error when the settings [`enum`](reference/enum.md) and
   [`useUnderlyingTypeMethods`](reference/useUnderlyingTypeMethods.md) conflict.
   <GH issue="141" pr="142"/>
+- Add [CLI](./reference/cli.md) commands `help` and `version`. <GH issue="144" pr="145"/>
 
 ## v1.4.0
 
