@@ -35,12 +35,10 @@ success:
 
         func (c *ConverterImpl) Convert(source execution.Input) execution.Output {
         	var structsOutput execution.Output
-        	var pPStructsX **execution.X
         	if source.X != nil {
         		pStructsX := c.pStructsXToPStructsX((*source.X))
-        		pPStructsX = &pStructsX
+        		structsOutput.X = &pStructsX
         	}
-        	structsOutput.X = pPStructsX
         	return structsOutput
         }
         func (c *ConverterImpl) pStructsXToPStructsX(source *execution.X) *execution.X {

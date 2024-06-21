@@ -12,12 +12,10 @@ func (c *ConverterImpl) Convert(source *default1.Input) *default1.Output {
 	if source != nil {
 		var exampleOutput default1.Output
 		exampleOutput.Age = (*source).Age
-		var pString *string
 		if (*source).Name != nil {
 			xstring := *(*source).Name
-			pString = &xstring
+			exampleOutput.Name = &xstring
 		}
-		exampleOutput.Name = pString
 		pExampleOutput = &exampleOutput
 	}
 	return pExampleOutput

@@ -22,6 +22,10 @@ func (*Basic) Build(_ Generator, _ *MethodContext, sourceID *xtype.JenID, source
 	return nil, sourceID, nil
 }
 
+func (b *Basic) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, sourceID *xtype.JenID, source, target *xtype.Type, errPath ErrorPath) ([]jen.Code, *Error) {
+	return AssignByBuild(b, gen, ctx, assignTo, sourceID, source, target, errPath)
+}
+
 // BasicTargetPointerRule handles edge conditions if the target type is a pointer.
 type BasicTargetPointerRule struct{}
 
@@ -48,4 +52,8 @@ func (*BasicTargetPointerRule) Build(gen Generator, ctx *MethodContext, sourceID
 	newID := jen.Op("&").Id(name)
 
 	return stmt, xtype.OtherID(newID), err
+}
+
+func (b *BasicTargetPointerRule) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, sourceID *xtype.JenID, source, target *xtype.Type, errPath ErrorPath) ([]jen.Code, *Error) {
+	return AssignByBuild(b, gen, ctx, assignTo, sourceID, source, target, errPath)
 }

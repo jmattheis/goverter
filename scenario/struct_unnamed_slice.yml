@@ -30,11 +30,8 @@ success:
 
         func (c *ConverterImpl) ConvertHouse(source execution.Input) execution.Output {
         	var structsOutput execution.Output
-        	var unnamedList []struct {
-        		Name string
-        	}
         	if source.House != nil {
-        		unnamedList = make([]struct {
+        		structsOutput.House = make([]struct {
         			Name string
         		}, len(source.House))
         		for i := 0; i < len(source.House); i++ {
@@ -42,9 +39,8 @@ success:
         				Name string
         			}
         			unnamed.Name = source.House[i].Name
-        			unnamedList[i] = unnamed
+        			structsOutput.House[i] = unnamed
         		}
         	}
-        	structsOutput.House = unnamedList
         	return structsOutput
         }

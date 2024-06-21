@@ -1,21 +1,17 @@
 input:
     input.go: |
-        package structs
+        package slices_arrays
 
         // goverter:converter
         type Converter interface {
-            // goverter:map Nested.Name Name
-            Convert(source Input) Output
+            Convert(Input) Output
         }
 
         type Input struct {
-            Nested *InputNested
-        }
-        type InputNested struct {
-            Name *string
+            Value [5]int
         }
         type Output struct {
-            Name *string
+            Value []int
         }
 success:
     - generated/generated.go: |
@@ -28,14 +24,9 @@ success:
         type ConverterImpl struct{}
 
         func (c *ConverterImpl) Convert(source execution.Input) execution.Output {
-        	var structsOutput execution.Output
-        	var pString *string
-        	if source.Nested != nil {
-        		pString = source.Nested.Name
+        	var slices_arraysOutput execution.Output
+        	for i := 0; i < len(source.Value); i++ {
+        		slices_arraysOutput.Value[i] = source.Value[i]
         	}
-        	if pString != nil {
-        		xstring := *pString
-        		structsOutput.Name = &xstring
-        	}
-        	return structsOutput
+        	return slices_arraysOutput
         }

@@ -74,12 +74,11 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 			}
 			stmt = append(stmt, mapStmt...)
 
-			fieldStmt, fieldID, err := gen.Build(ctx, nextID, nextSource, targetFieldType, targetFieldPath)
+			fieldStmt, err := gen.Assign(ctx, assignOf(nameVar.Clone().Dot(targetField.Name())), nextID, nextSource, targetFieldType, targetFieldPath)
 			if err != nil {
 				return nil, nil, err.Lift(lift...)
 			}
 			stmt = append(stmt, fieldStmt...)
-			stmt = append(stmt, nameVar.Clone().Dot(targetField.Name()).Op("=").Add(fieldID.Code))
 		} else {
 			def := fieldMapping.Function
 
@@ -132,6 +131,10 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 	}
 
 	return stmt, xtype.VariableID(nameVar), nil
+}
+
+func (s *Struct) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, sourceID *xtype.JenID, source, target *xtype.Type, path ErrorPath) ([]jen.Code, *Error) {
+	return AssignByBuild(s, gen, ctx, assignTo, sourceID, source, target, path)
 }
 
 func mapField(

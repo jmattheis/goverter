@@ -42,11 +42,9 @@ success:
         	var structsAPIPersonInfo execution.APIPersonInfo
         	if source != nil {
         		var structsAPIPersonInfo2 execution.APIPersonInfo
-        		var xstring string
         		if (*source).FirstName != nil {
-        			xstring = *(*source).FirstName
+        			structsAPIPersonInfo2.FirstName = *(*source).FirstName
         		}
-        		structsAPIPersonInfo2.FirstName = xstring
         		structsAPIPersonInfo = structsAPIPersonInfo2
         	}
         	return structsAPIPersonInfo

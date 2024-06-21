@@ -26,7 +26,6 @@ success:
 
         func (c *ConverterImpl) ConvertHouse(source execution.DBHouseNames) execution.APIHouseNames {
         	var slices_arraysAPIHouseNames execution.APIHouseNames
-        	var pPPStringList ***[]string
         	if source.Names != nil {
         		var pPStringList **[]string
         		if (*source.Names) != nil {
@@ -43,8 +42,7 @@ success:
         			}
         			pPStringList = &pStringList
         		}
-        		pPPStringList = &pPStringList
+        		slices_arraysAPIHouseNames.Names = &pPStringList
         	}
-        	slices_arraysAPIHouseNames.Names = pPPStringList
         	return slices_arraysAPIHouseNames
         }

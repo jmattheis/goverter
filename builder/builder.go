@@ -20,6 +20,13 @@ type Builder interface {
 		sourceID *xtype.JenID,
 		source, target *xtype.Type,
 		path ErrorPath) ([]jen.Code, *xtype.JenID, *Error)
+
+	Assign(gen Generator,
+		ctx *MethodContext,
+		assignTo *AssignTo,
+		sourceID *xtype.JenID,
+		source, target *xtype.Type,
+		path ErrorPath) ([]jen.Code, *Error)
 }
 
 // Generator checks all existing builders if they can create a conversion implementations for the given source and target type
@@ -30,6 +37,12 @@ type Generator interface {
 		sourceID *xtype.JenID,
 		source, target *xtype.Type,
 		path ErrorPath) ([]jen.Code, *xtype.JenID, *Error)
+
+	Assign(ctx *MethodContext,
+		assignTo *AssignTo,
+		sourceID *xtype.JenID,
+		source, target *xtype.Type,
+		path ErrorPath) ([]jen.Code, *Error)
 
 	CallMethod(
 		ctx *MethodContext,
