@@ -3,7 +3,7 @@
 ## struct:comment COMMENT
 
 `struct:comment COMMENT` can be defined as [CLI argument](./define-settings.md#cli)
-or [converter comment](./define-settings.md#converter).
+or [conversion comment](./define-settings.md#conversion).
 
 `struct:comment` instructs goverter to add a comment line to the generated
 struct. It can be configured multiple times to add multiline comments. Prefix

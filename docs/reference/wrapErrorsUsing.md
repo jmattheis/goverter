@@ -2,7 +2,7 @@
 
 `wrapErrorsUsing [PACKAGE]` is a [boolean setting](./define-settings.md#boolean)
 and can be defined as [CLI argument](./define-settings.md#cli),
-[converter comment](./define-settings.md#converter) or
+[conversion comment](./define-settings.md#conversion) or
 [method comment](./define-settings.md#method). This setting is
 [inheritable](./define-settings.md#inheritance).
 

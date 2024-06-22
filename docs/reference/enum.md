@@ -10,7 +10,7 @@ type](https://go.dev/ref/spec#Underlying_types) of (`float`, `string`, or
 ## enum
 
 `enum [yes|no]` can be defined as [CLI argument](./define-settings.md#cli) or
-[converter comment](./define-settings.md#converter). `enum` is enabled per
+[conversion comment](./define-settings.md#conversion). `enum` is enabled per
 default.
 
 `enum` allows you to disable enum support in goverter.
@@ -25,8 +25,8 @@ default.
 
 
 `enum:unknown ACTION|KEY` can be defined as [CLI
-argument](./define-settings.md#cli), [converter
-comment](./define-settings.md#converter) or [method
+argument](./define-settings.md#cli), [conversion
+comment](./define-settings.md#conversion) or [method
 comment](./define-settings.md#method). This setting is
 [inheritable](./define-settings.md#inheritance).
 
@@ -77,8 +77,8 @@ statement.
 ## enum:exclude
 
 `enum:exclude [PACKAGE:]NAME` can be defined as [CLI
-argument](./define-settings.md#cli) or [converter
-comment](./define-settings.md#converter).
+argument](./define-settings.md#cli) or [conversion
+comment](./define-settings.md#conversion).
 
 You can exclude falsely detected enums with exclude. This is useful when a type
 [qualifies as enum](#definition) but isn't one. If `PACKAGE` is unset, goverter

@@ -8,6 +8,17 @@ import GH from './GH.vue';
 
 - tbd
 
+## v1.5.0
+
+- Add two input-output formats. See
+  [Guide: Input/Output formats](guide/format.md) for help to choose a format.
+  The new formats allow you to call top level functions without the need to
+  instantiate a struct to call methods on it. <GH issue="77" pr="149"/>
+  - Add [`variables`](reference/variables.md) setting
+  - Add [`output:format`](reference/output.md#output-format) setting
+- Add line numbers of originating definitions to all error messages.
+  <GH pr="149"/>
+
 ## v1.4.1
 
 - Error when the settings [`enum`](reference/enum.md) and

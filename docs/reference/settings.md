@@ -4,21 +4,23 @@ Before configuring settings here it is useful to understand how [converter
 generation works](../explanation/generation.md) and how to [configure nested
 settings](../guide/configure-nested.md).
 
-## Converter
+## Conversion
 
 These settings can only be defined as [CLI argument](./define-settings.md#cli) or
-[converter comment](./define-settings.md#converter).
+[conversion comment](./define-settings.md#conversion).
 
 - [`converter` marker comment for conversion interfaces](./converter.md)
 - [`enum [yes|no]` enable / disable enum support](./enum.md#enum-detect)
 - [`enum:exclude [PACKAGE:]NAME` exclude wrongly detected enums](./enum.md#enum-exclude)
 - [`extend [PACKAGE:]TYPE...` add custom methods for conversions](./extend.md)
 - [`name NAME` rename generated struct](./name.md)
-- [`output:file FILE` set the output directory for a converter](./output.md#outputfile)
-- [`output:package [PACKAGE:]NAME` set the output package for a converter](./output.md#outputpackage)
-- [`struct:comment COMMENT` add comments to generated struct](./struct.md#structcomment-comment)
+- [`output:file FILE` set the output directory for a converter](./output.md#output-file)
+- [`output:format FORMAT` set the output format](./output.md#output-format)
+- [`output:package [PACKAGE:]NAME` set the output package for a converter](./output.md#output-package)
+- [`struct:comment COMMENT` add comments to generated struct](./struct.md#struct-comment-comment)
+- [`variables` marker comment for variable blocks](./variables.md)
 
-## Method:
+## Method
 
 These settings can only be defined as [method comment](./define-settings.md#method).
 
@@ -38,7 +40,7 @@ These settings can only be defined as [method comment](./define-settings.md#meth
 ### Method (inheritable)
 
 These settings can be defined as [CLI argument](./define-settings.md#cli),
-[converter comment](./define-settings.md#converter) or
+[conversion comment](./define-settings.md#conversion) or
 [method comment](./define-settings.md#method) and are
 [inheritable](./define-settings.md#inheritance).
 
