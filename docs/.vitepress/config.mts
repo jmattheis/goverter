@@ -42,12 +42,13 @@ export default defineConfig({
     sidebar: [
       { text: "Intro", link: "/" },
       { text: "Use-Cases", link: "/use-case" },
+      { text: "Error early", link: "/guide/error-early" },
       {
         text: "Guides",
         items: [
           { text: "Getting Started", link: "/guide/getting-started" },
           { text: "Installation", link: "/guide/install" },
-          { text: "Error early", link: "/guide/error-early" },
+          { text: "Input/Output formats", link: "/guide/format" },
           { text: "Convert Enums", link: "/guide/enum" },
           {
             text: "Output into same package",
@@ -77,7 +78,7 @@ export default defineConfig({
           { text: "Settings Overview", link: "/reference/settings" },
           { text: "Enums", link: "/reference/enum" },
           {
-            text: "Converter",
+            text: "Conversion",
             collapsed: true,
             items: [
               { text: "converter", link: "/reference/converter" },
@@ -85,6 +86,7 @@ export default defineConfig({
               { text: "name", link: "/reference/name" },
               { text: "output", link: "/reference/output" },
               { text: "struct", link: "/reference/struct" },
+              { text: "variables", link: "/reference/variables" },
             ],
           },
           {

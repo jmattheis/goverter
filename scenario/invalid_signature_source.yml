@@ -8,6 +8,7 @@ input:
         }
 error: |-
     error parsing converter method:
+        @workdir/input.go:5
         func (github.com/jmattheis/goverter/execution.Converter).Convert() map[string]int
 
     must have at least one parameter

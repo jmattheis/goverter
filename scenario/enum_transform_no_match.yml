@@ -26,6 +26,7 @@ input:
         const Blue Color = "blue"
 error: |-
     Error while creating converter method:
+        @workdir/input.go:12
         func (github.com/jmattheis/goverter/execution.Converter).Convert(github.com/jmattheis/goverter/execution/input.Color) github.com/jmattheis/goverter/execution/output.Color
 
     | github.com/jmattheis/goverter/execution/input.Color

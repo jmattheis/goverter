@@ -9,6 +9,7 @@ input:
         package execution
 
         // goverter:converter
+        // goverter:output:package github.com/jmattheis/goverter/execution/generated
         // goverter:extend github.com/jmattheis/goverter/execution/generated:intToString
         type Converter interface {
             Convert(source Input) Output

@@ -1,7 +1,7 @@
 # Setting: extend
 
 `extend [PACKAGE:]TYPE...` can be defined as [CLI argument](./define-settings.md#cli) or
-[converter comment](./define-settings.md#converter).
+[conversion comment](./define-settings.md#conversion).
 
 If a type cannot be converted automatically, you can manually define an
 implementation with `:extend` for the missing mapping. Keep in mind,

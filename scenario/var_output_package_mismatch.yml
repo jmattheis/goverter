@@ -1,0 +1,31 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:variables
+        // goverter:output:package pkg1
+        var (
+            ConvertX func(source Input) Output
+        )
+
+        // goverter:variables
+        // goverter:output:package pkg2
+        var (
+            ConvertY func(source Input) Output
+        )
+
+        type Input struct { ID int }
+        type Output struct { ID int }
+error: |-
+    Error creating converters
+        @workdir/input.go:11
+        var definition
+    and
+        @workdir/input.go:5
+        var definition
+
+    Cannot use different packages
+        pkg2
+        pkg1
+    in the same output file:
+        @workdir/input.gen.go

@@ -15,6 +15,7 @@ input:
         }
 error: |-
     error parsing converter method:
+        @workdir/input.go:5
         func (github.com/jmattheis/goverter/execution.Converter).convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
 
     must be exported

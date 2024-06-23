@@ -28,9 +28,10 @@ type Converter interface {
 
 the resolved settings would be the same as with the example below for Converter.
 
-## Converter
+## Conversion
 
-You can define settings on the converter interface by prefixing them with `goverter:`.
+When using [`goverter:converter`](converter.md), then you can define settings
+on the converter interface by prefixing them with `goverter:`.
 
 ```go
 // goverter:converter
@@ -41,9 +42,22 @@ type Converter interface {
 }
 ```
 
+When using [`goverter:variables`](variables.md), then you can define settings
+on the `var`-block by prefixing them with `goverter:`.
+
+```go
+// goverter:variables
+// goverter:setting yes
+// goverter:setting2 no
+var (
+    Convert func(source Input) Output
+)
+```
+
 ## Method
 
-You can define settings on the converter methods by prefixing them with `goverter:`.
+When using [`goverter:converter`](converter.md), then you can define settings
+on the converter methods by prefixing them with `goverter:`.
 
 ```go
 // goverter:converter
@@ -52,6 +66,18 @@ type Converter interface {
     // goverter:setting2 no
     Convert(source Input) Output
 }
+```
+
+When using [`goverter:variables`](variables.md), then you can define settings
+on the function variables by prefixing them with `goverter:`.
+
+```go
+// goverter:variables
+var (
+    // goverter:setting yes
+    // goverter:setting2 no
+    Convert func(source Input) Output
+)
 ```
 
 ### Inheritance

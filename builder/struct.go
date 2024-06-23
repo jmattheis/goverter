@@ -239,11 +239,11 @@ func mapField(
 			OutputPackagePath: ctx.OutputPackagePath,
 			ErrorPrefix:       "Error parsing struct method",
 			Params:            method.ParamsNone,
+			CustomCall:        nextIDCode,
 		})
 		if err != nil {
 			return nil, nil, nil, nil, false, NewError(err.Error()).Lift(lift...)
 		}
-		def.Call = nextIDCode
 
 		methodCallInner, callID, callErr := gen.CallMethod(ctx, def, nil, nil, def.Target, errPath)
 		if callErr != nil {

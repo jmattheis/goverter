@@ -14,11 +14,12 @@ type RawLines struct {
 }
 
 type RawConverter struct {
-	Package       string
+	PackagePath   string
+	PackageName   string
 	InterfaceName string
 	Converter     RawLines
 	Methods       map[string]RawLines
-	FileSource    string
+	FileName      string
 }
 
 type Raw struct {
@@ -46,14 +47,9 @@ func Parse(raw *Raw) ([]*Converter, error) {
 
 	ctx := &context{Loader: loader, EnumTransformers: raw.EnumTransformers}
 
-	global, err := parseGlobal(ctx, raw.Global)
-	if err != nil {
-		return nil, err
-	}
-
 	converters := []*Converter{}
 	for _, rawConverter := range raw.Converters {
-		converter, err := parseConverter(ctx, &rawConverter, *global)
+		converter, err := parseConverter(ctx, &rawConverter, raw.Global)
 		if err != nil {
 			return nil, err
 		}

@@ -1,29 +1,69 @@
 package config
 
 import (
+	"fmt"
 	"go/types"
+	"path/filepath"
 	"strings"
 
 	"github.com/jmattheis/goverter/enum"
 	"github.com/jmattheis/goverter/method"
+	"github.com/jmattheis/goverter/pkgload"
 )
 
 const (
 	configExtend = "extend"
 )
 
-var DefaultConfig = ConverterConfig{
+type Format string
+
+const (
+	FormatStruct   Format = "struct"
+	FormatVariable Format = "assign-variable"
+	FormatFunction Format = "function"
+)
+
+var DefaultConfigInterface = ConverterConfig{
 	OutputFile:        "./generated/generated.go",
 	OutputPackageName: "generated",
 	Common:            Common{Enum: enum.Config{Enabled: true}},
+	OutputFormat:      FormatStruct,
+}
+
+var DefaultConfigVariables = ConverterConfig{
+	OutputFormat: FormatVariable,
+	Common:       Common{Enum: enum.Config{Enabled: true}},
 }
 
 type Converter struct {
 	ConverterConfig
-	Package    string
-	FileSource string
-	Type       types.Type
-	Methods    map[string]*Method
+	Package  string
+	FileName string
+	typ      types.Type
+	Methods  map[string]*Method
+
+	Location string
+}
+
+func (c *Converter) typeForMethod() types.Type {
+	if c.OutputFormat == FormatFunction {
+		return nil
+	}
+	return c.typ
+}
+
+func (c *Converter) requireStruct() error {
+	if c.OutputFormat == FormatStruct {
+		return nil
+	}
+	return fmt.Errorf("not allowed when using goverter:variables")
+}
+
+func (c *Converter) IDString() string {
+	if c.typ == nil {
+		return "var definition"
+	}
+	return c.typ.String()
 }
 
 type ConverterConfig struct {
@@ -32,6 +72,7 @@ type ConverterConfig struct {
 	OutputFile        string
 	OutputPackagePath string
 	OutputPackageName string
+	OutputFormat      Format
 	Extend            []*method.Definition
 	Comments          []string
 }
@@ -43,44 +84,56 @@ func (conf *ConverterConfig) PackageID() string {
 	return conf.OutputPackagePath + ":" + conf.OutputPackageName
 }
 
-func parseGlobal(ctx *context, global RawLines) (*ConverterConfig, error) {
-	c := Converter{ConverterConfig: DefaultConfig}
-	err := parseConverterLines(ctx, &c, "global", global)
-	return &c.ConverterConfig, err
+func defaultOutputFile(name string) string {
+	f := filepath.Base(name)
+	ext := filepath.Ext(f)
+	return strings.TrimSuffix(f, ext) + ".gen" + ext
 }
 
-func parseConverter(ctx *context, rawConverter *RawConverter, global ConverterConfig) (*Converter, error) {
-	v, err := ctx.Loader.GetOneRaw(rawConverter.Package, rawConverter.InterfaceName)
+func parseConverter(ctx *context, rawConverter *RawConverter, global RawLines) (*Converter, error) {
+	c, err := initConverter(ctx.Loader, rawConverter)
 	if err != nil {
 		return nil, err
 	}
-	namedType := v.Type()
-	interfaceType := namedType.Underlying().(*types.Interface)
 
-	c := &Converter{
-		ConverterConfig: global,
-		Type:            namedType,
-		FileSource:      rawConverter.FileSource,
-		Package:         rawConverter.Package,
-		Methods:         map[string]*Method{},
+	if err := parseConverterLines(ctx, c, "global", global); err != nil {
+		return nil, err
 	}
-	if c.Name == "" {
-		c.Name = rawConverter.InterfaceName + "Impl"
-	}
-
-	if err := parseConverterLines(ctx, c, c.Type.String(), rawConverter.Converter); err != nil {
+	if err := parseConverterLines(ctx, c, c.IDString(), rawConverter.Converter); err != nil {
 		return nil, err
 	}
 
-	for i := 0; i < interfaceType.NumMethods(); i++ {
-		fun := interfaceType.Method(i)
-		def, err := parseMethod(ctx, c, fun, rawConverter.Methods[fun.Name()])
+	err = parseMethods(ctx, rawConverter, c)
+	return c, err
+}
+
+func initConverter(loader *pkgload.PackageLoader, rawConverter *RawConverter) (*Converter, error) {
+	c := &Converter{
+		FileName: rawConverter.FileName,
+		Package:  rawConverter.PackagePath,
+		Methods:  map[string]*Method{},
+		Location: rawConverter.Converter.Location,
+	}
+
+	if rawConverter.InterfaceName != "" {
+		c.ConverterConfig = DefaultConfigInterface
+		v, err := loader.GetOneRaw(c.Package, rawConverter.InterfaceName)
 		if err != nil {
 			return nil, err
 		}
-		c.Methods[fun.Name()] = def
+
+		c.OutputFile = "./generated/generated.go"
+		c.OutputPackageName = "generated"
+		c.typ = v.Type()
+		c.Name = rawConverter.InterfaceName + "Impl"
+		c.OutputFormat = FormatStruct
+		return c, nil
 	}
 
+	c.OutputFormat = FormatVariable
+	c.OutputFile = defaultOutputFile(rawConverter.FileName)
+	c.OutputPackageName = rawConverter.PackageName
+	c.OutputPackagePath = rawConverter.PackagePath
 	return c, nil
 }
 
@@ -97,12 +150,31 @@ func parseConverterLines(ctx *context, c *Converter, source string, raw RawLines
 func parseConverterLine(ctx *context, c *Converter, value string) (err error) {
 	cmd, rest := parseCommand(value)
 	switch cmd {
-	case "converter":
+	case "converter", "variables":
 		// only a marker interface
 	case "name":
+		if err = c.requireStruct(); err != nil {
+			return err
+		}
 		c.Name, err = parseString(rest)
 	case "output:file":
 		c.OutputFile, err = parseString(rest)
+	case "output:format":
+		if len(c.Extend) != 0 {
+			return fmt.Errorf("Cannot change output:format after extend functions have been added.\nMove the extend below the output:format setting.")
+		}
+
+		c.OutputFormat, err = parseEnum("format", false, rest, FormatFunction, FormatStruct, FormatVariable)
+		if err != nil {
+			return err
+		}
+
+		if c.typ == nil && c.OutputFormat != FormatVariable {
+			return fmt.Errorf("unsupported format for goverter:variables")
+		}
+		if c.typ != nil && c.OutputFormat == FormatVariable {
+			return fmt.Errorf("unsupported format for goverter:converter")
+		}
 	case "output:package":
 		c.OutputPackageName = ""
 		var pkg string
@@ -117,6 +189,9 @@ func parseConverterLine(ctx *context, c *Converter, value string) (err error) {
 			c.OutputPackagePath = parts[0]
 		}
 	case "struct:comment":
+		if err = c.requireStruct(); err != nil {
+			return err
+		}
 		c.Comments = append(c.Comments, rest)
 	case "enum:exclude":
 		var pattern enum.IDPattern
@@ -127,7 +202,7 @@ func parseConverterLine(ctx *context, c *Converter, value string) (err error) {
 			opts := &method.ParseOpts{
 				ErrorPrefix:       "error parsing type",
 				OutputPackagePath: c.OutputPackagePath,
-				Converter:         c.Type,
+				Converter:         c.typeForMethod(),
 				Params:            method.ParamsRequired,
 			}
 			var defs []*method.Definition

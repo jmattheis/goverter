@@ -34,7 +34,7 @@ input:
         )
 error: |-
     error parsing 'goverter:enum:exclude' at
-        @workdir/input.go:11:1
+        @workdir/input.go:11
         github.com/jmattheis/goverter/execution.Converter
 
     error parsing regexp: missing closing ): `.*(`

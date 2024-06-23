@@ -16,6 +16,7 @@ const (
 	prefix          = "goverter"
 	delimter        = ":"
 	converterMarker = prefix + delimter + "converter"
+	variablesMarker = prefix + delimter + "variables"
 )
 
 // ParseDocsConfig provides input to the ParseDocs method below.
@@ -38,9 +39,8 @@ type Converter struct {
 // ParseDocs parses the docs for the given pattern.
 func ParseDocs(c ParseDocsConfig) ([]config.RawConverter, error) {
 	loadCfg := &packages.Config{
-		Mode: packages.NeedSyntax | packages.NeedCompiledGoFiles | packages.NeedTypes |
-			packages.NeedModule | packages.NeedFiles | packages.NeedName | packages.NeedImports,
-		Dir: c.WorkingDir,
+		Mode: packages.NeedName | packages.NeedTypes | packages.NeedTypesInfo | packages.NeedSyntax,
+		Dir:  c.WorkingDir,
 	}
 	if c.BuildTags != "" {
 		loadCfg.BuildFlags = append(loadCfg.BuildFlags, "-tags", c.BuildTags)
@@ -75,10 +75,51 @@ requires the type information from the compiled sources.`, pkg.PkgPath, pkg.Erro
 	return rawConverters, nil
 }
 
+func parseFunctions(fset *token.FileSet, pkg *types.Package, decl *ast.GenDecl, comments string) ([]config.RawConverter, error) {
+	if decl.Tok != token.VAR {
+		return nil, fmt.Errorf("%s must be defined on %q-block but was %q", converterMarker, token.VAR, decl.Tok.String())
+	}
+
+	location := fset.Position(decl.Pos())
+	converterLines := parseRawLines(fileWithLine(location), comments)
+
+	result := map[string]config.RawLines{}
+	for _, spec := range decl.Specs {
+		value, ok := spec.(*ast.ValueSpec)
+		if !ok {
+			return nil, fmt.Errorf("expected value spec but got %#v", spec)
+		}
+		if len(value.Names) != 1 {
+			return nil, fmt.Errorf("must have one name")
+		}
+		name := value.Names[0].Name
+
+		location := fileWithLine(fset.Position(value.Pos()))
+		result[name] = parseRawLines(location, value.Doc.Text())
+	}
+
+	converter := config.RawConverter{
+		FileName:    location.Filename,
+		Converter:   converterLines,
+		Methods:     result,
+		PackageName: pkg.Name(),
+		PackagePath: pkg.Path(),
+	}
+	return []config.RawConverter{converter}, nil
+}
+
 func parseGenDecl(fset *token.FileSet, pkg *types.Package, decl *ast.GenDecl) ([]config.RawConverter, error) {
 	declDocs := decl.Doc.Text()
 
+	if strings.Contains(declDocs, variablesMarker) {
+		return parseFunctions(fset, pkg, decl, declDocs)
+	}
+
 	if strings.Contains(declDocs, converterMarker) {
+		if decl.Tok != token.TYPE {
+			return nil, fmt.Errorf("%s must be defined on %q-block but was %q", converterMarker, token.TYPE, decl.Tok.String())
+		}
+
 		if len(decl.Specs) != 1 {
 			return nil, fmt.Errorf("found %s on type but it has multiple interfaces inside", converterMarker)
 		}
@@ -86,57 +127,53 @@ func parseGenDecl(fset *token.FileSet, pkg *types.Package, decl *ast.GenDecl) ([
 		if !ok {
 			return nil, fmt.Errorf("%s may only be applied to type declarations ", converterMarker)
 		}
-		interfaceType, ok := typeSpec.Type.(*ast.InterfaceType)
-		if !ok {
-			return nil, fmt.Errorf("%s may only be applied to type interface declarations ", converterMarker)
-		}
-		typeName := typeSpec.Name.String()
-
-		location := fset.Position(decl.Pos())
-		converterLines := parseRawLines(location.String(), declDocs)
-		methods, err := parseInterface(fset, interfaceType)
+		c, err := parseInterface(fset, pkg, typeSpec, declDocs)
 		if err != nil {
-			return nil, fmt.Errorf("type %s: %s", typeName, err)
+			return nil, err
 		}
-		converter := config.RawConverter{
-			FileSource:    location.Filename,
-			InterfaceName: typeName,
-			Converter:     converterLines,
-			Methods:       methods,
-			Package:       pkg.Path(),
-		}
-		return []config.RawConverter{converter}, nil
+		return []config.RawConverter{c}, nil
 	}
 
 	var converters []config.RawConverter
 
 	for _, spec := range decl.Specs {
 		if typeSpec, ok := spec.(*ast.TypeSpec); ok && strings.Contains(typeSpec.Doc.Text(), converterMarker) {
-			interfaceType, ok := typeSpec.Type.(*ast.InterfaceType)
-			if !ok {
-				return nil, fmt.Errorf("%s may only be applied to type interface declarations ", converterMarker)
-			}
-			typeName := typeSpec.Name.String()
-			location := fset.Position(interfaceType.Pos())
-			lines := parseRawLines(location.String(), typeSpec.Doc.Text())
-			methods, err := parseInterface(fset, interfaceType)
+			c, err := parseInterface(fset, pkg, typeSpec, typeSpec.Doc.Text())
 			if err != nil {
-				return nil, fmt.Errorf("type %s: %s", typeName, err)
+				return nil, err
 			}
-			converters = append(converters, config.RawConverter{
-				FileSource:    location.Filename,
-				InterfaceName: typeName,
-				Converter:     lines,
-				Methods:       methods,
-				Package:       pkg.Path(),
-			})
+			converters = append(converters, c)
 		}
 	}
 
 	return converters, nil
 }
 
-func parseInterface(location *token.FileSet, inter *ast.InterfaceType) (map[string]config.RawLines, error) {
+func parseInterface(fset *token.FileSet, pkg *types.Package, typeSpec *ast.TypeSpec, declDocs string) (config.RawConverter, error) {
+	astInterface, ok := typeSpec.Type.(*ast.InterfaceType)
+	if !ok {
+		return config.RawConverter{}, fmt.Errorf("%s may only be applied to type interface declarations ", converterMarker)
+	}
+	typeName := typeSpec.Name.String()
+
+	location := fset.Position(typeSpec.Pos())
+	converterLines := parseRawLines(fileWithLine(location), declDocs)
+	methods, err := parseInterfaceMethods(fset, astInterface)
+	if err != nil {
+		return config.RawConverter{}, fmt.Errorf("type %s: %s", typeName, err)
+	}
+	converter := config.RawConverter{
+		InterfaceName: typeName,
+		FileName:      location.Filename,
+		Converter:     converterLines,
+		Methods:       methods,
+		PackageName:   pkg.Name(),
+		PackagePath:   pkg.Path(),
+	}
+	return converter, nil
+}
+
+func parseInterfaceMethods(location *token.FileSet, inter *ast.InterfaceType) (map[string]config.RawLines, error) {
 	result := map[string]config.RawLines{}
 	for _, method := range inter.Methods.List {
 		if len(method.Names) != 1 {
@@ -144,8 +181,8 @@ func parseInterface(location *token.FileSet, inter *ast.InterfaceType) (map[stri
 		}
 		name := method.Names[0].String()
 
-		location := location.Position(method.Pos()).String()
-		result[name] = parseRawLines(location, method.Doc.Text())
+		location := location.Position(method.Pos())
+		result[name] = parseRawLines(fileWithLine(location), method.Doc.Text())
 	}
 	return result, nil
 }
@@ -161,4 +198,8 @@ func parseRawLines(location, comment string) config.RawLines {
 		}
 	}
 	return raw
+}
+
+func fileWithLine(p token.Position) string {
+	return fmt.Sprintf("%s:%d", p.Filename, p.Line)
 }

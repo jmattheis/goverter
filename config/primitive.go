@@ -13,7 +13,7 @@ func parseCommand(value string) (string, string) {
 	return parts[0], ""
 }
 
-func parseEnum(name string, empty bool, remaining string, values ...string) (string, error) {
+func parseEnum[T ~string](name string, empty bool, remaining string, values ...T) (T, error) {
 	fields := strings.Fields(remaining)
 
 	switch {
@@ -21,12 +21,12 @@ func parseEnum(name string, empty bool, remaining string, values ...string) (str
 		return "", nil
 	case len(fields) == 1:
 		for _, value := range values {
-			if fields[0] == value {
+			if fields[0] == string(value) {
 				return value, nil
 			}
 		}
 
-		return "", fmt.Errorf("invalid %s value: '%s' must be one of '%s'", name, fields[0], strings.Join(values, "', '"))
+		return "", fmt.Errorf("invalid %s value: '%s' must be one of %+q", name, fields[0], values)
 	default:
 		return "", fmt.Errorf("invalid %s value: expected one value but got %d: %s", name, len(fields), fields)
 	}

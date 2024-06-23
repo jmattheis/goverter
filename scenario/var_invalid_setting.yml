@@ -1,0 +1,22 @@
+input:
+    input.go: |
+        package example
+
+        // goverter:variables
+        // goverter:oops
+        var (
+            conv func(Person) FlatPerson
+        )
+
+        type FlatPerson struct {
+            Name    string
+        }
+        type Person struct {
+            Name    string
+        }
+error: |-
+    error parsing 'goverter:oops' at
+        @workdir/input.go:5
+        var definition
+
+    unknown setting: oops

@@ -1,9 +1,11 @@
 # Setting: output
 
+[[toc]]
+
 ## output:file
 
 `output:file FILE` can be defined as [CLI argument](./define-settings.md#cli) or
-[converter comment](./define-settings.md#converter). Default is
+[conversion comment](./define-settings.md#conversion). Default is
 `./generated/generated.go`.
 
 `output:file` sets the generated output file of a converter interface. The file
@@ -28,10 +30,50 @@ the same. See this more complex example:
 <<< @../../example/output-multiple-files/b/generated.go [b/generated.go]
 :::
 
+## output:format
+
+`output:format FORMAT` can be defined as [CLI argument](./define-settings.md#cli) or
+[conversion comment](./define-settings.md#conversion). Default `struct`
+
+Specify the output FORMAT for the conversion methods. See [Guide: Input/Output formats](../guide/format.md)
+
+### output:format struct
+
+Output an implementation of the conversion interface by creating a struct with methods.
+
+::: details Example (click me)
+::: code-group
+<<< @../../example/format/interfacetostruct/input.go
+<<< @../../example/format/common/common.go
+<<< @../../example/format/interfacetostruct/generated/generated.go [generated/generated.go]
+:::
+
+### output:format assign-variable
+
+Output an init function assiging an implementation for all function variables.
+
+::: details Example (click me)
+::: code-group
+<<< @../../example/format/assignvariables/input.go
+<<< @../../example/format/common/common.go
+<<< @../../example/format/assignvariables/input.gen.go
+:::
+
+### output:format function
+
+Output a function for each method in the conversion interface.
+
+::: details Example (click me)
+::: code-group
+<<< @../../example/format/interfacefunction/input.go
+<<< @../../example/format/common/common.go
+<<< @../../example/format/interfacefunction/generated/generated.go [generated/generated.go]
+:::
+
 ## output:package
 
 `output:package [PACKAGE][:NAME]` can be defined as
-[CLI argument](./define-settings.md#cli) or [converter comment](./define-settings.md#converter).
+[CLI argument](./define-settings.md#cli) or [conversion comment](./define-settings.md#conversion).
 Default is `:generated`.
 
 ### output:package PACKAGE

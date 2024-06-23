@@ -9,7 +9,7 @@ input:
         }
 error: |-
     error parsing 'goverter:matchIgnoreCase' at
-        @workdir/input.go:6:5
+        @workdir/input.go:6
         func (github.com/jmattheis/goverter/execution.Converter).ConvertString(source string) string
 
-    invalid boolean value: 'a' must be one of 'yes', 'no'
+    invalid boolean value: 'a' must be one of ["yes" "no"]

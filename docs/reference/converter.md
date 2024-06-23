@@ -1,7 +1,7 @@
 # Setting: converter
 
-`converter` accepts no arguments and can be defined as [converter
-comment](./define-settings.md#converter).
+`converter` accepts no arguments and can be defined as [conversion
+comment](./define-settings.md#conversion).
 
 `converter` instructs goverter to generate an implementation for the given
 interface. You can have multiple converters in one package.

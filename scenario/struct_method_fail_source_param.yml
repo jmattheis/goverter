@@ -19,6 +19,7 @@ input:
         }
 error: |-
     Error while creating converter method:
+        @workdir/input.go:5
         func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
 
     | github.com/jmattheis/goverter/execution.Input

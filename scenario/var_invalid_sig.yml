@@ -1,0 +1,14 @@
+input:
+    input.go: |
+        package example
+
+        // goverter:variables
+        var (
+            Convert int
+        )
+error: |-
+    error parsing converter method:
+        @workdir/input.go:5
+        var github.com/jmattheis/goverter/execution.Convert int
+
+    must be a function

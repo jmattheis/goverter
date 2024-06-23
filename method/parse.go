@@ -17,33 +17,35 @@ const (
 )
 
 type ParseOpts struct {
+	Location          string
 	Converter         types.Type
 	OutputPackagePath string
 
 	ErrorPrefix     string
 	Params          ParamType
-	ConvFunction    bool
 	AllowTypeParams bool
+
+	Generated  bool
+	CustomCall *jen.Statement
 }
 
 // Parse parses an function into a Definition.
 func Parse(obj types.Object, opts *ParseOpts) (*Definition, error) {
 	formatErr := func(s string) error {
-		return fmt.Errorf("%s:\n    %s\n\n%s", opts.ErrorPrefix, obj.String(), s)
+		loc := ""
+		if opts.Location != "" {
+			loc = opts.Location + "\n    "
+		}
+		return fmt.Errorf("%s:\n    %s%s\n\n%s", opts.ErrorPrefix, loc, obj.String(), s)
 	}
 
-	fn, ok := obj.(*types.Func)
-	if !ok {
-		return nil, formatErr("must be a function")
-	}
-
-	if !xtype.Accessible(fn, opts.OutputPackagePath) {
+	if !xtype.Accessible(obj, opts.OutputPackagePath) {
 		return nil, formatErr("must be exported")
 	}
 
-	sig, ok := fn.Type().(*types.Signature)
+	sig, ok := obj.Type().(*types.Signature)
 	if !ok {
-		return nil, formatErr("must have a signature")
+		return nil, formatErr("must be a function")
 	}
 	if sig.Results().Len() == 0 || sig.Results().Len() > 2 {
 		return nil, formatErr("must have one or two returns")
@@ -58,24 +60,24 @@ func Parse(obj types.Object, opts *ParseOpts) (*Definition, error) {
 	}
 
 	methodDef := &Definition{
-		ID:       fn.String(),
-		OriginID: fn.String(),
+		ID:         obj.String(),
+		OriginID:   obj.String(),
+		Generated:  opts.Generated,
+		CustomCall: opts.CustomCall,
 		Parameters: Parameters{
 			ReturnError: returnError,
 			Target:      xtype.TypeOf(sig.Results().At(0).Type()),
 			TypeParams:  sig.TypeParams().Len() > 0,
 		},
-		Name: fn.Name(),
+		Name: obj.Name(),
 	}
 
 	if methodDef.TypeParams && !opts.AllowTypeParams {
 		return nil, formatErr("must not be generic")
 	}
 
-	if opts.ConvFunction {
-		methodDef.Call = jen.Id(xtype.ThisVar).Dot(fn.Name())
-	} else {
-		methodDef.Call = jen.Qual(fn.Pkg().Path(), fn.Name())
+	if pkg := obj.Pkg(); pkg != nil {
+		methodDef.Package = pkg.Path()
 	}
 
 	if opts.Params == ParamsNone && sig.Params().Len() > 0 {
@@ -85,8 +87,7 @@ func Parse(obj types.Object, opts *ParseOpts) (*Definition, error) {
 	switch sig.Params().Len() {
 	case 2:
 		if opts.Converter == nil {
-			// converterInterface is used when searching for methods in the local package only
-			return nil, formatErr("must have one parameter when using extend with a package")
+			return nil, formatErr("must have one parameter")
 		}
 
 		actual := sig.Params().At(0).Type().String()

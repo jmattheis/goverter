@@ -1,0 +1,18 @@
+input:
+    input.go: |
+        package example
+
+        // goverter:converter
+        var (
+            // goverter:map Name2 Name
+            conv func(Person) FlatPerson
+            Convert func([]Person) []FlatPerson
+        )
+
+        type FlatPerson struct {
+            Name    string
+        }
+        type Person struct {
+            Name2    string
+        }
+error: '@workdir/input.go:4:1: goverter:converter must be defined on "type"-block but was "var"'

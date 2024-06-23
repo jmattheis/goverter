@@ -23,6 +23,8 @@ type Method struct {
 	EnumMapping *EnumMapping
 
 	RawFieldSettings []string
+
+	Location string
 }
 
 type FieldMapping struct {
@@ -40,13 +42,41 @@ func (m *Method) Field(targetName string) *FieldMapping {
 	return target
 }
 
-func parseMethod(ctx *context, c *Converter, fn *types.Func, rawMethod RawLines) (*Method, error) {
-	def, err := method.Parse(fn, &method.ParseOpts{
+func parseMethods(ctx *context, rawConverter *RawConverter, c *Converter) error {
+	if c.typ != nil {
+		interf := c.typ.Underlying().(*types.Interface)
+		for i := 0; i < interf.NumMethods(); i++ {
+			fun := interf.Method(i)
+			def, err := parseMethod(ctx, c, fun, rawConverter.Methods[fun.Name()])
+			if err != nil {
+				return err
+			}
+			c.Methods[fun.Name()] = def
+		}
+		return nil
+	}
+	for name, lines := range rawConverter.Methods {
+		fun, err := ctx.Loader.GetOneRaw(c.Package, name)
+		if err != nil {
+			return err
+		}
+		def, err := parseMethod(ctx, c, fun, lines)
+		if err != nil {
+			return err
+		}
+		c.Methods[fun.Name()] = def
+	}
+	return nil
+}
+
+func parseMethod(ctx *context, c *Converter, obj types.Object, rawMethod RawLines) (*Method, error) {
+	def, err := method.Parse(obj, &method.ParseOpts{
 		ErrorPrefix:       "error parsing converter method",
+		Location:          rawMethod.Location,
 		Converter:         nil,
 		OutputPackagePath: c.OutputPackagePath,
 		Params:            method.ParamsRequired,
-		ConvFunction:      true,
+		Generated:         true,
 	})
 	if err != nil {
 		return nil, err
@@ -56,12 +86,13 @@ func parseMethod(ctx *context, c *Converter, fn *types.Func, rawMethod RawLines)
 		Definition:  def,
 		Common:      c.Common,
 		Fields:      map[string]*FieldMapping{},
+		Location:    rawMethod.Location,
 		EnumMapping: &EnumMapping{Map: map[string]string{}},
 	}
 
 	for _, value := range rawMethod.Lines {
 		if err := parseMethodLine(ctx, c, m, value); err != nil {
-			return m, formatLineError(rawMethod, fn.String(), value, err) // TODO get method type
+			return m, formatLineError(rawMethod, obj.String(), value, err)
 		}
 	}
 	return m, nil
@@ -85,7 +116,7 @@ func parseMethodLine(ctx *context, c *Converter, m *Method, value string) (err e
 			opts := &method.ParseOpts{
 				ErrorPrefix:       "error parsing type",
 				OutputPackagePath: c.OutputPackagePath,
-				Converter:         c.Type,
+				Converter:         c.typeForMethod(),
 				Params:            method.ParamsOptional,
 				AllowTypeParams:   true,
 			}
@@ -128,7 +159,7 @@ func parseMethodLine(ctx *context, c *Converter, m *Method, value string) (err e
 		opts := &method.ParseOpts{
 			ErrorPrefix:       "error parsing type",
 			OutputPackagePath: c.OutputPackagePath,
-			Converter:         c.Type,
+			Converter:         c.typeForMethod(),
 			Params:            method.ParamsOptional,
 			AllowTypeParams:   true,
 		}

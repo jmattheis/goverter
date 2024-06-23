@@ -30,7 +30,7 @@ input:
         )
 error: |-
     error parsing 'goverter:enum:transform' at
-        @workdir/input.go:12:5
+        @workdir/input.go:12
         func (github.com/jmattheis/goverter/execution.Converter).Convert(github.com/jmattheis/goverter/execution/input.Color) github.com/jmattheis/goverter/execution/output.Color
 
     transformer "not-existing" does not exist
