@@ -36,7 +36,7 @@ error: |-
 
     | github.com/jmattheis/goverter/execution/input.Color
     |
-    |      | constant: 3
+    |      | Gray(3)
     |      |
     source.Gray
     target.@error

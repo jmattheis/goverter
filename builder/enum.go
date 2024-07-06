@@ -42,8 +42,8 @@ func (*Enum) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, sou
 		return nil, nil, err
 	}
 
+	sourceTargetMapping := map[interface{}]enumMapping{}
 	for _, sourceName := range sourceEnum.SortedMembers() {
-		value := sourceEnum.Members[sourceName]
 		delete(definedKeys, sourceName)
 
 		targetName, ok := ctx.Conf.EnumMapping.Map[sourceName]
@@ -59,14 +59,33 @@ func (*Enum) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, sou
 		body, err := caseAction(gen, ctx, nameVar, target, targetEnum, targetName, sourceID, path)
 		if err != nil {
 			return nil, nil, err.Lift(&Path{
-				SourceType: fmt.Sprint("constant: ", value),
+				SourceType: fmtEnumValue(sourceEnum, sourceName),
 				SourceID:   sourceName,
 				Prefix:     ".",
 				TargetID:   targetName,
 				TargetType: "???",
 			})
 		}
-		cases = append(cases, jen.Case(sourceQual).Add(body))
+
+		sourceValue := sourceEnum.Members[sourceName]
+		if previous, ok := sourceTargetMapping[sourceValue]; ok {
+			if enumTargetMismatches(previous, targetEnum, targetName) {
+				return nil, nil, enumTargetMismatchError(targetEnum, sourceName, targetName, previous, sourceValue).Lift(&Path{
+					SourceType: fmtEnumValue(sourceEnum, sourceName),
+					SourceID:   sourceName,
+					Prefix:     ".",
+					TargetID:   targetName,
+					TargetType: fmtEnumValue(targetEnum, targetName),
+				})
+			} else {
+				cases = append(cases, jen.Comment(fmt.Sprintf("Skipped %s -> %s because it duplicates %s -> %s",
+					fmtEnumValue(sourceEnum, sourceName), fmtEnumValue(targetEnum, targetName),
+					fmtEnumValue(sourceEnum, previous.Source), fmtEnumValue(targetEnum, previous.Target))))
+			}
+		} else {
+			sourceTargetMapping[sourceValue] = enumMapping{Source: sourceName, Target: targetName}
+			cases = append(cases, jen.Case(sourceQual).Add(body))
+		}
 	}
 
 	enumUnknown := ctx.Conf.Common.Enum.Unknown
@@ -148,4 +167,39 @@ func executeTransformers(transformers []config.ConfiguredTransformer, source, ta
 		}
 	}
 	return transformerMapping, nil
+}
+
+func enumTargetMismatches(previous enumMapping, targetEnum *xtype.Enum, targetName string) bool {
+	if !config.IsEnumAction(targetName) && !config.IsEnumAction(previous.Target) {
+		return targetEnum.Members[previous.Target] != targetEnum.Members[targetName]
+	}
+	return targetName != previous.Target
+}
+
+func enumTargetMismatchError(targetEnum *xtype.Enum, sourceName, targetName string, previous enumMapping, sourceValue interface{}) *Error {
+	return NewError(fmt.Sprintf(`Detected multiple enum source members with the same value but different target values/actions.
+    %s(%v) -> %s
+    %s(%v) -> %s
+
+Explicitly define what the correct mapping is. E.g. by adding
+    goverter:enum:map %s %s
+    goverter:enum:map %s %s
+
+See https://goverter.jmattheis.de/guide/enum#mapping-enum-keys`,
+		previous.Source, sourceValue, fmtEnumValue(targetEnum, previous.Target),
+		sourceName, sourceValue, fmtEnumValue(targetEnum, targetName),
+		previous.Source, previous.Target,
+		sourceName, previous.Target))
+}
+
+func fmtEnumValue(targetEnum *xtype.Enum, targetName string) string {
+	if config.IsEnumAction(targetName) {
+		return fmt.Sprintf("%s(action)", targetName)
+	}
+	return fmt.Sprintf("%s(%v)", targetName, targetEnum.Members[targetName])
+}
+
+type enumMapping struct {
+	Target string
+	Source string
 }
