@@ -20,8 +20,10 @@ success:
         	if source != nil {
         		mapStringPInt = make(map[string]*int, len(source))
         		for key, value := range source {
-        			pInt := value
-        			mapStringPInt[key] = &pInt
+        			if value != *new(int) {
+        				pInt := value
+        				mapStringPInt[key] = &pInt
+        			}
         		}
         	}
         	return mapStringPInt

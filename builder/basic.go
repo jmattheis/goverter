@@ -1,6 +1,8 @@
 package builder
 
 import (
+	"fmt"
+
 	"github.com/dave/jennifer/jen"
 	"github.com/jmattheis/goverter/xtype"
 )
@@ -55,5 +57,12 @@ func (*BasicTargetPointerRule) Build(gen Generator, ctx *MethodContext, sourceID
 }
 
 func (b *BasicTargetPointerRule) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, sourceID *xtype.JenID, source, target *xtype.Type, errPath ErrorPath) ([]jen.Code, *Error) {
-	return AssignByBuild(b, gen, ctx, assignTo, sourceID, source, target, errPath)
+	stmt := []jen.Code{}
+	generated, err := AssignByBuild(b, gen, ctx, assignTo, sourceID, source, target, errPath)
+	zeroValueForType := fmt.Sprintf("*new(%s)", source.T.String())
+	stmt = append(stmt, jen.If(jen.Id(sourceID.Code.GoString()).Op("!=").Id(zeroValueForType).Block(
+		generated...,
+	)))
+
+	return stmt, err
 }

@@ -90,8 +90,10 @@ success:
         	var fmtfuncAPIPerson execution.APIPerson
         	fmtfuncAPIPerson.ID = source.ID
         	fmtfuncAPIPerson.MiddleName = execution.SQLStringToPString(source.MiddleName)
-        	pString := source.Name
-        	fmtfuncAPIPerson.FirstName = &pString
+        	if source.Name != *new(string) {
+        		pString := source.Name
+        		fmtfuncAPIPerson.FirstName = &pString
+        	}
         	if source.Friends != nil {
         		fmtfuncAPIPerson.Friends = make([]execution.APIPerson, len(source.Friends))
         		for i := 0; i < len(source.Friends); i++ {

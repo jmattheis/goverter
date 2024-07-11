@@ -31,10 +31,14 @@ success:
 
         func (c *ConverterImpl) Convert(source execution.Input) execution.Output {
         	var structsOutput execution.Output
-        	pStructsID := execution.ID(source.ID)
-        	structsOutput.ID = &pStructsID
-        	pString := source.Name
-        	structsOutput.Name = &pString
+        	if source.ID != *new(string) {
+        		pStructsID := execution.ID(source.ID)
+        		structsOutput.ID = &pStructsID
+        	}
+        	if source.Name != *new(string) {
+        		pString := source.Name
+        		structsOutput.Name = &pString
+        	}
         	if source.Age != nil {
         		xint := *source.Age
         		structsOutput.Age = &xint
