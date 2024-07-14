@@ -24,7 +24,6 @@ linters:
         - unused
         - whitespace
     disable:
-        - goerr113
         - errcheck
         - revive
         - funlen
@@ -36,14 +35,12 @@ linters:
         - godox
         - gomnd
         - lll
-        - maligned
         - nestif
         - nlreturn
         - noctx
         - testpackage
         - wsl
         - ineffassign
-        - interfacer
 
 linters-settings:
     gofumpt:

@@ -10,7 +10,6 @@ input:
         // goverter:converter
         // goverter:enum:unknown @panic
         type Converter interface {
-            // goverter:enum:map Gray Oops
             Convert(input.Color) output.Color
         }
     input/enum.go: |
@@ -19,33 +18,41 @@ input:
         type Color int
 
         const (
+            Default = Gray
             Green Color = 1
-            Gray  Color = 3
+            Gray  Color = 2
         )
     output/enum.go: |
         package output
 
         type Color string
         const (
+            Default = Green
             Green Color = "green"
+            Gray  Color = "gray"
         )
 error: |-
     Error while creating converter method:
-        @workdir/input.go:12
+        @workdir/input.go:11
         func (github.com/jmattheis/goverter/execution.Converter).Convert(github.com/jmattheis/goverter/execution/input.Color) github.com/jmattheis/goverter/execution/output.Color
 
     | github.com/jmattheis/goverter/execution/input.Color
     |
-    |      | Gray(3)
+    |      | Gray(2)
     |      |
     source.Gray
-    target.Oops
+    target.Gray
     |      |
-    |      | ???
+    |      | Gray(gray)
     |
     | github.com/jmattheis/goverter/execution/output.Color
 
-    Enum Oops does not exist on
-        github.com/jmattheis/goverter/execution/output.Color
+    Detected multiple enum source members with the same value but different target values/actions.
+        Default(2) -> Default(green)
+        Gray(2) -> Gray(gray)
 
-    See https://goverter.jmattheis.de/guide/enum
+    Explicitly define what the correct mapping is. E.g. by adding
+        goverter:enum:map Default Default
+        goverter:enum:map Gray Default
+
+    See https://goverter.jmattheis.de/guide/enum#mapping-enum-keys
