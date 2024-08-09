@@ -8,6 +8,12 @@ import GH from './GH.vue';
 
 - tbd
 
+## v1.5.1
+
+- Prevent duplicated enum cases. <GH issue="150" pr="154"/>
+- Enable [`enum`](/reference/enum.md) by default when using
+  [`variables`](/reference/variables.md). <GH pr="155"/>
+
 ## v1.5.0
 
 - Add two input-output formats. See
