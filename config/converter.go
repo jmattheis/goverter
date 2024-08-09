@@ -109,10 +109,11 @@ func parseConverter(ctx *context, rawConverter *RawConverter, global RawLines) (
 
 func initConverter(loader *pkgload.PackageLoader, rawConverter *RawConverter) (*Converter, error) {
 	c := &Converter{
-		FileName: rawConverter.FileName,
-		Package:  rawConverter.PackagePath,
-		Methods:  map[string]*Method{},
-		Location: rawConverter.Converter.Location,
+		FileName:        rawConverter.FileName,
+		Package:         rawConverter.PackagePath,
+		Methods:         map[string]*Method{},
+		Location:        rawConverter.Converter.Location,
+		ConverterConfig: DefaultConfigVariables,
 	}
 
 	if rawConverter.InterfaceName != "" {
