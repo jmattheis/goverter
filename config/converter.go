@@ -122,15 +122,12 @@ func initConverter(loader *pkgload.PackageLoader, rawConverter *RawConverter) (*
 			return nil, err
 		}
 
-		c.OutputFile = "./generated/generated.go"
-		c.OutputPackageName = "generated"
 		c.typ = v.Type()
 		c.Name = rawConverter.InterfaceName + "Impl"
-		c.OutputFormat = FormatStruct
 		return c, nil
 	}
 
-	c.OutputFormat = FormatVariable
+	c.ConverterConfig = DefaultConfigVariables
 	c.OutputFile = defaultOutputFile(rawConverter.FileName)
 	c.OutputPackageName = rawConverter.PackageName
 	c.OutputPackagePath = rawConverter.PackagePath
