@@ -109,11 +109,10 @@ func parseConverter(ctx *context, rawConverter *RawConverter, global RawLines) (
 
 func initConverter(loader *pkgload.PackageLoader, rawConverter *RawConverter) (*Converter, error) {
 	c := &Converter{
-		FileName:        rawConverter.FileName,
-		Package:         rawConverter.PackagePath,
-		Methods:         map[string]*Method{},
-		Location:        rawConverter.Converter.Location,
-		ConverterConfig: DefaultConfigVariables,
+		FileName: rawConverter.FileName,
+		Package:  rawConverter.PackagePath,
+		Methods:  map[string]*Method{},
+		Location: rawConverter.Converter.Location,
 	}
 
 	if rawConverter.InterfaceName != "" {
@@ -123,15 +122,12 @@ func initConverter(loader *pkgload.PackageLoader, rawConverter *RawConverter) (*
 			return nil, err
 		}
 
-		c.OutputFile = "./generated/generated.go"
-		c.OutputPackageName = "generated"
 		c.typ = v.Type()
 		c.Name = rawConverter.InterfaceName + "Impl"
-		c.OutputFormat = FormatStruct
 		return c, nil
 	}
 
-	c.OutputFormat = FormatVariable
+	c.ConverterConfig = DefaultConfigVariables
 	c.OutputFile = defaultOutputFile(rawConverter.FileName)
 	c.OutputPackageName = rawConverter.PackageName
 	c.OutputPackagePath = rawConverter.PackagePath
