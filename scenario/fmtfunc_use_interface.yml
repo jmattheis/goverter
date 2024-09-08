@@ -27,5 +27,8 @@ error: |-
 
     error parsing type:
         func github.com/jmattheis/goverter/execution.Custom(c github.com/jmattheis/goverter/execution.Converter, s string) uint
+            [source] github.com/jmattheis/goverter/execution.Converter
+            [source] string
+            [target] uint
 
-    must have one parameter
+    must have only one source param

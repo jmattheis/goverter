@@ -10,6 +10,8 @@ error: |-
     Error while creating converter method:
         @workdir/input.go:5
         func (github.com/jmattheis/goverter/execution.Converter).ConvertString(source func() string) func() string
+            [source] func() string
+            [target] func() string
 
     | func() string
     |

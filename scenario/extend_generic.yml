@@ -20,5 +20,7 @@ error: |-
 
     error parsing type:
         func github.com/jmattheis/goverter/execution.Extend[T any](T) int
+            [source] T
+            [target] int
 
     must not be generic

@@ -24,6 +24,8 @@ error: |-
     Error while creating converter method:
         @workdir/input.go:6
         func (github.com/jmattheis/goverter/execution.Converter).ConvertPerson(source github.com/jmattheis/goverter/execution.Person) github.com/jmattheis/goverter/execution.APIPerson
+            [source] github.com/jmattheis/goverter/execution.Person
+            [target] github.com/jmattheis/goverter/execution.APIPerson
 
     | github.com/jmattheis/goverter/execution.Person
     |
@@ -38,5 +40,7 @@ error: |-
 
     Error using method:
         func github.com/jmattheis/goverter/execution.ToFullName(input *github.com/jmattheis/goverter/execution.Person) string
+            [source] *github.com/jmattheis/goverter/execution.Person
+            [target] string
 
     Method source type mismatches with conversion source: *github.com/jmattheis/goverter/execution.Person != github.com/jmattheis/goverter/execution.Person

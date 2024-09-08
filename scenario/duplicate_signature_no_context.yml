@@ -1,0 +1,31 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        type Converter interface {
+            Convert(source Input) Output
+            Convert2(source Input) Output
+        }
+
+        type Input struct {
+            ID int
+            Age int
+        }
+        type Output struct {
+            ID int
+            Age string
+        }
+error: |-
+    Overlapping signatures found. All sources and contexts of this method
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+            [source] github.com/jmattheis/goverter/execution.Input
+            [target] github.com/jmattheis/goverter/execution.Output
+
+    are contained in method
+        func (github.com/jmattheis/goverter/execution.Converter).Convert2(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+            [source] github.com/jmattheis/goverter/execution.Input
+            [target] github.com/jmattheis/goverter/execution.Output
+
+    Goverter doesn't know which method to use when all contexts of the second method are available.
+    Remove one of the methods to prevent this ambiguity.

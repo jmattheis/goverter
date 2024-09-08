@@ -18,6 +18,8 @@ error: |-
     Error while creating converter method:
         @workdir/input.go:5
         func (github.com/jmattheis/goverter/execution.Converter).AToB(github.com/jmattheis/goverter/execution.A) github.com/jmattheis/goverter/execution.B
+            [source] github.com/jmattheis/goverter/execution.A
+            [target] github.com/jmattheis/goverter/execution.B
 
     | github.com/jmattheis/goverter/execution.A
     |

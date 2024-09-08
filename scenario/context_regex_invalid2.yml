@@ -1,0 +1,25 @@
+input:
+    input.go: |
+        package example
+
+        // goverter:converter
+        // goverter:arg:context:regex abc abc
+        // goverter:extend DoLookup
+        type Converter interface {
+            Convert(source []string, test map[string]Output) []Output
+        }
+
+        func DoLookup(id string, test map[string]Output) Output {
+            return test[id]
+        }
+
+        type Output struct {
+            Name string
+            Age int
+        }
+error: |-
+    error parsing 'goverter:arg:context:regex' at
+        @workdir/input.go:6
+        github.com/jmattheis/goverter/execution.Converter
+
+    must have one value but got 2: "abc abc"

@@ -16,5 +16,6 @@ error: |-
 
     error parsing type:
         func github.com/jmattheis/goverter/execution.HelloWorld() int
+            [target] int
 
-    must have at least one parameter
+    must have at least one source param

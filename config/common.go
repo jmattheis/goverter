@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"regexp"
 
 	"github.com/jmattheis/goverter/enum"
 )
@@ -16,6 +17,7 @@ type Common struct {
 	SkipCopySameType                   bool
 	UseZeroValueOnPointerInconsistency bool
 	UseUnderlyingTypeMethods           bool
+	ArgContextRegex                    *regexp.Regexp
 	Enum                               enum.Config
 }
 
@@ -48,6 +50,8 @@ func parseCommon(c *Common, cmd, rest string) (fieldSetting bool, err error) {
 		c.UseUnderlyingTypeMethods, err = parseBool(rest)
 	case "enum":
 		c.Enum.Enabled, err = parseBool(rest)
+	case "arg:context:regex":
+		c.ArgContextRegex, err = parseRegex(rest)
 	case "enum:unknown":
 		c.Enum.Unknown, err = parseString(rest)
 		if err == nil && IsEnumAction(c.Enum.Unknown) {

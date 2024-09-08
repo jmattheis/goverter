@@ -23,6 +23,8 @@ error: |-
     Error while creating converter method:
         @workdir/input.go:6
         func (github.com/jmattheis/goverter/execution.Converter).Convert(github.com/jmattheis/goverter/execution.Person) github.com/jmattheis/goverter/execution.FlatPerson
+            [source] github.com/jmattheis/goverter/execution.Person
+            [target] github.com/jmattheis/goverter/execution.FlatPerson
 
     | github.com/jmattheis/goverter/execution.Person
     |

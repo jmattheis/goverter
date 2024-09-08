@@ -22,6 +22,8 @@ error: |-
     Error while creating converter method:
         @workdir/input.go:7
         func (github.com/jmattheis/goverter/execution.Converter).Convert(github.com/jmattheis/goverter/execution.SqlColor) github.com/jmattheis/goverter/execution.Color
+            [source] github.com/jmattheis/goverter/execution.SqlColor
+            [target] github.com/jmattheis/goverter/execution.Color
 
     | github.com/jmattheis/goverter/execution.SqlColor
     |

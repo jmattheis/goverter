@@ -21,6 +21,8 @@ error: |-
     Error while creating converter method:
         @workdir/input.go:6
         func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+            [source] github.com/jmattheis/goverter/execution.Input
+            [target] github.com/jmattheis/goverter/execution.Output
 
     | github.com/jmattheis/goverter/execution.Input
     |
@@ -31,5 +33,7 @@ error: |-
 
     Error using method:
         func github.com/jmattheis/goverter/execution.NewOutput(string) github.com/jmattheis/goverter/execution.Output
+            [source] string
+            [target] github.com/jmattheis/goverter/execution.Output
 
     Method source type mismatches with conversion source: string != github.com/jmattheis/goverter/execution.Input

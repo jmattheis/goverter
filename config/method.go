@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"go/types"
+	"regexp"
 	"strings"
 
 	"github.com/jmattheis/goverter/method"
@@ -12,6 +13,8 @@ const (
 	configMap     = "map"
 	configDefault = "default"
 )
+
+var StructMethodContextRegex = regexp.MustCompile(".*")
 
 type Method struct {
 	*method.Definition
@@ -51,7 +54,7 @@ func parseMethods(ctx *context, rawConverter *RawConverter, c *Converter) error 
 			if err != nil {
 				return err
 			}
-			c.Methods[fun.Name()] = def
+			c.Methods = append(c.Methods, def)
 		}
 		return nil
 	}
@@ -64,26 +67,13 @@ func parseMethods(ctx *context, rawConverter *RawConverter, c *Converter) error 
 		if err != nil {
 			return err
 		}
-		c.Methods[fun.Name()] = def
+		c.Methods = append(c.Methods, def)
 	}
 	return nil
 }
 
 func parseMethod(ctx *context, c *Converter, obj types.Object, rawMethod RawLines) (*Method, error) {
-	def, err := method.Parse(obj, &method.ParseOpts{
-		ErrorPrefix:       "error parsing converter method",
-		Location:          rawMethod.Location,
-		Converter:         nil,
-		OutputPackagePath: c.OutputPackagePath,
-		Params:            method.ParamsRequired,
-		Generated:         true,
-	})
-	if err != nil {
-		return nil, err
-	}
-
 	m := &Method{
-		Definition:  def,
 		Common:      c.Common,
 		Fields:      map[string]*FieldMapping{},
 		Location:    rawMethod.Location,
@@ -95,7 +85,20 @@ func parseMethod(ctx *context, c *Converter, obj types.Object, rawMethod RawLine
 			return m, formatLineError(rawMethod, obj.String(), value, err)
 		}
 	}
-	return m, nil
+
+	def, err := method.Parse(obj, &method.ParseOpts{
+		ErrorPrefix:       "error parsing converter method",
+		Location:          rawMethod.Location,
+		Converter:         nil,
+		OutputPackagePath: c.OutputPackagePath,
+		Params:            method.ParamsRequired,
+		ContextMatch:      m.ArgContextRegex,
+		Generated:         true,
+	})
+
+	m.Definition = def
+
+	return m, err
 }
 
 func parseMethodLine(ctx *context, c *Converter, m *Method, value string) (err error) {
@@ -119,6 +122,7 @@ func parseMethodLine(ctx *context, c *Converter, m *Method, value string) (err e
 				Converter:         c.typeForMethod(),
 				Params:            method.ParamsOptional,
 				AllowTypeParams:   true,
+				ContextMatch:      m.ArgContextRegex,
 			}
 			f.Function, err = ctx.Loader.GetOne(c.Package, custom, opts)
 		}
@@ -162,6 +166,7 @@ func parseMethodLine(ctx *context, c *Converter, m *Method, value string) (err e
 			Converter:         c.typeForMethod(),
 			Params:            method.ParamsOptional,
 			AllowTypeParams:   true,
+			ContextMatch:      m.ArgContextRegex,
 		}
 		m.Constructor, err = ctx.Loader.GetOne(c.Package, rest, opts)
 	default:

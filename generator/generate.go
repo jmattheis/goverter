@@ -47,7 +47,10 @@ func Generate(converters []*config.Converter, c Config) (map[string][]byte, erro
 }
 
 func generateConverter(converter *config.Converter, c Config, f *jen.File, n *namer.Namer) error {
-	gen := setupGenerator(converter, n)
+	gen, err := setupGenerator(converter, n)
+	if err != nil {
+		return err
+	}
 
 	if err := validateMethods(gen.lookup); err != nil {
 		return err
