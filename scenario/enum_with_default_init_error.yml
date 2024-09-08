@@ -31,6 +31,8 @@ error: |-
     Error while creating converter method:
         @workdir/input.go:12
         func (github.com/jmattheis/goverter/execution.Converter).Convert(github.com/jmattheis/goverter/execution/input.Color) (github.com/jmattheis/goverter/execution/output.Color, error)
+            [source] github.com/jmattheis/goverter/execution/input.Color
+            [target] github.com/jmattheis/goverter/execution/output.Color
 
     | github.com/jmattheis/goverter/execution/input.Color
     |
@@ -41,5 +43,6 @@ error: |-
 
     Error using method:
         func github.com/jmattheis/goverter/execution.DefaultColor() bool
+            [target] bool
 
     Method return type mismatches with target: bool != github.com/jmattheis/goverter/execution/output.Color

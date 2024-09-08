@@ -16,5 +16,8 @@ error: |-
 
     error parsing type:
         func github.com/jmattheis/goverter/execution.HelloWorld(int, int) int
+            [source] int
+            [source] int
+            [target] int
 
-    first parameter must be of type github.com/jmattheis/goverter/execution.Converter but was int when having two parameters
+    must have only one source param

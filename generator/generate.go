@@ -38,7 +38,7 @@ func Generate(converters []*config.Converter, c Config) (map[string][]byte, erro
 			return nil, err
 		}
 
-		if err := generateConverter(converter, c, jenFile, n); err != nil {
+		if err := generateConverter(converter, jenFile, n); err != nil {
 			return nil, err
 		}
 	}
@@ -46,8 +46,11 @@ func Generate(converters []*config.Converter, c Config) (map[string][]byte, erro
 	return manager.renderFiles()
 }
 
-func generateConverter(converter *config.Converter, c Config, f *jen.File, n *namer.Namer) error {
-	gen := setupGenerator(converter, n)
+func generateConverter(converter *config.Converter, f *jen.File, n *namer.Namer) error {
+	gen, err := setupGenerator(converter, n)
+	if err != nil {
+		return err
+	}
 
 	if err := validateMethods(gen.lookup); err != nil {
 		return err

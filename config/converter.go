@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"go/types"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"github.com/jmattheis/goverter/enum"
@@ -23,16 +24,21 @@ const (
 	FormatFunction Format = "function"
 )
 
+var DefaultCommon = Common{
+	Enum:            enum.Config{Enabled: true},
+	ArgContextRegex: regexp.MustCompile("^ctx|^context"),
+}
+
 var DefaultConfigInterface = ConverterConfig{
 	OutputFile:        "./generated/generated.go",
 	OutputPackageName: "generated",
-	Common:            Common{Enum: enum.Config{Enabled: true}},
+	Common:            DefaultCommon,
 	OutputFormat:      FormatStruct,
 }
 
 var DefaultConfigVariables = ConverterConfig{
 	OutputFormat: FormatVariable,
-	Common:       Common{Enum: enum.Config{Enabled: true}},
+	Common:       DefaultCommon,
 }
 
 type Converter struct {
@@ -40,7 +46,7 @@ type Converter struct {
 	Package  string
 	FileName string
 	typ      types.Type
-	Methods  map[string]*Method
+	Methods  []*Method
 
 	Location string
 }
@@ -111,7 +117,6 @@ func initConverter(loader *pkgload.PackageLoader, rawConverter *RawConverter) (*
 	c := &Converter{
 		FileName: rawConverter.FileName,
 		Package:  rawConverter.PackagePath,
-		Methods:  map[string]*Method{},
 		Location: rawConverter.Converter.Location,
 	}
 
@@ -201,6 +206,7 @@ func parseConverterLine(ctx *context, c *Converter, value string) (err error) {
 				OutputPackagePath: c.OutputPackagePath,
 				Converter:         c.typeForMethod(),
 				Params:            method.ParamsRequired,
+				ContextMatch:      c.ArgContextRegex,
 			}
 			var defs []*method.Definition
 			defs, err = ctx.Loader.GetMatching(c.Package, name, opts)

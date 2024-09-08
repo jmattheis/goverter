@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/dave/jennifer/jen"
+	"github.com/jmattheis/goverter/config"
 	"github.com/jmattheis/goverter/method"
 	"github.com/jmattheis/goverter/xtype"
 )
@@ -239,6 +240,7 @@ func mapField(
 			OutputPackagePath: ctx.OutputPackagePath,
 			ErrorPrefix:       "Error parsing struct method",
 			Params:            method.ParamsNone,
+			ContextMatch:      config.StructMethodContextRegex,
 			CustomCall:        nextIDCode,
 		})
 		if err != nil {

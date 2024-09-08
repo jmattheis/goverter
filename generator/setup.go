@@ -4,21 +4,25 @@ import (
 	"github.com/jmattheis/goverter/config"
 	"github.com/jmattheis/goverter/method"
 	"github.com/jmattheis/goverter/namer"
-	"github.com/jmattheis/goverter/xtype"
 )
 
-func setupGenerator(converter *config.Converter, n *namer.Namer) *generator {
-	extend := map[xtype.Signature]*method.Definition{}
+func setupGenerator(converter *config.Converter, n *namer.Namer) (*generator, error) {
+	extend := method.NewIndex[method.Definition]()
 	for _, def := range converter.Extend {
-		extend[def.Signature()] = def
+		extend.RegisterOverrideOverlapping(def, def)
 	}
 
-	lookup := map[xtype.Signature]*generatedMethod{}
-	for _, method := range converter.Methods {
-		lookup[method.Definition.Signature()] = &generatedMethod{
-			Method:   method,
+	var err error
+	lookup := method.NewIndex[generatedMethod]()
+	for _, cMethod := range converter.Methods {
+		gen := &generatedMethod{
+			Method:   cMethod,
 			Dirty:    true,
 			Explicit: true,
+		}
+		gen.IndexID, err = lookup.Register(gen, gen.Definition)
+		if err != nil {
+			return nil, err
 		}
 	}
 
@@ -29,5 +33,5 @@ func setupGenerator(converter *config.Converter, n *namer.Namer) *generator {
 		extend: extend,
 	}
 
-	return &gen
+	return &gen, nil
 }

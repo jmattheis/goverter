@@ -17,14 +17,32 @@ type Definition struct {
 	CustomCall *jen.Statement
 }
 
-func (m *Definition) Signature() xtype.Signature {
-	return xtype.SignatureOf(m.Parameters.Source, m.Parameters.Target)
+type Parameters struct {
+	TypeParams bool
+
+	Source       *xtype.Type
+	MultiSources []*xtype.Type
+	Target       *xtype.Type
+	Context      map[string]*xtype.Type
+
+	Signature xtype.Signature
+
+	RawArgs []Arg
+
+	ReturnError bool
 }
 
-type Parameters struct {
-	ReturnError          bool
-	SelfAsFirstParameter bool
-	TypeParams           bool
-	Source               *xtype.Type
-	Target               *xtype.Type
+type Arg struct {
+	Name string
+	Use  ArgUse
+	Type *xtype.Type
 }
+
+type ArgUse string
+
+const (
+	ArgUseSource      ArgUse = "source"
+	ArgUseMultiSource ArgUse = "additional-source"
+	ArgUseInterface   ArgUse = "interface"
+	ArgUseContext     ArgUse = "context"
+)

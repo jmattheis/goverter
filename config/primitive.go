@@ -2,6 +2,7 @@ package config
 
 import (
 	"fmt"
+	"regexp"
 	"strings"
 )
 
@@ -43,4 +44,12 @@ func parseString(remaining string) (string, error) {
 		return "", fmt.Errorf("must have one value but got %d: %#v", len(fields), remaining)
 	}
 	return fields[0], nil
+}
+
+func parseRegex(remaining string) (*regexp.Regexp, error) {
+	value, err := parseString(remaining)
+	if err != nil {
+		return nil, err
+	}
+	return regexp.Compile(value)
 }

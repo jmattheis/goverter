@@ -16,5 +16,6 @@ error: |-
 
     error parsing type:
         func github.com/jmattheis/goverter/execution.HelloWorld(int) (int, int)
+            [source] int
 
     must have type error as second return but has: int

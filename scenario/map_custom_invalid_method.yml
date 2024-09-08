@@ -15,7 +15,7 @@ input:
             Name string
             Age int
         }
-        func ExtendMethod(converter, source string) int {
+        func ExtendMethod(c Converter, converter, source string) int {
             return 1
         }
 error: |-
@@ -24,6 +24,10 @@ error: |-
         func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
 
     error parsing type:
-        func github.com/jmattheis/goverter/execution.ExtendMethod(converter string, source string) int
+        func github.com/jmattheis/goverter/execution.ExtendMethod(c github.com/jmattheis/goverter/execution.Converter, converter string, source string) int
+            [context] github.com/jmattheis/goverter/execution.Converter
+            [source] string
+            [source] string
+            [target] int
 
-    first parameter must be of type github.com/jmattheis/goverter/execution.Converter but was string when having two parameters
+    must have only one source param

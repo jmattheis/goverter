@@ -15,5 +15,6 @@ error: |-
 
     error parsing type:
         func github.com/jmattheis/goverter/execution.HelloWorld(int)
+            [source] int
 
     must have one or two returns

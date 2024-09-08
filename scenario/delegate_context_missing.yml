@@ -1,0 +1,40 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        // goverter:extend InputToOutput
+        type Converter interface {
+            Convert(source Input) Output
+        }
+
+        type Input struct {
+            ID int
+            Age int
+        }
+        type Output struct {
+            ID int
+            Age string
+        }
+        func InputToOutput(source Input, ctx string) Output {
+            return Output{}
+        }
+error: |-
+    Error while creating converter method:
+        @workdir/input.go:6
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+            [source] github.com/jmattheis/goverter/execution.Input
+            [target] github.com/jmattheis/goverter/execution.Output
+
+    | github.com/jmattheis/goverter/execution.Input
+    |
+    source
+    target
+    |
+    | github.com/jmattheis/goverter/execution.Output
+
+    Found custom functions(s) converting github.com/jmattheis/goverter/execution.Input to github.com/jmattheis/goverter/execution.Output
+    but not all required context params are available in the current method.
+
+    func github.com/jmattheis/goverter/execution.InputToOutput(source github.com/jmattheis/goverter/execution.Input, ctx string) github.com/jmattheis/goverter/execution.Output:
+        [missing]   string

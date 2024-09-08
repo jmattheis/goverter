@@ -1,0 +1,17 @@
+input:
+    input.go: |
+        package fmtfunc
+
+        // goverter:converter
+        type Converter interface {
+            ConvertPerson(c Converter, source int) int
+        }
+error: |-
+    error parsing converter method:
+        @workdir/input.go:5
+        func (github.com/jmattheis/goverter/execution.Converter).ConvertPerson(c github.com/jmattheis/goverter/execution.Converter, source int) int
+            [source] github.com/jmattheis/goverter/execution.Converter
+            [source] int
+            [target] int
+
+    must have only one source param

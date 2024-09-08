@@ -64,8 +64,13 @@ type MethodContext struct {
 	OutputPackagePath string
 	Signature         xtype.Signature
 	TargetType        *xtype.Type
-	HasMethod         func(types.Type, types.Type) bool
+	HasMethod         func(*MethodContext, types.Type, types.Type) bool
 	SeenNamed         map[string]struct{}
+
+	IndexID method.IndexID
+	Context map[string]*xtype.JenID
+
+	AvailableContext map[string]*xtype.Type
 
 	TargetVar *jen.Statement
 }

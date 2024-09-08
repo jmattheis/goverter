@@ -10,5 +10,6 @@ error: |-
     error parsing converter method:
         @workdir/input.go:5
         func (github.com/jmattheis/goverter/execution.Converter).Convert(map[string]int)
+            [source] map[string]int
 
     must have one or two returns

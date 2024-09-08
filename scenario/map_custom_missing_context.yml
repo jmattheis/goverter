@@ -25,5 +25,9 @@ error: |-
 
     error parsing type:
         func github.com/jmattheis/goverter/execution.ExtendMethod(x int, source int, target int) int
+            [source] int
+            [source] int
+            [source] int
+            [target] int
 
-    must have one or two parameters
+    must have only one source param

@@ -26,6 +26,8 @@ error: |-
     Error while creating converter method:
         @workdir/input.go:6
         func (github.com/jmattheis/goverter/execution.Converter).Convert2(github.com/jmattheis/goverter/execution.Input2) github.com/jmattheis/goverter/execution.Output2
+            [source] github.com/jmattheis/goverter/execution.Input2
+            [target] github.com/jmattheis/goverter/execution.Output2
 
     | github.com/jmattheis/goverter/execution.Input2
     |
