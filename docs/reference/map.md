@@ -1,6 +1,6 @@
 # Setting: map
 
-`map [SOURCE-PATH] TARGET [| METHOD]` can be defined as [method comment](./define-settings.md#method).
+`map [SOURCE-PATH] TARGET [| FUNC]` can be defined as [method comment](./define-settings.md#method).
 
 ## map SOURCE-FIELD TARGET 
 
@@ -48,15 +48,15 @@ struct. See [`autoMap`](./autoMap.md) for the invert operation of this.
 <<< @../../example/map-identity/generated/generated.go [generated/generated.go]
 :::
 
-## map [SOURCE-PATH] TARGET | METHOD
+## map [SOURCE-PATH] TARGET | [PACKAGE:]FUNC
 
-For `[SOURCE-PATH] TARGET` you can use everything that's described above in this document. 
+For `[SOURCE-PATH] TARGET` you can use everything that's described above in
+this document. The `FUNC` may have the signatures described in [Signature:
+Optional Source](./signature.md#signature-optional-source).
 
-The `METHOD` may be everything supported in [extend Signatures](./extend.md#signatures)
-with the addition that the source parameter is optional.
-
-Similarely to the extend setting you can reference external packages in
-`METHOD` by separating the package path and method name by `:`.
+You can optionally define the `PACKAGE` where `FUNC` is located by separating
+the `PACKAGE` and `FUNC` with a `:`(colon). If no package is defined, then the
+package of the conversion method is used.
 
 ::: code-group
 <<< @../../example/map-custom/input.go

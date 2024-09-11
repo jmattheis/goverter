@@ -6,7 +6,10 @@ import GH from './GH.vue';
 
 ## unreleased
 
-- tbd
+- Support for passing context to functions.
+  - See [Guide: Pass context to functions](./guide/context.md)
+  - See [Reference: Signature](./reference/signature.md)
+  - Add [`arg:context:regex`](./reference/arg.md)
 
 ## v1.5.1
 

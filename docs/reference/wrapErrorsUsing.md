@@ -1,9 +1,9 @@
 # Setting: wrapErrorsUsing
 
-`wrapErrorsUsing [PACKAGE]` is a [boolean setting](./define-settings.md#boolean)
-and can be defined as [CLI argument](./define-settings.md#cli),
-[conversion comment](./define-settings.md#conversion) or
-[method comment](./define-settings.md#method). This setting is
+`wrapErrorsUsing [PACKAGE]` can be defined as [CLI
+argument](./define-settings.md#cli), [conversion
+comment](./define-settings.md#conversion) or [method
+comment](./define-settings.md#method). This setting is
 [inheritable](./define-settings.md#inheritance).
 
 Enable `wrapErrorsUsing` to instruct goverter to wrap errors returned by
