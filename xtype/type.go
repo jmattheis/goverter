@@ -114,8 +114,7 @@ func (t Type) findAllFields(path []string, name, targetTag, matchTag string, ign
 		exact := obj.Name() == name
 		if exact || (ignoreCase && strings.EqualFold(obj.Name(), name)) {
 			// exact match takes precedence over case-insensitive match
-			newPath := append(path, obj.Name())
-			f := &StructField{Path: newPath, Type: TypeOf(obj.Type()).inStruct(&t, obj.Name())}
+			f := &StructField{Path: append(path, obj.Name()), Type: TypeOf(obj.Type()).inStruct(&t, obj.Name())}
 			if exact {
 				return f
 			}
