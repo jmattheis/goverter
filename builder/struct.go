@@ -39,6 +39,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 	usedSourceID := false
 	for i := 0; i < target.StructType.NumFields(); i++ {
 		targetField := target.StructType.Field(i)
+		targetTag := target.StructType.Tag(i)
 		delete(definedFields, targetField.Name())
 
 		fieldMapping := ctx.Field(target, targetField.Name())
@@ -65,7 +66,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 
 		if fieldMapping.Function == nil {
 			usedSourceID = true
-			nextID, nextSource, mapStmt, lift, skip, err := mapField(gen, ctx, targetField, sourceID, source, target, additionalFieldSources, targetFieldPath)
+			nextID, nextSource, mapStmt, lift, skip, err := mapField(gen, ctx, targetField, targetTag, ctx.Conf.MatchTag, sourceID, source, target, additionalFieldSources, targetFieldPath)
 			if skip {
 				continue
 			}
@@ -87,7 +88,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 			var functionCallSourceType *xtype.Type
 			if def.Source != nil {
 				usedSourceID = true
-				nextID, nextSource, mapStmt, mapLift, _, err := mapField(gen, ctx, targetField, sourceID, source, target, additionalFieldSources, targetFieldPath)
+				nextID, nextSource, mapStmt, mapLift, _, err := mapField(gen, ctx, targetField, targetTag, ctx.Conf.MatchTag, sourceID, source, target, additionalFieldSources, targetFieldPath)
 				if err != nil {
 					return nil, nil, err
 				}
@@ -141,6 +142,8 @@ func mapField(
 	gen Generator,
 	ctx *MethodContext,
 	targetField *types.Var,
+	targetTag string,
+	matchTag string,
 	sourceID *xtype.JenID,
 	source, target *xtype.Type,
 	additionalFieldSources []xtype.FieldSources,
@@ -162,7 +165,7 @@ func mapField(
 
 	var path []string
 	if pathString == "" {
-		sourceMatch, err := xtype.FindField(targetField.Name(), ctx.Conf.MatchIgnoreCase, source, additionalFieldSources)
+		sourceMatch, err := xtype.FindField(targetField.Name(), targetTag, matchTag, ctx.Conf.MatchIgnoreCase, source, additionalFieldSources)
 		if err != nil {
 			cause := fmt.Sprintf("Cannot match the target field with the source entry: %s.", err.Error())
 			skip := false
@@ -205,7 +208,7 @@ func mapField(
 				SourceType: "???",
 			}).Lift(lift...)
 		}
-		sourceMatch, err := xtype.FindExactField(nextSource, path[i])
+		sourceMatch, err := xtype.FindExactField(nextSource, path[i], targetTag, ctx.Conf.MatchTag)
 		if err == nil {
 			nextSource = sourceMatch.Type
 			nextIDCode = nextIDCode.Clone().Dot(sourceMatch.Name)
@@ -298,7 +301,7 @@ func parseAutoMap(ctx *MethodContext, source *xtype.Type) ([]xtype.FieldSources,
 		lift := []*Path{}
 		path := strings.Split(field, ".")
 		for _, part := range path {
-			field, err := xtype.FindExactField(innerSource, part)
+			field, err := xtype.FindExactField(innerSource, part, "", "")
 			if err != nil {
 				return nil, NewError(err.Error()).Lift(&Path{
 					Prefix:     ".",
@@ -328,7 +331,7 @@ func parseAutoMap(ctx *MethodContext, source *xtype.Type) ([]xtype.FieldSources,
 	return fieldSources, nil
 }
 
-func unexportedStructError(targetField, sourceType, targetType string) string {
+func unexportedStructError(targetField, _, _ string) string {
 	return fmt.Sprintf(`Cannot set value for unexported field "%s".
 
 See https://goverter.jmattheis.de/guide/unexported-field`, targetField)
