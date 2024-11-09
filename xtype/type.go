@@ -218,6 +218,8 @@ func parseTagName(matchTag, tag string) string {
 				return x
 			}
 		}
+		// Fall back to json.
+		entry = reflect.StructTag(tag).Get("json")
 	}
 
 	// Standard tags.
