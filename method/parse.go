@@ -63,18 +63,8 @@ func Parse(obj types.Object, opts *ParseOpts) (*Definition, error) {
 	if !ok {
 		return nil, formatErr("must be a function")
 	}
-	if sig.Results().Len() == 0 || sig.Results().Len() > 2 {
-		return nil, formatErr("must have one or two returns")
-	}
-	if sig.Results().Len() == 2 {
-		if i, ok := sig.Results().At(1).Type().(*types.Named); ok && i.Obj().Name() == "error" && i.Obj().Pkg() == nil {
-			methodDef.ReturnError = true
-		} else {
-			return nil, formatErr("must have type error as second return but has: " + sig.Results().At(1).Type().String())
-		}
-	}
+	resultsLen := sig.Results().Len()
 
-	methodDef.Target = xtype.TypeOf(sig.Results().At(0).Type())
 	methodDef.TypeParams = sig.TypeParams().Len() > 0
 
 	if pkg := obj.Pkg(); pkg != nil {
@@ -87,22 +77,40 @@ func Parse(obj types.Object, opts *ParseOpts) (*Definition, error) {
 			Type: xtype.TypeOf(sig.Params().At(i).Type()),
 		}
 
-		if types.Identical(arg.Type.T, opts.Converter) {
+		switch {
+		case types.Identical(arg.Type.T, opts.Converter):
 			arg.Use = ArgUseInterface
-		} else if opts.ContextMatch.MatchString(arg.Name) {
+		case arg.Name == "target" && resultsLen == 0:
+			return nil, formatErr("This signature (no args with name target and error result) is reserved for https://github.com/jmattheis/goverter/issues/147")
+		case arg.Name == "target" && resultsLen == 1 && isError(sig.Results().At(0)):
+			return nil, formatErr("This signature (one arg with name target and error result) is reserved for https://github.com/jmattheis/goverter/issues/147")
+		case opts.ContextMatch.MatchString(arg.Name):
 			methodDef.Context[arg.Type.String] = arg.Type
 			arg.Use = ArgUseContext
-		} else if methodDef.Source == nil {
+		case methodDef.Source == nil:
 			arg.Use = ArgUseSource
 			methodDef.Source = arg.Type
 			methodDef.Signature.Source = methodDef.Source.String
-		} else {
+		default:
 			arg.Use = ArgUseMultiSource
 			methodDef.MultiSources = append(methodDef.MultiSources, arg.Type)
 		}
 
 		methodDef.RawArgs = append(methodDef.RawArgs, arg)
 	}
+
+	if resultsLen == 0 || resultsLen > 2 {
+		return nil, formatErr("must have one or two returns")
+	}
+	if resultsLen == 2 {
+		if isError(sig.Results().At(1)) {
+			methodDef.ReturnError = true
+		} else {
+			return nil, formatErr("must have type error as second return but has: " + sig.Results().At(1).Type().String())
+		}
+	}
+
+	methodDef.Target = xtype.TypeOf(sig.Results().At(0).Type())
 
 	if methodDef.TypeParams && !opts.AllowTypeParams {
 		return nil, formatErr("must not be generic")
@@ -120,6 +128,11 @@ func Parse(obj types.Object, opts *ParseOpts) (*Definition, error) {
 	methodDef.Signature.Target = methodDef.Target.String
 
 	return methodDef, nil
+}
+
+func isError(obj *types.Var) bool {
+	t, ok := obj.Type().(*types.Named)
+	return ok && t.Obj().Name() == "error" && t.Obj().Pkg() == nil
 }
 
 func (def *Definition) ArgDebug(indent string) string {

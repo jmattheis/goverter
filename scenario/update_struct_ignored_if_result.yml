@@ -1,0 +1,27 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        type Converter interface {
+            Convert(source Input, target *Target) Output
+        }
+
+        type Target struct {
+            A string
+        }
+        type Input struct {
+            A string
+        }
+        type Output struct {
+            A string
+        }
+error: |-
+    error parsing converter method:
+        @workdir/input.go:5
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input, target *github.com/jmattheis/goverter/execution.Target) github.com/jmattheis/goverter/execution.Output
+            [source] github.com/jmattheis/goverter/execution.Input
+            [source] *github.com/jmattheis/goverter/execution.Target
+            [target] github.com/jmattheis/goverter/execution.Output
+
+    must have only one source param

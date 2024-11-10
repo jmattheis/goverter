@@ -174,6 +174,8 @@ func (g *generator) buildMethod(genMethod *generatedMethod, context map[string]*
 			args = append(args, jen.Id(name).Add(arg.Type.TypeAsJen()))
 		case method.ArgUseMultiSource:
 			panic("multi source aren't supported right now. https://github.com/jmattheis/goverter/issues/143")
+		case method.ArgUseTarget:
+			panic("unreachable")
 		}
 	}
 
@@ -263,6 +265,8 @@ func (g *generator) CallMethod(
 			params = append(params, sourceID.Code)
 		case method.ArgUseMultiSource:
 			panic("multi source aren't supported right now. https://github.com/jmattheis/goverter/issues/143")
+		case method.ArgUseTarget:
+			panic("unreachable")
 		}
 	}
 
@@ -355,6 +359,8 @@ func (g *generator) delegateMethod(
 			params = append(params, sourceID.Code)
 		case method.ArgUseMultiSource:
 			panic("not supported atm")
+		case method.ArgUseTarget:
+			panic("unreachable")
 		}
 	}
 
