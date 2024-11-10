@@ -47,6 +47,8 @@ type Type struct {
 	SignatureType *types.Signature
 	Func          bool
 	FuncType      *types.Func
+	Chan          bool
+	ChanType      *types.Chan
 
 	enum *Enum
 }
@@ -248,6 +250,9 @@ func applyTo(rt *Type, t types.Type) {
 	case *types.Signature:
 		rt.Signature = true
 		rt.SignatureType = value
+	case *types.Chan:
+		rt.Chan = true
+		rt.ChanType = value
 	case *types.TypeParam:
 		// ignore
 	default:
@@ -295,6 +300,9 @@ func (t *Type) asID(seeNamed, escapeReserved bool) string {
 	}
 	if t.Struct {
 		return "unnamed"
+	}
+	if t.Chan {
+		return "chan"
 	}
 	return "unknown"
 }

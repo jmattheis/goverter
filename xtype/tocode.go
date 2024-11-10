@@ -27,8 +27,27 @@ func toCode(t types.Type) *jen.Statement {
 		return toCodeInterface(cast)
 	case *types.Signature:
 		return jen.Func().Add(toCodeSignature(cast))
+	case *types.Chan:
+		return toChan(cast)
 	}
 	panic("unsupported type " + t.String())
+}
+
+func toChan(t *types.Chan) *jen.Statement {
+	switch t.Dir() {
+	case types.SendRecv:
+		// chan (<-chan T) requires parentheses
+		if c, _ := t.Elem().(*types.Chan); c != nil && c.Dir() == types.RecvOnly {
+			return jen.Chan().Parens(toCode(t.Elem()))
+		}
+		return jen.Chan().Add(toCode(t.Elem()))
+	case types.SendOnly:
+		return jen.Chan().Op("<-").Add(toCode(t.Elem()))
+	case types.RecvOnly:
+		return jen.Op("<-").Chan().Add(toCode(t.Elem()))
+	default:
+		panic("unsupported channel " + t.String())
+	}
 }
 
 func toCodeInterface(t *types.Interface) *jen.Statement {
