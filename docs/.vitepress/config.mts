@@ -50,6 +50,7 @@ export default defineConfig({
           { text: "Installation", link: "/guide/install" },
           { text: "Input/Output formats", link: "/guide/format" },
           { text: "Convert Enums", link: "/guide/enum" },
+          { text: "Pass context to functions", link: "/guide/context" },
           {
             text: "Output into same package",
             link: "/guide/output-same-package",
@@ -69,54 +70,73 @@ export default defineConfig({
       {
         text: "Reference",
         items: [
-          { text: "Command Line Interface", link: "/reference/cli" },
           {
             text: "Build Constraint/Tags",
             link: "/reference/build-constraint",
           },
-          { text: "Define Settings", link: "/reference/define-settings" },
-          { text: "Settings Overview", link: "/reference/settings" },
-          { text: "Enums", link: "/reference/enum" },
+          { text: "Command Line Interface", link: "/reference/cli" },
+          { text: "Signature", link: "/reference/signature" },
           {
-            text: "Conversion",
-            collapsed: true,
+            text: "Settings",
             items: [
-              { text: "converter", link: "/reference/converter" },
-              { text: "extend", link: "/reference/extend" },
-              { text: "name", link: "/reference/name" },
-              { text: "output", link: "/reference/output" },
-              { text: "struct", link: "/reference/struct" },
-              { text: "variables", link: "/reference/variables" },
-            ],
-          },
-          {
-            text: "Method",
-            collapsed: true,
-            items: [
-              { text: "autoMap", link: "/reference/autoMap" },
-              { text: "default", link: "/reference/default" },
-              { text: "ignore", link: "/reference/ignore" },
-              { text: "map", link: "/reference/map" },
-            ],
-          },
-          {
-            text: "Method (inheritable)",
-            collapsed: true,
-            items: [
-              { text: "ignoreMissing", link: "/reference/ignoreMissing" },
-              { text: "ignoreUnexported", link: "/reference/ignoreUnexported" },
-              { text: "matchIgnoreCase", link: "/reference/matchIgnoreCase" },
-              { text: "skipCopySameType", link: "/reference/skipCopySameType" },
+              { text: "Overview", link: "/reference/settings" },
+              { text: "Define Settings", link: "/reference/define-settings" },
+              { text: "Enums", link: "/reference/enum" },
               {
-                text: "useUnderlyingTypeMethods",
-                link: "/reference/useUnderlyingTypeMethods",
+                text: "Conversion",
+                collapsed: true,
+                items: [
+                  { text: "converter", link: "/reference/converter" },
+                  { text: "extend", link: "/reference/extend" },
+                  { text: "name", link: "/reference/name" },
+                  { text: "output", link: "/reference/output" },
+                  { text: "struct", link: "/reference/struct" },
+                  { text: "variables", link: "/reference/variables" },
+                ],
               },
               {
-                text: "useZeroValueOnPointerInconsistency",
-                link: "/reference/useZeroValueOnPointerInconsistency",
+                text: "Method",
+                collapsed: true,
+                items: [
+                  { text: "autoMap", link: "/reference/autoMap" },
+                  { text: "default", link: "/reference/default" },
+                  { text: "ignore", link: "/reference/ignore" },
+                  { text: "map", link: "/reference/map" },
+                ],
               },
-              { text: "wrapErrors", link: "/reference/wrapErrors" },
-              { text: "wrapErrorsUsing", link: "/reference/wrapErrorsUsing" },
+              {
+                text: "Method (inheritable)",
+                collapsed: true,
+                items: [
+                  { text: "arg", link: "/reference/arg" },
+                  { text: "ignoreMissing", link: "/reference/ignoreMissing" },
+                  {
+                    text: "ignoreUnexported",
+                    link: "/reference/ignoreUnexported",
+                  },
+                  {
+                    text: "matchIgnoreCase",
+                    link: "/reference/matchIgnoreCase",
+                  },
+                  {
+                    text: "skipCopySameType",
+                    link: "/reference/skipCopySameType",
+                  },
+                  {
+                    text: "useUnderlyingTypeMethods",
+                    link: "/reference/useUnderlyingTypeMethods",
+                  },
+                  {
+                    text: "useZeroValueOnPointerInconsistency",
+                    link: "/reference/useZeroValueOnPointerInconsistency",
+                  },
+                  { text: "wrapErrors", link: "/reference/wrapErrors" },
+                  {
+                    text: "wrapErrorsUsing",
+                    link: "/reference/wrapErrorsUsing",
+                  },
+                ],
+              },
             ],
           },
         ],

@@ -25,5 +25,6 @@ error: |-
 
     error parsing type:
         func github.com/jmattheis/goverter/execution.PluckAgeInt(source github.com/jmattheis/goverter/execution.Input) (int, int, int)
+            [source] github.com/jmattheis/goverter/execution.Input
 
     must have one or two returns

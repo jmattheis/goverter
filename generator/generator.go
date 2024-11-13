@@ -20,15 +20,17 @@ type generatedMethod struct {
 	Explicit bool
 	Dirty    bool
 
-	OriginPath []xtype.Signature
+	OriginPath []method.IndexID
 	Jen        jen.Code
+
+	IndexID method.IndexID
 }
 
 type generator struct {
 	namer  *namer.Namer
 	conf   *config.Converter
-	lookup map[xtype.Signature]*generatedMethod
-	extend map[xtype.Signature]*method.Definition
+	lookup *method.Index[generatedMethod]
+	extend *method.Index[method.Definition]
 }
 
 func (g *generator) buildMethods(f *jen.File) error {
@@ -43,8 +45,10 @@ func (g *generator) buildMethods(f *jen.File) error {
 
 func (g *generator) buildDirtyMethods() error {
 	genMethods := []*generatedMethod{}
-	for _, genMethod := range g.lookup {
-		genMethods = append(genMethods, genMethod)
+	for _, exactHits := range g.lookup.Exact {
+		for _, hit := range exactHits {
+			genMethods = append(genMethods, hit.Item)
+		}
 	}
 	sort.Slice(genMethods, func(i, j int) bool {
 		return genMethods[i].Name < genMethods[j].Name
@@ -54,7 +58,7 @@ func (g *generator) buildDirtyMethods() error {
 			continue
 		}
 		genMethod.Dirty = false
-		err := g.buildMethod(genMethod)
+		err := g.buildMethod(genMethod, genMethod.Context)
 		if err != nil {
 			err = err.Lift(&builder.Path{
 				SourceID:   "source",
@@ -62,16 +66,18 @@ func (g *generator) buildDirtyMethods() error {
 				SourceType: genMethod.Source.String,
 				TargetType: genMethod.Target.String,
 			})
-			return fmt.Errorf("Error while creating converter method:\n    %s\n    %s\n\n%s", genMethod.Location, genMethod.ID, builder.ToString(err))
+			return fmt.Errorf("Error while creating converter method:\n    %s\n    %s%s\n\n%s", genMethod.Location, genMethod.ID, genMethod.Definition.ArgDebug("        "), builder.ToString(err))
 		}
 	}
 	return nil
 }
 
 func (g *generator) anyDirty() bool {
-	for _, genMethod := range g.lookup {
-		if genMethod.Dirty {
-			return true
+	for _, hits := range g.lookup.Exact {
+		for _, hit := range hits {
+			if hit.Item.Dirty {
+				return true
+			}
 		}
 	}
 	return false
@@ -79,8 +85,10 @@ func (g *generator) anyDirty() bool {
 
 func (g *generator) appendGenerated(f *jen.File) {
 	genMethods := []*generatedMethod{}
-	for _, genMethod := range g.lookup {
-		genMethods = append(genMethods, genMethod)
+	for _, hits := range g.lookup.Exact {
+		for _, hit := range hits {
+			genMethods = append(genMethods, hit.Item)
+		}
 	}
 	sort.Slice(genMethods, func(i, j int) bool {
 		return genMethods[i].Name < genMethods[j].Name
@@ -120,8 +128,8 @@ func (g *generator) appendGenerated(f *jen.File) {
 	}
 }
 
-func (g *generator) buildMethod(genMethod *generatedMethod) *builder.Error {
-	sourceID := jen.Id("source")
+func (g *generator) buildMethod(genMethod *generatedMethod, context map[string]*xtype.Type) *builder.Error {
+	var sourceID *xtype.JenID
 	source := genMethod.Source
 	target := genMethod.Target
 
@@ -139,22 +147,49 @@ func (g *generator) buildMethod(genMethod *generatedMethod) *builder.Error {
 		Namer:             namer.New(),
 		Conf:              genMethod.Method,
 		FieldsTarget:      fieldsTarget,
+		AvailableContext:  context,
 		SeenNamed:         map[string]struct{}{},
 		TargetType:        genMethod.Target,
-		Signature:         genMethod.Signature(),
+		Context:           map[string]*xtype.JenID{},
+		IndexID:           genMethod.IndexID,
+		Signature:         genMethod.Signature,
 		HasMethod:         g.hasMethod,
 		OutputPackagePath: g.conf.OutputPackagePath,
 	}
 
+	args := []jen.Code{}
+
+	for _, arg := range genMethod.RawArgs {
+		switch arg.Use {
+		case method.ArgUseInterface:
+			panic("hopefully unreachable")
+		case method.ArgUseContext:
+			name := ctx.Name("context")
+			ctx.Context[arg.Type.String] = xtype.VariableID(jen.Id(name))
+			args = append(args, jen.Id(name).Add(arg.Type.TypeAsJen()))
+		case method.ArgUseSource:
+			name := ctx.Name("source")
+
+			sourceID = xtype.VariableID(jen.Id(name))
+			args = append(args, jen.Id(name).Add(arg.Type.TypeAsJen()))
+		case method.ArgUseMultiSource:
+			panic("multi source aren't supported right now. https://github.com/jmattheis/goverter/issues/143")
+		case method.ArgUseTarget:
+			panic("unreachable")
+		}
+	}
+
 	var funcBlock []jen.Code
-	if def, ok := g.extend[ctx.Signature]; ok {
-		jenReturn, err := g.delegateMethod(ctx, def, xtype.VariableID(sourceID.Clone()))
+	if def, err := g.extend.Get(ctx.Signature, context); def != nil {
+		jenReturn, err := g.delegateMethod(ctx, def, sourceID)
 		if err != nil {
 			return err
 		}
 		funcBlock = []jen.Code{jenReturn}
+	} else if err != nil {
+		return builder.NewError(err.Error())
 	} else {
-		stmt, newID, err := g.buildNoLookup(ctx, xtype.VariableID(sourceID.Clone()), source, target, nil)
+		stmt, newID, err := g.buildNoLookup(ctx, sourceID, source, target, nil)
 		if err != nil {
 			return err
 		}
@@ -166,8 +201,7 @@ func (g *generator) buildMethod(genMethod *generatedMethod) *builder.Error {
 		funcBlock = append(stmt, jen.Return(ret...))
 	}
 
-	genMethod.Jen = jen.Params(jen.Id("source").Add(source.TypeAsJen())).Params(returns...).
-		Block(funcBlock...)
+	genMethod.Jen = jen.Params(args...).Params(returns...).Block(funcBlock...)
 
 	return nil
 }
@@ -208,20 +242,31 @@ func (g *generator) CallMethod(
 	errPath builder.ErrorPath,
 ) ([]jen.Code, *xtype.JenID, *builder.Error) {
 	params := []jen.Code{}
-	if definition.SelfAsFirstParameter {
-		params = append(params, jen.Id(xtype.ThisVar))
-	}
-
 	formatErr := func(s string) *builder.Error {
-		return builder.NewError(fmt.Sprintf("Error using method:\n    %s\n\n%s", definition.ID, s))
+		return builder.NewError(fmt.Sprintf("Error using method:\n    %s%s\n\n%s", definition.ID, definition.ArgDebug("        "), s))
 	}
 
-	if definition.Source != nil {
-		params = append(params, sourceID.Code.Clone())
-
-		if !source.AssignableTo(definition.Source) && !definition.TypeParams {
-			cause := fmt.Sprintf("Method source type mismatches with conversion source: %s != %s", definition.Source.String, source.String)
-			return nil, nil, formatErr(cause)
+	for _, arg := range definition.RawArgs {
+		switch arg.Use {
+		case method.ArgUseInterface:
+			params = append(params, jen.Id(xtype.ThisVar))
+		case method.ArgUseContext:
+			if !g.requireContext(ctx, arg.Type) {
+				return nil, nil, formatErr("Could not satisfy all required context parameters:\n" + strings.Join(method.AvailableContextDebug(definition.Context, ctx.AvailableContext), "\n"))
+			}
+			if id, ok := ctx.Context[arg.Type.String]; ok {
+				params = append(params, id.Code.Clone())
+			}
+		case method.ArgUseSource:
+			if !source.AssignableTo(definition.Source) && !definition.TypeParams {
+				cause := fmt.Sprintf("Method source type mismatches with conversion source: %s != %s", definition.Source.String, source.String)
+				return nil, nil, formatErr(cause)
+			}
+			params = append(params, sourceID.Code)
+		case method.ArgUseMultiSource:
+			panic("multi source aren't supported right now. https://github.com/jmattheis/goverter/issues/143")
+		case method.ArgUseTarget:
+			panic("unreachable")
 		}
 	}
 
@@ -251,10 +296,10 @@ func (g *generator) CallMethod(
 }
 
 func (g *generator) ReturnError(ctx *builder.MethodContext, errPath builder.ErrorPath, id *jen.Statement) (jen.Code, bool) {
-	current := g.lookup[ctx.Signature]
+	current := g.lookup.ByID(ctx.IndexID)
 	if !ctx.Conf.ReturnError {
-		for _, path := range append([]xtype.Signature{ctx.Signature}, current.OriginPath...) {
-			check := g.lookup[path]
+		for _, path := range append([]method.IndexID{ctx.IndexID}, current.OriginPath...) {
+			check := g.lookup.ByID(path)
 			if check.Explicit && !check.ReturnError {
 				return nil, false
 			}
@@ -269,19 +314,57 @@ func (g *generator) ReturnError(ctx *builder.MethodContext, errPath builder.Erro
 	return jen.Return(ctx.TargetVar, g.wrap(ctx, errPath, id)), true
 }
 
+func (g *generator) requireContext(ctx *builder.MethodContext, need *xtype.Type) bool {
+	if _, ok := ctx.Context[need.String]; ok {
+		return true
+	}
+
+	current := g.lookup.ByID(ctx.IndexID)
+	for _, path := range append([]method.IndexID{ctx.IndexID}, current.OriginPath...) {
+		check := g.lookup.ByID(path)
+
+		if _, ok := check.Context[need.String]; ok {
+			continue
+		}
+
+		if check.Explicit {
+			return false
+		}
+
+		check.Context[need.String] = need
+		check.RawArgs = append(check.RawArgs, method.Arg{
+			Name: "",
+			Use:  method.ArgUseContext,
+			Type: need,
+		})
+		check.Dirty = true
+	}
+	return true
+}
+
 func (g *generator) delegateMethod(
 	ctx *builder.MethodContext,
 	delegateTo *method.Definition,
 	sourceID *xtype.JenID,
 ) (*jen.Statement, *builder.Error) {
 	params := []jen.Code{}
-	if delegateTo.SelfAsFirstParameter {
-		params = append(params, jen.Id(xtype.ThisVar))
+
+	for _, arg := range delegateTo.RawArgs {
+		switch arg.Use {
+		case method.ArgUseInterface:
+			params = append(params, jen.Id(xtype.ThisVar))
+		case method.ArgUseContext:
+			params = append(params, ctx.Context[arg.Type.String].Code.Clone())
+		case method.ArgUseSource:
+			params = append(params, sourceID.Code)
+		case method.ArgUseMultiSource:
+			panic("not supported atm")
+		case method.ArgUseTarget:
+			panic("unreachable")
+		}
 	}
-	if sourceID != nil {
-		params = append(params, sourceID.Code.Clone())
-	}
-	current := g.lookup[ctx.Signature]
+
+	current := g.lookup.ByID(ctx.IndexID)
 
 	returns := []jen.Code{g.qualMethod(delegateTo).Call(params...)}
 
@@ -316,12 +399,9 @@ func (g *generator) Build(
 	source, target *xtype.Type,
 	errPath builder.ErrorPath,
 ) ([]jen.Code, *xtype.JenID, *builder.Error) {
-	signature := xtype.SignatureOf(source, target)
-	if def, ok := g.extend[signature]; ok {
-		return g.CallMethod(ctx, def, sourceID, source, target, errPath)
-	}
-	if genMethod, ok := g.lookup[signature]; ok {
-		return g.CallMethod(ctx, genMethod.Definition, sourceID, source, target, errPath)
+	stmt, nextID, err := g.callExisting(ctx, sourceID, source, target, errPath)
+	if nextID != nil || err != nil {
+		return stmt, nextID, err
 	}
 
 	if g.shouldCreateSubMethod(ctx, source, target) {
@@ -339,12 +419,9 @@ func (g *generator) Assign(
 	source, target *xtype.Type,
 	errPath builder.ErrorPath,
 ) ([]jen.Code, *builder.Error) {
-	signature := xtype.SignatureOf(source, target)
-	if def, ok := g.extend[signature]; ok {
-		return builder.ToAssignable(assignTo)(g.CallMethod(ctx, def, sourceID, source, target, errPath))
-	}
-	if genMethod, ok := g.lookup[signature]; ok {
-		return builder.ToAssignable(assignTo)(g.CallMethod(ctx, genMethod.Definition, sourceID, source, target, errPath))
+	stmt, nextID, err := g.callExisting(ctx, sourceID, source, target, errPath)
+	if nextID != nil || err != nil {
+		return builder.ToAssignable(assignTo)(stmt, nextID, err)
 	}
 
 	if g.shouldCreateSubMethod(ctx, source, target) {
@@ -352,6 +429,26 @@ func (g *generator) Assign(
 	}
 
 	return g.assignNoLookup(ctx, assignTo, sourceID, source, target, errPath)
+}
+
+func (g generator) callExisting(
+	ctx *builder.MethodContext,
+	sourceID *xtype.JenID,
+	source, target *xtype.Type,
+	errPath builder.ErrorPath,
+) ([]jen.Code, *xtype.JenID, *builder.Error) {
+	signature := xtype.SignatureOf(source, target)
+	if def, err := g.extend.Get(signature, ctx.AvailableContext); def != nil {
+		return g.CallMethod(ctx, def, sourceID, source, target, errPath)
+	} else if err != nil {
+		return nil, nil, builder.NewError(err.Error())
+	}
+	if genMethod, err := g.lookup.Get(signature, ctx.AvailableContext); genMethod != nil {
+		return g.CallMethod(ctx, genMethod.Definition, sourceID, source, target, errPath)
+	} else if err != nil {
+		return nil, nil, builder.NewError(err.Error())
+	}
+	return nil, nil, nil
 }
 
 func (g *generator) shouldCreateSubMethod(ctx *builder.MethodContext, source, target *xtype.Type) bool {
@@ -368,7 +465,7 @@ func (g *generator) shouldCreateSubMethod(ctx *builder.MethodContext, source, ta
 	createSubMethod := false
 
 	if ctx.HasSeen(source) {
-		g.lookup[ctx.Signature].Dirty = true
+		g.lookup.ByID(ctx.IndexID).Dirty = true
 		createSubMethod = true
 	} else if !isCurrentPointerStructMethod {
 		switch {
@@ -391,12 +488,17 @@ func (g *generator) shouldCreateSubMethod(ctx *builder.MethodContext, source, ta
 }
 
 func (g *generator) createSubMethod(ctx *builder.MethodContext, sourceID *xtype.JenID, source, target *xtype.Type, errPAth builder.ErrorPath) ([]jen.Code, *xtype.JenID, *builder.Error) {
-	signature := xtype.SignatureOf(source, target)
-
 	name := g.namer.Name(source.UnescapedID() + "To" + strings.Title(target.UnescapedID()))
-	orig := g.lookup[ctx.Signature]
+	orig := g.lookup.ByID(ctx.IndexID)
 
-	path := append([]xtype.Signature{ctx.Signature}, orig.OriginPath...)
+	var args []method.Arg
+	args = append(args, method.Arg{
+		Name: "source",
+		Type: source,
+		Use:  method.ArgUseSource,
+	})
+
+	path := append([]method.IndexID{ctx.IndexID}, orig.OriginPath...)
 	genMethod := &generatedMethod{
 		OriginPath: path,
 		Method: &config.Method{
@@ -410,27 +512,27 @@ func (g *generator) createSubMethod(ctx *builder.MethodContext, sourceID *xtype.
 				Name:      name,
 				Generated: true,
 				Parameters: method.Parameters{
-					Source: xtype.TypeOf(source.T),
-					Target: xtype.TypeOf(target.T),
+					Source:    source,
+					RawArgs:   args,
+					Context:   map[string]*xtype.Type{},
+					Signature: xtype.SignatureOf(source, target),
+					Target:    target,
 				},
 			},
 		},
 	}
 
-	g.lookup[signature] = genMethod
-	if err := g.buildMethod(genMethod); err != nil {
+	genMethod.IndexID, _ = g.lookup.Register(genMethod, genMethod.Definition)
+
+	if err := g.buildMethod(genMethod, ctx.AvailableContext); err != nil {
 		return nil, nil, err
 	}
 	return g.CallMethod(ctx, genMethod.Definition, sourceID, source, target, errPAth)
 }
 
-func (g *generator) hasMethod(source, target types.Type) bool {
+func (g *generator) hasMethod(ctx *builder.MethodContext, source, target types.Type) bool {
 	signature := xtype.Signature{Source: source.String(), Target: target.String()}
-	_, ok := g.extend[signature]
-	if !ok {
-		_, ok = g.lookup[signature]
-	}
-	return ok
+	return g.extend.Has(signature) || g.lookup.Has(signature)
 }
 
 func (g *generator) getOverlappingStructDefinition(ctx *builder.MethodContext, source, target *xtype.Type) *builder.Error {
@@ -448,9 +550,9 @@ func (g *generator) getOverlappingStructDefinition(ctx *builder.MethodContext, s
 		if ctx.Signature == sig {
 			continue
 		}
-		if def, ok := g.lookup[sig]; ok && len(def.RawFieldSettings) > 0 {
+		if def, _ := g.lookup.Get(sig, ctx.AvailableContext); def != nil && len(def.RawFieldSettings) > 0 {
 			var toMethod string
-			if def, ok := g.lookup[ctx.Signature]; ok && def.Explicit {
+			if def, _ := g.lookup.Get(ctx.Signature, ctx.AvailableContext); def != nil && def.Explicit {
 				toMethod = fmt.Sprintf("to the %q method.", def.Name)
 			} else {
 				toMethod = fmt.Sprintf("to a newly created method with this signature:\n    func(%s) %s", source.String, target.String)

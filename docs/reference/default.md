@@ -1,15 +1,18 @@
 # Setting: default
 
-`default [PACKAGE:]METHOD` can be defined as [method
+`default [PACKAGE:]FUNC` can be defined as [method
 comment](./define-settings.md#method).
 
 By default the target object is initialized with [zero values | Go
 docs](https://go.dev/tour/basics/12). With `default` you can instruct Goverter
-to use `METHOD` as default target value or constructor for the target value.
+to use `FUNC` as default target value or constructor for the target value.
 
-The `METHOD` may be everything supported in [extend
-Signatures](./extend.md#signatures) with the addition that the source
-parameter is optional.
+The `FUNC` may have the signatures described in [Signature: Optional
+Source](./signature.md#signature-optional-source).
+
+You can optionally define the `PACKAGE` where `FUNC` is located by separating
+the `PACKAGE` and `FUNC` with a `:`(colon). If no package is defined, then the
+package of the conversion method is used.
 
 ::: code-group
 <<< @../../example/default/input.go

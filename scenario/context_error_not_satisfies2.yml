@@ -1,0 +1,52 @@
+input:
+    input.go: |
+        package example
+
+        // goverter:converter
+        // goverter:extend DoLookup
+        // goverter:extend DoOther
+        type Converter interface {
+            Convert(source []string, ctx map[string]int) []Output
+        }
+
+        func DoLookup(id string, ctx map[string]Output) Output {
+            return ctx[id]
+        }
+
+        func DoOther(id string, ctx map[string]string) Output {
+            return Output{}
+        }
+
+        type Output struct {
+            Name string
+            Age int
+        }
+error: |-
+    Error while creating converter method:
+        @workdir/input.go:7
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source []string, ctx map[string]int) []github.com/jmattheis/goverter/execution.Output
+            [source] []string
+            [context] map[string]int
+            [target] []github.com/jmattheis/goverter/execution.Output
+
+    | []string
+    |
+    |     | string
+    |     |
+    source[]
+    target[]
+    |     |
+    |     | github.com/jmattheis/goverter/execution.Output
+    |
+    | []github.com/jmattheis/goverter/execution.Output
+
+    Found custom functions(s) converting string to github.com/jmattheis/goverter/execution.Output
+    but not all required context params are available in the current method.
+
+    func github.com/jmattheis/goverter/execution.DoLookup(id string, ctx map[string]github.com/jmattheis/goverter/execution.Output) github.com/jmattheis/goverter/execution.Output:
+        [missing]   map[string]github.com/jmattheis/goverter/execution.Output
+        [unused]    map[string]int
+
+    func github.com/jmattheis/goverter/execution.DoOther(id string, ctx map[string]string) github.com/jmattheis/goverter/execution.Output:
+        [missing]   map[string]string
+        [unused]    map[string]int
