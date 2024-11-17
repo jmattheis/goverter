@@ -17,6 +17,7 @@ These settings can only be defined as [CLI argument](./define-settings.md#cli) o
 - [`output:file FILE` set the output directory for a converter](./output.md#output-file)
 - [`output:format FORMAT` set the output format](./output.md#output-format)
 - [`output:package [PACKAGE:]NAME` set the output package for a converter](./output.md#output-package)
+- [`output:raw CODE` add raw code to generated output](./output.md#output-raw-code)
 - [`struct:comment COMMENT` add comments to generated struct](./struct.md#struct-comment-comment)
 - [`variables` marker comment for variable blocks](./variables.md)
 

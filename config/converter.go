@@ -75,6 +75,7 @@ func (c *Converter) IDString() string {
 type ConverterConfig struct {
 	Common
 	Name              string
+	OutputRaw         []string
 	OutputFile        string
 	OutputPackagePath string
 	OutputPackageName string
@@ -159,6 +160,8 @@ func parseConverterLine(ctx *context, c *Converter, value string) (err error) {
 			return err
 		}
 		c.Name, err = parseString(rest)
+	case "output:raw":
+		c.OutputRaw = append(c.OutputRaw, rest)
 	case "output:file":
 		c.OutputFile, err = parseString(rest)
 	case "output:format":
