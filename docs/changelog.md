@@ -12,6 +12,7 @@ import GH from './GH.vue';
   - Add [`arg:context:regex`](./reference/arg.md)
 - Error on duplicated converter signatures. <GH issue="146" pr="166"/>
 - Fix panic when using `chan` in conversion functions. <GH issue="165" pr="167"/>
+- Add [`output:raw CODE`](./reference/output.md#output-raw-code) <GH issue="113" pr="168"/>
 
 ## v1.5.1
 

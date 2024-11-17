@@ -94,6 +94,10 @@ func (g *generator) appendGenerated(f *jen.File) {
 		return genMethods[i].Name < genMethods[j].Name
 	})
 
+	for _, raw := range g.conf.OutputRaw {
+		f.Id(raw)
+	}
+
 	if g.conf.OutputFormat == config.FormatStruct {
 		if len(g.conf.Comments) > 0 {
 			f.Comment(strings.Join(g.conf.Comments, "\n"))

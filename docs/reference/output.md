@@ -157,3 +157,16 @@ will create **generated/generated.go** starting with
 package mypackage
 // ...
 ```
+
+## output:raw CODE
+
+`output:raw CODE` can be defined as [CLI argument](./define-settings.md#cli) or
+[conversion comment](./define-settings.md#conversion).
+
+Add raw output to the generated file.
+
+::: details Example (click me)
+::: code-group
+<<< @../../example/output-raw/input.go
+<<< @../../example/output-raw/generated/generated.go [generated/generated.go]
+:::
