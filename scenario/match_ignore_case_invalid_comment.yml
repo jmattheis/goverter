@@ -12,4 +12,4 @@ error: |-
         @workdir/input.go:6
         func (github.com/jmattheis/goverter/execution.Converter).ConvertString(source string) string
 
-    invalid boolean value: 'a' must be one of ["yes" "no"]
+    invalid value: 'a' must be one of: yes, no
