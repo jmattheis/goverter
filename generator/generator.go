@@ -33,6 +33,14 @@ type generator struct {
 	extend *method.Index[method.Definition]
 }
 
+func (g *generator) getGenMethods() []*generatedMethod {
+	genMethods := g.lookup.GetAll()
+	sort.Slice(genMethods, func(i, j int) bool {
+		return genMethods[i].Name < genMethods[j].Name
+	})
+	return genMethods
+}
+
 func (g *generator) buildMethods(f *jen.File) error {
 	for g.anyDirty() {
 		if err := g.buildDirtyMethods(); err != nil {
@@ -44,16 +52,7 @@ func (g *generator) buildMethods(f *jen.File) error {
 }
 
 func (g *generator) buildDirtyMethods() error {
-	genMethods := []*generatedMethod{}
-	for _, exactHits := range g.lookup.Exact {
-		for _, hit := range exactHits {
-			genMethods = append(genMethods, hit.Item)
-		}
-	}
-	sort.Slice(genMethods, func(i, j int) bool {
-		return genMethods[i].Name < genMethods[j].Name
-	})
-	for _, genMethod := range genMethods {
+	for _, genMethod := range g.getGenMethods() {
 		if !genMethod.Dirty {
 			continue
 		}
@@ -73,27 +72,16 @@ func (g *generator) buildDirtyMethods() error {
 }
 
 func (g *generator) anyDirty() bool {
-	for _, hits := range g.lookup.Exact {
-		for _, hit := range hits {
-			if hit.Item.Dirty {
-				return true
-			}
+	for _, m := range g.getGenMethods() {
+		if m.Dirty {
+			return true
 		}
 	}
 	return false
 }
 
 func (g *generator) appendGenerated(f *jen.File) {
-	genMethods := []*generatedMethod{}
-	for _, hits := range g.lookup.Exact {
-		for _, hit := range hits {
-			genMethods = append(genMethods, hit.Item)
-		}
-	}
-	sort.Slice(genMethods, func(i, j int) bool {
-		return genMethods[i].Name < genMethods[j].Name
-	})
-
+	genMethods := g.getGenMethods()
 	for _, raw := range g.conf.OutputRaw {
 		f.Id(raw)
 	}
@@ -137,11 +125,6 @@ func (g *generator) buildMethod(genMethod *generatedMethod, context map[string]*
 	source := genMethod.Source
 	target := genMethod.Target
 
-	returns := []jen.Code{target.TypeAsJen()}
-	if genMethod.ReturnError {
-		returns = append(returns, jen.Id("error"))
-	}
-
 	fieldsTarget := genMethod.Target.String
 	if genMethod.Target.Pointer && genMethod.Target.PointerInner.Struct {
 		fieldsTarget = genMethod.Target.PointerInner.String
@@ -161,8 +144,8 @@ func (g *generator) buildMethod(genMethod *generatedMethod, context map[string]*
 		OutputPackagePath: g.conf.OutputPackagePath,
 	}
 
+	var targetAssign *jen.Statement
 	args := []jen.Code{}
-
 	for _, arg := range genMethod.RawArgs {
 		switch arg.Use {
 		case method.ArgUseInterface:
@@ -173,18 +156,38 @@ func (g *generator) buildMethod(genMethod *generatedMethod, context map[string]*
 			args = append(args, jen.Id(name).Add(arg.Type.TypeAsJen()))
 		case method.ArgUseSource:
 			name := ctx.Name("source")
-
 			sourceID = xtype.VariableID(jen.Id(name))
+			args = append(args, jen.Id(name).Add(arg.Type.TypeAsJen()))
+		case method.ArgUseTarget:
+			name := ctx.Name("target")
+			targetAssign = jen.Id(name)
 			args = append(args, jen.Id(name).Add(arg.Type.TypeAsJen()))
 		case method.ArgUseMultiSource:
 			panic("multi source aren't supported right now. https://github.com/jmattheis/goverter/issues/143")
-		case method.ArgUseTarget:
-			panic("unreachable")
 		}
 	}
 
+	var returns []jen.Code
+	if targetAssign == nil {
+		returns = append(returns, target.TypeAsJen())
+	}
+
+	if genMethod.ReturnError {
+		returns = append(returns, jen.Id("error"))
+	}
+
 	var funcBlock []jen.Code
-	if def, err := g.extend.Get(ctx.Signature, context); def != nil {
+	if targetAssign != nil {
+		var err *builder.Error
+		funcBlock, err = g.convertTo(ctx, builder.AssignOf(targetAssign), sourceID, source, target, nil)
+		if err != nil {
+			return err
+		}
+
+		if genMethod.ReturnError {
+			funcBlock = append(funcBlock, jen.Return().Nil())
+		}
+	} else if def, err := g.extend.Get(ctx.Signature, context); def != nil {
 		jenReturn, err := g.delegateMethod(ctx, def, sourceID)
 		if err != nil {
 			return err
@@ -236,6 +239,28 @@ func (g *generator) assignNoLookup(ctx *builder.MethodContext, assignTo *builder
 	}
 
 	return nil, typeMismatch(source, target)
+}
+
+func (g *generator) convertTo(ctx *builder.MethodContext, assignTo *builder.AssignTo, sourceID *xtype.JenID, source, target *xtype.Type, errPath builder.ErrorPath) ([]jen.Code, *builder.Error) {
+	if !target.Pointer || !target.PointerInner.Struct {
+		return nil, builder.NewError("target type must be a pointer struct for goverter:update signatures.")
+	}
+	sourcePointer := false
+	if !source.Struct {
+		if source.Pointer && source.PointerInner.Struct {
+			sourcePointer = true
+			source = source.PointerInner
+		} else {
+			return nil, builder.NewError("source type must be a struct or pointer struct for goverter:update signatures.")
+		}
+	}
+
+	var s builder.Struct
+	stmt, err := s.ConvertTo(g, ctx, assignTo, sourceID, source, target.PointerInner, errPath)
+	if sourcePointer {
+		stmt = []jen.Code{jen.If(sourceID.Code.Clone().Op("!=").Nil()).Block(stmt...)}
+	}
+	return stmt, err
 }
 
 func (g *generator) CallMethod(
@@ -314,8 +339,12 @@ func (g *generator) ReturnError(ctx *builder.MethodContext, errPath builder.Erro
 			}
 		}
 	}
-
-	return jen.Return(ctx.TargetVar, g.wrap(ctx, errPath, id)), true
+	returns := []jen.Code{}
+	if !current.UpdateTarget {
+		returns = append(returns, ctx.TargetVar)
+	}
+	returns = append(returns, g.wrap(ctx, errPath, id))
+	return jen.Return(returns...), true
 }
 
 func (g *generator) requireContext(ctx *builder.MethodContext, need *xtype.Type) bool {

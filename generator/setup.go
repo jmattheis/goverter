@@ -20,7 +20,11 @@ func setupGenerator(converter *config.Converter, n *namer.Namer) (*generator, er
 			Dirty:    true,
 			Explicit: true,
 		}
-		gen.IndexID, err = lookup.Register(gen, gen.Definition)
+		if gen.UpdateTarget {
+			gen.IndexID, err = lookup.RegisterUpdate(gen, gen.Definition)
+		} else {
+			gen.IndexID, err = lookup.Register(gen, gen.Definition)
+		}
 		if err != nil {
 			return nil, err
 		}

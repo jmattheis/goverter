@@ -10,7 +10,7 @@ type AssignTo struct {
 	Stmt *jen.Statement
 }
 
-func assignOf(s *jen.Statement) *AssignTo {
+func AssignOf(s *jen.Statement) *AssignTo {
 	return &AssignTo{Stmt: s}
 }
 
@@ -45,7 +45,7 @@ func BuildByAssign(b Builder, gen Generator, ctx *MethodContext, sourceID *xtype
 		return nil, nil, err
 	}
 
-	stmt, err := b.Assign(gen, ctx, assignOf(valueVar), sourceID, source, target, path)
+	stmt, err := b.Assign(gen, ctx, AssignOf(valueVar), sourceID, source, target, path)
 	if err != nil {
 		return nil, nil, err
 	}

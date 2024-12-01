@@ -29,7 +29,8 @@ type Parameters struct {
 
 	RawArgs []Arg
 
-	ReturnError bool
+	ReturnError  bool
+	UpdateTarget bool
 }
 
 type Arg struct {

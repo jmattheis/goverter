@@ -36,6 +36,7 @@ These settings can only be defined as [method comment](./define-settings.md#meth
   - [`map . TARGET` map the source type to the target field](./map.md#map-dot-target)
   - [`map [SOURCE-PATH] TARGET| FUNC` map the SOURCE-PATH to the TARGET field by
     using FUNC](./map.md#map-source-path-target-func)
+- [`update ARG` update fields on ARG](./update.md)
 
 
 ### Method (inheritable)

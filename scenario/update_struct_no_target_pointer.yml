@@ -1,0 +1,31 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:update target
+            Convert(source Input, target Target)
+        }
+
+        type Target struct {
+            A string
+        }
+        type Input struct {
+            A string
+        }
+error: |-
+    Error while creating converter method:
+        @workdir/input.go:6
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input, target github.com/jmattheis/goverter/execution.Target)
+            [source] github.com/jmattheis/goverter/execution.Input
+            [target] github.com/jmattheis/goverter/execution.Target
+
+    | github.com/jmattheis/goverter/execution.Input
+    |
+    source
+    target
+    |
+    | github.com/jmattheis/goverter/execution.Target
+
+    target type must be a pointer struct for goverter:update signatures.

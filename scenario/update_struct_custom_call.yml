@@ -5,11 +5,12 @@ input:
         // goverter:converter
         type Converter interface {
             // goverter:update target
-            Convert(source Input, target *Output)
+            // goverter:map A | strconv:Itoa
+            Convert(source Input, target *Output) error
         }
 
         type Input struct {
-            A string
+            A int
         }
         type Output struct {
             A string
@@ -20,10 +21,14 @@ success:
 
         package generated
 
-        import execution "github.com/jmattheis/goverter/execution"
+        import (
+        	execution "github.com/jmattheis/goverter/execution"
+        	"strconv"
+        )
 
         type ConverterImpl struct{}
 
-        func (c *ConverterImpl) Convert(source execution.Input, target *execution.Output) {
-        	target.A = source.A
+        func (c *ConverterImpl) Convert(source execution.Input, target *execution.Output) error {
+        	target.A = strconv.Itoa(source.A)
+        	return nil
         }

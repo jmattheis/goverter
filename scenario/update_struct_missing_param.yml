@@ -1,0 +1,27 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:update abc
+            Convert(source Input, target *Target) error
+        }
+
+        type Target struct {
+            A string
+        }
+        type Input struct {
+            A string
+        }
+        type Output struct {
+            A string
+        }
+error: |-
+    error parsing converter method:
+        @workdir/input.go:6
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input, target *github.com/jmattheis/goverter/execution.Target) error
+            [source] github.com/jmattheis/goverter/execution.Input
+            [source] *github.com/jmattheis/goverter/execution.Target
+
+    Argument "abc" must exist when using 'goverter:target abc'

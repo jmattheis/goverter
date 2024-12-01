@@ -30,8 +30,9 @@ type ParseOpts struct {
 
 	ContextMatch *regexp.Regexp
 
-	Generated  bool
-	CustomCall *jen.Statement
+	Generated   bool
+	CustomCall  *jen.Statement
+	UpdateParam string
 }
 
 // Parse parses an function into a Definition.
@@ -80,10 +81,19 @@ func Parse(obj types.Object, opts *ParseOpts) (*Definition, error) {
 		switch {
 		case types.Identical(arg.Type.T, opts.Converter):
 			arg.Use = ArgUseInterface
-		case arg.Name == "target" && resultsLen == 0:
-			return nil, formatErr("This signature (no args with name target and error result) is reserved for https://github.com/jmattheis/goverter/issues/147")
-		case arg.Name == "target" && resultsLen == 1 && isError(sig.Results().At(0)):
-			return nil, formatErr("This signature (one arg with name target and error result) is reserved for https://github.com/jmattheis/goverter/issues/147")
+		case opts.UpdateParam != "" && arg.Name == opts.UpdateParam:
+			arg.Use = ArgUseTarget
+			methodDef.Target = arg.Type
+			methodDef.UpdateTarget = true
+
+			switch {
+			case resultsLen == 0:
+				// okay nothing more
+			case resultsLen == 1 && isError(sig.Results().At(0)):
+				methodDef.ReturnError = true
+			default:
+				return nil, formatErr("The signature one non 'error' result or multiple results is not supported for goverter:update signatures.")
+			}
 		case opts.ContextMatch.MatchString(arg.Name):
 			methodDef.Context[arg.Type.String] = arg.Type
 			arg.Use = ArgUseContext
@@ -98,19 +108,24 @@ func Parse(obj types.Object, opts *ParseOpts) (*Definition, error) {
 
 		methodDef.RawArgs = append(methodDef.RawArgs, arg)
 	}
-
-	if resultsLen == 0 || resultsLen > 2 {
-		return nil, formatErr("must have one or two returns")
+	if !methodDef.UpdateTarget && opts.UpdateParam != "" {
+		return nil, formatErr(fmt.Sprintf("Argument %q must exist when using 'goverter:target %s'", opts.UpdateParam, opts.UpdateParam))
 	}
-	if resultsLen == 2 {
-		if isError(sig.Results().At(1)) {
-			methodDef.ReturnError = true
-		} else {
-			return nil, formatErr("must have type error as second return but has: " + sig.Results().At(1).Type().String())
+
+	if !methodDef.UpdateTarget {
+		if resultsLen == 0 || resultsLen > 2 {
+			return nil, formatErr("must have one or two returns")
 		}
-	}
+		if resultsLen == 2 {
+			if isError(sig.Results().At(1)) {
+				methodDef.ReturnError = true
+			} else {
+				return nil, formatErr("must have type error as second return but has: " + sig.Results().At(1).Type().String())
+			}
+		}
 
-	methodDef.Target = xtype.TypeOf(sig.Results().At(0).Type())
+		methodDef.Target = xtype.TypeOf(sig.Results().At(0).Type())
+	}
 
 	if methodDef.TypeParams && !opts.AllowTypeParams {
 		return nil, formatErr("must not be generic")
@@ -147,7 +162,7 @@ func (def *Definition) ArgDebug(indent string) string {
 		lines = append(lines, fmt.Sprintf("[%s] %s", argUse, arg.Type.String))
 	}
 
-	if def.Target != nil {
+	if def.Target != nil && !def.UpdateTarget {
 		lines = append(lines, fmt.Sprintf("[target] %s", def.Target.String))
 	}
 

@@ -5,7 +5,7 @@ input:
         // goverter:converter
         type Converter interface {
             // goverter:update target
-            Convert(source Input, target *Output)
+            Convert(source *Input, target *Output)
         }
 
         type Input struct {
@@ -24,6 +24,8 @@ success:
 
         type ConverterImpl struct{}
 
-        func (c *ConverterImpl) Convert(source execution.Input, target *execution.Output) {
-        	target.A = source.A
+        func (c *ConverterImpl) Convert(source *execution.Input, target *execution.Output) {
+        	if source != nil {
+        		target.A = source.A
+        	}
         }

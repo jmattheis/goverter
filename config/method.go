@@ -27,7 +27,8 @@ type Method struct {
 
 	RawFieldSettings []string
 
-	Location string
+	Location    string
+	updateParam string
 }
 
 type FieldMapping struct {
@@ -94,6 +95,7 @@ func parseMethod(ctx *context, c *Converter, obj types.Object, rawMethod RawLine
 		Params:            method.ParamsRequired,
 		ContextMatch:      m.ArgContextRegex,
 		Generated:         true,
+		UpdateParam:       m.updateParam,
 	})
 
 	m.Definition = def
@@ -132,6 +134,8 @@ func parseMethodLine(ctx *context, c *Converter, m *Method, value string) (err e
 		for _, f := range fields {
 			m.Field(f).Ignore = true
 		}
+	case "update":
+		m.updateParam, err = parseString(rest)
 	case "enum:map":
 		fields := strings.Fields(rest)
 		if len(fields) != 2 {

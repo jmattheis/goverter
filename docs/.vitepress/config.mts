@@ -102,6 +102,7 @@ export default defineConfig({
                   { text: "default", link: "/reference/default" },
                   { text: "ignore", link: "/reference/ignore" },
                   { text: "map", link: "/reference/map" },
+                  { text: "update", link: "/reference/update" },
                 ],
               },
               {
