@@ -52,6 +52,7 @@ These settings can be defined as [CLI argument](./define-settings.md#cli),
 - [`ignoreUnexported [yes,no]` ignore unexported struct fields](./ignoreUnexported.md)
 - [`matchIgnoreCase [yes,no]` case-insensitive field matching](./matchIgnoreCase.md)
 - [`skipCopySameType [yes,no]` skip copying types when the source and target type are the same](./skipCopySameType.md)
+- [`update:ignoreZeroValueField [yes:no]` don't update fields with zero values](./update.md#update-ignorezerovaluefield-yes-no)
 - [`useUnderlyingTypeMethods [yes|no]` use underlying types when looking for existing methods](./useUnderlyingTypeMethods.md)
 - [`useZeroValueOnPointerInconsistency [yes|no]` Use zero values for `*S` to `T` conversions](./useZeroValueOnPointerInconsistency.md)
 - [`wrapErrorsUsing [PACKAGE]` wrap errors using a custom implementation](./wrapErrorsUsing.md)

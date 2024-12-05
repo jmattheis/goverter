@@ -90,7 +90,11 @@ func (s *Struct) ConvertTo(gen Generator, ctx *MethodContext, assignTo *AssignTo
 			if err != nil {
 				return nil, err.Lift(lift...)
 			}
-			stmt = append(stmt, fieldStmt...)
+			if shouldCheckAgainstZero(ctx, nextSource, targetFieldType, false) {
+				stmt = append(stmt, jen.If(nextID.Code.Clone().Op("!=").Add(xtype.ZeroValue(nextSource.T))).Block(fieldStmt...))
+			} else {
+				stmt = append(stmt, fieldStmt...)
+			}
 		} else {
 			def := fieldMapping.Function
 
@@ -126,8 +130,13 @@ func (s *Struct) ConvertTo(gen Generator, ctx *MethodContext, assignTo *AssignTo
 			if err != nil {
 				return nil, err.Lift(sourceLift...)
 			}
-			stmt = append(stmt, callStmt...)
-			stmt = append(stmt, assignTo.Stmt.Clone().Dot(targetField.Name()).Op("=").Add(callReturnID.Code))
+			callStmt = append(callStmt, assignTo.Stmt.Clone().Dot(targetField.Name()).Op("=").Add(callReturnID.Code))
+
+			if shouldCheckAgainstZero(ctx, functionCallSourceType, targetFieldType, true) {
+				stmt = append(stmt, jen.If(functionCallSourceID.Code.Clone().Op("!=").Add(xtype.ZeroValue(functionCallSourceType.T))).Block(callStmt...))
+			} else {
+				stmt = append(stmt, callStmt...)
+			}
 		}
 	}
 	if !usedSourceID {
@@ -143,6 +152,27 @@ func (s *Struct) ConvertTo(gen Generator, ctx *MethodContext, assignTo *AssignTo
 	}
 
 	return stmt, nil
+}
+
+func shouldCheckAgainstZero(ctx *MethodContext, s, t *xtype.Type, call bool) bool {
+	switch {
+	case !ctx.Conf.UpdateTarget:
+		return false
+	case s.Struct && ctx.Conf.IgnoreStructZeroValueField:
+		return true
+	case s.Basic && ctx.Conf.IgnoreBasicZeroValueField:
+		return true
+	case ctx.Conf.IgnoreNillableZeroValueField:
+		if s.Chan || s.Map || s.Func || s.Signature || s.Interface {
+			return true
+		}
+		if call || (ctx.Conf.SkipCopySameType && types.Identical(s.T, t.T)) {
+			return (s.List && !s.ListFixed) || s.Pointer
+		}
+		return false
+	default:
+		return false
+	}
 }
 
 func (s *Struct) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, sourceID *xtype.JenID, source, target *xtype.Type, path ErrorPath) ([]jen.Code, *Error) {
