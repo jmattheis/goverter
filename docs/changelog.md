@@ -10,9 +10,13 @@ import GH from './GH.vue';
   - See [Guide: Pass context to functions](./guide/context.md)
   - See [Reference: Signature](./reference/signature.md)
   - Add [`arg:context:regex`](./reference/arg.md)
+- Support updating an existing instance of a struct <GH issue="147" pr="170"/>
+  - See [Guide: Update an existing instance](./guide/update-instance.md)
+  - Add [`update ARG`](./reference/update.md)
+  - Add [`update:ignoreZeroValueField [yes|no]`](./reference/update.md)
+- Add [`output:raw CODE`](./reference/output.md#output-raw-code) <GH issue="113" pr="168"/>
 - Error on duplicated converter signatures. <GH issue="146" pr="166"/>
 - Fix panic when using `chan` in conversion functions. <GH issue="165" pr="167"/>
-- Add [`output:raw CODE`](./reference/output.md#output-raw-code) <GH issue="113" pr="168"/>
 
 ## v1.5.1
 

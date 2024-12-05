@@ -12,6 +12,8 @@ Constraints:
 
 - The type of `ARG` must be a pointer to a struct.
 - The source type must be a struct or a pointer to a struct.
+- See
+  [Signature: Update Conversion Method](/reference/signature.md#signature-update-conversion-method)
 
 <!-- prettier-ignore -->
 ::: details Example (click me)
