@@ -6,6 +6,10 @@ import GH from './GH.vue';
 
 ## unreleased
 
+- tbd
+
+## v1.6.0
+
 - Support for passing context to functions. <GH issue="68" pr="166"/>
   - See [Guide: Pass context to functions](./guide/context.md)
   - See [Reference: Signature](./reference/signature.md)
