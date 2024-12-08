@@ -18,7 +18,7 @@ func (l *List) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 	ctx.SetErrorTargetVar(jen.Nil())
 	targetSlice := ctx.Name(target.ID())
 
-	stmt, err := l.Assign(gen, ctx, assignOf(jen.Id(targetSlice)), sourceID, source, target, path)
+	stmt, err := l.Assign(gen, ctx, AssignOf(jen.Id(targetSlice)), sourceID, source, target, path)
 	if err != nil {
 		return nil, nil, err
 	}

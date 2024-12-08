@@ -12,6 +12,9 @@ type Common struct {
 	WrapErrors                         bool
 	WrapErrorsUsing                    string
 	IgnoreUnexported                   bool
+	IgnoreBasicZeroValueField          bool
+	IgnoreStructZeroValueField         bool
+	IgnoreNillableZeroValueField       bool
 	MatchIgnoreCase                    bool
 	IgnoreMissing                      bool
 	SkipCopySameType                   bool
@@ -36,6 +39,20 @@ func parseCommon(c *Common, cmd, rest string) (fieldSetting bool, err error) {
 	case "ignoreUnexported":
 		fieldSetting = true
 		c.IgnoreUnexported, err = parseBool(rest)
+	case "update:ignoreZeroValueField":
+		fieldSetting = true
+		c.IgnoreBasicZeroValueField, err = parseBool(rest)
+		c.IgnoreStructZeroValueField = c.IgnoreBasicZeroValueField
+		c.IgnoreNillableZeroValueField = c.IgnoreBasicZeroValueField
+	case "update:ignoreZeroValueField:basic":
+		fieldSetting = true
+		c.IgnoreBasicZeroValueField, err = parseBool(rest)
+	case "update:ignoreZeroValueField:struct":
+		fieldSetting = true
+		c.IgnoreStructZeroValueField, err = parseBool(rest)
+	case "update:ignoreZeroValueField:nillable":
+		fieldSetting = true
+		c.IgnoreNillableZeroValueField, err = parseBool(rest)
 	case "matchIgnoreCase":
 		fieldSetting = true
 		c.MatchIgnoreCase, err = parseBool(rest)

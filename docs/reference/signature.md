@@ -51,7 +51,7 @@ interface seen as `context` regardless of the param name.
 
 ## Supported Signatures
 
-### Conversion Method
+### Signature: Conversion Method
 
 Depending on the [`output:format`](./output.md#output-format), a conversion
 method is defined on an interface, e.g. `ConvertA` or as variable, e.g.
@@ -100,6 +100,25 @@ type Converter interface {
 <<< @../../example/context/database/input.go
 <<< @../../example/context/database/generated/generated.go [generated/generated.go]
 :::
+
+#### Signature: Update Conversion Method
+
+When [`update`](./update.md) is configured, the target type of the conversion
+signature must be inside the arguments, and the target type must be of type `*T`
+where `T` is any struct. The source type may be `T` or `*T` where `T` is any
+struct.
+
+```go
+// goverter:converter
+type Converter interface {
+    ConvertOne(source A, target B)
+    // A=source; B=target
+    ConvertTwo(source A, target B) error
+    // A=source; B=target; error=target_error
+    ConvertThree(target A, source B, ctx C)
+    // A=target; B=source; C=context
+}
+```
 
 ### Signature: optional source
 

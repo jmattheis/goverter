@@ -14,7 +14,7 @@ func parseCommand(value string) (string, string) {
 	return parts[0], ""
 }
 
-func parseEnum[T ~string](name string, empty bool, remaining string, values ...T) (T, error) {
+func parseEnum[T ~string](empty bool, remaining string, values ...T) (T, error) {
 	fields := strings.Fields(remaining)
 
 	switch {
@@ -27,14 +27,22 @@ func parseEnum[T ~string](name string, empty bool, remaining string, values ...T
 			}
 		}
 
-		return "", fmt.Errorf("invalid %s value: '%s' must be one of %+q", name, fields[0], values)
+		return "", fmt.Errorf("invalid value: '%s' must be one of: %s", fields[0], formatValues(values))
 	default:
-		return "", fmt.Errorf("invalid %s value: expected one value but got %d: %s", name, len(fields), fields)
+		return "", fmt.Errorf("invalid value: expected one value but got %d: %s", len(fields), fields)
 	}
 }
 
+func formatValues[T ~string](values []T) string {
+	strs := make([]string, len(values))
+	for i, id := range values {
+		strs[i] = string(id)
+	}
+	return strings.Join(strs, ", ")
+}
+
 func parseBool(remaining string) (bool, error) {
-	val, err := parseEnum("boolean", true, remaining, "yes", "no")
+	val, err := parseEnum(true, remaining, "yes", "no")
 	return val == "" || val == "yes", err
 }
 

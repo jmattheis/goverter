@@ -169,7 +169,7 @@ func parseConverterLine(ctx *context, c *Converter, value string) (err error) {
 			return fmt.Errorf("Cannot change output:format after extend functions have been added.\nMove the extend below the output:format setting.")
 		}
 
-		c.OutputFormat, err = parseEnum("format", false, rest, FormatFunction, FormatStruct, FormatVariable)
+		c.OutputFormat, err = parseEnum(false, rest, FormatFunction, FormatStruct, FormatVariable)
 		if err != nil {
 			return err
 		}

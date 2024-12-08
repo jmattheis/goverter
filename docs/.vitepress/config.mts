@@ -50,6 +50,7 @@ export default defineConfig({
           { text: "Installation", link: "/guide/install" },
           { text: "Input/Output formats", link: "/guide/format" },
           { text: "Convert Enums", link: "/guide/enum" },
+          { text: "Update existing instance", link: "/guide/update-instance" },
           { text: "Pass context to functions", link: "/guide/context" },
           {
             text: "Output into same package",
@@ -102,6 +103,7 @@ export default defineConfig({
                   { text: "default", link: "/reference/default" },
                   { text: "ignore", link: "/reference/ignore" },
                   { text: "map", link: "/reference/map" },
+                  { text: "update", link: "/reference/update" },
                 ],
               },
               {

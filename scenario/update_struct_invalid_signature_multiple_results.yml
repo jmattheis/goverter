@@ -4,6 +4,7 @@ input:
 
         // goverter:converter
         type Converter interface {
+            // goverter:update target
             Convert(source Input, target *Target) Output
         }
 
@@ -18,10 +19,8 @@ input:
         }
 error: |-
     error parsing converter method:
-        @workdir/input.go:5
+        @workdir/input.go:6
         func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input, target *github.com/jmattheis/goverter/execution.Target) github.com/jmattheis/goverter/execution.Output
             [source] github.com/jmattheis/goverter/execution.Input
-            [source] *github.com/jmattheis/goverter/execution.Target
-            [target] github.com/jmattheis/goverter/execution.Output
 
-    must have only one source param
+    The signature one non 'error' result or multiple results is not supported for goverter:update signatures.

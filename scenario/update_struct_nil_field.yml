@@ -9,10 +9,10 @@ input:
         }
 
         type Input struct {
-            A string
+            A *string
         }
         type Output struct {
-            A string
+            A *string
         }
 success:
     - generated/generated.go: |
@@ -25,5 +25,8 @@ success:
         type ConverterImpl struct{}
 
         func (c *ConverterImpl) Convert(source execution.Input, target *execution.Output) {
-        	target.A = source.A
+        	if source.A != nil {
+        		xstring := *source.A
+        		target.A = &xstring
+        	}
         }

@@ -14,6 +14,7 @@ import (
 type Builder interface {
 	// Matches returns true, if the builder can create handle the given types.
 	Matches(ctx *MethodContext, source, target *xtype.Type) bool
+
 	// Build creates conversion source code for the given source and target type.
 	Build(gen Generator,
 		ctx *MethodContext,
@@ -21,6 +22,7 @@ type Builder interface {
 		source, target *xtype.Type,
 		path ErrorPath) ([]jen.Code, *xtype.JenID, *Error)
 
+	// Assign creates conversion source code for the given source and target type and assigns it.
 	Assign(gen Generator,
 		ctx *MethodContext,
 		assignTo *AssignTo,

@@ -20,21 +20,32 @@ func (*Struct) Matches(_ *MethodContext, source, target *xtype.Type) bool {
 }
 
 // Build creates conversion source code for the given source and target type.
-func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type, errPath ErrorPath) ([]jen.Code, *xtype.JenID, *Error) {
+func (s *Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type, errPath ErrorPath) ([]jen.Code, *xtype.JenID, *Error) {
 	// Optimization for golang sets
 	if !source.Named && !target.Named && source.StructType.NumFields() == 0 && target.StructType.NumFields() == 0 {
 		return nil, sourceID, nil
 	}
-
 	stmt, nameVar, err := buildTargetVar(gen, ctx, sourceID, source, target, errPath)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	additionalFieldSources, err := parseAutoMap(ctx, source)
+	stmtAssign, err := s.ConvertTo(gen, ctx, AssignOf(nameVar), sourceID, source, target, errPath)
 	if err != nil {
 		return nil, nil, err
 	}
+	stmt = append(stmt, stmtAssign...)
+
+	return stmt, xtype.VariableID(nameVar), nil
+}
+
+func (s *Struct) ConvertTo(gen Generator, ctx *MethodContext, assignTo *AssignTo, sourceID *xtype.JenID, source, target *xtype.Type, errPath ErrorPath) ([]jen.Code, *Error) {
+	additionalFieldSources, err := parseAutoMap(ctx, source)
+	if err != nil {
+		return nil, err
+	}
+
+	stmt := []jen.Code{}
 
 	definedFields := ctx.DefinedFields(target)
 	usedSourceID := false
@@ -53,7 +64,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 
 		if !xtype.Accessible(targetField, ctx.OutputPackagePath) {
 			cause := unexportedStructError(targetField.Name(), source.String, target.String)
-			return nil, nil, NewError(cause).Lift(&Path{
+			return nil, NewError(cause).Lift(&Path{
 				Prefix:     ".",
 				SourceID:   "???",
 				TargetID:   targetField.Name(),
@@ -71,15 +82,19 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 				continue
 			}
 			if err != nil {
-				return nil, nil, err
+				return nil, err
 			}
 			stmt = append(stmt, mapStmt...)
 
-			fieldStmt, err := gen.Assign(ctx, assignOf(nameVar.Clone().Dot(targetField.Name())), nextID, nextSource, targetFieldType, targetFieldPath)
+			fieldStmt, err := gen.Assign(ctx, AssignOf(assignTo.Stmt.Clone().Dot(targetField.Name())), nextID, nextSource, targetFieldType, targetFieldPath)
 			if err != nil {
-				return nil, nil, err.Lift(lift...)
+				return nil, err.Lift(lift...)
 			}
-			stmt = append(stmt, fieldStmt...)
+			if shouldCheckAgainstZero(ctx, nextSource, targetFieldType, false) {
+				stmt = append(stmt, jen.If(nextID.Code.Clone().Op("!=").Add(xtype.ZeroValue(nextSource.T))).Block(fieldStmt...))
+			} else {
+				stmt = append(stmt, fieldStmt...)
+			}
 		} else {
 			def := fieldMapping.Function
 
@@ -90,7 +105,7 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 				usedSourceID = true
 				nextID, nextSource, mapStmt, mapLift, _, err := mapField(gen, ctx, targetField, sourceID, source, target, additionalFieldSources, targetFieldPath)
 				if err != nil {
-					return nil, nil, err
+					return nil, err
 				}
 				sourceLift = mapLift
 				stmt = append(stmt, mapStmt...)
@@ -113,10 +128,15 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 
 			callStmt, callReturnID, err := gen.CallMethod(ctx, fieldMapping.Function, functionCallSourceID, functionCallSourceType, targetFieldType, targetFieldPath)
 			if err != nil {
-				return nil, nil, err.Lift(sourceLift...)
+				return nil, err.Lift(sourceLift...)
 			}
-			stmt = append(stmt, callStmt...)
-			stmt = append(stmt, nameVar.Clone().Dot(targetField.Name()).Op("=").Add(callReturnID.Code))
+			callStmt = append(callStmt, assignTo.Stmt.Clone().Dot(targetField.Name()).Op("=").Add(callReturnID.Code))
+
+			if shouldCheckAgainstZero(ctx, functionCallSourceType, targetFieldType, true) {
+				stmt = append(stmt, jen.If(functionCallSourceID.Code.Clone().Op("!=").Add(xtype.ZeroValue(functionCallSourceType.T))).Block(callStmt...))
+			} else {
+				stmt = append(stmt, callStmt...)
+			}
 		}
 	}
 	if !usedSourceID {
@@ -124,14 +144,35 @@ func (*Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, s
 	}
 
 	for name := range definedFields {
-		return nil, nil, NewError(fmt.Sprintf("Field %q does not exist.\nRemove or adjust field settings referencing this field.", name)).Lift(&Path{
+		return nil, NewError(fmt.Sprintf("Field %q does not exist.\nRemove or adjust field settings referencing this field.", name)).Lift(&Path{
 			Prefix:     ".",
 			TargetID:   name,
 			TargetType: "???",
 		})
 	}
 
-	return stmt, xtype.VariableID(nameVar), nil
+	return stmt, nil
+}
+
+func shouldCheckAgainstZero(ctx *MethodContext, s, t *xtype.Type, call bool) bool {
+	switch {
+	case !ctx.Conf.UpdateTarget:
+		return false
+	case s.Struct && ctx.Conf.IgnoreStructZeroValueField:
+		return true
+	case s.Basic && ctx.Conf.IgnoreBasicZeroValueField:
+		return true
+	case ctx.Conf.IgnoreNillableZeroValueField:
+		if s.Chan || s.Map || s.Func || s.Signature || s.Interface {
+			return true
+		}
+		if call || (ctx.Conf.SkipCopySameType && types.Identical(s.T, t.T)) {
+			return (s.List && !s.ListFixed) || s.Pointer
+		}
+		return false
+	default:
+		return false
+	}
 }
 
 func (s *Struct) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, sourceID *xtype.JenID, source, target *xtype.Type, path ErrorPath) ([]jen.Code, *Error) {
