@@ -16,6 +16,7 @@ type Common struct {
 	IgnoreStructZeroValueField         bool
 	IgnoreNillableZeroValueField       bool
 	MatchIgnoreCase                    bool
+	MatchTag                           string
 	IgnoreMissing                      bool
 	SkipCopySameType                   bool
 	UseZeroValueOnPointerInconsistency bool
@@ -59,6 +60,9 @@ func parseCommon(c *Common, cmd, rest string) (fieldSetting bool, err error) {
 	case "ignoreMissing":
 		fieldSetting = true
 		c.IgnoreMissing, err = parseBool(rest)
+	case "matchTag":
+		fieldSetting = true
+		c.MatchTag, err = parseString(rest)
 	case "skipCopySameType":
 		c.SkipCopySameType, err = parseBool(rest)
 	case "useZeroValueOnPointerInconsistency":

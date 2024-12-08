@@ -51,6 +51,7 @@ These settings can be defined as [CLI argument](./define-settings.md#cli),
 - [`ignoreMissing [yes,no]` ignore missing struct fields](./ignoreMissing.md) 
 - [`ignoreUnexported [yes,no]` ignore unexported struct fields](./ignoreUnexported.md)
 - [`matchIgnoreCase [yes,no]` case-insensitive field matching](./matchIgnoreCase.md)
+- [`matchTag TAGNAME` indicates that the specified struct tag should be used to exactly match fields](./matchTag.md)
 - [`skipCopySameType [yes,no]` skip copying types when the source and target type are the same](./skipCopySameType.md)
 - [`update:ignoreZeroValueField [yes:no]` don't update fields with zero values](./update.md#update-ignorezerovaluefield-yes-no)
 - [`useUnderlyingTypeMethods [yes|no]` use underlying types when looking for existing methods](./useUnderlyingTypeMethods.md)

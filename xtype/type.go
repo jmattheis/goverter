@@ -3,6 +3,7 @@ package xtype
 import (
 	"fmt"
 	"go/types"
+	"reflect"
 	"strings"
 
 	"github.com/dave/jennifer/jen"
@@ -88,19 +89,34 @@ type SimpleStructField struct {
 // StructField returns the type of a struct field and its name upon successful match or
 // an error if it is not found. This method will also return a detailed error if matchIgnoreCase
 // is enabled and there are multiple non-exact matches.
-func (t Type) findAllFields(path []string, name string, ignoreCase bool) (*StructField, []*StructField) {
+func (t Type) findAllFields(path []string, name, targetTag, matchTag string, ignoreCase bool) (*StructField, []*StructField) {
 	if !t.Struct {
 		panic("trying to get field of non struct")
 	}
 
 	var matches []*StructField
-	handle := func(obj types.Object) *StructField {
+	tagName := parseTagName(matchTag, targetTag)
+	handle := func(inType types.Type, fieldNum int) *StructField {
+		var obj types.Object
+		switch inT := inType.(type) {
+		case *types.Struct:
+			obj = inT.Field(fieldNum)
+			if len(matchTag) == 0 || len(tagName) == 0 {
+				break
+			}
+			if parseTagName(matchTag, inT.Tag(fieldNum)) == tagName {
+				return &StructField{Path: append(path, obj.Name()), Type: TypeOf(obj.Type()).inStruct(&t, obj.Name())}
+			}
+		case *types.Named:
+			obj = inT.Method(fieldNum)
+		default:
+			return nil
+		}
+
 		exact := obj.Name() == name
 		if exact || (ignoreCase && strings.EqualFold(obj.Name(), name)) {
 			// exact match takes precedence over case-insensitive match
-			newPath := append([]string{}, path...)
-			newPath = append(newPath, obj.Name())
-			f := &StructField{Path: newPath, Type: TypeOf(obj.Type()).inStruct(&t, obj.Name())}
+			f := &StructField{Path: append(path, obj.Name()), Type: TypeOf(obj.Type()).inStruct(&t, obj.Name())}
 			if exact {
 				return f
 			}
@@ -110,14 +126,14 @@ func (t Type) findAllFields(path []string, name string, ignoreCase bool) (*Struc
 	}
 
 	for y := 0; y < t.StructType.NumFields(); y++ {
-		if exact := handle(t.StructType.Field(y)); exact != nil {
+		if exact := handle(t.StructType, y); exact != nil {
 			return exact, matches
 		}
 	}
 
 	if t.Named {
 		for y := 0; y < t.NamedType.NumMethods(); y++ {
-			if exact := handle(t.NamedType.Method(y)); exact != nil {
+			if exact := handle(t.NamedType, y); exact != nil {
 				return exact, matches
 			}
 		}
@@ -131,8 +147,8 @@ type FieldSources struct {
 	Type *Type
 }
 
-func FindExactField(source *Type, name string) (*SimpleStructField, error) {
-	exactMatch, _ := source.findAllFields(nil, name, false)
+func FindExactField(source *Type, name, targetTag, matchTag string) (*SimpleStructField, error) {
+	exactMatch, _ := source.findAllFields(nil, name, targetTag, matchTag, false)
 	if exactMatch == nil {
 		return nil, fmt.Errorf("%q does not exist", name)
 	}
@@ -145,15 +161,15 @@ func (err *NoMatchError) Error() string {
 	return fmt.Sprintf("\"%s\" does not exist", err.Field)
 }
 
-func FindField(name string, ignoreCase bool, source *Type, additionalFieldSources []FieldSources) (*StructField, error) {
-	exactMatch, ignoreCaseMatches := source.findAllFields(nil, name, ignoreCase)
+func FindField(name, targetTag, matchTag string, ignoreCase bool, source *Type, additionalFieldSources []FieldSources) (*StructField, error) {
+	exactMatch, ignoreCaseMatches := source.findAllFields(nil, name, targetTag, matchTag, ignoreCase)
 	var exactMatches []*StructField
 	if exactMatch != nil {
 		exactMatches = append(exactMatches, exactMatch)
 	}
 
 	for _, source := range additionalFieldSources {
-		sourceExactMatch, sourceIgnoreCaseMatches := source.Type.findAllFields(source.Path, name, ignoreCase)
+		sourceExactMatch, sourceIgnoreCaseMatches := source.Type.findAllFields(source.Path, name, targetTag, matchTag, ignoreCase)
 		if sourceExactMatch != nil {
 			exactMatches = append(exactMatches, sourceExactMatch)
 		}
@@ -177,6 +193,39 @@ func FindField(name string, ignoreCase bool, source *Type, additionalFieldSource
 		}
 		return nil, ambiguousMatchError(name, names)
 	}
+}
+
+// protobufSubtagOrder specifies which protobuf tag sub-tags should be considered and in which order.
+var protobufSubtagOrder = [2]string{"json=", "name="}
+
+// parseTagName parses out the field name from a struct tag.
+func parseTagName(matchTag, tag string) string {
+	entry := reflect.StructTag(tag).Get(matchTag)
+
+	// Protobuf tags are exciting, in that they /optionally/ have a json= section which takes
+	// precedence over the name= section.
+	if matchTag == "protobuf" {
+		// Load the subtags we care about into a map (avoids O(2N)).
+		entryMap := make(map[string]string, 2)
+		for _, section := range strings.Split(entry, ",") {
+			for _, prefix := range protobufSubtagOrder {
+				if strings.HasPrefix(section, prefix) {
+					entryMap[prefix] = strings.Split(section, "=")[1]
+				}
+			}
+		}
+		// Now that we have the full list of subtags, choose one in order of preference.
+		for _, prefix := range protobufSubtagOrder {
+			if x, ok := entryMap[prefix]; ok {
+				return x
+			}
+		}
+		// Fall back to json.
+		entry = reflect.StructTag(tag).Get("json")
+	}
+
+	// Standard tags.
+	return strings.Split(entry, ",")[0]
 }
 
 // JenID a jennifer code wrapper with extra infos.
