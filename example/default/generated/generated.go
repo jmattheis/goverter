@@ -11,7 +11,6 @@ func (c *ConverterImpl) Convert(source *default1.Input) *default1.Output {
 	pExampleOutput := default1.NewOutput()
 	if source != nil {
 		var exampleOutput default1.Output
-		exampleOutput.Age = (*source).Age
 		if (*source).Name != nil {
 			xstring := *(*source).Name
 			exampleOutput.Name = &xstring

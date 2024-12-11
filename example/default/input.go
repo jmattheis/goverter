@@ -3,6 +3,7 @@ package example
 // goverter:converter
 type Converter interface {
 	// goverter:default NewOutput
+	// goverter:ignore Age
 	Convert(*Input) *Output
 }
 
