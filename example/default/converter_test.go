@@ -9,7 +9,7 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestConverterSuccess(t *testing.T) {
+func TestConvertInterfaceSuccess(t *testing.T) {
 	var c default1.Converter = &generated.ConverterImpl{}
 
 	input := default1.Input{
@@ -17,14 +17,30 @@ func TestConverterSuccess(t *testing.T) {
 		Name: p("tester"),
 	}
 
-	output := c.Convert(&input)
+	output := c.ConvertInterfaceStruct(input)
 
-	expected := &default1.Output{
+	expected := default1.Output{
 		Age:  42,
 		Name: p("tester"),
 	}
 
 	require.Equal(t, expected, output)
+}
+
+func TestConvertVarSuccess(t *testing.T) {
+	input := default1.Input{
+		Age:  20,
+		Name: p("tester"),
+	}
+
+	output := default1.ConvertVarPointer(input)
+
+	expected := default1.Output{
+		Age:  42,
+		Name: p("tester"),
+	}
+
+	require.Equal(t, expected, *output)
 }
 
 func p(s string) *string {

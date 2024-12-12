@@ -5,17 +5,24 @@ package generated
 
 import default1 "github.com/jmattheis/goverter/example/default"
 
-type ConverterImpl struct{}
-
-func (c *ConverterImpl) Convert(source *default1.Input) *default1.Output {
-	pExampleOutput := default1.NewOutput()
-	if source != nil {
+func init() {
+	default1.ConvertVarPointer = func(source default1.Input) *default1.Output {
 		var exampleOutput default1.Output
-		if (*source).Name != nil {
-			xstring := *(*source).Name
+		if source.Name != nil {
+			xstring := *source.Name
 			exampleOutput.Name = &xstring
 		}
-		pExampleOutput = &exampleOutput
+		return &exampleOutput
 	}
-	return pExampleOutput
+}
+
+type ConverterImpl struct{}
+
+func (c *ConverterImpl) ConvertInterfaceStruct(source default1.Input) default1.Output {
+	exampleOutput := default1.NewOutput(source)
+	if source.Name != nil {
+		xstring := *source.Name
+		exampleOutput.Name = &xstring
+	}
+	return exampleOutput
 }

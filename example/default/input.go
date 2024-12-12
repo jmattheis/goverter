@@ -1,11 +1,21 @@
 package example
 
 // goverter:converter
+// goverter:output:package "github.com/jmattheis/goverter/example/default/generated"
 type Converter interface {
 	// goverter:default NewOutput
 	// goverter:ignore Age
-	Convert(*Input) *Output
+	ConvertInterfaceStruct(input Input) Output
 }
+
+// goverter:variables
+// goverter:output:file generated/generated.go
+// goverter:output:package "github.com/jmattheis/goverter/example/default/generated"
+var (
+	// goverter:default NewOutputPointer
+	// goverter:ignore Age
+	ConvertVarPointer func(input Input) *Output
+)
 
 type Input struct {
 	Age  int
@@ -16,10 +26,16 @@ type Output struct {
 	Name *string
 }
 
-func NewOutput() *Output {
-	name := "jmattheis"
+func NewOutput(input Input) Output {
+	return Output{
+		Age:  42,
+		Name: input.Name,
+	}
+}
+
+func NewOutputPointer(input *Input) *Output {
 	return &Output{
 		Age:  42,
-		Name: &name,
+		Name: input.Name,
 	}
 }
