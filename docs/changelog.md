@@ -6,7 +6,7 @@ import GH from './GH.vue';
 
 ## unreleased
 
-- tbd
+- Fix not setting `nil` on map when value is `nil`. <GH issue="173" pr="175"/>
 
 ## v1.6.0
 

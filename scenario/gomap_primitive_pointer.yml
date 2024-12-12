@@ -31,12 +31,12 @@ success:
         	if source != nil {
         		mapStringPInt = make(map[string]*int, len(source))
         		for key, value := range source {
+        			var pInt *int
         			if value != nil {
         				xint := *value
-        				mapStringPInt[key] = &xint
-        			} else {
-        				mapStringPInt[key] = nil
+        				pInt = &xint
         			}
+        			mapStringPInt[key] = pInt
         		}
         	}
         	return mapStringPInt

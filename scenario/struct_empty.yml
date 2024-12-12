@@ -38,7 +38,7 @@ success:
         	if source != nil {
         		unnamedList = make([]struct{}, len(source))
         		for i := 0; i < len(source); i++ {
-        			unnamedList[i] = source[i]
+        			_ = source[i]
         		}
         	}
         	return unnamedList

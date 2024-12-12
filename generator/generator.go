@@ -256,7 +256,7 @@ func (g *generator) convertTo(ctx *builder.MethodContext, assignTo *builder.Assi
 	}
 
 	var s builder.Struct
-	stmt, err := s.ConvertTo(g, ctx, assignTo, sourceID, source, target.PointerInner, errPath)
+	stmt, err := s.Assign(g, ctx, assignTo, sourceID, source, target.PointerInner, errPath)
 	if sourcePointer {
 		stmt = []jen.Code{jen.If(sourceID.Code.Clone().Op("!=").Nil()).Block(stmt...)}
 	}
@@ -452,6 +452,10 @@ func (g *generator) Assign(
 	source, target *xtype.Type,
 	errPath builder.ErrorPath,
 ) ([]jen.Code, *builder.Error) {
+	if assignTo.Must {
+		return builder.ToAssignable(assignTo)(g.Build(ctx, sourceID, source, target, errPath))
+	}
+
 	stmt, nextID, err := g.callExisting(ctx, sourceID, source, target, errPath)
 	if nextID != nil || err != nil {
 		return builder.ToAssignable(assignTo)(stmt, nextID, err)

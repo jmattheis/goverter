@@ -35,13 +35,8 @@ success:
 
         func (c *ConverterImpl) ConvertHouse(source execution.Input) execution.Output {
         	var structsOutput execution.Output
-        	var unnamed struct {
-        		execution.X
-        		execution.Y `json:"abc"`
-        	}
-        	unnamed.X = c.structsXToStructsX(source.House.X)
-        	unnamed.Y = c.structsYToStructsY(source.House.Y)
-        	structsOutput.House = unnamed
+        	structsOutput.House.X = c.structsXToStructsX(source.House.X)
+        	structsOutput.House.Y = c.structsYToStructsY(source.House.Y)
         	return structsOutput
         }
         func (c *ConverterImpl) structsXToStructsX(source execution.X) execution.X {

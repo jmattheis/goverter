@@ -35,7 +35,7 @@ func (*Map) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, source
 		})
 	}
 	valueStmt, err := gen.Assign(
-		ctx, assignTo.WithIndex(keyID.Code).WithMust(), xtype.VariableID(jen.Id(value)), source.MapValue, target.MapValue, errPath)
+		ctx, assignTo.WithIndex(keyID.Code).MustAssign(), xtype.VariableID(jen.Id(value)), source.MapValue, target.MapValue, errPath)
 	if err != nil {
 		return nil, err.Lift(&Path{
 			SourceID:   "[]",

@@ -45,13 +45,8 @@ func (*Pointer) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, so
 	ifBlock := append(nextBlock, pstmt...)
 	ifBlock = append(ifBlock, assignTo.Stmt.Clone().Op("=").Add(tmpID.Code))
 
-	var elseCase []jen.Code
-	if assignTo.Must {
-		elseCase = append(elseCase, jen.Else().Block(assignTo.Stmt.Clone().Op("=").Nil()))
-	}
-
 	stmt := []jen.Code{
-		jen.If(sourceID.Code.Clone().Op("!=").Nil()).Block(ifBlock...).Add(elseCase...),
+		jen.If(sourceID.Code.Clone().Op("!=").Nil()).Block(ifBlock...),
 	}
 
 	return stmt, err

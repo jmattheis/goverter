@@ -20,7 +20,7 @@ func (a *AssignTo) WithIndex(s *jen.Statement) *AssignTo {
 	}
 }
 
-func (a *AssignTo) WithMust() *AssignTo {
+func (a *AssignTo) MustAssign() *AssignTo {
 	a.Must = true
 	return a
 }
