@@ -25,21 +25,10 @@ func (s *Struct) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID,
 	if !source.Named && !target.Named && source.StructType.NumFields() == 0 && target.StructType.NumFields() == 0 {
 		return nil, sourceID, nil
 	}
-	stmt, nameVar, err := buildTargetVar(gen, ctx, sourceID, source, target, errPath)
-	if err != nil {
-		return nil, nil, err
-	}
-
-	stmtAssign, err := s.ConvertTo(gen, ctx, AssignOf(nameVar), sourceID, source, target, errPath)
-	if err != nil {
-		return nil, nil, err
-	}
-	stmt = append(stmt, stmtAssign...)
-
-	return stmt, xtype.VariableID(nameVar), nil
+	return BuildByAssign(s, gen, ctx, sourceID, source, target, errPath)
 }
 
-func (s *Struct) ConvertTo(gen Generator, ctx *MethodContext, assignTo *AssignTo, sourceID *xtype.JenID, source, target *xtype.Type, errPath ErrorPath) ([]jen.Code, *Error) {
+func (s *Struct) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, sourceID *xtype.JenID, source, target *xtype.Type, errPath ErrorPath) ([]jen.Code, *Error) {
 	additionalFieldSources, err := parseAutoMap(ctx, source)
 	if err != nil {
 		return nil, err
@@ -90,7 +79,7 @@ func (s *Struct) ConvertTo(gen Generator, ctx *MethodContext, assignTo *AssignTo
 			if err != nil {
 				return nil, err.Lift(lift...)
 			}
-			if shouldCheckAgainstZero(ctx, nextSource, targetFieldType, false) {
+			if shouldCheckAgainstZero(ctx, nextSource, targetFieldType, assignTo.Update, false) {
 				stmt = append(stmt, jen.If(nextID.Code.Clone().Op("!=").Add(xtype.ZeroValue(nextSource.T))).Block(fieldStmt...))
 			} else {
 				stmt = append(stmt, fieldStmt...)
@@ -132,7 +121,7 @@ func (s *Struct) ConvertTo(gen Generator, ctx *MethodContext, assignTo *AssignTo
 			}
 			callStmt = append(callStmt, assignTo.Stmt.Clone().Dot(targetField.Name()).Op("=").Add(callReturnID.Code))
 
-			if shouldCheckAgainstZero(ctx, functionCallSourceType, targetFieldType, true) {
+			if shouldCheckAgainstZero(ctx, functionCallSourceType, targetFieldType, assignTo.Update, true) {
 				stmt = append(stmt, jen.If(functionCallSourceID.Code.Clone().Op("!=").Add(xtype.ZeroValue(functionCallSourceType.T))).Block(callStmt...))
 			} else {
 				stmt = append(stmt, callStmt...)
@@ -154,9 +143,9 @@ func (s *Struct) ConvertTo(gen Generator, ctx *MethodContext, assignTo *AssignTo
 	return stmt, nil
 }
 
-func shouldCheckAgainstZero(ctx *MethodContext, s, t *xtype.Type, call bool) bool {
+func shouldCheckAgainstZero(ctx *MethodContext, s, t *xtype.Type, isUpdate, call bool) bool {
 	switch {
-	case !ctx.Conf.UpdateTarget:
+	case !ctx.Conf.UpdateTarget && !isUpdate:
 		return false
 	case s.Struct && ctx.Conf.IgnoreStructZeroValueField:
 		return true
@@ -173,10 +162,6 @@ func shouldCheckAgainstZero(ctx *MethodContext, s, t *xtype.Type, call bool) boo
 	default:
 		return false
 	}
-}
-
-func (s *Struct) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, sourceID *xtype.JenID, source, target *xtype.Type, path ErrorPath) ([]jen.Code, *Error) {
-	return AssignByBuild(s, gen, ctx, assignTo, sourceID, source, target, path)
 }
 
 func mapField(

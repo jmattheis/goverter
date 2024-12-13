@@ -45,8 +45,11 @@ success:
         			Age int
         		}, len(source.Values))
         		for key, value := range source.Values {
+        			var mapIntUnnamed map[int]struct {
+        				Age int
+        			}
         			if value != nil {
-        				structsOutput.Values[key] = make(map[int]struct {
+        				mapIntUnnamed = make(map[int]struct {
         					Age int
         				}, len(value))
         				for key2, value2 := range value {
@@ -58,29 +61,26 @@ success:
         						return structsOutput, patherr.Wrap(err, patherr.Field("Values"), patherr.Key(key), patherr.Key(key2), patherr.Field("Age"))
         					}
         					unnamed.Age = xint
-        					structsOutput.Values[key][key2] = unnamed
+        					mapIntUnnamed[key2] = unnamed
         				}
         			}
+        			structsOutput.Values[key] = mapIntUnnamed
         		}
         	}
-        	var unnamed2 struct {
-        		Names []map[bool]int
-        	}
         	if source.S.Names != nil {
-        		unnamed2.Names = make([]map[bool]int, len(source.S.Names))
+        		structsOutput.S.Names = make([]map[bool]int, len(source.S.Names))
         		for i := 0; i < len(source.S.Names); i++ {
         			if source.S.Names[i] != nil {
-        				unnamed2.Names[i] = make(map[bool]int, len(source.S.Names[i]))
+        				structsOutput.S.Names[i] = make(map[bool]int, len(source.S.Names[i]))
         				for key3, value3 := range source.S.Names[i] {
         					xint2, err := strconv.Atoi(value3)
         					if err != nil {
         						return structsOutput, patherr.Wrap(err, patherr.Field("S"), patherr.Field("Names"), patherr.Index(i), patherr.Key(key3))
         					}
-        					unnamed2.Names[i][key3] = xint2
+        					structsOutput.S.Names[i][key3] = xint2
         				}
         			}
         		}
         	}
-        	structsOutput.S = unnamed2
         	return structsOutput, nil
         }

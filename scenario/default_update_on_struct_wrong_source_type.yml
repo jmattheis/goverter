@@ -1,0 +1,40 @@
+input:
+    input.go: |
+        package execution
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:default NewOutput
+            // goverter:default:update
+            Convert(source Input) Output
+        }
+
+        type Input struct {
+            ID int
+        }
+        type Output struct {
+            ID int
+        }
+        func NewOutput(string) Output {
+            return Output{}
+        }
+error: |-
+    Error while creating converter method:
+        @workdir/input.go:7
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+            [source] github.com/jmattheis/goverter/execution.Input
+            [target] github.com/jmattheis/goverter/execution.Output
+
+    | github.com/jmattheis/goverter/execution.Input
+    |
+    source
+    target
+    |
+    | github.com/jmattheis/goverter/execution.Output
+
+    Error using method:
+        func github.com/jmattheis/goverter/execution.NewOutput(string) github.com/jmattheis/goverter/execution.Output
+            [source] string
+            [target] github.com/jmattheis/goverter/execution.Output
+
+    Method source type mismatches with conversion source: string != github.com/jmattheis/goverter/execution.Input

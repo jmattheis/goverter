@@ -69,11 +69,7 @@ success:
         	target.C = source.C
         	target.C2 = source.C2
         	target.D = source.D
-        	var unnamed struct {
-        		Name string
-        	}
-        	unnamed.Name = source.E.Name
-        	target.E = unnamed
+        	target.E.Name = source.E.Name
         	target.N = c.structsNestedToStructsNested(source.N)
         	if source.S != nil {
         		xstring := *source.S
@@ -111,13 +107,9 @@ success:
         	if source.D != 0 {
         		target.D = source.D
         	}
-        	var unnamed struct {
-        		Name string
-        	}
         	if source.E.Name != "" {
-        		unnamed.Name = source.E.Name
+        		target.E.Name = source.E.Name
         	}
-        	target.E = unnamed
         	target.N = c.structsNestedToStructsNested2(source.N)
         	if source.S != nil {
         		xstring := *source.S
@@ -146,11 +138,7 @@ success:
         	if source.E != struct {
         		Name string
         	}{} {
-        		var unnamed struct {
-        			Name string
-        		}
-        		unnamed.Name = source.E.Name
-        		target.E = unnamed
+        		target.E.Name = source.E.Name
         	}
         	if source.N != (execution.Nested{}) {
         		target.N = c.structsNestedToStructsNested3(source.N)

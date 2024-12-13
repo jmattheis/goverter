@@ -23,13 +23,11 @@ error: |-
 
     | github.com/jmattheis/goverter/execution.Input
     |
-    |     | github.com/jmattheis/goverter/execution.Input
-    |     |
-    |     | | []github.com/jmattheis/goverter/execution.Input
-    |     | |
-    |     | |      | github.com/jmattheis/goverter/execution.Input
-    |     | |      |
-    source*.Inputs []
+    |       | []github.com/jmattheis/goverter/execution.Input
+    |       |
+    |       |      | github.com/jmattheis/goverter/execution.Input
+    |       |      |
+    source .Inputs []
     target*.Outputs[]
     |     | |      |
     |     | |      | github.com/jmattheis/goverter/execution.Output

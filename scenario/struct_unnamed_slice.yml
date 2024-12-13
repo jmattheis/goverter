@@ -35,11 +35,7 @@ success:
         			Name string
         		}, len(source.House))
         		for i := 0; i < len(source.House); i++ {
-        			var unnamed struct {
-        				Name string
-        			}
-        			unnamed.Name = source.House[i].Name
-        			structsOutput.House[i] = unnamed
+        			structsOutput.House[i].Name = source.House[i].Name
         		}
         	}
         	return structsOutput

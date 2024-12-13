@@ -3,18 +3,18 @@ input:
         package execution
 
         // goverter:converter
-        type Default interface {
+        type Converter interface {
             // goverter:default NewOutputWithDefaults
-            Convert(source *Input) (*Output, error)
+            Convert(source Input) (*Output, error)
         }
 
         // goverter:converter
         type Update interface {
-            // goverter:default NewOutputWithDefaults
             // goverter:default:update
-            Update(source *Input) (*Output, error)
+            // goverter:default NewOutputWithDefaults
+            Update(source Input) (*Output, error)
         }
-        type Input struct {  Name string }
+        type Input struct { Name string }
         type Output struct { Name string }
 
         func NewOutputWithDefaults() *Output {
@@ -28,24 +28,18 @@ success:
 
         import execution "github.com/jmattheis/goverter/execution"
 
-        type DefaultImpl struct{}
+        type ConverterImpl struct{}
 
-        func (c *DefaultImpl) Convert(source *execution.Input) (*execution.Output, error) {
+        func (c *ConverterImpl) Convert(source execution.Input) (*execution.Output, error) {
         	pExecutionOutput := execution.NewOutputWithDefaults()
-        	if source != nil {
-        		var executionOutput execution.Output
-        		executionOutput.Name = (*source).Name
-        		pExecutionOutput = &executionOutput
-        	}
+        	(*pExecutionOutput).Name = source.Name
         	return pExecutionOutput, nil
         }
 
         type UpdateImpl struct{}
 
-        func (c *UpdateImpl) Update(source *execution.Input) (*execution.Output, error) {
+        func (c *UpdateImpl) Update(source execution.Input) (*execution.Output, error) {
         	pExecutionOutput := execution.NewOutputWithDefaults()
-        	if source != nil {
-        		(*pExecutionOutput).Name = (*source).Name
-        	}
+        	(*pExecutionOutput).Name = source.Name
         	return pExecutionOutput, nil
         }

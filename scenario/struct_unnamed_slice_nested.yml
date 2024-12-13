@@ -40,16 +40,12 @@ success:
         					Names []string
         				}, len(source.House[i]))
         				for j := 0; j < len(source.House[i]); j++ {
-        					var unnamed struct {
-        						Names []string
-        					}
         					if source.House[i][j].Names != nil {
-        						unnamed.Names = make([]string, len(source.House[i][j].Names))
+        						structsOutput.House[i][j].Names = make([]string, len(source.House[i][j].Names))
         						for k := 0; k < len(source.House[i][j].Names); k++ {
-        							unnamed.Names[k] = source.House[i][j].Names[k]
+        							structsOutput.House[i][j].Names[k] = source.House[i][j].Names[k]
         						}
         					}
-        					structsOutput.House[i][j] = unnamed
         				}
         			}
         		}

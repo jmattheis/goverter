@@ -30,10 +30,6 @@ success:
 
         func (c *ConverterImpl) ConvertHouse(source execution.Input) execution.Output {
         	var structsOutput execution.Output
-        	var unnamed struct {
-        		Name string ` json:"lmao"   json:"other" xml:"abc"`
-        	}
-        	unnamed.Name = source.House.Name
-        	structsOutput.House = unnamed
+        	structsOutput.House.Name = source.House.Name
         	return structsOutput
         }

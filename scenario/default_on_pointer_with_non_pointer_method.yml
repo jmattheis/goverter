@@ -8,12 +8,15 @@ input:
             Convert(source *Input) (*Output)
         }
 
-        type Input struct {
-            Name       string
+        // goverter:converter
+        type Update interface {
+            // goverter:default NewOutput
+            // goverter:default:update
+            Update(source *Input) (*Output)
         }
-        type Output struct {
-            Name       string
-        }
+
+        type Input struct { Name string }
+        type Output struct { Name string }
 
         func NewOutput() Output {
             return Output{Name: "string"}
@@ -35,6 +38,17 @@ success:
         		var executionOutput2 execution.Output
         		executionOutput2.Name = (*source).Name
         		pExecutionOutput = &executionOutput2
+        	}
+        	return pExecutionOutput
+        }
+
+        type UpdateImpl struct{}
+
+        func (c *UpdateImpl) Update(source *execution.Input) *execution.Output {
+        	executionOutput := execution.NewOutput()
+        	pExecutionOutput := &executionOutput
+        	if source != nil {
+        		(*pExecutionOutput).Name = (*source).Name
         	}
         	return pExecutionOutput
         }
