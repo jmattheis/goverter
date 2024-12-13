@@ -1,4 +1,4 @@
-package config
+package parse
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-func parseCommand(value string) (string, string) {
+func Command(value string) (string, string) {
 	parts := strings.SplitN(value, " ", 2)
 	if len(parts) == 2 {
 		return parts[0], parts[1]
@@ -14,7 +14,7 @@ func parseCommand(value string) (string, string) {
 	return parts[0], ""
 }
 
-func parseEnum[T ~string](empty bool, remaining string, values ...T) (T, error) {
+func Enum[T ~string](empty bool, remaining string, values ...T) (T, error) {
 	fields := strings.Fields(remaining)
 
 	switch {
@@ -41,12 +41,12 @@ func formatValues[T ~string](values []T) string {
 	return strings.Join(strs, ", ")
 }
 
-func parseBool(remaining string) (bool, error) {
-	val, err := parseEnum(true, remaining, "yes", "no")
+func Bool(remaining string) (bool, error) {
+	val, err := Enum(true, remaining, "yes", "no")
 	return val == "" || val == "yes", err
 }
 
-func parseString(remaining string) (string, error) {
+func String(remaining string) (string, error) {
 	fields := strings.Fields(remaining)
 	if len(fields) != 1 {
 		return "", fmt.Errorf("must have one value but got %d: %#v", len(fields), remaining)
@@ -54,8 +54,8 @@ func parseString(remaining string) (string, error) {
 	return fields[0], nil
 }
 
-func parseRegex(remaining string) (*regexp.Regexp, error) {
-	value, err := parseString(remaining)
+func Regex(remaining string) (*regexp.Regexp, error) {
+	value, err := String(remaining)
 	if err != nil {
 		return nil, err
 	}

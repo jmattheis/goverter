@@ -6,6 +6,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/jmattheis/goverter/config/parse"
 	"github.com/jmattheis/goverter/method"
 )
 
@@ -104,7 +105,7 @@ func parseMethod(ctx *context, c *Converter, obj types.Object, rawMethod RawLine
 }
 
 func parseMethodLine(ctx *context, c *Converter, m *Method, value string) (err error) {
-	cmd, rest := parseCommand(value)
+	cmd, rest := parse.Command(value)
 	fieldSetting := false
 	switch cmd {
 	case configMap:
@@ -135,7 +136,7 @@ func parseMethodLine(ctx *context, c *Converter, m *Method, value string) (err e
 			m.Field(f).Ignore = true
 		}
 	case "update":
-		m.updateParam, err = parseString(rest)
+		m.updateParam, err = parse.String(rest)
 	case "enum:map":
 		fields := strings.Fields(rest)
 		if len(fields) != 2 {
@@ -161,7 +162,7 @@ func parseMethodLine(ctx *context, c *Converter, m *Method, value string) (err e
 	case "autoMap":
 		fieldSetting = true
 		var s string
-		s, err = parseString(rest)
+		s, err = parse.String(rest)
 		m.AutoMap = append(m.AutoMap, strings.TrimSpace(s))
 	case configDefault:
 		opts := &method.ParseOpts{

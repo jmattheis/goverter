@@ -3,6 +3,7 @@ package config
 import (
 	"strings"
 
+	"github.com/jmattheis/goverter/config/parse"
 	"github.com/jmattheis/goverter/pkgload"
 )
 
@@ -27,7 +28,7 @@ func getPackages(raw *Raw) []string {
 
 func registerConverterLines(lookup map[string]struct{}, cwd string, lines RawLines) {
 	for _, line := range lines.Lines {
-		cmd, rest := parseCommand(line)
+		cmd, rest := parse.Command(line)
 		if cmd == configExtend {
 			for _, fullMethod := range strings.Fields(rest) {
 				registerFullMethod(lookup, cwd, fullMethod)
@@ -38,7 +39,7 @@ func registerConverterLines(lookup map[string]struct{}, cwd string, lines RawLin
 
 func registerMethodLines(lookup map[string]struct{}, cwd string, lines RawLines) {
 	for _, line := range lines.Lines {
-		cmd, rest := parseCommand(line)
+		cmd, rest := parse.Command(line)
 		switch cmd {
 		case configMap:
 			if _, _, custom, err := parseMethodMap(rest); err == nil && custom != "" {

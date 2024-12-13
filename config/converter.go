@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 
+	"github.com/jmattheis/goverter/config/parse"
 	"github.com/jmattheis/goverter/enum"
 	"github.com/jmattheis/goverter/method"
 	"github.com/jmattheis/goverter/pkgload"
@@ -151,7 +152,7 @@ func parseConverterLines(ctx *context, c *Converter, source string, raw RawLines
 }
 
 func parseConverterLine(ctx *context, c *Converter, value string) (err error) {
-	cmd, rest := parseCommand(value)
+	cmd, rest := parse.Command(value)
 	switch cmd {
 	case "converter", "variables":
 		// only a marker interface
@@ -159,17 +160,17 @@ func parseConverterLine(ctx *context, c *Converter, value string) (err error) {
 		if err = c.requireStruct(); err != nil {
 			return err
 		}
-		c.Name, err = parseString(rest)
+		c.Name, err = parse.String(rest)
 	case "output:raw":
 		c.OutputRaw = append(c.OutputRaw, rest)
 	case "output:file":
-		c.OutputFile, err = parseString(rest)
+		c.OutputFile, err = parse.String(rest)
 	case "output:format":
 		if len(c.Extend) != 0 {
 			return fmt.Errorf("Cannot change output:format after extend functions have been added.\nMove the extend below the output:format setting.")
 		}
 
-		c.OutputFormat, err = parseEnum(false, rest, FormatFunction, FormatStruct, FormatVariable)
+		c.OutputFormat, err = parse.Enum(false, rest, FormatFunction, FormatStruct, FormatVariable)
 		if err != nil {
 			return err
 		}
@@ -183,7 +184,7 @@ func parseConverterLine(ctx *context, c *Converter, value string) (err error) {
 	case "output:package":
 		c.OutputPackageName = ""
 		var pkg string
-		pkg, err = parseString(rest)
+		pkg, err = parse.String(rest)
 
 		parts := strings.SplitN(pkg, ":", 2)
 		switch len(parts) {
