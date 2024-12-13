@@ -1,14 +1,16 @@
 package builder
 
 import (
+	"go/types"
+
 	"github.com/dave/jennifer/jen"
 	"github.com/jmattheis/goverter/xtype"
 )
 
 func buildTargetVar(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type, errPath ErrorPath) ([]jen.Code, *jen.Statement, *Error) {
 	if ctx.Conf.Constructor == nil ||
-		ctx.Conf.Source.String != source.String ||
-		ctx.Conf.Target.String != target.String {
+		!types.Identical(ctx.Conf.Source.T, source.T) ||
+		!types.Identical(ctx.Conf.Target.T, target.T) {
 		name := ctx.Name(target.ID())
 		variable := jen.Var().Id(name).Add(target.TypeAsJen())
 		ctx.SetErrorTargetVar(jen.Id(name))
