@@ -1,6 +1,7 @@
 package example
 
 // goverter:converter
+// goverter:default:update
 type Converter interface {
 	// goverter:default NewOutput
 	Convert(*Input) *Output

@@ -7,6 +7,7 @@ import GH from './GH.vue';
 ## unreleased
 
 - Fix not setting `nil` on map when value is `nil`. <GH issue="173" pr="175"/>
+- Add [`default:update`](/reference/default.md#default-update-yes-no) <GH issue="171" pr="175"/>
 
 ## v1.6.0
 

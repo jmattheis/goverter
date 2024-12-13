@@ -142,6 +142,7 @@ func (g *generator) buildMethod(genMethod *generatedMethod, context map[string]*
 		Signature:         genMethod.Signature,
 		HasMethod:         g.hasMethod,
 		OutputPackagePath: g.conf.OutputPackagePath,
+		UseConstructor:    genMethod.Constructor != nil,
 	}
 
 	var targetAssign *jen.Statement

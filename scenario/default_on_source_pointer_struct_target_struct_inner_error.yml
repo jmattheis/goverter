@@ -1,0 +1,40 @@
+input:
+    input.go: |
+        package execution
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:default NewOutputWithDefaults
+            // goverter:default:update
+            Convert(source Input) (*Output, error)
+        }
+        type Input struct { Name int }
+        type Output struct { Name string }
+
+        func NewOutputWithDefaults() *Output {
+            return &Output{ Name: "string" }
+        }
+error: |-
+    Error while creating converter method:
+        @workdir/input.go:7
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.Input) (*github.com/jmattheis/goverter/execution.Output, error)
+            [source] github.com/jmattheis/goverter/execution.Input
+            [target] *github.com/jmattheis/goverter/execution.Output
+
+    | github.com/jmattheis/goverter/execution.Input
+    |
+    |       | int
+    |       |
+    source .Name
+    target*.Name
+    |     | |
+    |     | | string
+    |     |
+    |     | github.com/jmattheis/goverter/execution.Output
+    |
+    | *github.com/jmattheis/goverter/execution.Output
+
+    TypeMismatch: Cannot convert int to string
+
+    You can define a custom conversion method with extend:
+    https://goverter.jmattheis.de/reference/extend

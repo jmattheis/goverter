@@ -24,11 +24,9 @@ error: |-
 
     | github.com/jmattheis/goverter/execution.Input
     |
-    |     | github.com/jmattheis/goverter/execution.Input
-    |     |
-    |     | | int
-    |     | |
-    source*.Age
+    |       | int
+    |       |
+    source .Age
     target*.Age
     |     | |
     |     | | int64

@@ -196,6 +196,16 @@ func (j *JenID) Pointer(t *Type, namer func(string) string) ([]jen.Code, *JenID)
 	return stmt, OtherID(jen.Op("&").Id(name))
 }
 
+func (j *JenID) Deref(source *Type) *JenID {
+	valueSourceID := jen.Op("*").Add(j.Code.Clone())
+	if !source.PointerInner.Basic {
+		valueSourceID = jen.Parens(valueSourceID)
+	}
+	innerID := OtherID(valueSourceID)
+	innerID.ParentPointer = j
+	return innerID
+}
+
 // VariableID is used, when the ID can be referenced. F.ex it is not a function call.
 func VariableID(code *jen.Statement) *JenID {
 	return &JenID{Code: code, Variable: true}

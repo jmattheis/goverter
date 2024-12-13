@@ -8,7 +8,7 @@ import (
 )
 
 func buildTargetVar(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type, errPath ErrorPath) ([]jen.Code, *jen.Statement, *Error) {
-	if ctx.Conf.Constructor == nil ||
+	if !ctx.UseConstructor ||
 		!types.Identical(ctx.Conf.Source.T, source.T) ||
 		!types.Identical(ctx.Conf.Target.T, target.T) {
 		name := ctx.Name(target.ID())
@@ -16,6 +16,7 @@ func buildTargetVar(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, so
 		ctx.SetErrorTargetVar(jen.Id(name))
 		return []jen.Code{variable}, jen.Id(name), nil
 	}
+	ctx.UseConstructor = false
 
 	callTarget := target
 	toPointer := target.Pointer && !ctx.Conf.Constructor.Target.Pointer

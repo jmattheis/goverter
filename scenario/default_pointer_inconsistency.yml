@@ -9,16 +9,18 @@ input:
             Convert(source *Input) Output
         }
 
-        type Input struct {
-            ID int
+        // goverter:converter
+        // goverter:useZeroValueOnPointerInconsistency
+        type Update interface {
+            // goverter:default NewOutput
+            // goverter:default:update
+            ConvertUpdate(source *Input) Output
         }
-        type Output struct {
-            ID int
-        }
+
+        type Input struct { ID int }
+        type Output struct { ID int }
         func NewOutput() Output {
-            return Output{
-                ID: 0,
-            }
+            return Output{ ID: 0 }
         }
 success:
     - generated/generated.go: |
@@ -36,6 +38,16 @@ success:
         		var executionOutput2 execution.Output
         		executionOutput2.ID = (*source).ID
         		executionOutput = executionOutput2
+        	}
+        	return executionOutput
+        }
+
+        type UpdateImpl struct{}
+
+        func (c *UpdateImpl) ConvertUpdate(source *execution.Input) execution.Output {
+        	executionOutput := execution.NewOutput()
+        	if source != nil {
+        		executionOutput.ID = (*source).ID
         	}
         	return executionOutput
         }

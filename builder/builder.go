@@ -64,6 +64,7 @@ type MethodContext struct {
 	Conf              *config.Method
 	FieldsTarget      string
 	OutputPackagePath string
+	UseConstructor    bool
 	Signature         xtype.Signature
 	TargetType        *xtype.Type
 	HasMethod         func(*MethodContext, types.Type, types.Type) bool

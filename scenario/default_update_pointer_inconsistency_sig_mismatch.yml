@@ -1,0 +1,40 @@
+input:
+    input.go: |
+        package execution
+
+        // goverter:converter
+        // goverter:useZeroValueOnPointerInconsistency
+        // goverter:default:update
+        type Converter interface {
+            // goverter:default NewOutput
+            Convert(source *Input) Output
+        }
+
+        type Input struct {
+            ID int
+        }
+        type Output struct {
+            ID int
+        }
+        func NewOutput() string {
+            return ""
+        }
+error: |-
+    Error while creating converter method:
+        @workdir/input.go:8
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source *github.com/jmattheis/goverter/execution.Input) github.com/jmattheis/goverter/execution.Output
+            [source] *github.com/jmattheis/goverter/execution.Input
+            [target] github.com/jmattheis/goverter/execution.Output
+
+    | *github.com/jmattheis/goverter/execution.Input
+    |
+    source
+    target
+    |
+    | github.com/jmattheis/goverter/execution.Output
+
+    Error using method:
+        func github.com/jmattheis/goverter/execution.NewOutput() string
+            [target] string
+
+    Method return type mismatches with target: string != github.com/jmattheis/goverter/execution.Output

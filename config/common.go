@@ -20,6 +20,7 @@ type Common struct {
 	SkipCopySameType                   bool
 	UseZeroValueOnPointerInconsistency bool
 	UseUnderlyingTypeMethods           bool
+	DefaultUpdate                      bool
 	ArgContextRegex                    *regexp.Regexp
 	Enum                               enum.Config
 }
@@ -45,14 +46,13 @@ func parseCommon(c *Common, cmd, rest string) (fieldSetting bool, err error) {
 		c.IgnoreStructZeroValueField = c.IgnoreBasicZeroValueField
 		c.IgnoreNillableZeroValueField = c.IgnoreBasicZeroValueField
 	case "update:ignoreZeroValueField:basic":
-		fieldSetting = true
 		c.IgnoreBasicZeroValueField, err = parseBool(rest)
 	case "update:ignoreZeroValueField:struct":
-		fieldSetting = true
 		c.IgnoreStructZeroValueField, err = parseBool(rest)
 	case "update:ignoreZeroValueField:nillable":
-		fieldSetting = true
 		c.IgnoreNillableZeroValueField, err = parseBool(rest)
+	case "default:update":
+		c.DefaultUpdate, err = parseBool(rest)
 	case "matchIgnoreCase":
 		fieldSetting = true
 		c.MatchIgnoreCase, err = parseBool(rest)

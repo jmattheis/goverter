@@ -25,9 +25,7 @@ error: |-
 
     | github.com/jmattheis/goverter/execution.Input
     |
-    |     | github.com/jmattheis/goverter/execution.Input
-    |     |
-    source*
+    source
     target*
     |     |
     |     | github.com/jmattheis/goverter/execution.Output
