@@ -22,7 +22,7 @@ func (p *Pointer) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID
 			return nil, nil, err
 		}
 
-		stmt, err := gen.Assign(ctx, AssignOf(jen.Parens(jen.Op("*").Add(valueVar))), sourceID.Deref(source), source.PointerInner, target.PointerInner, errPath)
+		stmt, err := gen.Assign(ctx, AssignOf(jen.Parens(jen.Op("*").Add(valueVar))).IsUpdate(), sourceID.Deref(source), source.PointerInner, target.PointerInner, errPath)
 		if err != nil {
 			return nil, nil, err.Lift(&Path{
 				SourceID:   "*",
@@ -81,7 +81,7 @@ func (s *SourcePointer) Build(gen Generator, ctx *MethodContext, sourceID *xtype
 			return nil, nil, err
 		}
 
-		stmt, err := gen.Assign(ctx, AssignOf(valueVar), sourceID.Deref(source), source.PointerInner, target, path)
+		stmt, err := gen.Assign(ctx, AssignOf(valueVar).IsUpdate(), sourceID.Deref(source), source.PointerInner, target, path)
 		if err != nil {
 			return nil, nil, err.Lift(&Path{
 				SourceID:   "*",
@@ -133,7 +133,7 @@ func (*TargetPointer) Build(gen Generator, ctx *MethodContext, sourceID *xtype.J
 			return nil, nil, err
 		}
 
-		stmt, err := gen.Assign(ctx, AssignOf(jen.Parens(jen.Op("*").Add(valueVar))), sourceID, source, target.PointerInner, path)
+		stmt, err := gen.Assign(ctx, AssignOf(jen.Parens(jen.Op("*").Add(valueVar))).IsUpdate(), sourceID, source, target.PointerInner, path)
 		if err != nil {
 			return nil, nil, err.Lift(&Path{
 				TargetID:   "*",

@@ -16,6 +16,15 @@ input:
             // goverter:useZeroValueOnPointerInconsistency
             Update(source *Input) (Output, error)
         }
+
+        // goverter:converter
+        type UpdateUpdate interface {
+            // goverter:default NewOutputWithDefaults
+            // goverter:default:update
+            // goverter:update:ignoreZeroValueField
+            // goverter:useZeroValueOnPointerInconsistency
+            Update(source *Input) (Output, error)
+        }
         type Input struct { Name string }
         type Output struct { Name string }
 
@@ -48,6 +57,18 @@ success:
         	executionOutput := execution.NewOutputWithDefaults()
         	if source != nil {
         		executionOutput.Name = (*source).Name
+        	}
+        	return executionOutput, nil
+        }
+
+        type UpdateUpdateImpl struct{}
+
+        func (c *UpdateUpdateImpl) Update(source *execution.Input) (execution.Output, error) {
+        	executionOutput := execution.NewOutputWithDefaults()
+        	if source != nil {
+        		if (*source).Name != "" {
+        			executionOutput.Name = (*source).Name
+        		}
         	}
         	return executionOutput, nil
         }

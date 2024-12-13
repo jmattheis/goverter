@@ -6,8 +6,9 @@ import (
 )
 
 type AssignTo struct {
-	Must bool
-	Stmt *jen.Statement
+	Stmt   *jen.Statement
+	Must   bool
+	Update bool
 }
 
 func AssignOf(s *jen.Statement) *AssignTo {
@@ -22,6 +23,11 @@ func (a *AssignTo) WithIndex(s *jen.Statement) *AssignTo {
 
 func (a *AssignTo) MustAssign() *AssignTo {
 	a.Must = true
+	return a
+}
+
+func (a *AssignTo) IsUpdate() *AssignTo {
+	a.Update = true
 	return a
 }
 

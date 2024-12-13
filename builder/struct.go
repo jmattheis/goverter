@@ -79,7 +79,7 @@ func (s *Struct) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, s
 			if err != nil {
 				return nil, err.Lift(lift...)
 			}
-			if shouldCheckAgainstZero(ctx, nextSource, targetFieldType, false) {
+			if shouldCheckAgainstZero(ctx, nextSource, targetFieldType, assignTo.Update, false) {
 				stmt = append(stmt, jen.If(nextID.Code.Clone().Op("!=").Add(xtype.ZeroValue(nextSource.T))).Block(fieldStmt...))
 			} else {
 				stmt = append(stmt, fieldStmt...)
@@ -121,7 +121,7 @@ func (s *Struct) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, s
 			}
 			callStmt = append(callStmt, assignTo.Stmt.Clone().Dot(targetField.Name()).Op("=").Add(callReturnID.Code))
 
-			if shouldCheckAgainstZero(ctx, functionCallSourceType, targetFieldType, true) {
+			if shouldCheckAgainstZero(ctx, functionCallSourceType, targetFieldType, assignTo.Update, true) {
 				stmt = append(stmt, jen.If(functionCallSourceID.Code.Clone().Op("!=").Add(xtype.ZeroValue(functionCallSourceType.T))).Block(callStmt...))
 			} else {
 				stmt = append(stmt, callStmt...)
@@ -143,9 +143,9 @@ func (s *Struct) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, s
 	return stmt, nil
 }
 
-func shouldCheckAgainstZero(ctx *MethodContext, s, t *xtype.Type, call bool) bool {
+func shouldCheckAgainstZero(ctx *MethodContext, s, t *xtype.Type, isUpdate, call bool) bool {
 	switch {
-	case !ctx.Conf.UpdateTarget:
+	case !ctx.Conf.UpdateTarget && !isUpdate:
 		return false
 	case s.Struct && ctx.Conf.IgnoreStructZeroValueField:
 		return true
