@@ -100,6 +100,7 @@ export default defineConfig({
                 collapsed: true,
                 items: [
                   { text: "autoMap", link: "/reference/autoMap" },
+                  { text: "context", link: "/reference/context" },
                   { text: "default", link: "/reference/default" },
                   { text: "ignore", link: "/reference/ignore" },
                   { text: "map", link: "/reference/map" },

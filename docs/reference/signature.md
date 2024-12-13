@@ -34,15 +34,16 @@ Goverter groups **params** and **results** into these categories:
 
 1. `source` is a **param** that will be converted to the `target` type. Any
    **param** that is not a `context` type is a `source` type.
-1. `target` is the **first result** which `sources` are converted to.
+1. `target` is the **first result** or the argument defined with
+   [`update`](./update.md)  which `sources` are converted to.
 1. `target_error` is the **second result** type which can be specified if the
    conversion fails. `target_error` must be of type
    [`error`](https://go.dev/tour/methods/19)
-1. `context` are **[named](#named-paramsresults) params** where the name starts
-   with `ctx` or `context`. The regex can be adjusted via
-   [`arg:context:regex`](./arg.md#arg-context-regex). They are used in
-   [custom functions](#custom-function) for manual conversion. `context` types
-   aren't used for automatic conversion.
+1. `context` are **[named](#named-paramsresults) params** where the argument is
+   defined with [`context`](./context.md). Or matching the regex
+   [`arg:context:regex`](./arg.md#arg-context-regex) They are used in [custom
+   functions](#custom-function) for manual conversion. `context` types aren't
+   used for automatic conversion.
 
 ### Default context
 
@@ -87,10 +88,13 @@ type Converter interface {
     ConvertTwo(source A) (B, error)
     // A=source; B=target; error=target_error
 
-    ConvertThree(source A, ctx B) C
+    // goverter:context b
+    ConvertThree(source A, b B) C
     // A=source; B=context; B=target
 
-    ConvertFour(ctxOne A, source B, ctxSecond C) (D, error)
+    // goverter:context one
+    // goverter:context two
+    ConvertFour(one A, source B, two C) (D, error)
     // A=context; B=source; C=context; D=target; error=target_error
 }
 ```
@@ -115,6 +119,7 @@ type Converter interface {
     // A=source; B=target
     ConvertTwo(source A, target B) error
     // A=source; B=target; error=target_error
+    // goverter:context ctx
     ConvertThree(target A, source B, ctx C)
     // A=target; B=source; C=context
 }
@@ -146,14 +151,15 @@ func ConvertThree(input A) B {/**/}
 func ConvertFour(input A) (B, error) {/**/}
 // A=source; B=target; error=target_error
 
-func ConvertFour(ctxOne A, ctxTwo B) C {/**/}
+// goverter:context one
+// goverter:context two
+func ConvertFour(one A, two B) C {/**/}
 // A=context; B=context; C=target
 
-func ConvertFive(input A, ctxOne B, ctxTwo C) D {/**/}
+// goverter:context one
+// goverter:context two
+func ConvertFive(input A, one B, two C) D {/**/}
 // A=source; B=context; C=context; D=target
-
-func ConvertSix(ctxOne A, source B ctxTwo C) (D, error) {/**/}
-// A=context; B=source; C=context; D=target; error=target_error
 ```
 
 ::: details Example (click to expand)
@@ -180,13 +186,18 @@ func ConvertOne(input A) B {/**/}
 func ConvertTwo(input A) (B, error) {/**/}
 // A=source; B=target; error=target_error
 
-func ConvertThree(input A, ctxOne B) C {/**/}
+// goverter:context one
+func ConvertThree(input A, one B) C {/**/}
 // A=source; B=context; C=target
 
-func ConvertFour(input A, ctxOne B, ctxTwo C) D {/**/}
+// goverter:context one
+// goverter:context two
+func ConvertFour(input A, one B, two C) D {/**/}
 // A=source; B=context; C=context; D=target
 
-func ConvertFive(ctxOne A, source B ctxTwo C) (D, error) {/**/}
+// goverter:context one
+// goverter:context two
+func ConvertFive(one A, source B, two C) (D, error) {/**/}
 // A=context; B=source; C=context; D=target; error=target_error
 ```
 

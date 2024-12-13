@@ -8,6 +8,7 @@ input:
             Convert(source []string) []Output
         }
 
+        // goverter:context ctx
         func DoLookup(id string, ctx map[string]Output) Output {
             return ctx[id]
         }

@@ -30,6 +30,7 @@ type Method struct {
 
 	Location    string
 	updateParam string
+	localOpts   method.LocalOpts
 }
 
 type FieldMapping struct {
@@ -61,11 +62,11 @@ func parseMethods(ctx *context, rawConverter *RawConverter, c *Converter) error 
 		return nil
 	}
 	for name, lines := range rawConverter.Methods {
-		fun, err := ctx.Loader.GetOneRaw(c.Package, name)
+		_, fn, err := ctx.Loader.GetOneRaw(c.Package, name)
 		if err != nil {
 			return err
 		}
-		def, err := parseMethod(ctx, c, fun, lines)
+		def, err := parseMethod(ctx, c, fn, lines)
 		if err != nil {
 			return err
 		}
@@ -80,6 +81,7 @@ func parseMethod(ctx *context, c *Converter, obj types.Object, rawMethod RawLine
 		Fields:      map[string]*FieldMapping{},
 		Location:    rawMethod.Location,
 		EnumMapping: &EnumMapping{Map: map[string]string{}},
+		localOpts:   method.LocalOpts{Context: map[string]bool{}},
 	}
 
 	for _, value := range rawMethod.Lines {
@@ -97,7 +99,7 @@ func parseMethod(ctx *context, c *Converter, obj types.Object, rawMethod RawLine
 		ContextMatch:      m.ArgContextRegex,
 		Generated:         true,
 		UpdateParam:       m.updateParam,
-	})
+	}, m.localOpts)
 
 	m.Definition = def
 
@@ -137,6 +139,10 @@ func parseMethodLine(ctx *context, c *Converter, m *Method, value string) (err e
 		}
 	case "update":
 		m.updateParam, err = parse.String(rest)
+	case "context":
+		var key string
+		key, err = parse.String(rest)
+		m.localOpts.Context[key] = true
 	case "enum:map":
 		fields := strings.Fields(rest)
 		if len(fields) != 2 {

@@ -6,13 +6,17 @@ input:
         // goverter:extend LookupInt
         // goverter:extend LookupBool
         type Converter interface {
+            // goverter:context ctxInt
+            // goverter:context ctxBool
             Convert(source []Input, ctxInt map[string]int, ctxBool map[string]bool) []Output
         }
 
+        // goverter:context ctx
         func LookupBool(id string, ctx map[string]bool) bool {
             return ctx[id]
         }
 
+        // goverter:context ctx
         func LookupInt(id string, ctx map[string]int) int {
             return ctx[id]
         }

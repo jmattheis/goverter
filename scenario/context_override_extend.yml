@@ -6,6 +6,7 @@ input:
         // goverter:extend Two
         // goverter:extend One
         type Conv1 interface {
+            // goverter:context ctx
             Convert(source []string, ctx map[string]Output) []Output
         }
 
@@ -13,9 +14,11 @@ input:
         // goverter:extend One
         // goverter:extend Two
         type Conv2 interface {
+            // goverter:context ctx
             Convert(source []string, ctx map[string]Output) []Output
         }
 
+        // goverter:context ctx
         func One(id string, ctx map[string]Output) Output { return ctx[id] }
         func Two(id string) Output { return Output{} }
 

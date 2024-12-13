@@ -5,9 +5,11 @@ input:
         // goverter:converter
         // goverter:extend DoLookup
         type Converter interface {
+            // goverter:context ctx
             Convert(source []string, ctx map[string]int) []Output
         }
 
+        // goverter:context ctx
         func DoLookup(id string, ctx map[string]Output) Output {
             return ctx[id]
         }
@@ -18,7 +20,7 @@ input:
         }
 error: |-
     Error while creating converter method:
-        @workdir/input.go:6
+        @workdir/input.go:7
         func (github.com/jmattheis/goverter/execution.Converter).Convert(source []string, ctx map[string]int) []github.com/jmattheis/goverter/execution.Output
             [source] []string
             [context] map[string]int

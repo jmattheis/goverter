@@ -6,8 +6,13 @@ import GH from './GH.vue';
 
 ## unreleased
 
-- Fix not setting `nil` on map when value is `nil`. <GH issue="173" pr="175"/>
 - Add [`default:update`](/reference/default.md#default-update-yes-no) <GH issue="171" pr="175"/>
+- Add [`context`](./reference/context.md). See [Guide: Pass context to
+  functions](./guide/context.md) <GH issue="68" pr="176"/>
+- Remove default value of [`arg:context:regex`](./reference/arg.md) <GH issue="68" pr="176"/>
+  - To get v1.6.0 behavior, configure: `goverter:arg:context:regex ^ctx|^context`
+  - The recommended way to configure context is to use [`context`](./reference/context.md).
+- Fix not setting `nil` on map when value is `nil`. <GH issue="173" pr="175"/>
 
 ## v1.6.0
 

@@ -26,6 +26,7 @@ These settings can only be defined as [CLI argument](./define-settings.md#cli) o
 These settings can only be defined as [method comment](./define-settings.md#method).
 
 - [`autoMap PATH` automatically match fields from a sub struct to the target struct](./autoMap.md)
+- [`context ARG` define an argument as context](./context.md)
 - [`default [PACKAGE:]FUNC` define default target value](./default.md)
 - [`enum:map SOURCE TARGET` define an enum value mapping](./enum.md#enum-map-source-target)
 - [`enum:transform ID CONFIG` use an enum value transformer](./enum.md#enum-transform-id-config)
@@ -57,3 +58,9 @@ These settings can be defined as [CLI argument](./define-settings.md#cli),
 - [`useZeroValueOnPointerInconsistency [yes|no]` Use zero values for `*S` to `T` conversions](./useZeroValueOnPointerInconsistency.md)
 - [`wrapErrorsUsing [PACKAGE]` wrap errors using a custom implementation](./wrapErrorsUsing.md)
 - [`wrapErrors [yes,no]` wrap errors with extra information](./wrapErrors.md)
+
+## Custom Function
+
+These settings can only be defined as [custom function comment](./define-settings.md#custom-function).
+
+- [`context ARG` define an argument as context](./context.md)

@@ -5,6 +5,7 @@ input:
         // goverter:converter
         // goverter:extend InputToOutput
         type Converter interface {
+            // goverter:context ctx
             Convert(source Input, ctx string) Output
         }
 
@@ -16,6 +17,7 @@ input:
             ID int
             Age string
         }
+        // goverter:context ctx
         func InputToOutput(source Input, ctx string) Output {
             return Output{}
         }

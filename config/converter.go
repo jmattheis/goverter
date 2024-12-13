@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"go/types"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"github.com/jmattheis/goverter/config/parse"
@@ -26,8 +25,7 @@ const (
 )
 
 var DefaultCommon = Common{
-	Enum:            enum.Config{Enabled: true},
-	ArgContextRegex: regexp.MustCompile("^ctx|^context"),
+	Enum: enum.Config{Enabled: true},
 }
 
 var DefaultConfigInterface = ConverterConfig{
@@ -124,12 +122,12 @@ func initConverter(loader *pkgload.PackageLoader, rawConverter *RawConverter) (*
 
 	if rawConverter.InterfaceName != "" {
 		c.ConverterConfig = DefaultConfigInterface
-		v, err := loader.GetOneRaw(c.Package, rawConverter.InterfaceName)
+		_, interfaceObj, err := loader.GetOneRaw(c.Package, rawConverter.InterfaceName)
 		if err != nil {
 			return nil, err
 		}
 
-		c.typ = v.Type()
+		c.typ = interfaceObj.Type()
 		c.Name = rawConverter.InterfaceName + "Impl"
 		return c, nil
 	}

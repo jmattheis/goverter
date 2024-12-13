@@ -268,7 +268,7 @@ func mapField(
 			Params:            method.ParamsNone,
 			ContextMatch:      config.StructMethodContextRegex,
 			CustomCall:        nextIDCode,
-		})
+		}, method.EmptyLocalOpts)
 		if err != nil {
 			return nil, nil, nil, nil, false, NewError(err.Error()).Lift(lift...)
 		}

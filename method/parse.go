@@ -35,8 +35,14 @@ type ParseOpts struct {
 	UpdateParam string
 }
 
+type LocalOpts struct {
+	Context map[string]bool
+}
+
+var EmptyLocalOpts = LocalOpts{Context: map[string]bool{}}
+
 // Parse parses an function into a Definition.
-func Parse(obj types.Object, opts *ParseOpts) (*Definition, error) {
+func Parse(obj types.Object, opts *ParseOpts, localOpts LocalOpts) (*Definition, error) {
 	methodDef := &Definition{
 		ID:         obj.String(),
 		OriginID:   obj.String(),
@@ -94,7 +100,7 @@ func Parse(obj types.Object, opts *ParseOpts) (*Definition, error) {
 			default:
 				return nil, formatErr("The signature one non 'error' result or multiple results is not supported for goverter:update signatures.")
 			}
-		case opts.ContextMatch.MatchString(arg.Name):
+		case (opts.ContextMatch != nil && opts.ContextMatch.MatchString(arg.Name)) || localOpts.Context[arg.Name]:
 			methodDef.Context[arg.Type.String] = arg.Type
 			arg.Use = ArgUseContext
 		case methodDef.Source == nil:
