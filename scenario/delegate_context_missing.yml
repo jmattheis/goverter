@@ -16,6 +16,7 @@ input:
             ID int
             Age string
         }
+        // goverter:context ctx
         func InputToOutput(source Input, ctx string) Output {
             return Output{}
         }

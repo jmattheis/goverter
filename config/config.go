@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 
+	"github.com/jmattheis/goverter/config/parse"
 	"github.com/jmattheis/goverter/enum"
 	"github.com/jmattheis/goverter/pkgload"
 )
@@ -64,7 +65,7 @@ func Parse(raw *Raw) ([]*Converter, error) {
 }
 
 func formatLineError(lines RawLines, t, value string, err error) error {
-	cmd, _ := parseCommand(value)
+	cmd, _ := parse.Command(value)
 	msg := `error parsing 'goverter:%s' at
     %s
     %s

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 
+	"github.com/jmattheis/goverter/config/parse"
 	"github.com/jmattheis/goverter/enum"
 )
 
@@ -31,46 +32,46 @@ func parseCommon(c *Common, cmd, rest string) (fieldSetting bool, err error) {
 		if c.WrapErrorsUsing != "" {
 			return false, fmt.Errorf("cannot be used in combination with wrapErrorsUsing")
 		}
-		c.WrapErrors, err = parseBool(rest)
+		c.WrapErrors, err = parse.Bool(rest)
 	case "wrapErrorsUsing":
 		if c.WrapErrors {
 			return false, fmt.Errorf("cannot be used in combination with wrapErrors")
 		}
-		c.WrapErrorsUsing, err = parseString(rest)
+		c.WrapErrorsUsing, err = parse.String(rest)
 	case "ignoreUnexported":
 		fieldSetting = true
-		c.IgnoreUnexported, err = parseBool(rest)
+		c.IgnoreUnexported, err = parse.Bool(rest)
 	case "update:ignoreZeroValueField":
 		fieldSetting = true
-		c.IgnoreBasicZeroValueField, err = parseBool(rest)
+		c.IgnoreBasicZeroValueField, err = parse.Bool(rest)
 		c.IgnoreStructZeroValueField = c.IgnoreBasicZeroValueField
 		c.IgnoreNillableZeroValueField = c.IgnoreBasicZeroValueField
 	case "update:ignoreZeroValueField:basic":
-		c.IgnoreBasicZeroValueField, err = parseBool(rest)
+		c.IgnoreBasicZeroValueField, err = parse.Bool(rest)
 	case "update:ignoreZeroValueField:struct":
-		c.IgnoreStructZeroValueField, err = parseBool(rest)
+		c.IgnoreStructZeroValueField, err = parse.Bool(rest)
 	case "update:ignoreZeroValueField:nillable":
-		c.IgnoreNillableZeroValueField, err = parseBool(rest)
+		c.IgnoreNillableZeroValueField, err = parse.Bool(rest)
 	case "default:update":
-		c.DefaultUpdate, err = parseBool(rest)
+		c.DefaultUpdate, err = parse.Bool(rest)
 	case "matchIgnoreCase":
 		fieldSetting = true
-		c.MatchIgnoreCase, err = parseBool(rest)
+		c.MatchIgnoreCase, err = parse.Bool(rest)
 	case "ignoreMissing":
 		fieldSetting = true
-		c.IgnoreMissing, err = parseBool(rest)
+		c.IgnoreMissing, err = parse.Bool(rest)
 	case "skipCopySameType":
-		c.SkipCopySameType, err = parseBool(rest)
+		c.SkipCopySameType, err = parse.Bool(rest)
 	case "useZeroValueOnPointerInconsistency":
-		c.UseZeroValueOnPointerInconsistency, err = parseBool(rest)
+		c.UseZeroValueOnPointerInconsistency, err = parse.Bool(rest)
 	case "useUnderlyingTypeMethods":
-		c.UseUnderlyingTypeMethods, err = parseBool(rest)
+		c.UseUnderlyingTypeMethods, err = parse.Bool(rest)
 	case "enum":
-		c.Enum.Enabled, err = parseBool(rest)
+		c.Enum.Enabled, err = parse.Bool(rest)
 	case "arg:context:regex":
-		c.ArgContextRegex, err = parseRegex(rest)
+		c.ArgContextRegex, err = parse.Regex(rest)
 	case "enum:unknown":
-		c.Enum.Unknown, err = parseString(rest)
+		c.Enum.Unknown, err = parse.String(rest)
 		if err == nil && IsEnumAction(c.Enum.Unknown) {
 			err = validateEnumAction(c.Enum.Unknown)
 		}

@@ -2,10 +2,12 @@ package pkgload
 
 import (
 	"fmt"
+	"go/ast"
 	"go/types"
 	"regexp"
 	"strings"
 
+	"github.com/jmattheis/goverter/config/parse"
 	"github.com/jmattheis/goverter/method"
 	"golang.org/x/tools/go/packages"
 )
@@ -13,6 +15,7 @@ import (
 func New(workDir, buildTags string, paths []string) (*PackageLoader, error) {
 	loader := &PackageLoader{
 		lookup: map[string]*packages.Package{},
+		locals: map[string]map[string]method.LocalOpts{},
 	}
 	err := loader.load(workDir, buildTags, paths)
 	return loader, err
@@ -20,6 +23,7 @@ func New(workDir, buildTags string, paths []string) (*PackageLoader, error) {
 
 type PackageLoader struct {
 	lookup map[string]*packages.Package
+	locals map[string]map[string]method.LocalOpts
 }
 
 func (g *PackageLoader) GetMatching(cwd, fullMethod string, opts *method.ParseOpts) ([]*method.Definition, error) {
@@ -62,7 +66,7 @@ func (g *PackageLoader) GetMatching(cwd, fullMethod string, opts *method.ParseOp
 		}
 
 		obj := scope.Lookup(name)
-		m, err := method.Parse(obj, opts)
+		m, err := method.Parse(obj, opts, g.localConfig(pkg, name))
 		if err == nil {
 			matches = append(matches, m)
 		}
@@ -93,17 +97,50 @@ func (g *PackageLoader) getPkg(pkgName string) (*packages.Package, error) {
 	return pkg, nil
 }
 
-func (g *PackageLoader) GetOneRaw(pkgName, name string) (types.Object, error) {
+func (g *PackageLoader) localConfig(pkg *packages.Package, name string) method.LocalOpts {
+	fns, ok := g.locals[pkg.PkgPath]
+	if !ok {
+		fns = map[string]method.LocalOpts{}
+		for _, file := range pkg.Syntax {
+			for _, decl := range file.Decls {
+				if fn, ok := decl.(*ast.FuncDecl); ok {
+					lines := parse.SettingLines(fn.Doc.Text())
+					if len(lines) == 0 {
+						continue
+					}
+
+					contexts := map[string]bool{}
+					for _, line := range lines {
+						if cmd, rest := parse.Command(line); cmd == "context" {
+							if ctx, err := parse.String(rest); err == nil {
+								contexts[ctx] = true
+							}
+						}
+					}
+					fns[fn.Name.Name] = method.LocalOpts{Context: contexts}
+				}
+			}
+		}
+		g.locals[pkg.PkgPath] = fns
+	}
+	fn, ok := fns[name]
+	if !ok {
+		return method.EmptyLocalOpts
+	}
+	return fn
+}
+
+func (g *PackageLoader) GetOneRaw(pkgName, name string) (*packages.Package, types.Object, error) {
 	pkg, err := g.getPkg(pkgName)
 	if err != nil {
-		return nil, err
+		return pkg, nil, err
 	}
 
 	obj := pkg.Types.Scope().Lookup(name)
 	if obj == nil {
-		return nil, fmt.Errorf("%q does not exist in package %q", name, pkgName)
+		return pkg, nil, fmt.Errorf("%q does not exist in package %q", name, pkgName)
 	}
-	return obj, nil
+	return pkg, obj, nil
 }
 
 func (g *PackageLoader) GetOne(cwd, fullMethod string, opts *method.ParseOpts) (*method.Definition, error) {
@@ -115,12 +152,12 @@ func (g *PackageLoader) GetOne(cwd, fullMethod string, opts *method.ParseOpts) (
 }
 
 func (g *PackageLoader) getOneParsed(pkgName, name string, opts *method.ParseOpts) (*method.Definition, error) {
-	obj, err := g.GetOneRaw(pkgName, name)
+	pkg, obj, err := g.GetOneRaw(pkgName, name)
 	if err != nil {
 		return nil, err
 	}
 
-	def, err := method.Parse(obj, opts)
+	def, err := method.Parse(obj, opts, g.localConfig(pkg, name))
 	if err != nil {
 		return nil, err
 	}
@@ -130,7 +167,7 @@ func (g *PackageLoader) getOneParsed(pkgName, name string, opts *method.ParseOpt
 // loadPackages is used to load extend packages, with caching support.
 func (g *PackageLoader) load(workDir, buildTags string, paths []string) error {
 	packagesCfg := &packages.Config{
-		Mode: packages.NeedName | packages.NeedTypes | packages.NeedTypesInfo,
+		Mode: packages.NeedName | packages.NeedTypes | packages.NeedTypesInfo | packages.NeedSyntax,
 		Dir:  workDir,
 	}
 	if buildTags != "" {

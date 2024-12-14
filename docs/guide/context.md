@@ -1,9 +1,7 @@
 # How to pass context to custom functions
 
 You can pass additional parameters to custom functions by defining them as
-[context](../reference/signature.md#categories). This can be done by prefixing
-the parameter names with `context` or `ctx`. Use this guide to get a broad
-overview on how to use this feature.
+[`context`](../reference/context.md).
 
 If we want to format a `time.Time` to `string` but have requirements so that
 the date format must be changeable at runtime. You can define the time format

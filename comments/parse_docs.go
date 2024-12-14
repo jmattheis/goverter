@@ -1,7 +1,6 @@
 package comments
 
 import (
-	"bufio"
 	"fmt"
 	"go/ast"
 	"go/token"
@@ -9,14 +8,13 @@ import (
 	"strings"
 
 	"github.com/jmattheis/goverter/config"
+	"github.com/jmattheis/goverter/config/parse"
 	"golang.org/x/tools/go/packages"
 )
 
 const (
-	prefix          = "goverter"
-	delimter        = ":"
-	converterMarker = prefix + delimter + "converter"
-	variablesMarker = prefix + delimter + "variables"
+	converterMarker = parse.Prefix + parse.Delimiter + "converter"
+	variablesMarker = parse.Prefix + parse.Delimiter + "variables"
 )
 
 // ParseDocsConfig provides input to the ParseDocs method below.
@@ -188,16 +186,7 @@ func parseInterfaceMethods(location *token.FileSet, inter *ast.InterfaceType) (m
 }
 
 func parseRawLines(location, comment string) config.RawLines {
-	scanner := bufio.NewScanner(strings.NewReader(comment))
-	raw := config.RawLines{Location: location}
-	for scanner.Scan() {
-		line := strings.TrimSpace(scanner.Text())
-		if strings.HasPrefix(line, prefix+delimter) {
-			line := strings.TrimPrefix(line, prefix+delimter)
-			raw.Lines = append(raw.Lines, line)
-		}
-	}
-	return raw
+	return config.RawLines{Location: location, Lines: parse.SettingLines(comment)}
 }
 
 func fileWithLine(p token.Position) string {

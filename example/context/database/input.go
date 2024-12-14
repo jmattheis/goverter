@@ -3,11 +3,13 @@ package example
 // goverter:converter
 type Converter interface {
 	// goverter:map ID Editable | QueryEditable
-	Convert(source PostInput, ctxDatabase Database) (PostOutput, error)
+	// goverter:context db
+	Convert(source PostInput, db Database) (PostOutput, error)
 }
 
-func QueryEditable(id int, ctxDatabase Database) bool {
-	return ctxDatabase.AllowedToEdit(id)
+// goverter:context db
+func QueryEditable(id int, db Database) bool {
+	return db.AllowedToEdit(id)
 }
 
 type Database interface {

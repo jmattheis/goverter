@@ -5,11 +5,13 @@ import "time"
 // goverter:converter
 // goverter:extend FormatTime
 type Converter interface {
-	Convert(source map[string]Input, ctxFormat string) map[string]Output
+	// goverter:context dateFormat
+	Convert(source map[string]Input, dateFormat string) map[string]Output
 }
 
-func FormatTime(t time.Time, ctxFormat string) string {
-	return t.Format(ctxFormat)
+// goverter:context dateFormat
+func FormatTime(t time.Time, dateFormat string) string {
+	return t.Format(dateFormat)
 }
 
 type Input struct {

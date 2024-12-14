@@ -80,6 +80,17 @@ var (
 )
 ```
 
+## Custom Function
+
+You can define settings for custom functions by prefixing them with `goverter:`.
+
+```go
+// goverter:setting abc
+func FormatInt(value int, abc context.Context) {
+    return strconv.Itoa(value)
+}
+```
+
 ### Inheritance
 
 Method settings can be inherited for all methods if they are defined on the CLI

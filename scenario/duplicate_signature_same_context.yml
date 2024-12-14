@@ -4,7 +4,9 @@ input:
 
         // goverter:converter
         type Converter interface {
+            // goverter:context ctx
             Convert(source Input, ctx string) Output
+            // goverter:context ctx
             Convert2(source Input, ctx string) Output
         }
 

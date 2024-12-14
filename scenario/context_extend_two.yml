@@ -5,9 +5,13 @@ input:
         // goverter:converter
         // goverter:extend DoLookup
         type Converter interface {
+            // goverter:context ctxOther
+            // goverter:context ctxLookup
             Convert(source []string, ctxOther map[string]int, ctxLookup map[string]Output) []Output
         }
 
+        // goverter:context ctx
+        // goverter:context ctx2
         func DoLookup(id string, ctx map[string]Output, ctx2 map[string]int) Output {
             return ctx[id]
         }
