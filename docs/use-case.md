@@ -37,6 +37,6 @@ source and target type is the same. This is useful when you want to adjust a
 copy of a instance without affecting the source instance.
 
 This can be done at runtime with a library like
-[github.com/jinzhu/copier](ttps://github.com/jinzhu/copier) but using generated
+[github.com/jinzhu/copier](https://github.com/jinzhu/copier) but using generated
 code will be much faster and you'll have a compile-time guarantee that the
 types can be coverted.
