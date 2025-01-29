@@ -30,7 +30,7 @@ var DefaultCommon = Common{
 
 var DefaultConfigInterface = ConverterConfig{
 	OutputFile:        "./generated/generated.go",
-	OutputPackageName: "generated",
+	OutputPackageName: "", // will try to use existing package name, if can be found
 	Common:            DefaultCommon,
 	OutputFormat:      FormatStruct,
 }
@@ -107,6 +107,18 @@ func parseConverter(ctx *context, rawConverter *RawConverter, global RawLines) (
 	}
 	if err := parseConverterLines(ctx, c, c.IDString(), rawConverter.Converter); err != nil {
 		return nil, err
+	}
+
+	if c.OutputPackagePath == "" && c.OutputPackageName == "" {
+		name, path, err := ctx.Loader.LoadPkgPathFromDir(
+			filepath.Dir(rawConverter.FileName),
+			filepath.Dir(c.OutputFile))
+		if err != nil {
+			c.OutputPackageName = "generated"
+		} else {
+			c.OutputPackageName = name
+			c.OutputPackagePath = path
+		}
 	}
 
 	err = parseMethods(ctx, rawConverter, c)

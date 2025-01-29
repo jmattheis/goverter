@@ -1,4 +1,4 @@
-package samepackage
+package package_name_that_doesnt_match_dir_name
 
 // goverter:converter
 // goverter:output:file ./generated.go
