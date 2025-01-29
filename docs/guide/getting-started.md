@@ -11,7 +11,7 @@
 1. [Guide: Install Goverter](./install.md)
 
 1. Create your converter interface and mark it with a comment containing
-   [`goverter:converter`](https://goverter.jmattheis.de/reference/converter)
+   [`goverter:converter`](../reference/converter.md)
 
     ::: code-group
     ```go [input.go]

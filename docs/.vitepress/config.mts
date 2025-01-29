@@ -34,6 +34,7 @@ export default defineConfig({
         indexName: "goverter-jmattheis",
       },
     },
+    externalLinkIcon: true,
     nav: [
       { text: "Getting Started", link: "/guide/getting-started" },
       { text: "Settings", link: "/reference/settings" },
