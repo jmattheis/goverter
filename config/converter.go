@@ -29,10 +29,9 @@ var DefaultCommon = Common{
 }
 
 var DefaultConfigInterface = ConverterConfig{
-	OutputFile:        "./generated/generated.go",
-	OutputPackageName: "", // will try to use existing package name, if can be found
-	Common:            DefaultCommon,
-	OutputFormat:      FormatStruct,
+	OutputFile:   "./generated/generated.go",
+	Common:       DefaultCommon,
+	OutputFormat: FormatStruct,
 }
 
 var DefaultConfigVariables = ConverterConfig{
