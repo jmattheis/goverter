@@ -137,8 +137,6 @@ func initConverter(loader *pkgload.PackageLoader, rawConverter *RawConverter) (*
 
 	c.ConverterConfig = DefaultConfigVariables
 	c.OutputFile = defaultOutputFile(rawConverter.FileName)
-	c.OutputPackageName = rawConverter.PackageName
-	c.OutputPackagePath = rawConverter.PackagePath
 	return c, nil
 }
 
