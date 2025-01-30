@@ -6,8 +6,7 @@ interface you can follow these steps:
 ## Configure generation
 
 Configure [`output`](../reference/output.md) to output the file into the same
-directory, define the full package path, and then run [`goverter
-gen`](../reference/cli.md).
+directory, and then run [`goverter gen`](../reference/cli.md).
 
 ::: code-group
 <<< @../../example/samepackage/input.go

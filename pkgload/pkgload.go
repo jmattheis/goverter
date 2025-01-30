@@ -3,7 +3,9 @@ package pkgload
 import (
 	"fmt"
 	"go/ast"
+	"go/token"
 	"go/types"
+	"path/filepath"
 	"regexp"
 	"strings"
 
@@ -14,16 +16,18 @@ import (
 
 func New(workDir, buildTags string, paths []string) (*PackageLoader, error) {
 	loader := &PackageLoader{
-		lookup: map[string]*packages.Package{},
-		locals: map[string]map[string]method.LocalOpts{},
+		lookupPkgPath: map[string]*packages.Package{},
+		lookupAbsDir:  map[string]*packages.Package{},
+		locals:        map[string]map[string]method.LocalOpts{},
 	}
-	err := loader.load(workDir, buildTags, paths)
+	_, err := loader.loadIntoCache(workDir, buildTags, paths)
 	return loader, err
 }
 
 type PackageLoader struct {
-	lookup map[string]*packages.Package
-	locals map[string]map[string]method.LocalOpts
+	lookupPkgPath map[string]*packages.Package
+	lookupAbsDir  map[string]*packages.Package
+	locals        map[string]map[string]method.LocalOpts
 }
 
 func (g *PackageLoader) GetMatching(cwd, fullMethod string, opts *method.ParseOpts) ([]*method.Definition, error) {
@@ -81,7 +85,7 @@ the golang regexp pattern %q and a convert signature`, pkgName, name)
 }
 
 func (g *PackageLoader) getPkg(pkgName string) (*packages.Package, error) {
-	pkg := g.lookup[pkgName]
+	pkg := g.lookupPkgPath[pkgName]
 	if pkg == nil {
 		return nil, fmt.Errorf("failed to load package %q:\nmake sure it's a valid golang package", pkgName)
 	}
@@ -130,6 +134,35 @@ func (g *PackageLoader) localConfig(pkg *packages.Package, name string) method.L
 	return fn
 }
 
+func (g *PackageLoader) LoadPkgPathFromDir(dir string) (string, string, error) {
+	absDir, err := filepath.Abs(dir)
+	if err != nil {
+		return "", "", err
+	}
+	if pkg, ok := g.lookupAbsDir[absDir]; ok {
+		return pkg.Name, pkg.PkgPath, nil
+	}
+	// Skipping build tags as they're not used when only using packages.NeedName
+	pkgs, err := load(absDir, "", packages.NeedName, []string{"."})
+	if err != nil {
+		return "", "", err
+	}
+	if len(pkgs) == 0 {
+		return "", "", fmt.Errorf("no packages found in directory %s", absDir)
+	}
+	if len(pkgs) > 1 {
+		return "", "", fmt.Errorf("too many packages found in the same directory %s", absDir)
+	}
+	pkg := pkgs[0]
+	if len(pkg.Errors) > 0 {
+		return "", "", fmt.Errorf("got %d package errors; first error: %w",
+			len(pkg.Errors),
+			pkg.Errors[0])
+	}
+	g.lookupAbsDir[absDir] = pkg
+	return pkg.Name, pkg.PkgPath, nil
+}
+
 func (g *PackageLoader) GetOneRaw(pkgName, name string) (*packages.Package, types.Object, error) {
 	pkg, err := g.getPkg(pkgName)
 	if err != nil {
@@ -164,10 +197,38 @@ func (g *PackageLoader) getOneParsed(pkgName, name string, opts *method.ParseOpt
 	return def, nil
 }
 
-// loadPackages is used to load extend packages, with caching support.
-func (g *PackageLoader) load(workDir, buildTags string, paths []string) error {
+// loadIntoCache is used to load extend packages, with caching support.
+func (g *PackageLoader) loadIntoCache(workDir, buildTags string, paths []string) ([]*packages.Package, error) {
+	mode := packages.NeedName | packages.NeedTypes | packages.NeedTypesInfo | packages.NeedSyntax
+	pkgs, err := load(workDir, buildTags, mode, paths)
+	if err != nil {
+		return nil, err
+	}
+	for _, pkg := range pkgs {
+		g.lookupPkgPath[pkg.PkgPath] = pkg
+		if absDir := packageAbsDir(pkg); absDir != "" {
+			g.lookupAbsDir[absDir] = pkg
+		}
+	}
+	return pkgs, nil
+}
+
+func packageAbsDir(pkg *packages.Package) string {
+	var dir string
+	pkg.Fset.Iterate(func(f *token.File) bool {
+		if filepath.IsAbs(f.Name()) {
+			dir = filepath.Dir(f.Name())
+			return false // stop iterating
+		}
+		return true // continue
+	})
+	return dir
+}
+
+// load is used to load extend packages and referenced output directory packages
+func load(workDir, buildTags string, mode packages.LoadMode, paths []string) ([]*packages.Package, error) {
 	packagesCfg := &packages.Config{
-		Mode: packages.NeedName | packages.NeedTypes | packages.NeedTypesInfo | packages.NeedSyntax,
+		Mode: mode,
 		Dir:  workDir,
 	}
 	if buildTags != "" {
@@ -177,11 +238,7 @@ func (g *PackageLoader) load(workDir, buildTags string, paths []string) error {
 	if err != nil {
 		// This happens rare, and only if somebody uses advanced package pattern query in a wrong way.
 		// The cause (err) usually has enough details to troubleshoot this issue.
-		return fmt.Errorf("failed to load packages %s:\n%s", paths, err)
+		return nil, fmt.Errorf("failed to load packages %s:\n%s", paths, err)
 	}
-	for _, pkg := range pkgs {
-		g.lookup[pkg.PkgPath] = pkg
-	}
-
-	return nil
+	return pkgs, nil
 }

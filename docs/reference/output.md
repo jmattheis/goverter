@@ -74,7 +74,10 @@ Output a function for each method in the conversion interface.
 
 `output:package [PACKAGE][:NAME]` can be defined as
 [CLI argument](./define-settings.md#cli) or [conversion comment](./define-settings.md#conversion).
-Default is `:generated`.
+
+Default is to reuse the same package name from the directory of the file
+specified with `output:file`. However if that lookup fails, the fallback
+is `:generated`.
 
 ### output:package PACKAGE
 
