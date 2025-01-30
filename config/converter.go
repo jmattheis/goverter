@@ -108,17 +108,9 @@ func parseConverter(ctx *context, rawConverter *RawConverter, global RawLines) (
 	if err := parseConverterLines(ctx, c, c.IDString(), rawConverter.Converter); err != nil {
 		return nil, err
 	}
-
-	if c.OutputPackagePath == "" && c.OutputPackageName == "" {
-		name, path, err := ctx.Loader.LoadPkgPathFromDir(
-			filepath.Dir(rawConverter.FileName),
-			filepath.Dir(c.OutputFile))
-		if err != nil {
-			c.OutputPackageName = "generated"
-		} else {
-			c.OutputPackageName = name
-			c.OutputPackagePath = path
-		}
+	if err := resolvePkgPath(ctx, c, rawConverter); err != nil {
+		// resolving failed, so lets use a fallback
+		c.OutputPackageName = "generated"
 	}
 
 	err = parseMethods(ctx, rawConverter, c)
@@ -233,4 +225,33 @@ func parseConverterLine(ctx *context, c *Converter, value string) (err error) {
 		_, err = parseCommon(&c.Common, cmd, rest)
 	}
 	return err
+}
+
+func resolvePkgPath(ctx *context, c *Converter, rawConverter *RawConverter) error {
+	if c.OutputFile == "" {
+		// Nowhere to resolve pkg path from
+		return nil
+	}
+	if c.OutputPackagePath != "" {
+		// User has already set the pkg path
+		return nil
+	}
+
+	absOutputDir := c.OutputFile
+	if !filepath.IsAbs(c.OutputFile) {
+		absOutputDir = filepath.Join(
+			filepath.Dir(rawConverter.FileName),
+			filepath.Dir(c.OutputFile))
+	}
+
+	name, path, err := ctx.Loader.LoadPkgPathFromDir(absOutputDir)
+	if err != nil {
+		return err
+	}
+
+	c.OutputPackagePath = path
+	if c.OutputPackageName == "" {
+		c.OutputPackageName = name
+	}
+	return nil
 }

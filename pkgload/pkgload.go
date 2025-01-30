@@ -17,7 +17,7 @@ func New(workDir, buildTags string, paths []string) (*PackageLoader, error) {
 		lookup: map[string]*packages.Package{},
 		locals: map[string]map[string]method.LocalOpts{},
 	}
-	err := loader.load(workDir, buildTags, paths)
+	err := loader.loadIntoCache(workDir, buildTags, paths)
 	return loader, err
 }
 
@@ -130,25 +130,25 @@ func (g *PackageLoader) localConfig(pkg *packages.Package, name string) method.L
 	return fn
 }
 
-func (g *PackageLoader) LoadPkgPathFromDir(relativeSource, targetDir string) (string, string, error) {
-	packagesCfg := &packages.Config{
-		Mode: packages.NeedName,
-		Dir:  relativeSource,
-		// Skipping build tags as they're not used when only using packages.NeedName
-	}
-	pkgs, err := packages.Load(packagesCfg, targetDir)
+func (g *PackageLoader) LoadPkgPathFromDir(dir string) (string, string, error) {
+	// Skipping build tags as they're not used when only using packages.NeedName
+	pkgs, err := g.load(dir, "", packages.NeedName, []string{"."})
 	if err != nil {
-		// This happens rare, and only if somebody uses advanced package pattern query in a wrong way.
-		// The cause (err) usually has enough details to troubleshoot this issue.
-		return "", "", fmt.Errorf("failed to load packages %s:\n%s", targetDir, err)
+		return "", "", err
 	}
 	if len(pkgs) == 0 {
-		return "", "", fmt.Errorf("no packages found in directory %s", targetDir)
+		return "", "", fmt.Errorf("no packages found in directory %s", dir)
 	}
 	if len(pkgs) > 1 {
-		return "", "", fmt.Errorf("too many packages found in the same directory %s", targetDir)
+		return "", "", fmt.Errorf("too many packages found in the same directory %s", dir)
 	}
-	return pkgs[0].Name, pkgs[0].PkgPath, nil
+	pkg := pkgs[0]
+	if len(pkg.Errors) > 0 {
+		return "", "", fmt.Errorf("got %d package errors; first error: %w",
+			len(pkg.Errors),
+			pkg.Errors[0])
+	}
+	return pkg.Name, pkg.PkgPath, nil
 }
 
 func (g *PackageLoader) GetOneRaw(pkgName, name string) (*packages.Package, types.Object, error) {
@@ -186,9 +186,22 @@ func (g *PackageLoader) getOneParsed(pkgName, name string, opts *method.ParseOpt
 }
 
 // loadPackages is used to load extend packages, with caching support.
-func (g *PackageLoader) load(workDir, buildTags string, paths []string) error {
+func (g *PackageLoader) loadIntoCache(workDir, buildTags string, paths []string) error {
+	mode := packages.NeedName | packages.NeedTypes | packages.NeedTypesInfo | packages.NeedSyntax
+	pkgs, err := g.load(workDir, buildTags, mode, paths)
+	if err != nil {
+		return err
+	}
+	for _, pkg := range pkgs {
+		g.lookup[pkg.PkgPath] = pkg
+	}
+	return nil
+}
+
+// loadPackages is used to load extend packages, with caching support.
+func (g *PackageLoader) load(workDir, buildTags string, mode packages.LoadMode, paths []string) ([]*packages.Package, error) {
 	packagesCfg := &packages.Config{
-		Mode: packages.NeedName | packages.NeedTypes | packages.NeedTypesInfo | packages.NeedSyntax,
+		Mode: mode,
 		Dir:  workDir,
 	}
 	if buildTags != "" {
@@ -198,11 +211,7 @@ func (g *PackageLoader) load(workDir, buildTags string, paths []string) error {
 	if err != nil {
 		// This happens rare, and only if somebody uses advanced package pattern query in a wrong way.
 		// The cause (err) usually has enough details to troubleshoot this issue.
-		return fmt.Errorf("failed to load packages %s:\n%s", paths, err)
+		return nil, fmt.Errorf("failed to load packages %s:\n%s", paths, err)
 	}
-	for _, pkg := range pkgs {
-		g.lookup[pkg.PkgPath] = pkg
-	}
-
-	return nil
+	return pkgs, nil
 }
