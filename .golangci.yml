@@ -5,7 +5,6 @@ issues:
 linters:
     enable:
         - asciicheck
-        - exportloopref
         - gci
         - godot
         - gofmt
@@ -33,7 +32,6 @@ linters:
         - goconst
         - gocyclo
         - godox
-        - gomnd
         - lll
         - nestif
         - nlreturn
