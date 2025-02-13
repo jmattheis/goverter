@@ -13,7 +13,8 @@ import (
 )
 
 const (
-	configExtend = "extend"
+	configExtend     = "extend"
+	configOutputFile = "output:file"
 )
 
 type Format string
@@ -29,10 +30,9 @@ var DefaultCommon = Common{
 }
 
 var DefaultConfigInterface = ConverterConfig{
-	OutputFile:        "./generated/generated.go",
-	OutputPackageName: "generated",
-	Common:            DefaultCommon,
-	OutputFormat:      FormatStruct,
+	OutputFile:   "./generated/generated.go",
+	Common:       DefaultCommon,
+	OutputFormat: FormatStruct,
 }
 
 var DefaultConfigVariables = ConverterConfig{
@@ -109,8 +109,28 @@ func parseConverter(ctx *context, rawConverter *RawConverter, global RawLines) (
 		return nil, err
 	}
 
+	resolveOutputPackage(ctx, c)
+
 	err = parseMethods(ctx, rawConverter, c)
 	return c, err
+}
+
+func resolveOutputPackage(ctx *context, c *Converter) {
+	path := filepath.Dir(pkgload.ResolveRelativePath(c.Package, c.OutputFile))
+
+	if c.OutputPackagePath == "" {
+		c.OutputPackagePath = path
+	}
+
+	pkg := ctx.Loader.GetUncheckedPkg(path)
+
+	if pkg == nil {
+		return
+	}
+
+	if c.OutputPackageName == "" {
+		c.OutputPackageName = pkg.Types.Name()
+	}
 }
 
 func initConverter(loader *pkgload.PackageLoader, rawConverter *RawConverter) (*Converter, error) {
@@ -161,7 +181,7 @@ func parseConverterLine(ctx *context, c *Converter, value string) (err error) {
 		c.Name, err = parse.String(rest)
 	case "output:raw":
 		c.OutputRaw = append(c.OutputRaw, rest)
-	case "output:file":
+	case configOutputFile:
 		c.OutputFile, err = parse.String(rest)
 	case "output:format":
 		if len(c.Extend) != 0 {

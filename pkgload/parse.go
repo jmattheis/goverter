@@ -6,6 +6,13 @@ import (
 	"strings"
 )
 
+func ResolveRelativePath(cwd, pkg string) string {
+	if strings.HasPrefix(pkg, "../") || strings.HasPrefix(pkg, "./") || pkg == "." {
+		return path.Join(cwd, pkg)
+	}
+	return pkg
+}
+
 func ParseMethodString(cwd, fullMethod string) (pkg, name string, err error) {
 	parts := strings.SplitN(fullMethod, ":", 2)
 	switch len(parts) {
@@ -15,11 +22,8 @@ func ParseMethodString(cwd, fullMethod string) (pkg, name string, err error) {
 		name = parts[0]
 		pkg = cwd
 	case 2:
-		pkg = parts[0]
+		pkg = ResolveRelativePath(cwd, parts[0])
 		name = parts[1]
-		if strings.HasPrefix(pkg, "./") || strings.HasPrefix(pkg, "../") {
-			pkg = path.Join(cwd, pkg)
-		}
 
 		if pkg == "" {
 			// example: goverter:extend :MyLocalConvert

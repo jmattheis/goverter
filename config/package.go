@@ -1,6 +1,7 @@
 package config
 
 import (
+	"path/filepath"
 	"strings"
 
 	"github.com/jmattheis/goverter/config/parse"
@@ -11,6 +12,11 @@ func getPackages(raw *Raw) []string {
 	lookup := map[string]struct{}{}
 	for _, c := range raw.Converters {
 		lookup[c.PackagePath] = struct{}{}
+
+		// the default output:file is in ./generated and may not be configured in Raw.
+		// This preemptively loads this package, in case it already exists.
+		lookup[filepath.Join(c.PackagePath, "generated")] = struct{}{}
+
 		registerConverterLines(lookup, c.PackagePath, c.Converter)
 		registerConverterLines(lookup, c.PackagePath, raw.Global)
 		for _, m := range c.Methods {
@@ -29,9 +35,14 @@ func getPackages(raw *Raw) []string {
 func registerConverterLines(lookup map[string]struct{}, cwd string, lines RawLines) {
 	for _, line := range lines.Lines {
 		cmd, rest := parse.Command(line)
-		if cmd == configExtend {
+		switch cmd {
+		case configExtend:
 			for _, fullMethod := range strings.Fields(rest) {
 				registerFullMethod(lookup, cwd, fullMethod)
+			}
+		case configOutputFile:
+			if file, err := parse.String(rest); err == nil {
+				lookup[filepath.Dir(pkgload.ResolveRelativePath(cwd, file))] = struct{}{}
 			}
 		}
 	}

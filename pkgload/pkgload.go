@@ -80,6 +80,10 @@ the golang regexp pattern %q and a convert signature`, pkgName, name)
 	return matches, nil
 }
 
+func (g *PackageLoader) GetUncheckedPkg(pkgName string) *packages.Package {
+	return g.lookup[pkgName]
+}
+
 func (g *PackageLoader) getPkg(pkgName string) (*packages.Package, error) {
 	pkg := g.lookup[pkgName]
 	if pkg == nil {
