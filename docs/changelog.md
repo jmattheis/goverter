@@ -6,6 +6,10 @@ import GH from './GH.vue';
 
 ## unreleased
 
+- Fix go1.24 support. <GH issue="186" pr="187"/>
+- Increase minimal go version to go1.22 due to breaking changes in x/tools for
+  go1.24 <GH pr="187"/>
+
 ## v1.7.0
 
 - Remove default value of [`arg:context:regex`](./reference/arg.md) <GH issue="68" pr="176"/>
