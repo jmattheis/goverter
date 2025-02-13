@@ -218,7 +218,7 @@ func OtherID(code *jen.Statement) *JenID {
 
 // TypeOf creates a Type.
 func TypeOf(t types.Type) *Type {
-	t = Unalias(t)
+	t = types.Unalias(t)
 	rt := &Type{}
 	rt.T = t
 	rt.String = t.String()
