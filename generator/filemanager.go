@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"path/filepath"
-	"strings"
 
 	"github.com/dave/jennifer/jen"
 	"github.com/jmattheis/goverter/config"
@@ -23,7 +22,7 @@ type managedFile struct {
 }
 
 func (m *fileManager) Get(conv *config.Converter, cfg Config) (*jen.File, *namer.Namer, error) {
-	output := getOutputDir(conv, cfg.WorkingDir)
+	output := getOutputDir(conv)
 
 	f, ok := m.Files[output]
 	if !ok {
@@ -66,11 +65,7 @@ func (m *fileManager) renderFiles() (map[string][]byte, error) {
 	return result, nil
 }
 
-func getOutputDir(c *config.Converter, cwd string) string {
-	if strings.HasPrefix(c.OutputFile, "@cwd/") {
-		return filepath.Join(cwd, strings.TrimPrefix(c.OutputFile, "@cwd/"))
-	}
-
+func getOutputDir(c *config.Converter) string {
 	if filepath.IsAbs(c.OutputFile) {
 		return c.OutputFile
 	}
