@@ -35,8 +35,8 @@ type Raw struct {
 }
 
 type context struct {
-	Loader *pkgload.PackageLoader
-
+	Loader           *pkgload.PackageLoader
+	WorkDir          string
 	EnumTransformers map[string]enum.Transformer
 }
 
@@ -46,7 +46,7 @@ func Parse(raw *Raw) ([]*Converter, error) {
 		return nil, err
 	}
 
-	ctx := &context{Loader: loader, EnumTransformers: raw.EnumTransformers}
+	ctx := &context{Loader: loader, EnumTransformers: raw.EnumTransformers, WorkDir: raw.WorkDir}
 
 	converters := []*Converter{}
 	for _, rawConverter := range raw.Converters {

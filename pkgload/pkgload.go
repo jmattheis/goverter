@@ -80,6 +80,10 @@ the golang regexp pattern %q and a convert signature`, pkgName, name)
 	return matches, nil
 }
 
+func (g *PackageLoader) GetUncheckedPkg(pkgName string) *packages.Package {
+	return g.lookup[pkgName]
+}
+
 func (g *PackageLoader) getPkg(pkgName string) (*packages.Package, error) {
 	pkg := g.lookup[pkgName]
 	if pkg == nil {
@@ -143,8 +147,8 @@ func (g *PackageLoader) GetOneRaw(pkgName, name string) (*packages.Package, type
 	return pkg, obj, nil
 }
 
-func (g *PackageLoader) GetOne(cwd, fullMethod string, opts *method.ParseOpts) (*method.Definition, error) {
-	pkgName, name, err := ParseMethodString(cwd, fullMethod)
+func (g *PackageLoader) GetOne(sourcePackage, fullMethod string, opts *method.ParseOpts) (*method.Definition, error) {
+	pkgName, name, err := ParseMethodString(sourcePackage, fullMethod)
 	if err != nil {
 		return nil, err
 	}

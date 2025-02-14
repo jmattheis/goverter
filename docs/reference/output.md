@@ -78,10 +78,11 @@ Default is `:generated`.
 
 ### output:package PACKAGE
 
-This is the recommended way to define this setting. If you define the full
-package path, goverter is able to prevent edge-cases in the converter
-generation. The package name used in the generated `.go` file will be inferred
-from the normalized full package path. E.g.
+Goverter will infer the package path from `output:file` if it's outputted in
+the same go module, but you can override it with this setting. The full package
+path is needed is able to prevent edge-cases in the converter generation. If
+there is already a package name defined in the package, then it's used
+otherwise it will be infered from the full normalized package path. E.g.
 
 ```go
 // goverter:converter

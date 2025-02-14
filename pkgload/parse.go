@@ -6,19 +6,19 @@ import (
 	"strings"
 )
 
-func ParseMethodString(cwd, fullMethod string) (pkg, name string, err error) {
+func ParseMethodString(sourcePackage, fullMethod string) (pkg, name string, err error) {
 	parts := strings.SplitN(fullMethod, ":", 2)
 	switch len(parts) {
 	case 0:
 		return pkg, name, fmt.Errorf("invalid custom method: %s", fullMethod)
 	case 1:
 		name = parts[0]
-		pkg = cwd
+		pkg = sourcePackage
 	case 2:
 		pkg = parts[0]
 		name = parts[1]
-		if strings.HasPrefix(pkg, "./") || strings.HasPrefix(pkg, "../") {
-			pkg = path.Join(cwd, pkg)
+		if strings.HasPrefix(pkg, "../") || strings.HasPrefix(pkg, "./") || pkg == "." {
+			pkg = path.Join(sourcePackage, pkg)
 		}
 
 		if pkg == "" {
