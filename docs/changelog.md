@@ -9,6 +9,8 @@ import GH from './GH.vue';
 - Fix go1.24 support. <GH issue="186" pr="187"/>
 - Increase minimal go version to go1.22 due to breaking changes in x/tools for
   go1.24 <GH pr="187"/>
+- Infer [`output:package`](./reference/output.md) from file location
+  <GH issue="180" pr="181"/>
 
 ## v1.7.0
 

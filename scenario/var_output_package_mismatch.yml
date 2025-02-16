@@ -25,7 +25,7 @@ error: |-
         var definition
 
     Cannot use different packages
-        pkg2
-        pkg1
+        pkg2:structs
+        pkg1:structs
     in the same output file:
         @workdir/input.gen.go

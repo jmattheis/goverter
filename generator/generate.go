@@ -9,7 +9,6 @@ import (
 
 // Config the generate config.
 type Config struct {
-	WorkingDir      string
 	BuildConstraint string
 }
 

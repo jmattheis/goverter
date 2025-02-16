@@ -61,7 +61,6 @@ func generateConvertersRaw(c *GenerateConfig) (map[string][]byte, error) {
 	}
 
 	return generator.Generate(converters, generator.Config{
-		WorkingDir:      c.WorkingDir,
 		BuildConstraint: c.OutputBuildConstraint,
 	})
 }
