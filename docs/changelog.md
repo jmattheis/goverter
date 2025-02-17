@@ -6,6 +6,8 @@ import GH from './GH.vue';
 
 ## unreleased
 
+## v1.8.0
+
 - Fix go1.24 support. <GH issue="186" pr="187"/>
 - Increase minimal go version to go1.22 due to breaking changes in x/tools for
   go1.24 <GH pr="187"/>
