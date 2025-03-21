@@ -93,7 +93,7 @@ func parseFunctions(fset *token.FileSet, pkg *types.Package, decl *ast.GenDecl, 
 		name := value.Names[0].Name
 
 		location := fileWithLine(fset.Position(value.Pos()))
-		result[name] = parseRawLines(location, value.Doc.Text())
+		result[name] = parseRawLines(location, parse.CommentToString(value.Doc))
 	}
 
 	converter := config.RawConverter{
@@ -107,7 +107,7 @@ func parseFunctions(fset *token.FileSet, pkg *types.Package, decl *ast.GenDecl, 
 }
 
 func parseGenDecl(fset *token.FileSet, pkg *types.Package, decl *ast.GenDecl) ([]config.RawConverter, error) {
-	declDocs := decl.Doc.Text()
+	declDocs := parse.CommentToString(decl.Doc)
 
 	if strings.Contains(declDocs, variablesMarker) {
 		return parseFunctions(fset, pkg, decl, declDocs)
@@ -135,8 +135,8 @@ func parseGenDecl(fset *token.FileSet, pkg *types.Package, decl *ast.GenDecl) ([
 	var converters []config.RawConverter
 
 	for _, spec := range decl.Specs {
-		if typeSpec, ok := spec.(*ast.TypeSpec); ok && strings.Contains(typeSpec.Doc.Text(), converterMarker) {
-			c, err := parseInterface(fset, pkg, typeSpec, typeSpec.Doc.Text())
+		if typeSpec, ok := spec.(*ast.TypeSpec); ok && strings.Contains(parse.CommentToString(typeSpec.Doc), converterMarker) {
+			c, err := parseInterface(fset, pkg, typeSpec, parse.CommentToString(typeSpec.Doc))
 			if err != nil {
 				return nil, err
 			}
@@ -180,7 +180,7 @@ func parseInterfaceMethods(location *token.FileSet, inter *ast.InterfaceType) (m
 		name := method.Names[0].String()
 
 		location := location.Position(method.Pos())
-		result[name] = parseRawLines(fileWithLine(location), method.Doc.Text())
+		result[name] = parseRawLines(fileWithLine(location), parse.CommentToString(method.Doc))
 	}
 	return result, nil
 }
