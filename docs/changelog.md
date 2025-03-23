@@ -6,6 +6,9 @@ import GH from './GH.vue';
 
 ## unreleased
 
+- Allow specifying `goverter:` settings without leading space e.g.
+  `//goverter:converter` <GH issue="190" pr="191"/>
+
 ## v1.8.0
 
 - Fix go1.24 support. <GH issue="186" pr="187"/>

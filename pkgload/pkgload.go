@@ -108,7 +108,7 @@ func (g *PackageLoader) localConfig(pkg *packages.Package, name string) method.L
 		for _, file := range pkg.Syntax {
 			for _, decl := range file.Decls {
 				if fn, ok := decl.(*ast.FuncDecl); ok {
-					lines := parse.SettingLines(fn.Doc.Text())
+					lines := parse.SettingLines(parse.CommentToString(fn.Doc))
 					if len(lines) == 0 {
 						continue
 					}
