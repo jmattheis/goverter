@@ -8,6 +8,9 @@ import GH from './GH.vue';
 
 - Allow specifying `goverter:` settings without leading space e.g.
   `//goverter:converter` <GH issue="190" pr="191"/>
+- Fix SEGSEGV with enabled
+  [`useUnderlyingTypeMethods`](reference/useUnderlyingTypeMethods.md) 
+  <GH issue="192" pr="193"/>
 
 ## v1.8.0
 

@@ -68,7 +68,7 @@ func (u *UseUnderlyingTypeMethods) Assign(gen Generator, ctx *MethodContext, ass
 
 func findUnderlyingExtendMapping(ctx *MethodContext, source, target *xtype.Type) (underlyingSource, underlyingTarget bool) {
 	if source.Named {
-		if ctx.HasMethod(ctx, source.NamedType.Underlying(), target.NamedType) {
+		if ctx.HasMethod(ctx, source.NamedType.Underlying(), target.T) {
 			return true, false
 		}
 
@@ -77,7 +77,7 @@ func findUnderlyingExtendMapping(ctx *MethodContext, source, target *xtype.Type)
 		}
 	}
 
-	if target.Named && ctx.HasMethod(ctx, source.NamedType, target.NamedType.Underlying()) {
+	if target.Named && ctx.HasMethod(ctx, source.T, target.NamedType.Underlying()) {
 		return false, true
 	}
 
