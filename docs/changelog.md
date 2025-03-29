@@ -6,6 +6,8 @@ import GH from './GH.vue';
 
 ## unreleased
 
+## v1.8.1
+
 - Allow specifying `goverter:` settings without leading space e.g.
   `//goverter:converter` <GH issue="190" pr="191"/>
 - Fix SEGSEGV with enabled
