@@ -6,6 +6,11 @@ import GH from './GH.vue';
 
 ## unreleased
 
+## v1.8.2
+
+- Fix panic when using `golang.org/x/tools` >= `v0.31.0`.
+  <GH issue="194" pr="195"/>
+
 ## v1.8.1
 
 - Allow specifying `goverter:` settings without leading space e.g.
