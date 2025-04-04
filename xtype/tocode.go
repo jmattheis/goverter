@@ -8,6 +8,7 @@ import (
 )
 
 func toCode(t types.Type) *jen.Statement {
+	t = types.Unalias(t)
 	switch cast := t.(type) {
 	case *types.Named:
 		return toCodeNamed(cast)
