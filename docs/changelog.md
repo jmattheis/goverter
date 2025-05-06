@@ -6,6 +6,8 @@ import GH from './GH.vue';
 
 ## unreleased
 
+- Fix inferred package names on windows. <GH issue="198" pr="199"/>
+
 ## v1.8.2
 
 - Fix panic when using `golang.org/x/tools` >= `v0.31.0`.

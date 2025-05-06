@@ -118,7 +118,7 @@ func TestScenario(t *testing.T) {
 }
 
 func replaceAbsolutePath(curPath, body string) string {
-	return strings.ReplaceAll(body, curPath, "@workdir")
+	return filepath.ToSlash(strings.ReplaceAll(body, curPath, "@workdir"))
 }
 
 func compile(dir string) error {
@@ -140,7 +140,7 @@ func toOutputFiles(execDir string, files map[string][]byte) []*OutputFile {
 		if err != nil {
 			panic("could not create relpath")
 		}
-		output = append(output, &OutputFile{Name: rel, Content: string(content)})
+		output = append(output, &OutputFile{Name: filepath.ToSlash(rel), Content: string(content)})
 	}
 	sort.Slice(output, func(i, j int) bool {
 		return output[i].Name < output[j].Name
