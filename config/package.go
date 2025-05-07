@@ -18,7 +18,7 @@ func resolvePackage(sourceFileName, sourcePackage, targetFile string) (string, e
 		}
 	}
 
-	return filepath.Dir(filepath.Join(sourcePackage, relativeFile)), nil
+	return filepath.ToSlash(filepath.Dir(filepath.Join(sourcePackage, relativeFile))), nil
 }
 
 func getPackages(raw *Raw) []string {
