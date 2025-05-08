@@ -6,6 +6,8 @@ import GH from './GH.vue';
 
 ## unreleased
 
+## v1.8.3
+
 - Fix inferred package names on windows. <GH issue="198" pr="199"/>
 
 ## v1.8.2
