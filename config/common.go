@@ -87,18 +87,12 @@ func parseCommon(c *Common, cmd, rest string) (fieldSetting bool, err error) {
 	case "getters:preferred":
 		c.GettersPreferred, err = parse.Bool(rest)
 	case "getters:template":
-		if len(rest) == 0 {
-			rest = "Get{{.}}"
-		}
 		c.GettersTemplate, err = template.New("getterTemplate").Parse(rest)
 	case "setters:enabled":
 		c.SettersEnabled, err = parse.Bool(rest)
 	case "setters:preferred":
 		c.SettersPreferred, err = parse.Bool(rest)
 	case "setters:regex":
-		if len(rest) == 0 {
-			rest = "Set([A-Z].*)"
-		}
 		c.SettersRegex, err = parse.Regex(rest)
 		if c.SettersRegex.NumSubexp() != 1 {
 			return false, fmt.Errorf("setterRegex must have one subexpression to extract the field name")

@@ -1,0 +1,38 @@
+input:
+    input.go: |
+        package execution
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:getters:enabled
+            // goverter:getters:preferred
+            // goverter:getters:template {{.fail.here}}
+            Convert(source MyInput) MyOutput
+        }
+
+        type MyInput struct {
+            Name string
+        }
+        func (i MyInput) GetName() string {
+            return i.Name
+        }
+        type MyOutput struct {
+            Name string
+        }
+error: |-
+    Error while creating converter method:
+        @workdir/input.go:8
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.MyInput) github.com/jmattheis/goverter/execution.MyOutput
+            [source] github.com/jmattheis/goverter/execution.MyInput
+            [target] github.com/jmattheis/goverter/execution.MyOutput
+
+    | github.com/jmattheis/goverter/execution.MyInput
+    |
+    source.???
+    target.Name
+    |      |
+    |      | string
+    |
+    | github.com/jmattheis/goverter/execution.MyOutput
+
+    Cannot execute getter template

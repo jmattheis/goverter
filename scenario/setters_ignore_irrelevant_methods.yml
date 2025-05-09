@@ -6,17 +6,16 @@ input:
         type Converter interface {
             // goverter:setters:enabled
             // goverter:setters:preferred
-            // goverter:map MyName Name
             Convert(source MyInput) MyOutput
         }
 
         type MyInput struct {
-            MyName string
+            Name string
         }
         type MyOutput struct {
             Name string
         }
-        func (o *MyOutput) SetName(firstName string) {
+        func (o *MyOutput) WithName(firstName string) {
             o.Name = firstName
         }
 success:
@@ -31,6 +30,6 @@ success:
 
         func (c *ConverterImpl) Convert(source execution.MyInput) execution.MyOutput {
         	var executionMyOutput execution.MyOutput
-        	executionMyOutput.Name = source.MyName
+        	executionMyOutput.Name = source.Name
         	return executionMyOutput
         }
