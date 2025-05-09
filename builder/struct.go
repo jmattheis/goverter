@@ -1,7 +1,9 @@
 package builder
 
 import (
+	"bytes"
 	"fmt"
+	"go/token"
 	"go/types"
 	"strings"
 
@@ -37,97 +39,41 @@ func (s *Struct) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, s
 	stmt := []jen.Code{}
 
 	definedFields := ctx.DefinedFields(target)
-	usedSourceID := false
-	for i := 0; i < target.StructType.NumFields(); i++ {
-		targetField := target.StructType.Field(i)
-		delete(definedFields, targetField.Name())
+	// nil indicates that the field was found in one of the paths
+	// non nil indicates that it was not found and should error if it's not found in the alternative path
+	missing := map[string]*Error{}
 
-		fieldMapping := ctx.Field(target, targetField.Name())
+	fieldGens := []func() ([]jen.Code, bool, *Error){
+		func() ([]jen.Code, bool, *Error) {
+			return fields(gen, ctx, assignTo, sourceID, source, target, errPath, additionalFieldSources, definedFields, missing)
+		},
+	}
 
-		if fieldMapping.Ignore {
-			continue
-		}
-		if !targetField.Exported() && ctx.Conf.IgnoreUnexported {
-			continue
-		}
-
-		if !xtype.Accessible(targetField, ctx.OutputPackagePath) {
-			cause := unexportedStructError(targetField.Name(), source.String, target.String)
-			return nil, NewError(cause).Lift(&Path{
-				Prefix:     ".",
-				SourceID:   "???",
-				TargetID:   targetField.Name(),
-				TargetType: targetField.Type().String(),
-			})
-		}
-
-		targetFieldType := xtype.TypeOf(targetField.Type())
-		targetFieldPath := errPath.Field(targetField.Name())
-
-		if fieldMapping.Function == nil {
-			usedSourceID = true
-			nextID, nextSource, mapStmt, lift, skip, err := mapField(gen, ctx, targetField, sourceID, source, target, additionalFieldSources, targetFieldPath)
-			if skip {
-				continue
-			}
-			if err != nil {
-				return nil, err
-			}
-			stmt = append(stmt, mapStmt...)
-
-			fieldStmt, err := gen.Assign(ctx, AssignOf(assignTo.Stmt.Clone().Dot(targetField.Name())), nextID, nextSource, targetFieldType, targetFieldPath)
-			if err != nil {
-				return nil, err.Lift(lift...)
-			}
-			if shouldCheckAgainstZero(ctx, nextSource, targetFieldType, assignTo.Update, false) {
-				stmt = append(stmt, jen.If(nextID.Code.Clone().Op("!=").Add(xtype.ZeroValue(nextSource.T))).Block(fieldStmt...))
-			} else {
-				stmt = append(stmt, fieldStmt...)
-			}
-		} else {
-			def := fieldMapping.Function
-
-			sourceLift := []*Path{}
-			var functionCallSourceID *xtype.JenID
-			var functionCallSourceType *xtype.Type
-			if def.Source != nil {
-				usedSourceID = true
-				nextID, nextSource, mapStmt, mapLift, _, err := mapField(gen, ctx, targetField, sourceID, source, target, additionalFieldSources, targetFieldPath)
-				if err != nil {
-					return nil, err
-				}
-				sourceLift = mapLift
-				stmt = append(stmt, mapStmt...)
-
-				if fieldMapping.Source == "." && sourceID.ParentPointer != nil &&
-					def.Source.AssignableTo(source.AsPointer()) {
-					functionCallSourceID = sourceID.ParentPointer
-					functionCallSourceType = source.AsPointer()
-				} else {
-					functionCallSourceID = nextID
-					functionCallSourceType = nextSource
-				}
-			} else {
-				sourceLift = append(sourceLift, &Path{
-					Prefix:     ".",
-					TargetID:   targetField.Name(),
-					TargetType: targetFieldType.String,
-				})
-			}
-
-			callStmt, callReturnID, err := gen.CallMethod(ctx, fieldMapping.Function, functionCallSourceID, functionCallSourceType, targetFieldType, targetFieldPath)
-			if err != nil {
-				return nil, err.Lift(sourceLift...)
-			}
-			callStmt = append(callStmt, assignTo.Stmt.Clone().Dot(targetField.Name()).Op("=").Add(callReturnID.Code))
-
-			if shouldCheckAgainstZero(ctx, functionCallSourceType, targetFieldType, assignTo.Update, true) {
-				stmt = append(stmt, jen.If(functionCallSourceID.Code.Clone().Op("!=").Add(xtype.ZeroValue(functionCallSourceType.T))).Block(callStmt...))
-			} else {
-				stmt = append(stmt, callStmt...)
-			}
+	if ctx.Conf.SettersEnabled {
+		fieldGens = append(fieldGens, func() ([]jen.Code, bool, *Error) {
+			return setters(gen, ctx, assignTo, sourceID, source, target, errPath, additionalFieldSources, definedFields, missing)
+		})
+		if ctx.Conf.SettersPreferred {
+			fieldGens[0], fieldGens[1] = fieldGens[1], fieldGens[0]
 		}
 	}
+
+	usedSourceID := false
+	for _, fieldGen := range fieldGens {
+		genStmt, genUsedSourceID, err := fieldGen()
+		if err != nil {
+			return nil, err
+		}
+		stmt = append(stmt, genStmt...)
+		usedSourceID = usedSourceID || genUsedSourceID
+	}
+
+	for _, err := range missing {
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	if !usedSourceID {
 		stmt = append(stmt, jen.Id("_").Op("=").Add(sourceID.Code.Clone()))
 	}
@@ -141,6 +87,198 @@ func (s *Struct) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, s
 	}
 
 	return stmt, nil
+}
+
+func fields(gen Generator, ctx *MethodContext, assignTo *AssignTo, sourceID *xtype.JenID, source, target *xtype.Type, errPath ErrorPath, additionalFieldSources []xtype.FieldSources, definedFields map[string]struct{}, missing map[string]*Error) ([]jen.Code, bool, *Error) {
+	stmt := []jen.Code{}
+
+	usedSourceID := false
+	for i := 0; i < target.StructType.NumFields(); i++ {
+		targetField := target.StructType.Field(i)
+		fieldStmt, fieldUsedSourceID, err := fieldGen(gen, ctx, assignTo, sourceID, source, target, errPath, additionalFieldSources, definedFields, missing, targetField)
+		if err != nil {
+			return nil, false, err
+		}
+		usedSourceID = usedSourceID || fieldUsedSourceID
+		stmt = append(stmt, fieldStmt...)
+	}
+	return stmt, usedSourceID, nil
+}
+
+func setters(gen Generator, ctx *MethodContext, assignTo *AssignTo, sourceID *xtype.JenID, source, target *xtype.Type, errPath ErrorPath, additionalFieldSources []xtype.FieldSources, definedFields map[string]struct{}, missing map[string]*Error) ([]jen.Code, bool, *Error) {
+	targetType := target.T
+
+	stmt := []jen.Code{}
+	usedSourceID := false
+
+	if targetType, ok := targetType.(*types.Named); ok {
+		methodSet := types.NewMethodSet(types.NewPointer(targetType))
+		for i := 0; i < methodSet.Len(); i++ {
+			method := methodSet.At(i).Obj().(*types.Func)
+			targetField := types.NewVar(token.NoPos, nil, method.Name(), method.Type())
+			fieldStmt, fieldUsedSourceID, err := fieldGen(gen, ctx, assignTo, sourceID, source, target, errPath, additionalFieldSources, definedFields, missing, targetField)
+			if err != nil {
+				return nil, false, err
+			}
+			usedSourceID = usedSourceID || fieldUsedSourceID
+			stmt = append(stmt, fieldStmt...)
+		}
+	}
+	return stmt, usedSourceID, nil
+}
+
+func fieldGen(gen Generator, ctx *MethodContext, assignTo *AssignTo, sourceID *xtype.JenID, source, target *xtype.Type, errPath ErrorPath, additionalFieldSources []xtype.FieldSources, definedFields map[string]struct{}, missing map[string]*Error, targetField *types.Var) ([]jen.Code, bool, *Error) {
+	delete(definedFields, targetField.Name())
+
+	fieldMapping := ctx.Field(target, targetField.Name())
+
+	if fieldMapping.Ignore {
+		return nil, false, nil
+	}
+	if !targetField.Exported() && ctx.Conf.IgnoreUnexported {
+		return nil, false, nil
+	}
+
+	if !xtype.Accessible(targetField, ctx.OutputPackagePath) {
+		cause := unexportedStructError(targetField.Name(), source.String, target.String)
+		return nil, false, NewError(cause).Lift(&Path{
+			Prefix:     ".",
+			SourceID:   "???",
+			TargetID:   targetField.Name(),
+			TargetType: targetField.Type().String(),
+		})
+	}
+
+	implicitName := targetField.Name()
+	tempStmt := []jen.Code{}
+	targetFieldType := xtype.TypeOf(targetField.Type())
+	targetFieldPath := errPath.Field(targetField.Name())
+	assignVar := assignTo.Stmt.Clone().Dot(targetField.Name())
+	setterStmt := []jen.Code{}
+
+	setterSignature, ok := targetField.Type().(*types.Signature)
+	if ok && setterSignature.Recv() != nil {
+		matches := ctx.Conf.SettersRegex.FindStringSubmatch(targetField.Name())
+		if len(matches) == 2 && matches[0] == targetField.Name() {
+			implicitName = matches[1]
+		} else if fieldMapping.Source == "" && fieldMapping.Function == nil {
+			return nil, false, nil
+		}
+
+		if setterSignature.Params().Len() != 1 {
+			return nil, false, NewError(fmt.Sprintf("Setter method %s must have exactly one parameter.", targetField.Name())).Lift(&Path{
+				Prefix:     ".",
+				SourceID:   "???",
+				TargetID:   targetField.Name(),
+				TargetType: "???",
+			})
+		}
+
+		setParam := setterSignature.Params().At(0)
+		targetField := types.NewVar(token.NoPos, nil, targetField.Name(), setParam.Type())
+		targetFieldType = xtype.TypeOf(targetField.Type())
+		var err *Error
+		tempStmt, assignVar, err = buildTargetVar(gen, ctx, sourceID, source, targetFieldType, targetFieldPath)
+		if err != nil {
+			return nil, false, err
+		}
+		setterStmt = []jen.Code{assignTo.Stmt.Clone().Dot(targetField.Name()).Call(assignVar.Clone())}
+	}
+
+	if err, ok := missing[implicitName]; ok && err == nil {
+		return nil, false, nil
+	}
+	missing[implicitName] = nil
+
+	stmt := []jen.Code{}
+	usedSourceID := false
+	if fieldMapping.Function == nil {
+		nextID, nextSource, mapStmt, lift, miss, err := mapField(gen, ctx, implicitName, targetField, sourceID, source, target, additionalFieldSources, targetFieldPath)
+		if miss {
+			if ctx.Conf.IgnoreMissing {
+				return nil, false, nil
+			}
+			storedErr := missing[implicitName]
+			if storedErr != nil {
+				return nil, false, storedErr
+			} else {
+				missing[implicitName] = err
+				return nil, false, nil
+			}
+		}
+		if err != nil {
+			return nil, false, err
+		}
+		usedSourceID = true
+		stmt = append(stmt, mapStmt...)
+
+		fieldStmt := []jen.Code{}
+		fieldStmt = append(fieldStmt, tempStmt...)
+
+		assignStmt, err := gen.Assign(ctx, AssignOf(assignVar), nextID, nextSource, targetFieldType, targetFieldPath)
+		if err != nil {
+			return nil, false, err.Lift(lift...)
+		}
+		fieldStmt = append(fieldStmt, assignStmt...)
+
+		fieldStmt = append(fieldStmt, setterStmt...)
+
+		if shouldCheckAgainstZero(ctx, nextSource, targetFieldType, assignTo.Update, false) {
+			stmt = append(stmt, jen.If(nextID.Code.Clone().Op("!=").Add(xtype.ZeroValue(nextSource.T))).Block(fieldStmt...))
+		} else {
+			stmt = append(stmt, fieldStmt...)
+		}
+	} else {
+		def := fieldMapping.Function
+
+		sourceLift := []*Path{}
+		var functionCallSourceID *xtype.JenID
+		var functionCallSourceType *xtype.Type
+		if def.Source != nil {
+			usedSourceID = true
+			nextID, nextSource, mapStmt, mapLift, _, err := mapField(gen, ctx, implicitName, targetField, sourceID, source, target, additionalFieldSources, targetFieldPath)
+			if err != nil {
+				return nil, false, err
+			}
+			sourceLift = mapLift
+			stmt = append(stmt, mapStmt...)
+
+			if fieldMapping.Source == "." && sourceID.ParentPointer != nil &&
+				def.Source.AssignableTo(source.AsPointer()) {
+				functionCallSourceID = sourceID.ParentPointer
+				functionCallSourceType = source.AsPointer()
+			} else {
+				functionCallSourceID = nextID
+				functionCallSourceType = nextSource
+			}
+		} else {
+			sourceLift = append(sourceLift, &Path{
+				Prefix:     ".",
+				TargetID:   targetField.Name(),
+				TargetType: targetFieldType.String,
+			})
+		}
+
+		fieldStmt := []jen.Code{}
+		fieldStmt = append(fieldStmt, tempStmt...)
+
+		callStmt, callReturnID, err := gen.CallMethod(ctx, fieldMapping.Function, functionCallSourceID, functionCallSourceType, targetFieldType, targetFieldPath)
+		if err != nil {
+			return nil, false, err.Lift(sourceLift...)
+		}
+		fieldStmt = append(fieldStmt, callStmt...)
+
+		fieldStmt = append(fieldStmt, assignVar.Clone().Op("=").Add(callReturnID.Code))
+
+		fieldStmt = append(fieldStmt, setterStmt...)
+
+		if shouldCheckAgainstZero(ctx, functionCallSourceType, targetFieldType, assignTo.Update, true) {
+			stmt = append(stmt, jen.If(functionCallSourceID.Code.Clone().Op("!=").Add(xtype.ZeroValue(functionCallSourceType.T))).Block(fieldStmt...))
+		} else {
+			stmt = append(stmt, fieldStmt...)
+		}
+	}
+	return stmt, usedSourceID, nil
 }
 
 func shouldCheckAgainstZero(ctx *MethodContext, s, t *xtype.Type, isUpdate, call bool) bool {
@@ -167,6 +305,7 @@ func shouldCheckAgainstZero(ctx *MethodContext, s, t *xtype.Type, isUpdate, call
 func mapField(
 	gen Generator,
 	ctx *MethodContext,
+	implicitName string,
 	targetField *types.Var,
 	sourceID *xtype.JenID,
 	source, target *xtype.Type,
@@ -176,6 +315,7 @@ func mapField(
 	lift := []*Path{}
 	def := ctx.Field(target, targetField.Name())
 	pathString := def.Source
+
 	if pathString == "." {
 		lift = append(lift, &Path{
 			Prefix:     ".",
@@ -189,14 +329,42 @@ func mapField(
 
 	var path []string
 	if pathString == "" {
-		sourceMatch, err := xtype.FindField(targetField.Name(), ctx.Conf.MatchIgnoreCase, source, additionalFieldSources)
+		findField := []string{implicitName}
+		if ctx.Conf.GettersEnabled {
+			buf := &bytes.Buffer{}
+			err := ctx.Conf.GettersTemplate.Execute(buf, implicitName)
+			if err != nil {
+				return nil, nil, nil, nil, false, NewError("Cannot execute getter template").Lift(&Path{
+					Prefix:     ".",
+					SourceID:   "???",
+					TargetID:   targetField.Name(),
+					TargetType: targetField.Type().String(),
+				})
+			}
+			findField = append(findField, buf.String())
+			if ctx.Conf.GettersPreferred {
+				findField[0], findField[1] = findField[1], findField[0]
+			}
+		}
+
+		var sourceMatch *xtype.StructField
+		var err error
+		for _, field := range findField {
+			var ferr error
+			sourceMatch, ferr = xtype.FindField(field, ctx.Conf.MatchIgnoreCase, source, additionalFieldSources)
+			if ferr != nil {
+				if err == nil {
+					err = ferr
+				}
+			} else {
+				err = nil
+				break
+			}
+		}
 		if err != nil {
 			cause := fmt.Sprintf("Cannot match the target field with the source entry: %s.", err.Error())
-			skip := false
-			if ctx.Conf.IgnoreMissing {
-				_, skip = err.(*xtype.NoMatchError)
-			}
-			return nil, nil, nil, nil, skip, NewError(cause).Lift(&Path{
+			_, miss := err.(*xtype.NoMatchError)
+			return nil, nil, nil, nil, miss, NewError(cause).Lift(&Path{
 				Prefix:     ".",
 				SourceID:   "???",
 				TargetID:   targetField.Name(),

@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"regexp"
+	"text/template"
 
 	"github.com/jmattheis/goverter/config/parse"
 	"github.com/jmattheis/goverter/enum"
@@ -24,6 +25,12 @@ type Common struct {
 	DefaultUpdate                      bool
 	ArgContextRegex                    *regexp.Regexp
 	Enum                               enum.Config
+	GettersEnabled                     bool
+	GettersPreferred                   bool
+	GettersTemplate                    *template.Template
+	SettersEnabled                     bool
+	SettersPreferred                   bool
+	SettersRegex                       *regexp.Regexp
 }
 
 func parseCommon(c *Common, cmd, rest string) (fieldSetting bool, err error) {
@@ -74,6 +81,27 @@ func parseCommon(c *Common, cmd, rest string) (fieldSetting bool, err error) {
 		c.Enum.Unknown, err = parse.String(rest)
 		if err == nil && IsEnumAction(c.Enum.Unknown) {
 			err = validateEnumAction(c.Enum.Unknown)
+		}
+	case "getters:enabled":
+		c.GettersEnabled, err = parse.Bool(rest)
+	case "getters:preferred":
+		c.GettersPreferred, err = parse.Bool(rest)
+	case "getters:template":
+		if len(rest) == 0 {
+			rest = "Get{{.}}"
+		}
+		c.GettersTemplate, err = template.New("getterTemplate").Parse(rest)
+	case "setters:enabled":
+		c.SettersEnabled, err = parse.Bool(rest)
+	case "setters:preferred":
+		c.SettersPreferred, err = parse.Bool(rest)
+	case "setters:regex":
+		if len(rest) == 0 {
+			rest = "Set([A-Z].*)"
+		}
+		c.SettersRegex, err = parse.Regex(rest)
+		if c.SettersRegex.NumSubexp() != 1 {
+			return false, fmt.Errorf("setterRegex must have one subexpression to extract the field name")
 		}
 	case "":
 		err = fmt.Errorf("missing setting key")
