@@ -16,8 +16,8 @@ input:
         type MyOutput struct {
             Name string
         }
-        func (o *MyOutput) WithName(firstName string) {
-            o.Name = firstName
+        func (o *MyOutput) WithName(name string) {
+            o.Name = name
         }
 success:
     - generated/generated.go: |

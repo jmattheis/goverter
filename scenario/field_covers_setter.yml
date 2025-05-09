@@ -16,8 +16,8 @@ input:
         type MyOutput struct {
             Name string
         }
-        func (o *MyOutput) SetName(firstName string) {
-            o.Name = firstName
+        func (o *MyOutput) SetName(name string) {
+            o.Name = name
         }
 success:
     - generated/generated.go: |
