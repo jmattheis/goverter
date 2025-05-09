@@ -47,6 +47,6 @@ find matching field names and matching getters.
 
 ::: details Example (click me)
 ::: code-group
-<<< @../../../example/setters-regex/input.go
-<<< @../../../example/setters-regex/generated/generated.go [generated/generated.go]
+<<< @../../example/setters-regex/input.go
+<<< @../../example/setters-regex/generated/generated.go [generated/generated.go]
 :::
