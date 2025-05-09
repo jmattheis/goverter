@@ -6,6 +6,8 @@ import GH from './GH.vue';
 
 ## unreleased
 
+- Add [`getters and setters support`](./reference/output.md#use-setters) <GH issue="179" pull="200"></GH>
+
 ## v1.8.3
 
 - Fix inferred package names on windows. <GH issue="198" pr="199"/>
@@ -20,7 +22,7 @@ import GH from './GH.vue';
 - Allow specifying `goverter:` settings without leading space e.g.
   `//goverter:converter` <GH issue="190" pr="191"/>
 - Fix SEGSEGV with enabled
-  [`useUnderlyingTypeMethods`](reference/useUnderlyingTypeMethods.md) 
+  [`useUnderlyingTypeMethods`](reference/useUnderlyingTypeMethods.md)
   <GH issue="192" pr="193"/>
 
 ## v1.8.0
@@ -33,12 +35,17 @@ import GH from './GH.vue';
 
 ## v1.7.0
 
-- Remove default value of [`arg:context:regex`](./reference/arg.md) <GH issue="68" pr="176"/>
-  - To get v1.6.0 behavior, configure: `goverter:arg:context:regex ^ctx|^context`
-  - The recommended way to configure context is to use [`context`](./reference/context.md).
-- Add [`context`](./reference/context.md). See [Guide: Pass context to
-  functions](./guide/context.md) <GH issue="68" pr="176"/>
-- Add [`default:update`](/reference/default.md#default-update-yes-no) <GH issue="171" pr="175"/>
+- Remove default value of [`arg:context:regex`](./reference/arg.md)
+  <GH issue="68" pr="176"/>
+  - To get v1.6.0 behavior, configure:
+    `goverter:arg:context:regex ^ctx|^context`
+  - The recommended way to configure context is to use
+    [`context`](./reference/context.md).
+- Add [`context`](./reference/context.md). See
+  [Guide: Pass context to functions](./guide/context.md)
+  <GH issue="68" pr="176"/>
+- Add [`default:update`](/reference/default.md#default-update-yes-no)
+  <GH issue="171" pr="175"/>
 - Fix not setting `nil` on map when value is `nil`. <GH issue="173" pr="175"/>
 
 ## v1.6.0
@@ -51,9 +58,11 @@ import GH from './GH.vue';
   - See [Guide: Update an existing instance](./guide/update-instance.md)
   - Add [`update ARG`](./reference/update.md)
   - Add [`update:ignoreZeroValueField [yes|no]`](./reference/update.md)
-- Add [`output:raw CODE`](./reference/output.md#output-raw-code) <GH issue="113" pr="168"/>
+- Add [`output:raw CODE`](./reference/output.md#output-raw-code)
+  <GH issue="113" pr="168"/>
 - Error on duplicated converter signatures. <GH issue="146" pr="166"/>
-- Fix panic when using `chan` in conversion functions. <GH issue="165" pr="167"/>
+- Fix panic when using `chan` in conversion functions.
+  <GH issue="165" pr="167"/>
 
 ## v1.5.1
 
@@ -80,8 +89,8 @@ import GH from './GH.vue';
 - Add [CLI](./reference/cli.md) commands `help` and `version`.
   <GH issue="144" pr="145"/>
 - Improve generation by assigning variables directly if possible.
-  <GH issue="97" pr="148"/> 
-  :::details Examples
+  <GH issue="97" pr="148"/> :::details Examples
+
   ```diff
    func (c *ConverterImpl) Convert(source execution.Input) execution.Output {
        var structsOutput execution.Output
@@ -95,7 +104,9 @@ import GH from './GH.vue';
        return structsOutput
    }
   ```
+
   ***
+
   ```diff
    func (c *ConverterImpl) ConvertPToP(source []*int) []*int {
        var pIntList []*int
@@ -114,6 +125,7 @@ import GH from './GH.vue';
        return pIntList
    }
   ```
+
   :::
 
 ## v1.4.0
@@ -123,11 +135,14 @@ import GH from './GH.vue';
 - Add [`wrapErrorsUsing`](./reference/wrapErrorsUsing.md) <GH pr="134"/>
 - Fix panic with go1.22 <GH issue="135" pr="133"/>
 - Require go1.18 for building Goverter <GH pr="133"/>
-- Add current working directory `-cwd` option to [CLI](./reference/cli.md) <GH pr="134"/>
+- Add current working directory `-cwd` option to [CLI](./reference/cli.md)
+  <GH pr="134"/>
 - Fix error messages when there is an return error mismatch <GH pr="136"/>
 - Fix panic when using type params in [`extend`](./reference/extend),
-  [`map`](./reference/map) or [`default`](./reference/default). <GH issue="138" pr="139"/>
-- Fix `types.Alias`. See [golang#63223](https://github.com/golang/go/issues/63223)
+  [`map`](./reference/map) or [`default`](./reference/default).
+  <GH issue="138" pr="139"/>
+- Fix `types.Alias`. See
+  [golang#63223](https://github.com/golang/go/issues/63223)
 
 _internals_:
 
@@ -138,8 +153,8 @@ _internals_:
 
 Change generated directory permissions from `777` -> `755` and generated file
 permissions from `777` -> `644`. This only affects newly created files and
-directories. Existing files and directories will keep their current
-permissions. <GH issue="128" pr="129"/>
+directories. Existing files and directories will keep their current permissions.
+<GH issue="128" pr="129"/>
 
 ## v1.3.1
 
@@ -288,7 +303,7 @@ Fix generation of types with generic arguments <GH issue="66" pr="67"/>
   [migration](guide/migration.md)
 - Add support for unnamed structs
   <GH issue="41" commit="6287f10e5e3ae1d8ebcaa50138898242c659aa2d"/>
-- Add documentation https://goverter.jmattheis.de/ <GH pr="49"/>
+- Add documentation <https://goverter.jmattheis.de/> <GH pr="49"/>
 - Allow defining a custom conversion for only a specific field. See
   [`map`](reference/map.md) <GH pr="49"/>
 

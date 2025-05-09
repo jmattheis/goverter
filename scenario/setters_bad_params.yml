@@ -1,0 +1,37 @@
+input:
+    input.go: |
+        package execution
+
+        // goverter:converter
+        type Converter interface {
+            // goverter:setters:enabled
+            // goverter:setters:preferred
+            Convert(source MyInput) MyOutput
+        }
+
+        type MyInput struct {
+            Name string
+        }
+        type MyOutput struct {
+            Name string
+        }
+        func (o *MyOutput) SetName(firstName string, lastName string) {
+            o.Name = firstName + " " + lastName
+        }
+error: |-
+    Error while creating converter method:
+        @workdir/input.go:7
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source github.com/jmattheis/goverter/execution.MyInput) github.com/jmattheis/goverter/execution.MyOutput
+            [source] github.com/jmattheis/goverter/execution.MyInput
+            [target] github.com/jmattheis/goverter/execution.MyOutput
+
+    | github.com/jmattheis/goverter/execution.MyInput
+    |
+    source.???
+    target.SetName
+    |      |
+    |      | ???
+    |
+    | github.com/jmattheis/goverter/execution.MyOutput
+
+    Setter method SetName must have exactly one parameter.

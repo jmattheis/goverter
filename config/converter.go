@@ -4,7 +4,9 @@ import (
 	"fmt"
 	"go/types"
 	"path/filepath"
+	"regexp"
 	"strings"
+	"text/template"
 
 	"github.com/jmattheis/goverter/config/parse"
 	"github.com/jmattheis/goverter/enum"
@@ -25,8 +27,18 @@ const (
 	FormatFunction Format = "function"
 )
 
+func mustParse(pattern string) *template.Template {
+	tmpl, err := template.New("getterTemplate").Parse(pattern)
+	if err != nil {
+		panic(err)
+	}
+	return tmpl
+}
+
 var DefaultCommon = Common{
-	Enum: enum.Config{Enabled: true},
+	Enum:            enum.Config{Enabled: true},
+	SettersRegex:    regexp.MustCompile(`Set([A-Z].*)`),
+	GettersTemplate: mustParse("Get{{.}}"),
 }
 
 var DefaultConfigInterface = ConverterConfig{
