@@ -36,6 +36,7 @@ type Type struct {
 	PointerInner  *Type
 	List          bool
 	ListFixed     bool
+	ListLen       int64
 	ListInner     *Type
 	Map           bool
 	MapType       *types.Map
@@ -247,6 +248,7 @@ func applyTo(rt *Type, t types.Type) {
 		rt.List = true
 		rt.ListFixed = true
 		rt.ListInner = TypeOf(value.Elem())
+		rt.ListLen = value.Len()
 	case *types.Named:
 		rt.Named = true
 		rt.NamedType = value
