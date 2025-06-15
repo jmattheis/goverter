@@ -25,6 +25,7 @@ success:
 
         func (c *ConverterImpl) Convert(source execution.Input) execution.Output {
         	var slices_arraysOutput execution.Output
+        	slices_arraysOutput.Value = make([]int, len(source.Value))
         	for i := 0; i < len(source.Value); i++ {
         		slices_arraysOutput.Value[i] = source.Value[i]
         	}
