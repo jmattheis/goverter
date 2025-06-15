@@ -1,0 +1,26 @@
+input:
+    input.go: |
+        package slices_arrays
+
+        // goverter:converter
+        type Converter interface {
+            Convert(source [6]int) [5]int
+        }
+error: |-
+    Error while creating converter method:
+        @workdir/input.go:5
+        func (github.com/jmattheis/goverter/execution.Converter).Convert(source [6]int) [5]int
+            [source] [6]int
+            [target] [5]int
+
+    | [6]int
+    |
+    source
+    target
+    |
+    | [5]int
+
+    TypeMismatch: Cannot convert [6]int to [5]int
+
+    You can define a custom conversion method with extend:
+    https://goverter.jmattheis.de/reference/extend

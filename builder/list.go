@@ -10,7 +10,15 @@ type List struct{}
 
 // Matches returns true, if the builder can create handle the given types.
 func (*List) Matches(_ *MethodContext, source, target *xtype.Type) bool {
-	return source.List && target.List && !target.ListFixed
+	if !source.List || !target.List {
+		return false
+	}
+
+	if !target.ListFixed {
+		return true
+	}
+
+	return source.ListFixed && target.ListFixed && source.ListLen == target.ListLen
 }
 
 // Build creates conversion source code for the given source and target type.
@@ -46,7 +54,10 @@ func (*List) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, sourc
 	}
 
 	var result []jen.Code
-	result = append(result, assignTo.Stmt.Clone().Op("=").Make(target.TypeAsJen(), jen.Len(sourceID.Code.Clone())))
+
+	if !target.ListFixed {
+		result = append(result, assignTo.Stmt.Clone().Op("=").Make(target.TypeAsJen(), jen.Len(sourceID.Code.Clone())))
+	}
 
 	forStmt := jen.For(jen.Id(index).Op(":=").Lit(0), jen.Id(index).Op("<").Len(sourceID.Code.Clone()), jen.Id(index).Op("++")).
 		Block(forBlock...)
