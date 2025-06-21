@@ -6,6 +6,11 @@ import GH from './GH.vue';
 
 ## unreleased
 
+## v1.9.0
+
+- Add automatic conversion of arrays with same size <GH issue="202" pr="204"/>
+- Fix missing initialization on array to slice conversion <GH issue="203" pr="204"/>
+
 ## v1.8.3
 
 - Fix inferred package names on windows. <GH issue="198" pr="199"/>
