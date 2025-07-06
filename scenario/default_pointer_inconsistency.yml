@@ -35,9 +35,7 @@ success:
         func (c *ConverterImpl) Convert(source *execution.Input) execution.Output {
         	executionOutput := execution.NewOutput()
         	if source != nil {
-        		var executionOutput2 execution.Output
-        		executionOutput2.ID = (*source).ID
-        		executionOutput = executionOutput2
+        		executionOutput.ID = (*source).ID
         	}
         	return executionOutput
         }

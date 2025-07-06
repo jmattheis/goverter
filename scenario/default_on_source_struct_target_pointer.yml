@@ -44,9 +44,7 @@ success:
         func (c *ConverterImpl) Convert(source *execution.Input) (execution.Output, error) {
         	executionOutput := execution.NewOutputWithDefaults()
         	if source != nil {
-        		var executionOutput2 execution.Output
-        		executionOutput2.Name = (*source).Name
-        		executionOutput = executionOutput2
+        		executionOutput.Name = (*source).Name
         	}
         	return executionOutput, nil
         }
