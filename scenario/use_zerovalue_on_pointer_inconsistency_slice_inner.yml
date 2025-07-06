@@ -9,7 +9,7 @@ input:
         }
 
         type DBHouseNames struct {
-            Names *[]string
+            Names []*string
         }
 
         type APIHouseNames struct {
@@ -28,10 +28,10 @@ success:
         func (c *ConverterImpl) ConvertHouse(source execution.DBHouseNames) execution.APIHouseNames {
         	var slices_arraysAPIHouseNames execution.APIHouseNames
         	if source.Names != nil {
-        		if (*source.Names) != nil {
-        			slices_arraysAPIHouseNames.Names = make([]string, len((*source.Names)))
-        			for i := 0; i < len((*source.Names)); i++ {
-        				slices_arraysAPIHouseNames.Names[i] = (*source.Names)[i]
+        		slices_arraysAPIHouseNames.Names = make([]string, len(source.Names))
+        		for i := 0; i < len(source.Names); i++ {
+        			if source.Names[i] != nil {
+        				slices_arraysAPIHouseNames.Names[i] = *source.Names[i]
         			}
         		}
         	}

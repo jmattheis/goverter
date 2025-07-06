@@ -98,7 +98,7 @@ func (s *SourcePointer) Build(gen Generator, ctx *MethodContext, sourceID *xtype
 }
 
 func (*SourcePointer) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, sourceID *xtype.JenID, source, target *xtype.Type, path ErrorPath) ([]jen.Code, *Error) {
-	nextInner, nextID, err := gen.Build(ctx, sourceID.Deref(source), source.PointerInner, target, path)
+	nextInner, err := gen.Assign(ctx, assignTo, sourceID.Deref(source), source.PointerInner, target, path)
 	if err != nil {
 		return nil, err.Lift(&Path{
 			SourceID:   "*",
@@ -107,9 +107,8 @@ func (*SourcePointer) Assign(gen Generator, ctx *MethodContext, assignTo *Assign
 	}
 
 	stmt := []jen.Code{
-		jen.If(sourceID.Code.Clone().Op("!=").Nil()).Block(
-			append(nextInner, assignTo.Stmt.Clone().Op("=").Add(nextID.Code))...,
-		),
+		jen.If(sourceID.Code.Clone().Op("!=").Nil()).
+			Block(nextInner...),
 	}
 
 	return stmt, nil
