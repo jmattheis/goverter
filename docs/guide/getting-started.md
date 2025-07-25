@@ -1,6 +1,6 @@
 # Getting started
 
-1. Ensure your `go version` is 1.18 or above
+1. Ensure your `go version` is 1.23 or above
 
 1. Create a go modules project if you haven't done so already
 

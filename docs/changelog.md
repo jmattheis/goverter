@@ -6,6 +6,12 @@ import GH from './GH.vue';
 
 ## unreleased
 
+## v1.9.1
+
+- Increase minimal go version to go1.23 due to breaking changes in x/tools for
+  go1.24 <GH pr="208"/>
+- Improve conversion of `*T` to `T`. <GH issue="205" pr="206"/>
+
 ## v1.9.0
 
 - Add automatic conversion of arrays with same size <GH issue="202" pr="204"/>
