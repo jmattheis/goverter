@@ -2,7 +2,7 @@ module github.com/jmattheis/goverter
 
 go 1.23.0
 
-toolchain go1.24.5
+toolchain go1.25.0
 
 require (
 	github.com/dave/jennifer v1.6.0

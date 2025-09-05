@@ -6,6 +6,8 @@ import GH from './GH.vue';
 
 ## unreleased
 
+- Upgrade toolchain to go1.25. <GH pr="214"/>
+
 ## v1.9.1
 
 - Increase minimal go version to go1.23 due to breaking changes in x/tools for

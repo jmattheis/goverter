@@ -1,47 +1,61 @@
-issues:
-    exclude-dirs:
-        - example
-
+version: "2"
 linters:
-    enable:
-        - asciicheck
-        - gci
-        - godot
-        - gofmt
-        - gofumpt
-        - goimports
-        - gomodguard
-        - goprintffuncname
-        - gosimple
-        - govet
-        - misspell
-        - nakedret
-        - nolintlint
-        - sqlclosecheck
-        - typecheck
-        - unconvert
-        - unused
-        - whitespace
-    disable:
-        - errcheck
-        - revive
-        - funlen
-        - gochecknoglobals
-        - staticcheck
-        - gocognit
-        - goconst
-        - gocyclo
-        - godox
-        - lll
-        - nestif
-        - nlreturn
-        - noctx
-        - testpackage
-        - wsl
-        - ineffassign
-
-linters-settings:
-    gofumpt:
-        extra-rules: true
+  enable:
+    - asciicheck
+    - godot
+    - gomodguard
+    - goprintffuncname
+    - misspell
+    - nakedret
+    - nolintlint
+    - sqlclosecheck
+    - unconvert
+    - whitespace
+  disable:
+    - errcheck
+    - funlen
+    - gochecknoglobals
+    - gocognit
+    - goconst
+    - gocyclo
+    - godox
+    - ineffassign
+    - lll
+    - nestif
+    - nlreturn
+    - noctx
+    - revive
+    - staticcheck
+    - testpackage
+    - wsl
+  settings:
     misspell:
-        locale: US
+      locale: US
+  exclusions:
+    generated: lax
+    presets:
+      - comments
+      - common-false-positives
+      - legacy
+      - std-error-handling
+    paths:
+      - example
+      - third_party$
+      - builtin$
+      - examples$
+formatters:
+  enable:
+    - gci
+    - gofmt
+    - gofumpt
+    - goimports
+  settings:
+    gofumpt:
+      extra-rules: true
+  exclusions:
+    generated: lax
+    paths:
+      - example
+      - third_party$
+      - builtin$
+      - examples$
