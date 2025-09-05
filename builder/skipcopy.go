@@ -1,6 +1,8 @@
 package builder
 
 import (
+	"go/types"
+
 	"github.com/dave/jennifer/jen"
 	"github.com/jmattheis/goverter/xtype"
 )
@@ -10,7 +12,7 @@ type SkipCopy struct{}
 
 // Matches returns true, if the builder can create handle the given types.
 func (*SkipCopy) Matches(ctx *MethodContext, source, target *xtype.Type) bool {
-	return ctx.Conf.SkipCopySameType && source.String == target.String
+	return ctx.Conf.SkipCopySameType && types.Identical(source.T, target.T)
 }
 
 // Build creates conversion source code for the given source and target type.

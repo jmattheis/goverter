@@ -516,7 +516,7 @@ func (g *generator) shouldCreateSubMethod(ctx *builder.MethodContext, source, ta
 		case source.Enum(&ctx.Conf.Enum).OK && target.Enum(&ctx.Conf.Enum).OK:
 			createSubMethod = true
 		}
-		if ctx.Conf.SkipCopySameType && source.String == target.String {
+		if ctx.Conf.SkipCopySameType && types.Identical(source.T, target.T) {
 			createSubMethod = false
 		}
 	}
