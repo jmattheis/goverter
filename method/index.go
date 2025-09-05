@@ -21,18 +21,18 @@ type IndexID struct {
 
 func NewIndex[T any]() *Index[T] {
 	return &Index[T]{
-		Exact: map[xtype.Signature][]IndexEntry[T]{},
+		Exact: xtype.NewSignatureMap[[]IndexEntry[T]](),
 	}
 }
 
 type Index[T any] struct {
-	Exact  map[xtype.Signature][]IndexEntry[T]
+	Exact  *xtype.SignatureMap[[]IndexEntry[T]]
 	Update []*T
 }
 
 func (l *Index[T]) GetAll() []*T {
 	items := []*T{}
-	for _, exacts := range l.Exact {
+	for _, exacts := range l.Exact.Values() {
 		for _, exact := range exacts {
 			items = append(items, exact.Item)
 		}
@@ -42,14 +42,17 @@ func (l *Index[T]) GetAll() []*T {
 
 func (l *Index[T]) RegisterOverrideOverlapping(t *T, def *Definition) {
 	newEntry := IndexEntry[T]{Def: def, Item: t}
-	for i, entry := range l.Exact[def.Signature] {
+	entries, _ := l.Exact.At(def.Signature)
+	for i, entry := range entries {
 		if satisfiesContext(entry.Def.Context, def.Context) || satisfiesContext(def.Context, entry.Def.Context) {
-			l.Exact[def.Signature][i] = newEntry
+			entries[i] = newEntry
+			l.Exact.Set(def.Signature, entries)
 			return
 		}
 	}
 
-	l.Exact[def.Signature] = append(l.Exact[def.Signature], newEntry)
+	entries = append(entries, newEntry)
+	l.Exact.Set(def.Signature, entries)
 }
 
 func (l *Index[T]) RegisterUpdate(t *T, def *Definition) (IndexID, error) {
@@ -58,7 +61,8 @@ func (l *Index[T]) RegisterUpdate(t *T, def *Definition) (IndexID, error) {
 }
 
 func (l *Index[T]) Register(t *T, def *Definition) (IndexID, error) {
-	for _, entry := range l.Exact[def.Signature] {
+	entries, _ := l.Exact.At(def.Signature)
+	for _, entry := range entries {
 		if err := checkOverlap(entry.Def, def); err != nil {
 			return IndexID{}, err
 		}
@@ -68,8 +72,10 @@ func (l *Index[T]) Register(t *T, def *Definition) (IndexID, error) {
 	}
 
 	newEntry := IndexEntry[T]{Def: def, Item: t}
-	l.Exact[def.Signature] = append(l.Exact[def.Signature], newEntry)
-	return IndexID{sig: def.Signature, idx: len(l.Exact[def.Signature]) - 1}, nil
+	entries = append(entries, newEntry)
+	l.Exact.Set(def.Signature, entries)
+
+	return IndexID{sig: def.Signature, idx: len(entries) - 1}, nil
 }
 
 func checkOverlap(left, right *Definition) error {
@@ -83,16 +89,17 @@ func (l *Index[T]) ByID(id IndexID) *T {
 	if id.update {
 		return l.Update[id.idx]
 	}
-	return l.Exact[id.sig][id.idx].Item
+	value, _ := l.Exact.At(id.sig)
+	return value[id.idx].Item
 }
 
 func (l *Index[T]) Has(sig xtype.Signature) bool {
-	_, ok := l.Exact[sig]
+	_, ok := l.Exact.At(sig)
 	return ok
 }
 
 func (l *Index[T]) Get(sig xtype.Signature, m map[string]*xtype.Type) (*T, error) {
-	hits, ok := l.Exact[sig]
+	hits, ok := l.Exact.At(sig)
 	if !ok {
 		return nil, nil
 	}

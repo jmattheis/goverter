@@ -106,7 +106,7 @@ func Parse(obj types.Object, opts *ParseOpts, localOpts LocalOpts) (*Definition,
 		case methodDef.Source == nil:
 			arg.Use = ArgUseSource
 			methodDef.Source = arg.Type
-			methodDef.Signature.Source = methodDef.Source.String
+			methodDef.Signature.Source = methodDef.Source.T
 		default:
 			arg.Use = ArgUseMultiSource
 			methodDef.MultiSources = append(methodDef.MultiSources, arg.Type)
@@ -146,7 +146,7 @@ func Parse(obj types.Object, opts *ParseOpts, localOpts LocalOpts) (*Definition,
 		return nil, formatErr("must have only one source param")
 	}
 
-	methodDef.Signature.Target = methodDef.Target.String
+	methodDef.Signature.Target = methodDef.Target.T
 
 	return methodDef, nil
 }

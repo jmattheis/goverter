@@ -13,12 +13,16 @@ const ThisVar = "c"
 
 // Signature represents a signature for conversion.
 type Signature struct {
-	Source string
-	Target string
+	Source types.Type
+	Target types.Type
+}
+
+func (s *Signature) Identical(other Signature) bool {
+	return types.Identical(s.Source, other.Source) && types.Identical(s.Target, other.Target)
 }
 
 func SignatureOf(source, target *Type) Signature {
-	return Signature{Source: source.String, Target: target.String}
+	return Signature{Source: source.T, Target: target.T}
 }
 
 // Type is a helper wrapper for types.Type.
