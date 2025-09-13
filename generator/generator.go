@@ -496,8 +496,8 @@ func (g *generator) shouldCreateSubMethod(ctx *builder.MethodContext, source, ta
 		// *Source -> Target
 		//  Source -> *Target
 		// *Source -> *Target
-		isCurrentPointerStructMethod = ctx.Signature.Source == source.AsPointerType().String() ||
-			ctx.Signature.Target == target.AsPointerType().String()
+		isCurrentPointerStructMethod = types.Identical(ctx.Signature.Source, source.AsPointerType()) ||
+			types.Identical(ctx.Signature.Target, target.AsPointerType())
 	}
 
 	createSubMethod := false
@@ -516,7 +516,7 @@ func (g *generator) shouldCreateSubMethod(ctx *builder.MethodContext, source, ta
 		case source.Enum(&ctx.Conf.Enum).OK && target.Enum(&ctx.Conf.Enum).OK:
 			createSubMethod = true
 		}
-		if ctx.Conf.SkipCopySameType && source.String == target.String {
+		if ctx.Conf.SkipCopySameType && types.Identical(source.T, target.T) {
 			createSubMethod = false
 		}
 	}
@@ -569,7 +569,7 @@ func (g *generator) createSubMethod(ctx *builder.MethodContext, sourceID *xtype.
 }
 
 func (g *generator) hasMethod(ctx *builder.MethodContext, source, target types.Type) bool {
-	signature := xtype.Signature{Source: source.String(), Target: target.String()}
+	signature := xtype.Signature{Source: source, Target: target}
 	return g.extend.Has(signature) || g.lookup.Has(signature)
 }
 
@@ -579,13 +579,13 @@ func (g *generator) getOverlappingStructDefinition(ctx *builder.MethodContext, s
 	}
 
 	overlapping := []xtype.Signature{
-		{Source: source.AsPointerType().String(), Target: target.String},
-		{Source: source.AsPointerType().String(), Target: target.AsPointerType().String()},
-		{Source: source.String, Target: target.AsPointerType().String()},
+		{Source: source.AsPointerType(), Target: target.T},
+		{Source: source.AsPointerType(), Target: target.AsPointerType()},
+		{Source: source.T, Target: target.AsPointerType()},
 	}
 
 	for _, sig := range overlapping {
-		if ctx.Signature == sig {
+		if ctx.Signature.Identical(sig) {
 			continue
 		}
 		if def, _ := g.lookup.Get(sig, ctx.AvailableContext); def != nil && len(def.RawFieldSettings) > 0 {

@@ -7,7 +7,7 @@ import (
 )
 
 func validateMethods(lookup *method.Index[generatedMethod]) error {
-	for _, hits := range lookup.Exact {
+	for _, hits := range lookup.Exact.Values() {
 		for _, entry := range hits {
 			genMethod := entry.Item
 

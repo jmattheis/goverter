@@ -6,6 +6,9 @@ import GH from './GH.vue';
 
 ## unreleased
 
+- Fix comparison of signatures with aliases in
+  [`extend`](./reference/extend.md) and conversion methods. <GH issue="213" pr="215"/>
+  - This is a regression introduced in v1.9.1 due to the x/tools upgrade.
 - Upgrade toolchain to go1.25. <GH pr="214"/>
 
 ## v1.9.1
