@@ -1,0 +1,21 @@
+input:
+    input.go: |
+        package extend
+
+        // goverter:converter
+        // goverter:extend Custom
+        // goverter:output:package my-package
+        type Converter interface {
+            ConvertPerson(source Input) Output
+        }
+
+        func Custom(s string) uint { return 1 }
+        type Input struct { Value string }
+        type Output struct { Value uint }
+error: |-
+    error parsing 'goverter:output:package' at
+        @workdir/input.go:6
+        github.com/jmattheis/goverter/execution.Converter
+
+    Cannot change output:package after extend functions have been added.
+    Move the extend below the output:* setting.

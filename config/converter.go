@@ -9,7 +9,6 @@ import (
 	"github.com/jmattheis/goverter/config/parse"
 	"github.com/jmattheis/goverter/enum"
 	"github.com/jmattheis/goverter/method"
-	"github.com/jmattheis/goverter/pkgload"
 )
 
 const (
@@ -46,8 +45,23 @@ type Converter struct {
 	FileName string
 	typ      types.Type
 	Methods  []*Method
-
 	Location string
+
+	packageConfigured bool
+}
+
+func (c *Converter) inferOutputPackage(ctx *context) {
+	if !c.packageConfigured || c.OutputPackagePath == "" {
+		if targetPackage, err := resolvePackage(c.FileName, c.Package, c.OutputFile); err == nil {
+			c.OutputPackagePath = targetPackage
+		}
+	}
+
+	if !c.packageConfigured || c.OutputPackageName == "" {
+		if pkg := ctx.Loader.GetUncheckedPkg(c.OutputPackagePath); pkg != nil {
+			c.OutputPackageName = pkg.Types.Name()
+		}
+	}
 }
 
 func (c *Converter) typeForMethod() types.Type {
@@ -97,7 +111,7 @@ func defaultOutputFile(name string) string {
 }
 
 func parseConverter(ctx *context, rawConverter *RawConverter, global RawLines) (*Converter, error) {
-	c, err := initConverter(ctx.Loader, rawConverter)
+	c, err := initConverter(ctx, rawConverter)
 	if err != nil {
 		return nil, err
 	}
@@ -109,34 +123,11 @@ func parseConverter(ctx *context, rawConverter *RawConverter, global RawLines) (
 		return nil, err
 	}
 
-	resolveOutputPackage(ctx, c)
-
 	err = parseMethods(ctx, rawConverter, c)
 	return c, err
 }
 
-func resolveOutputPackage(ctx *context, c *Converter) {
-	targetPackage, err := resolvePackage(c.FileName, c.Package, c.OutputFile)
-	if err != nil {
-		return
-	}
-
-	if c.OutputPackagePath == "" {
-		c.OutputPackagePath = targetPackage
-	}
-
-	pkg := ctx.Loader.GetUncheckedPkg(targetPackage)
-
-	if pkg == nil {
-		return
-	}
-
-	if c.OutputPackageName == "" {
-		c.OutputPackageName = pkg.Types.Name()
-	}
-}
-
-func initConverter(loader *pkgload.PackageLoader, rawConverter *RawConverter) (*Converter, error) {
+func initConverter(ctx *context, rawConverter *RawConverter) (*Converter, error) {
 	c := &Converter{
 		FileName: rawConverter.FileName,
 		Package:  rawConverter.PackagePath,
@@ -145,13 +136,14 @@ func initConverter(loader *pkgload.PackageLoader, rawConverter *RawConverter) (*
 
 	if rawConverter.InterfaceName != "" {
 		c.ConverterConfig = DefaultConfigInterface
-		_, interfaceObj, err := loader.GetOneRaw(c.Package, rawConverter.InterfaceName)
+		_, interfaceObj, err := ctx.Loader.GetOneRaw(c.Package, rawConverter.InterfaceName)
 		if err != nil {
 			return nil, err
 		}
 
 		c.typ = interfaceObj.Type()
 		c.Name = rawConverter.InterfaceName + "Impl"
+		c.inferOutputPackage(ctx)
 		return c, nil
 	}
 
@@ -185,10 +177,14 @@ func parseConverterLine(ctx *context, c *Converter, value string) (err error) {
 	case "output:raw":
 		c.OutputRaw = append(c.OutputRaw, rest)
 	case configOutputFile:
+		if len(c.Extend) != 0 {
+			return fmt.Errorf("Cannot change output:file after extend functions have been added.\nMove the extend below the output:* setting.")
+		}
 		c.OutputFile, err = parse.File(ctx.WorkDir, rest)
+		c.inferOutputPackage(ctx)
 	case "output:format":
 		if len(c.Extend) != 0 {
-			return fmt.Errorf("Cannot change output:format after extend functions have been added.\nMove the extend below the output:format setting.")
+			return fmt.Errorf("Cannot change output:format after extend functions have been added.\nMove the extend below the output:* setting.")
 		}
 
 		c.OutputFormat, err = parse.Enum(false, rest, FormatFunction, FormatStruct, FormatVariable)
@@ -203,6 +199,11 @@ func parseConverterLine(ctx *context, c *Converter, value string) (err error) {
 			return fmt.Errorf("unsupported format for goverter:converter")
 		}
 	case "output:package":
+		if len(c.Extend) != 0 {
+			return fmt.Errorf("Cannot change output:package after extend functions have been added.\nMove the extend below the output:* setting.")
+		}
+		c.packageConfigured = true
+
 		c.OutputPackageName = ""
 		var pkg string
 		pkg, err = parse.String(rest)
@@ -215,6 +216,7 @@ func parseConverterLine(ctx *context, c *Converter, value string) (err error) {
 		case 1:
 			c.OutputPackagePath = parts[0]
 		}
+		c.inferOutputPackage(ctx)
 	case "struct:comment":
 		if err = c.requireStruct(); err != nil {
 			return err

@@ -1,0 +1,35 @@
+input:
+    input.go: |
+        package structs
+
+        // goverter:converter
+        // goverter:output:package pkg1:cde
+        type Converter interface {
+            Convert(source Input) Output
+        }
+
+        // goverter:converter
+        // goverter:output:package pkg1:abc
+        type Converter2 interface {
+            Convert(source Input) Output
+        }
+
+        type Input struct {
+            ID int
+        }
+        type Output struct {
+            ID int
+        }
+error: |-
+    Error creating converters
+        @workdir/input.go:5
+        github.com/jmattheis/goverter/execution.Converter
+    and
+        @workdir/input.go:11
+        github.com/jmattheis/goverter/execution.Converter2
+
+    Cannot use different packages
+        pkg1:cde
+        pkg1:abc
+    in the same output file:
+        @workdir/generated/generated.go
