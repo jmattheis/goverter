@@ -6,6 +6,10 @@ import GH from './GH.vue';
 
 ## unreleased
 
+- Allow unexported [`extend`](./reference/extend.md) functions with inferred
+  [`output:package`](./reference/output.md) from [`output:file`](./reference/output.md).
+  <GH issue="218" pr="219"/>
+
 ## v1.9.2
 
 - Fix comparison of signatures with aliases in

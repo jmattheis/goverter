@@ -3,8 +3,8 @@ input:
         package structs
 
         // goverter:converter
-        // goverter:extend StringPToString
         // goverter:output:file ./generated.go
+        // goverter:extend StringPToString
         type Converter interface {
             ConvertPerson(source Input) Output
         }
