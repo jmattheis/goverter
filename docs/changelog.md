@@ -6,6 +6,8 @@ import GH from './GH.vue';
 
 ## unreleased
 
+## v1.9.3
+
 - Allow unexported [`extend`](./reference/extend.md) functions with inferred
   [`output:package`](./reference/output.md) from [`output:file`](./reference/output.md).
   <GH issue="218" pr="219"/>
