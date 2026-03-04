@@ -7,14 +7,14 @@ import (
 	"github.com/jmattheis/goverter/xtype"
 )
 
-func buildTargetVar(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type, errPath ErrorPath) ([]jen.Code, *jen.Statement, *Error) {
+func buildTargetVar(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type, errPath ErrorPath) ([]jen.Code, *AssignTo, *Error) {
 	if !ctx.UseConstructor ||
 		!types.Identical(ctx.Conf.Source.T, source.T) ||
 		!types.Identical(ctx.Conf.Target.T, target.T) {
 		name := ctx.Name(target.ID())
 		variable := jen.Var().Id(name).Add(target.TypeAsJen())
 		ctx.SetErrorTargetVar(jen.Id(name))
-		return []jen.Code{variable}, jen.Id(name), nil
+		return []jen.Code{variable}, AssignOf(jen.Id(name)), nil
 	}
 	ctx.UseConstructor = false
 
@@ -37,10 +37,10 @@ func buildTargetVar(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, so
 
 	if nextID.Variable {
 		ctx.SetErrorTargetVar(nextID.Code.Clone())
-		return stmt, nextID.Code, nil
+		return stmt, AssignOf(nextID.Code).WithUpdate(ctx.Conf.DefaultUpdate), nil
 	}
 	name := ctx.Name(target.ID())
 	stmt = append(stmt, jen.Id(name).Op(":=").Add(nextID.Code))
 	ctx.SetErrorTargetVar(jen.Id(name))
-	return stmt, jen.Id(name), nil
+	return stmt, AssignOf(jen.Id(name)).WithUpdate(ctx.Conf.DefaultUpdate), nil
 }

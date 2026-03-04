@@ -25,10 +25,11 @@ func isEnum(ctx *MethodContext, source, target *xtype.Type) bool {
 
 // Build creates conversion source code for the given source and target type.
 func (*Enum) Build(gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type, path ErrorPath) ([]jen.Code, *xtype.JenID, *Error) {
-	stmt, nameVar, err := buildTargetVar(gen, ctx, sourceID, source, target, path)
+	stmt, nameAssign, err := buildTargetVar(gen, ctx, sourceID, source, target, path)
 	if err != nil {
 		return nil, nil, err
 	}
+	nameVar := nameAssign.Stmt
 
 	var cases []jen.Code
 

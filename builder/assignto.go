@@ -16,19 +16,19 @@ func AssignOf(s *jen.Statement) *AssignTo {
 }
 
 func (a *AssignTo) WithIndex(s *jen.Statement) *AssignTo {
-	return &AssignTo{
-		Stmt: a.Stmt.Clone().Index(s),
-	}
+	return &AssignTo{Stmt: a.Stmt.Clone().Index(s)}
 }
 
 func (a *AssignTo) MustAssign() *AssignTo {
-	a.Must = true
-	return a
+	return &AssignTo{Stmt: a.Stmt, Must: true, Update: a.Update}
 }
 
-func (a *AssignTo) IsUpdate() *AssignTo {
-	a.Update = true
-	return a
+func (a *AssignTo) WithStmt(s *jen.Statement) *AssignTo {
+	return &AssignTo{Stmt: s, Must: a.Must, Update: a.Update}
+}
+
+func (a *AssignTo) WithUpdate(update bool) *AssignTo {
+	return &AssignTo{Stmt: a.Stmt, Must: a.Must, Update: update}
 }
 
 func ToAssignable(assignTo *AssignTo) func(stmt []jen.Code, nextID *xtype.JenID, err *Error) ([]jen.Code, *Error) {
@@ -46,16 +46,16 @@ func AssignByBuild(b Builder, gen Generator, ctx *MethodContext, assignTo *Assig
 }
 
 func BuildByAssign(b Builder, gen Generator, ctx *MethodContext, sourceID *xtype.JenID, source, target *xtype.Type, path ErrorPath) ([]jen.Code, *xtype.JenID, *Error) {
-	buildStmt, valueVar, err := buildTargetVar(gen, ctx, sourceID, source, target, path)
+	buildStmt, assignTo, err := buildTargetVar(gen, ctx, sourceID, source, target, path)
 	if err != nil {
 		return nil, nil, err
 	}
 
-	stmt, err := b.Assign(gen, ctx, AssignOf(valueVar), sourceID, source, target, path)
+	stmt, err := b.Assign(gen, ctx, assignTo, sourceID, source, target, path)
 	if err != nil {
 		return nil, nil, err
 	}
 
 	buildStmt = append(buildStmt, stmt...)
-	return buildStmt, xtype.VariableID(valueVar), nil
+	return buildStmt, xtype.VariableID(assignTo.Stmt.Clone()), nil
 }
