@@ -6,6 +6,11 @@ import GH from './GH.vue';
 
 ## unreleased
 
+## v1.9.4
+
+- Fix [`default:update`](./reference/default.md) not applying zero value checks
+  for non-pointer source and target types. <GH issue="221" pr="222"/>
+
 ## v1.9.3
 
 - Allow unexported [`extend`](./reference/extend.md) functions with inferred
