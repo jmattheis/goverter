@@ -110,7 +110,7 @@ func defaultOutputFile(name string) string {
 	return strings.TrimSuffix(f, ext) + ".gen" + ext
 }
 
-func parseConverter(ctx *context, rawConverter *RawConverter, global RawLines) (*Converter, error) {
+func parseConverter(ctx *context, rawConverter *RawConverter, global RawLines, globalAfter RawLines) (*Converter, error) {
 	c, err := initConverter(ctx, rawConverter)
 	if err != nil {
 		return nil, err
@@ -120,6 +120,9 @@ func parseConverter(ctx *context, rawConverter *RawConverter, global RawLines) (
 		return nil, err
 	}
 	if err := parseConverterLines(ctx, c, c.IDString(), rawConverter.Converter); err != nil {
+		return nil, err
+	}
+	if err := parseConverterLines(ctx, c, "globalAfter", globalAfter); err != nil {
 		return nil, err
 	}
 
