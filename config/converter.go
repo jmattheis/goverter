@@ -8,12 +8,14 @@ import (
 
 	"github.com/jmattheis/goverter/config/parse"
 	"github.com/jmattheis/goverter/enum"
+	"github.com/jmattheis/goverter/identity"
 	"github.com/jmattheis/goverter/method"
 )
 
 const (
-	configExtend     = "extend"
-	configOutputFile = "output:file"
+	configExtend         = "extend"
+	configExtendIdentity = "extend:identity"
+	configOutputFile     = "output:file"
 )
 
 type Format string
@@ -94,6 +96,7 @@ type ConverterConfig struct {
 	OutputPackageName string
 	OutputFormat      Format
 	Extend            []*method.Definition
+	ExtendIdentity    []*identity.Definition
 	Comments          []string
 }
 
@@ -241,6 +244,22 @@ func parseConverterLine(ctx *context, c *Converter, value string) (err error) {
 				break
 			}
 			c.Extend = append(c.Extend, defs...)
+		}
+	case configExtendIdentity:
+		for _, name := range strings.Fields(rest) {
+			opts := &identity.ParseOpts{
+				ErrorPrefix:       "error parsing type",
+				OutputPackagePath: c.OutputPackagePath,
+				// Converter:         c.typeForMethod(),
+				// Params:            method.ParamsRequired,
+				// ContextMatch:      c.ArgContextRegex,
+			}
+			var defs []*identity.Definition
+			defs, err = ctx.Loader.GetMatchingIdentity(c.Package, name, opts)
+			if err != nil {
+				break
+			}
+			c.ExtendIdentity = append(c.ExtendIdentity, defs...)
 		}
 	default:
 		_, err = parseCommon(&c.Common, cmd, rest)

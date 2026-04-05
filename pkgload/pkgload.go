@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/jmattheis/goverter/config/parse"
+	"github.com/jmattheis/goverter/identity"
 	"github.com/jmattheis/goverter/method"
 	"golang.org/x/tools/go/packages"
 )
@@ -75,6 +76,35 @@ func (g *PackageLoader) GetMatching(cwd, fullMethod string, opts *method.ParseOp
 	if len(matches) == 0 {
 		return nil, fmt.Errorf(`package %s does not have methods with names that match
 the golang regexp pattern %q and a convert signature`, pkgName, name)
+	}
+
+	return matches, nil
+}
+
+func (g *PackageLoader) GetMatchingIdentity(cwd, fullMethod string, opts *identity.ParseOpts) ([]*identity.Definition, error) {
+	pkgName, name, err := ParseMethodString(cwd, fullMethod)
+	if err != nil {
+		return nil, err
+	}
+
+	// this is regexp, scan thru the package methods to find funcs that match the pattern
+	var matches []*identity.Definition
+
+	pkg, err := g.getPkg(pkgName)
+	if err != nil {
+		return nil, err
+	}
+
+	scope := pkg.Types.Scope()
+	obj := scope.Lookup(name)
+	m, err := identity.Parse(obj, opts) // , g.localConfig(pkg, name))
+	if err == nil {
+		matches = append(matches, m)
+	}
+
+	if len(matches) == 0 {
+		return nil, fmt.Errorf(`package %s does not have types with names that match
+the name %q`, pkgName, name)
 	}
 
 	return matches, nil
