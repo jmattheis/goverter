@@ -82,6 +82,10 @@ func TestScenario(t *testing.T) {
 						Lines:    scenario.Global,
 						Location: "scenario global",
 					},
+					GlobalAfter: config.RawLines{
+						Lines:    scenario.GlobalAfter,
+						Location: "scenario global after",
+					},
 				})
 
 			actualOutputFiles := toOutputFiles(testWorkDir, files)
@@ -151,8 +155,9 @@ func toOutputFiles(execDir string, files map[string][]byte) []*OutputFile {
 type Scenario struct {
 	VersionDependent bool `yaml:"version_dependent,omitempty"`
 
-	Input  map[string]string `yaml:"input"`
-	Global []string          `yaml:"global,omitempty"`
+	Input       map[string]string `yaml:"input"`
+	Global      []string          `yaml:"global,omitempty"`
+	GlobalAfter []string          `yaml:"globalAfter,omitempty"`
 
 	BuildConstraint string `yaml:"build_constraint,omitempty"`
 
