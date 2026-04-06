@@ -97,14 +97,13 @@ func (g *PackageLoader) GetMatchingIdentity(cwd, fullMethod string, opts *identi
 
 	scope := pkg.Types.Scope()
 	obj := scope.Lookup(name)
-	m, err := identity.Parse(obj, opts) // , g.localConfig(pkg, name))
+	m, err := identity.Parse(obj, opts)
 	if err == nil {
 		matches = append(matches, m)
 	}
 
 	if len(matches) == 0 {
-		return nil, fmt.Errorf(`package %s does not have types with names that match
-the name %q`, pkgName, name)
+		return nil, fmt.Errorf(`package %s does not have a type named %q`, pkgName, name)
 	}
 
 	return matches, nil

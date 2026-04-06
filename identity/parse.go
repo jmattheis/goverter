@@ -8,20 +8,10 @@ import (
 )
 
 type ParseOpts struct {
-	Location string
-	// Converter         types.Type
+	Location          string
 	OutputPackagePath string
 
 	ErrorPrefix string
-	// Params            ParamType
-	// ParamsMultiSource bool
-	// AllowTypeParams   bool
-	//
-	// ContextMatch *regexp.Regexp
-	//
-	// Generated   bool
-	// CustomCall  *jen.Statement
-	// UpdateParam string
 }
 
 func Parse(obj types.Object, opts *ParseOpts) (*Definition, error) {

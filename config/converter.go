@@ -250,9 +250,6 @@ func parseConverterLine(ctx *context, c *Converter, value string) (err error) {
 			opts := &identity.ParseOpts{
 				ErrorPrefix:       "error parsing type",
 				OutputPackagePath: c.OutputPackagePath,
-				// Converter:         c.typeForMethod(),
-				// Params:            method.ParamsRequired,
-				// ContextMatch:      c.ArgContextRegex,
 			}
 			var defs []*identity.Definition
 			defs, err = ctx.Loader.GetMatchingIdentity(c.Package, name, opts)
