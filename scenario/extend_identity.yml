@@ -5,7 +5,7 @@ input:
         import "time"
 
         // goverter:converter
-        // goverter:extend:identity time:Time *time.Time
+        // goverter:extend:identity time:Time *time:Time
         type Converter interface {
             Convert(source Input) Output
         }

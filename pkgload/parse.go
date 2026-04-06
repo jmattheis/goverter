@@ -40,17 +40,13 @@ See https://goverter.jmattheis.de/reference/extend`, fullMethod)
 }
 
 func ParseTypeString(sourcePackage, fullMethod string) (pkg, name string, isPtr bool, err error) {
+	if strings.HasPrefix(fullMethod, "*") {
+		fullMethod = strings.TrimPrefix(fullMethod, "*")
+		isPtr = true
+	}
 	pkg, name, err = ParseMethodString(sourcePackage, fullMethod)
 	if err != nil {
 		return "", "", false, err
-	}
-	if strings.HasPrefix(pkg, "*") {
-		pkg = strings.TrimPrefix(pkg, "*")
-		isPtr = true
-	}
-	if strings.HasPrefix(name, "*") {
-		name = strings.TrimPrefix(name, "*")
-		isPtr = true
 	}
 	return pkg, name, isPtr, err
 }

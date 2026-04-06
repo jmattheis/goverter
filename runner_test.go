@@ -35,9 +35,6 @@ func TestScenario(t *testing.T) {
 		file := file
 
 		testName := strings.TrimSuffix(file.Name(), filepath.Ext(file.Name()))
-		if testName != "extend_identity" {
-			continue
-		}
 
 		t.Run(testName, func(t *testing.T) {
 			if !NoParallel {
