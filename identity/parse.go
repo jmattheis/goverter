@@ -45,7 +45,7 @@ func Parse(obj types.Object, opts *ParseOpts, localOpts LocalOpts) (*Definition,
 	if localOpts.IsPtr {
 		objType = types.NewPointer(objType)
 	}
-	identityDef.Type = xtype.TypeOf(obj.Type())
+	identityDef.Type = xtype.TypeOf(objType)
 
 	return identityDef, nil
 }
