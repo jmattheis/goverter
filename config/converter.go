@@ -251,7 +251,8 @@ func parseConverterLine(ctx *context, c *Converter, value string) (err error) {
 				ErrorPrefix:       "error parsing type",
 				OutputPackagePath: c.OutputPackagePath,
 			}
-			def, err := ctx.Loader.GetMatchingIdentity(c.Package, name, opts)
+			var def *identity.Definition
+			def, err = ctx.Loader.GetMatchingIdentity(c.Package, name, opts)
 			if err != nil {
 				break
 			}
