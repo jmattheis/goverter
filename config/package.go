@@ -55,7 +55,7 @@ func registerConverterLines(lookup map[string]struct{}, cwd, filename, sourcePac
 			}
 		case configExtendIdentity:
 			for _, fullMethod := range strings.Fields(rest) {
-				registerFullMethod(lookup, sourcePackage, fullMethod)
+				registerType(lookup, sourcePackage, fullMethod)
 			}
 		case configOutputFile:
 			file, err := parse.File(cwd, rest)
@@ -87,6 +87,13 @@ func registerMethodLines(lookup map[string]struct{}, sourcePackage string, lines
 
 func registerFullMethod(lookup map[string]struct{}, sourcePackage, fullMethod string) {
 	pkg, _, err := pkgload.ParseMethodString(sourcePackage, fullMethod)
+	if err == nil {
+		lookup[pkg] = struct{}{}
+	}
+}
+
+func registerType(lookup map[string]struct{}, sourcePackage, fullMethod string) {
+	pkg, _, _, err := pkgload.ParseTypeString(sourcePackage, fullMethod)
 	if err == nil {
 		lookup[pkg] = struct{}{}
 	}
