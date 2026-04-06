@@ -1,9 +1,8 @@
 package generator
 
 import (
-	"go/types"
-
 	"github.com/jmattheis/goverter/config"
+	"github.com/jmattheis/goverter/identity"
 	"github.com/jmattheis/goverter/method"
 	"github.com/jmattheis/goverter/namer"
 )
@@ -13,9 +12,9 @@ func setupGenerator(converter *config.Converter, n *namer.Namer) (*generator, er
 	for _, def := range converter.Extend {
 		extend.RegisterOverrideOverlapping(def, def)
 	}
-	extendIdentity := map[types.Type]struct{}{}
+	extendIdentity := identity.NewIndex()
 	for _, def := range converter.ExtendIdentity {
-		extendIdentity[def.Type.T] = struct{}{}
+		extendIdentity.RegisterDefinition(def)
 	}
 
 	var err error

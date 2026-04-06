@@ -36,17 +36,12 @@ func Parse(obj types.Object, opts *ParseOpts) (*Definition, error) {
 		if opts.Location != "" {
 			loc = opts.Location + "\n    "
 		}
-		return fmt.Errorf("%s:\n    %s%s%s\n\n%s", opts.ErrorPrefix, loc, obj.String(), identityDef.ArgDebug("        "), s)
+		return fmt.Errorf("%s:\n    %s%s\n\n%s", opts.ErrorPrefix, loc, obj.String(), s)
 	}
 
 	if !xtype.Accessible(obj, opts.OutputPackagePath) {
 		return nil, formatErr("must be exported")
 	}
-
-	// sig, ok := obj.Type().(*types.Signature)
-	// if !ok {
-	// 	return nil, formatErr("must be a function")
-	// }
 
 	if pkg := obj.Pkg(); pkg != nil {
 		identityDef.Package = pkg.Path()

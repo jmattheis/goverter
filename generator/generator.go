@@ -9,6 +9,7 @@ import (
 	"github.com/dave/jennifer/jen"
 	"github.com/jmattheis/goverter/builder"
 	"github.com/jmattheis/goverter/config"
+	"github.com/jmattheis/goverter/identity"
 	"github.com/jmattheis/goverter/method"
 	"github.com/jmattheis/goverter/namer"
 	"github.com/jmattheis/goverter/xtype"
@@ -31,7 +32,7 @@ type generator struct {
 	conf           *config.Converter
 	lookup         *method.Index[generatedMethod]
 	extend         *method.Index[method.Definition]
-	extendIdentity map[types.Type]struct{}
+	extendIdentity *identity.Index
 }
 
 func (g *generator) getGenMethods() []*generatedMethod {
@@ -502,7 +503,7 @@ func (g *generator) isIdentityAssign(ctx *builder.MethodContext, source, target 
 	if !types.Identical(source.T, target.T) {
 		return false
 	}
-	if _, ok := g.extendIdentity[source.T]; !ok {
+	if !g.extendIdentity.Has(source.T) {
 		return false
 	}
 	return true
