@@ -251,12 +251,11 @@ func parseConverterLine(ctx *context, c *Converter, value string) (err error) {
 				ErrorPrefix:       "error parsing type",
 				OutputPackagePath: c.OutputPackagePath,
 			}
-			var defs []*identity.Definition
-			defs, err = ctx.Loader.GetMatchingIdentity(c.Package, name, opts)
+			def, err := ctx.Loader.GetMatchingIdentity(c.Package, name, opts)
 			if err != nil {
 				break
 			}
-			c.ExtendIdentity = append(c.ExtendIdentity, defs...)
+			c.ExtendIdentity = append(c.ExtendIdentity, def)
 		}
 	default:
 		_, err = parseCommon(&c.Common, cmd, rest)

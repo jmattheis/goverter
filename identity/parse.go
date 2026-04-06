@@ -14,7 +14,11 @@ type ParseOpts struct {
 	ErrorPrefix string
 }
 
-func Parse(obj types.Object, opts *ParseOpts) (*Definition, error) {
+type LocalOpts struct {
+	IsPtr bool
+}
+
+func Parse(obj types.Object, opts *ParseOpts, localOpts LocalOpts) (*Definition, error) {
 	identityDef := &Definition{
 		ID:       obj.String(),
 		OriginID: obj.String(),
@@ -37,6 +41,10 @@ func Parse(obj types.Object, opts *ParseOpts) (*Definition, error) {
 		identityDef.Package = pkg.Path()
 	}
 
+	objType := obj.Type()
+	if localOpts.IsPtr {
+		objType = types.NewPointer(objType)
+	}
 	identityDef.Type = xtype.TypeOf(obj.Type())
 
 	return identityDef, nil

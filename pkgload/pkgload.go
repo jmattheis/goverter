@@ -81,14 +81,11 @@ the golang regexp pattern %q and a convert signature`, pkgName, name)
 	return matches, nil
 }
 
-func (g *PackageLoader) GetMatchingIdentity(cwd, fullMethod string, opts *identity.ParseOpts) ([]*identity.Definition, error) {
-	pkgName, name, err := ParseMethodString(cwd, fullMethod)
+func (g *PackageLoader) GetMatchingIdentity(cwd, fullMethod string, opts *identity.ParseOpts) (*identity.Definition, error) {
+	pkgName, name, isPtr, err := ParseTypeString(cwd, fullMethod)
 	if err != nil {
 		return nil, err
 	}
-
-	// this is regexp, scan thru the package methods to find funcs that match the pattern
-	var matches []*identity.Definition
 
 	pkg, err := g.getPkg(pkgName)
 	if err != nil {
@@ -97,16 +94,15 @@ func (g *PackageLoader) GetMatchingIdentity(cwd, fullMethod string, opts *identi
 
 	scope := pkg.Types.Scope()
 	obj := scope.Lookup(name)
-	m, err := identity.Parse(obj, opts)
-	if err == nil {
-		matches = append(matches, m)
-	}
-
-	if len(matches) == 0 {
+	if obj == nil {
 		return nil, fmt.Errorf(`package %s does not have a type named %q`, pkgName, name)
 	}
+	m, err := identity.Parse(obj, opts, identity.LocalOpts{IsPtr: isPtr})
+	if err != nil {
+		return nil, err
+	}
 
-	return matches, nil
+	return m, nil
 }
 
 func (g *PackageLoader) GetUncheckedPkg(pkgName string) *packages.Package {

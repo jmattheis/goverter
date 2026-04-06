@@ -38,3 +38,14 @@ See https://goverter.jmattheis.de/reference/extend`, fullMethod)
 	}
 	return pkg, name, nil
 }
+
+func ParseTypeString(sourcePackage, fullMethod string) (pkg, name string, isPtr bool, err error) {
+	pkg, name, err = ParseMethodString(sourcePackage, fullMethod)
+	if err != nil {
+		return "", "", false, err
+	}
+	if strings.HasPrefix(pkg, "*") || strings.HasPrefix(name, "*") {
+		isPtr = true
+	}
+	return pkg, name, isPtr, err
+}
