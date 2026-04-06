@@ -5,18 +5,22 @@ import (
 )
 
 type Index struct {
-	List map[types.Type]struct{}
+	List []types.Type
 }
 
 func NewIndex() *Index {
-	return &Index{List: map[types.Type]struct{}{}}
+	return &Index{}
 }
 
 func (l *Index) Has(t types.Type) bool {
-	_, ok := l.List[t]
-	return ok
+	for _, tt := range l.List {
+		if types.Identical(t, tt) {
+			return true
+		}
+	}
+	return false
 }
 
 func (l *Index) RegisterDefinition(def *Definition) {
-	l.List[def.Type.T] = struct{}{}
+	l.List = append(l.List, def.Type.T)
 }
