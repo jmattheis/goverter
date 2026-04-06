@@ -18,10 +18,7 @@ success:
 
         package generated
 
-        import (
-        	execution "github.com/jmattheis/goverter/execution"
-        	"time"
-        )
+        import execution "github.com/jmattheis/goverter/execution"
 
         type ConverterImpl struct{}
 
