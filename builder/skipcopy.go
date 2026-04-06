@@ -12,7 +12,7 @@ type SkipCopy struct{}
 
 // Matches returns true, if the builder can create handle the given types.
 func (*SkipCopy) Matches(ctx *MethodContext, source, target *xtype.Type) bool {
-	return ctx.Conf.SkipCopySameType && types.Identical(source.T, target.T)
+	return (ctx.Conf.SkipCopySameType || ctx.ExtendIdentity.Has(source.T)) && types.Identical(source.T, target.T)
 }
 
 // Build creates conversion source code for the given source and target type.

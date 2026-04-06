@@ -145,6 +145,7 @@ func (g *generator) buildMethod(genMethod *generatedMethod, context map[string]*
 		HasMethod:         g.hasMethod,
 		OutputPackagePath: g.conf.OutputPackagePath,
 		UseConstructor:    genMethod.Constructor != nil,
+		ExtendIdentity:    g.extendIdentity,
 	}
 
 	var targetAssign *jen.Statement
@@ -440,10 +441,6 @@ func (g *generator) Build(
 		return stmt, nextID, err
 	}
 
-	if g.isIdentityAssign(ctx, source, target) {
-		return (&builder.SkipCopy{}).Build(g, ctx, sourceID, source, target, errPath)
-	}
-
 	if g.shouldCreateSubMethod(ctx, source, target) {
 		return g.createSubMethod(ctx, sourceID, source, target, errPath)
 	}
@@ -466,10 +463,6 @@ func (g *generator) Assign(
 	stmt, nextID, err := g.callExisting(ctx, sourceID, source, target, errPath)
 	if nextID != nil || err != nil {
 		return builder.ToAssignable(assignTo)(stmt, nextID, err)
-	}
-
-	if g.isIdentityAssign(ctx, source, target) {
-		return (&builder.SkipCopy{}).Assign(g, ctx, assignTo, sourceID, source, target, errPath)
 	}
 
 	if g.shouldCreateSubMethod(ctx, source, target) {
@@ -510,6 +503,10 @@ func (g *generator) isIdentityAssign(ctx *builder.MethodContext, source, target 
 }
 
 func (g *generator) shouldCreateSubMethod(ctx *builder.MethodContext, source, target *xtype.Type) bool {
+	if g.isIdentityAssign(ctx, source, target) {
+		return false
+	}
+
 	isCurrentPointerStructMethod := false
 	if source.Struct && target.Struct {
 		// This checks if we are currently inside the generation of one of the following combinations.
@@ -594,6 +591,9 @@ func (g *generator) hasMethod(ctx *builder.MethodContext, source, target types.T
 }
 
 func (g *generator) getOverlappingStructDefinition(ctx *builder.MethodContext, source, target *xtype.Type) *builder.Error {
+	if g.isIdentityAssign(ctx, source, target) {
+		return nil
+	}
 	if !source.Struct || !target.Struct {
 		return nil
 	}

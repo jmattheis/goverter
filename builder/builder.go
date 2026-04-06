@@ -5,6 +5,7 @@ import (
 
 	"github.com/dave/jennifer/jen"
 	"github.com/jmattheis/goverter/config"
+	"github.com/jmattheis/goverter/identity"
 	"github.com/jmattheis/goverter/method"
 	"github.com/jmattheis/goverter/namer"
 	"github.com/jmattheis/goverter/xtype"
@@ -69,6 +70,7 @@ type MethodContext struct {
 	TargetType        *xtype.Type
 	HasMethod         func(*MethodContext, types.Type, types.Type) bool
 	SeenNamed         map[string]struct{}
+	ExtendIdentity    *identity.Index
 
 	IndexID method.IndexID
 	Context map[string]*xtype.JenID
