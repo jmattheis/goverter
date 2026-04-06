@@ -440,7 +440,7 @@ func (g *generator) Build(
 	}
 
 	if g.isIdentityAssign(ctx, source, target) {
-		return (&builder.Basic{}).Build(g, ctx, sourceID, source, target, errPath)
+		return (&builder.SkipCopy{}).Build(g, ctx, sourceID, source, target, errPath)
 	}
 
 	if g.shouldCreateSubMethod(ctx, source, target) {
@@ -468,7 +468,7 @@ func (g *generator) Assign(
 	}
 
 	if g.isIdentityAssign(ctx, source, target) {
-		return (&builder.Basic{}).Assign(g, ctx, assignTo, sourceID, source, target, errPath)
+		return (&builder.SkipCopy{}).Assign(g, ctx, assignTo, sourceID, source, target, errPath)
 	}
 
 	if g.shouldCreateSubMethod(ctx, source, target) {
