@@ -27,10 +27,11 @@ type generatedMethod struct {
 }
 
 type generator struct {
-	namer  *namer.Namer
-	conf   *config.Converter
-	lookup *method.Index[generatedMethod]
-	extend *method.Index[method.Definition]
+	namer          *namer.Namer
+	conf           *config.Converter
+	lookup         *method.Index[generatedMethod]
+	extend         *method.Index[method.Definition]
+	extendIdentity map[types.Type]struct{}
 }
 
 func (g *generator) getGenMethods() []*generatedMethod {
@@ -438,6 +439,10 @@ func (g *generator) Build(
 		return stmt, nextID, err
 	}
 
+	if g.isIdentityAssign(ctx, source, target) {
+		return (&builder.Basic{}).Build(g, ctx, sourceID, source, target, errPath)
+	}
+
 	if g.shouldCreateSubMethod(ctx, source, target) {
 		return g.createSubMethod(ctx, sourceID, source, target, errPath)
 	}
@@ -460,6 +465,10 @@ func (g *generator) Assign(
 	stmt, nextID, err := g.callExisting(ctx, sourceID, source, target, errPath)
 	if nextID != nil || err != nil {
 		return builder.ToAssignable(assignTo)(stmt, nextID, err)
+	}
+
+	if g.isIdentityAssign(ctx, source, target) {
+		return (&builder.Basic{}).Assign(g, ctx, assignTo, sourceID, source, target, errPath)
 	}
 
 	if g.shouldCreateSubMethod(ctx, source, target) {
@@ -487,6 +496,16 @@ func (g generator) callExisting(
 		return nil, nil, builder.NewError(err.Error())
 	}
 	return nil, nil, nil
+}
+
+func (g *generator) isIdentityAssign(ctx *builder.MethodContext, source, target *xtype.Type) bool {
+	if !types.Identical(source.T, target.T) {
+		return false
+	}
+	if _, ok := g.extendIdentity[source.T]; !ok {
+		return false
+	}
+	return true
 }
 
 func (g *generator) shouldCreateSubMethod(ctx *builder.MethodContext, source, target *xtype.Type) bool {

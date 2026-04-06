@@ -53,6 +53,10 @@ func registerConverterLines(lookup map[string]struct{}, cwd, filename, sourcePac
 			for _, fullMethod := range strings.Fields(rest) {
 				registerFullMethod(lookup, sourcePackage, fullMethod)
 			}
+		case configExtendIdentity:
+			for _, fullMethod := range strings.Fields(rest) {
+				registerFullMethod(lookup, sourcePackage, fullMethod)
+			}
 		case configOutputFile:
 			file, err := parse.File(cwd, rest)
 			if err != nil {
