@@ -46,7 +46,8 @@ func (s *Struct) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, s
 
 		if fieldMapping.Ignore {
 			if ctx.Conf.DebugComments {
-				stmt = append(stmt, jen.Commentf("ignore: %s", targetField.Name()))
+				// stmt = append(stmt, jen.Commentf("ignore: %s", targetField.Name()))
+				stmt = append(stmt, jen.Commentf("ignore: %s", assignTo.Stmt.Clone().Dot(targetField.Name()).GoString()))
 			}
 			continue
 		}
