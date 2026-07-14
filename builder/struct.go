@@ -71,6 +71,9 @@ func (s *Struct) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, s
 			usedSourceID = true
 			nextID, nextSource, mapStmt, lift, skip, err := mapField(gen, ctx, targetField, sourceID, source, target, additionalFieldSources, targetFieldPath)
 			if skip {
+				if ctx.Conf.DebugComments {
+					stmt = append(stmt, jen.Commentf("skipped: %s", assignTo.Stmt.Clone().Dot(targetField.Name()).GoString()))
+				}
 				continue
 			}
 			if err != nil {
