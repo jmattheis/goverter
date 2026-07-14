@@ -45,6 +45,7 @@ func (s *Struct) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, s
 		fieldMapping := ctx.Field(target, targetField.Name())
 
 		if fieldMapping.Ignore {
+			stmt = append(stmt, jen.Commentf("ignore: %s", targetField.Name()))
 			continue
 		}
 		if !targetField.Exported() && ctx.Conf.IgnoreUnexported {
