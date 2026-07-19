@@ -47,6 +47,7 @@ These settings can be defined as [CLI argument](./define-settings.md#cli),
 [method comment](./define-settings.md#method) and are
 [inheritable](./define-settings.md#inheritance).
 
+- [`annotate:unmapped [yes,no]` annotate unmapped fields in the generated code](./annotate.md)
 - [`arg:context:regex REGEX` set context param regex](./arg.md#arg-context-regex)
 - [`enum:unknown ACTION|KEY` handle unexpected enum values](./enum.md#enum-unknown-action)
 - [`ignoreMissing [yes,no]` ignore missing struct fields](./ignoreMissing.md) 

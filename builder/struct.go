@@ -45,9 +45,15 @@ func (s *Struct) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, s
 		fieldMapping := ctx.Field(target, targetField.Name())
 
 		if fieldMapping.Ignore {
+			if ctx.Conf.AnnotateUnmapped {
+				stmt = append(stmt, unmappedComment(assignTo, targetField, "ignore"))
+			}
 			continue
 		}
 		if !targetField.Exported() && ctx.Conf.IgnoreUnexported {
+			if ctx.Conf.AnnotateUnmapped {
+				stmt = append(stmt, unmappedComment(assignTo, targetField, "ignoreUnexported"))
+			}
 			continue
 		}
 
@@ -68,6 +74,9 @@ func (s *Struct) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, s
 			usedSourceID = true
 			nextID, nextSource, mapStmt, lift, skip, err := mapField(gen, ctx, targetField, sourceID, source, target, additionalFieldSources, targetFieldPath)
 			if skip {
+				if ctx.Conf.AnnotateUnmapped {
+					stmt = append(stmt, unmappedComment(assignTo, targetField, "ignoreMissing"))
+				}
 				continue
 			}
 			if err != nil {
@@ -162,6 +171,10 @@ func shouldCheckAgainstZero(ctx *MethodContext, s, t *xtype.Type, isUpdate, call
 	default:
 		return false
 	}
+}
+
+func unmappedComment(assignTo *AssignTo, targetField *types.Var, setting string) jen.Code {
+	return jen.Commentf("%s: %s", assignTo.Stmt.Clone().Dot(targetField.Name()).GoString(), setting)
 }
 
 func mapField(

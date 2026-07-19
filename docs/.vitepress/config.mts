@@ -112,6 +112,7 @@ export default defineConfig({
                 text: "Method (inheritable)",
                 collapsed: true,
                 items: [
+                  { text: "annotate", link: "/reference/annotate" },
                   { text: "arg", link: "/reference/arg" },
                   { text: "ignoreMissing", link: "/reference/ignoreMissing" },
                   {
