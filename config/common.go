@@ -24,7 +24,7 @@ type Common struct {
 	DefaultUpdate                      bool
 	ArgContextRegex                    *regexp.Regexp
 	Enum                               enum.Config
-	DebugComments                      bool
+	AnnotateUnmapped                   bool
 }
 
 func parseCommon(c *Common, cmd, rest string) (fieldSetting bool, err error) {
@@ -76,8 +76,9 @@ func parseCommon(c *Common, cmd, rest string) (fieldSetting bool, err error) {
 		if err == nil && IsEnumAction(c.Enum.Unknown) {
 			err = validateEnumAction(c.Enum.Unknown)
 		}
-	case "debug:comments":
-		c.DebugComments, err = parse.Bool(rest)
+	case "annotate:unmapped":
+		fieldSetting = true
+		c.AnnotateUnmapped, err = parse.Bool(rest)
 	case "":
 		err = fmt.Errorf("missing setting key")
 	default:

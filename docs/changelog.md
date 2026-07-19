@@ -6,6 +6,9 @@ import GH from './GH.vue';
 
 ## unreleased
 
+- Add [`annotate:unmapped`](./reference/annotate.md) to annotate unmapped
+  fields in the generated code.
+
 ## v1.9.4
 
 - Fix [`default:update`](./reference/default.md) not applying zero value checks
