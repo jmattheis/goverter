@@ -24,8 +24,9 @@ type RawConverter struct {
 }
 
 type Raw struct {
-	Converters []RawConverter
-	Global     RawLines
+	Converters  []RawConverter
+	Global      RawLines
+	GlobalAfter RawLines
 
 	WorkDir              string
 	BuildTags            string
@@ -50,7 +51,7 @@ func Parse(raw *Raw) ([]*Converter, error) {
 
 	converters := []*Converter{}
 	for _, rawConverter := range raw.Converters {
-		converter, err := parseConverter(ctx, &rawConverter, raw.Global)
+		converter, err := parseConverter(ctx, &rawConverter, raw.Global, raw.GlobalAfter)
 		if err != nil {
 			return nil, err
 		}
@@ -72,4 +73,15 @@ func formatLineError(lines RawLines, t, value string, err error) error {
 
 %s`
 	return fmt.Errorf(msg, cmd, lines.Location, t, err)
+}
+
+func MergeRawLines(lines ...RawLines) RawLines {
+	merged := RawLines{}
+	for idx, line := range lines {
+		if idx == 0 {
+			merged.Location = line.Location
+		}
+		merged.Lines = append(merged.Lines, line.Lines...)
+	}
+	return merged
 }
