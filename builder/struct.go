@@ -89,7 +89,7 @@ func (s *Struct) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, s
 				return nil, err.Lift(lift...)
 			}
 			if shouldCheckAgainstZero(ctx, nextSource, targetFieldType, assignTo.Update, false) {
-				stmt = append(stmt, jen.If(nextID.Code.Clone().Op("!=").Add(xtype.ZeroValue(nextSource.T))).Block(fieldStmt...))
+				stmt = append(stmt, jen.If(xtype.NotZeroValueCheck(nextID.Code, nextSource.T)).Block(fieldStmt...))
 			} else {
 				stmt = append(stmt, fieldStmt...)
 			}
@@ -131,7 +131,7 @@ func (s *Struct) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, s
 			callStmt = append(callStmt, assignTo.Stmt.Clone().Dot(targetField.Name()).Op("=").Add(callReturnID.Code))
 
 			if shouldCheckAgainstZero(ctx, functionCallSourceType, targetFieldType, assignTo.Update, true) {
-				stmt = append(stmt, jen.If(functionCallSourceID.Code.Clone().Op("!=").Add(xtype.ZeroValue(functionCallSourceType.T))).Block(callStmt...))
+				stmt = append(stmt, jen.If(xtype.NotZeroValueCheck(functionCallSourceID.Code, functionCallSourceType.T)).Block(callStmt...))
 			} else {
 				stmt = append(stmt, callStmt...)
 			}
