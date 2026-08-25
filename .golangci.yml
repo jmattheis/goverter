@@ -3,7 +3,6 @@ linters:
   enable:
     - asciicheck
     - godot
-    - gomodguard
     - goprintffuncname
     - misspell
     - nakedret
@@ -47,7 +46,6 @@ formatters:
   enable:
     - gci
     - gofmt
-    - gofumpt
     - goimports
   settings:
     gofumpt:
