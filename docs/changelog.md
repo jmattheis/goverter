@@ -6,8 +6,13 @@ import GH from './GH.vue';
 
 ## unreleased
 
+## v1.10.0
+
 - Add [`annotate:unmapped`](./reference/annotate.md) to annotate unmapped
-  fields in the generated code.
+  fields in the generated code. <GH pr="226"/>
+- Add support for go1.27 <GH issue="229" pr="230"/>
+- Increase minimal go version to go1.25 due to breaking changes in x/tools for
+  go1.27 <GH issue="229" pr="230"/>
 
 ## v1.9.4
 
