@@ -11,9 +11,6 @@
      <a href="https://codecov.io/gh/jmattheis/goverter">
         <img alt="codecov" src="https://codecov.io/gh/jmattheis/goverter/branch/main/graph/badge.svg">
     </a>
-    <a href="https://goreportcard.com/report/github.com/jmattheis/goverter">
-        <img alt="Go Report Card" src="https://goreportcard.com/badge/github.com/jmattheis/goverter">
-    </a>
     <a href="https://pkg.go.dev/github.com/jmattheis/goverter">
         <img alt="Go Reference" src="https://pkg.go.dev/badge/github.com/jmattheis/goverter.svg">
     </a>
