@@ -46,6 +46,14 @@ func (*Map) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, source
 	}
 	block = append(block, valueStmt...)
 
+	if ctx.Conf.UseEmptyMapOnNil {
+		return []jen.Code{
+			assignTo.Stmt.Clone().Op("=").Make(target.TypeAsJen(), jen.Len(sourceID.Code.Clone())),
+			jen.For(jen.List(jen.Id(key), jen.Id(value)).Op(":=").Range().Add(sourceID.Code)).
+				Block(block...),
+		}, nil
+	}
+
 	stmt := []jen.Code{
 		jen.If(sourceID.Code.Clone().Op("!=").Nil()).Block(
 			assignTo.Stmt.Clone().Op("=").Make(target.TypeAsJen(), jen.Len(sourceID.Code.Clone())),
