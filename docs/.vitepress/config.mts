@@ -136,12 +136,8 @@ export default defineConfig({
                     link: "/reference/useZeroValueOnPointerInconsistency",
                   },
                   {
-                    text: "useEmptySliceOnNil",
-                    link: "/reference/useEmptySliceOnNil",
-                  },
-                  {
-                    text: "useEmptyMapOnNil",
-                    link: "/reference/useEmptyMapOnNil",
+                    text: "useEmptyOnNil",
+                    link: "/reference/useEmptyOnNil",
                   },
                   { text: "wrapErrors", link: "/reference/wrapErrors" },
                   {

@@ -57,8 +57,7 @@ These settings can be defined as [CLI argument](./define-settings.md#cli),
 - [`update:ignoreZeroValueField [yes:no]` don't update fields with zero values](./update.md#update-ignorezerovaluefield-yes-no)
 - [`useUnderlyingTypeMethods [yes|no]` use underlying types when looking for existing methods](./useUnderlyingTypeMethods.md)
 - [`useZeroValueOnPointerInconsistency [yes|no]` Use zero values for `*S` to `T` conversions](./useZeroValueOnPointerInconsistency.md)
-- [`useEmptySliceOnNil [yes|no]` initialize empty slices when source slice is nil](./useEmptySliceOnNil.md)
-- [`useEmptyMapOnNil [yes|no]` initialize empty maps when source map is nil](./useEmptyMapOnNil.md)
+- [`useEmptyOnNil [yes|no]` initialize empty slices and maps when source is nil](./useEmptyOnNil.md)
 - [`wrapErrorsUsing [PACKAGE]` wrap errors using a custom implementation](./wrapErrorsUsing.md)
 - [`wrapErrors [yes,no]` wrap errors with extra information](./wrapErrors.md)
 

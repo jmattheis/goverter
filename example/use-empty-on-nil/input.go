@@ -1,8 +1,7 @@
 package emptyonnil
 
 // goverter:converter
-// goverter:useEmptySliceOnNil
-// goverter:useEmptyMapOnNil
+// goverter:useEmptyOnNil
 type Converter interface {
 	Convert(source []Input) []Output
 	ConvertMap(source map[string]string) map[string]string

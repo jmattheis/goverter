@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"testing"
 
-	emptyonnil "github.com/jmattheis/goverter/example/use-empty-slice-on-nil"
-	"github.com/jmattheis/goverter/example/use-empty-slice-on-nil/generated"
+	emptyonnil "github.com/jmattheis/goverter/example/use-empty-on-nil"
+	"github.com/jmattheis/goverter/example/use-empty-on-nil/generated"
 	"github.com/stretchr/testify/require"
 )
 

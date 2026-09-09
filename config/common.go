@@ -69,9 +69,12 @@ func parseCommon(c *Common, cmd, rest string) (fieldSetting bool, err error) {
 		c.UseZeroValueOnPointerInconsistency, err = parse.Bool(rest)
 	case "useUnderlyingTypeMethods":
 		c.UseUnderlyingTypeMethods, err = parse.Bool(rest)
-	case "useEmptySliceOnNil":
+	case "useEmptyOnNil":
 		c.UseEmptySliceOnNil, err = parse.Bool(rest)
-	case "useEmptyMapOnNil":
+		c.UseEmptyMapOnNil = c.UseEmptySliceOnNil
+	case "useEmptyOnNil:slice":
+		c.UseEmptySliceOnNil, err = parse.Bool(rest)
+	case "useEmptyOnNil:map":
 		c.UseEmptyMapOnNil, err = parse.Bool(rest)
 	case "enum":
 		c.Enum.Enabled, err = parse.Bool(rest)
