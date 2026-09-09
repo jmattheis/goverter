@@ -55,9 +55,9 @@ These settings can be defined as [CLI argument](./define-settings.md#cli),
 - [`matchIgnoreCase [yes,no]` case-insensitive field matching](./matchIgnoreCase.md)
 - [`skipCopySameType [yes,no]` skip copying types when the source and target type are the same](./skipCopySameType.md)
 - [`update:ignoreZeroValueField [yes:no]` don't update fields with zero values](./update.md#update-ignorezerovaluefield-yes-no)
+- [`useEmptyOnNil [yes|no]` convert `nil` maps/slices to empty maps/slices](./useEmptyOnNil.md)
 - [`useUnderlyingTypeMethods [yes|no]` use underlying types when looking for existing methods](./useUnderlyingTypeMethods.md)
 - [`useZeroValueOnPointerInconsistency [yes|no]` Use zero values for `*S` to `T` conversions](./useZeroValueOnPointerInconsistency.md)
-- [`useEmptyOnNil [yes|no]` initialize empty slices and maps when source is nil](./useEmptyOnNil.md)
 - [`wrapErrorsUsing [PACKAGE]` wrap errors using a custom implementation](./wrapErrorsUsing.md)
 - [`wrapErrors [yes,no]` wrap errors with extra information](./wrapErrors.md)
 

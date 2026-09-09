@@ -3,18 +3,8 @@
 
 package generated
 
-import useemptyonnil "github.com/jmattheis/goverter/example/use-empty-on-nil"
-
 type ConverterImpl struct{}
 
-func (c *ConverterImpl) Convert(source []useemptyonnil.Input) []useemptyonnil.Output {
-	var emptyonnilOutputList []useemptyonnil.Output
-	emptyonnilOutputList = make([]useemptyonnil.Output, len(source))
-	for i := 0; i < len(source); i++ {
-		emptyonnilOutputList[i] = c.emptyonnilInputToEmptyonnilOutput(source[i])
-	}
-	return emptyonnilOutputList
-}
 func (c *ConverterImpl) ConvertMap(source map[string]string) map[string]string {
 	var mapStringString map[string]string
 	mapStringString = make(map[string]string, len(source))
@@ -23,24 +13,17 @@ func (c *ConverterImpl) ConvertMap(source map[string]string) map[string]string {
 	}
 	return mapStringString
 }
-func (c *ConverterImpl) emptyonnilInputToEmptyonnilOutput(source useemptyonnil.Input) useemptyonnil.Output {
-	var emptyonnilOutput useemptyonnil.Output
-	emptyonnilOutput.Name = source.Name
-	return emptyonnilOutput
+func (c *ConverterImpl) ConvertSlice(source []string) []string {
+	var stringList []string
+	stringList = make([]string, len(source))
+	for i := 0; i < len(source); i++ {
+		stringList[i] = source[i]
+	}
+	return stringList
 }
 
 type StrictConverterImpl struct{}
 
-func (c *StrictConverterImpl) Convert(source []useemptyonnil.Input) []useemptyonnil.Output {
-	var emptyonnilOutputList []useemptyonnil.Output
-	if source != nil {
-		emptyonnilOutputList = make([]useemptyonnil.Output, len(source))
-		for i := 0; i < len(source); i++ {
-			emptyonnilOutputList[i] = c.emptyonnilInputToEmptyonnilOutput2(source[i])
-		}
-	}
-	return emptyonnilOutputList
-}
 func (c *StrictConverterImpl) ConvertMap(source map[string]string) map[string]string {
 	var mapStringString map[string]string
 	if source != nil {
@@ -51,8 +34,13 @@ func (c *StrictConverterImpl) ConvertMap(source map[string]string) map[string]st
 	}
 	return mapStringString
 }
-func (c *StrictConverterImpl) emptyonnilInputToEmptyonnilOutput2(source useemptyonnil.Input) useemptyonnil.Output {
-	var emptyonnilOutput useemptyonnil.Output
-	emptyonnilOutput.Name = source.Name
-	return emptyonnilOutput
+func (c *StrictConverterImpl) ConvertSlice(source []string) []string {
+	var stringList []string
+	if source != nil {
+		stringList = make([]string, len(source))
+		for i := 0; i < len(source); i++ {
+			stringList[i] = source[i]
+		}
+	}
+	return stringList
 }
