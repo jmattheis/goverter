@@ -49,7 +49,7 @@ jobs:
     steps:
       - uses: actions/setup-go@v7
         with:
-          go-version: 1.25.x
+          go-version: 1.27.x
       - uses: actions/checkout@v7
       - run: |
           go get -u golang.org/x/tools
