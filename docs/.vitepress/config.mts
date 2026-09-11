@@ -127,6 +127,7 @@ export default defineConfig({
                     text: "skipCopySameType",
                     link: "/reference/skipCopySameType",
                   },
+                  { text: "useEmptyOnNil", link: "/reference/useEmptyOnNil" },
                   {
                     text: "useUnderlyingTypeMethods",
                     link: "/reference/useUnderlyingTypeMethods",
@@ -134,10 +135,6 @@ export default defineConfig({
                   {
                     text: "useZeroValueOnPointerInconsistency",
                     link: "/reference/useZeroValueOnPointerInconsistency",
-                  },
-                  {
-                    text: "useEmptyOnNil",
-                    link: "/reference/useEmptyOnNil",
                   },
                   { text: "wrapErrors", link: "/reference/wrapErrors" },
                   {
