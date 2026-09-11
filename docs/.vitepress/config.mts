@@ -127,6 +127,7 @@ export default defineConfig({
                     text: "skipCopySameType",
                     link: "/reference/skipCopySameType",
                   },
+                  { text: "useEmptyOnNil", link: "/reference/useEmptyOnNil" },
                   {
                     text: "useUnderlyingTypeMethods",
                     link: "/reference/useUnderlyingTypeMethods",

@@ -6,6 +6,11 @@ import GH from './GH.vue';
 
 ## unreleased
 
+## v1.11.0
+
+- Add [`useEmptyOnNil`](./reference/useEmptyOnNil.md) to convert `nil` slices/maps to empty slices/maps.
+  <GH issue="231" pr="232"/>
+
 ## v1.10.0
 
 - Add [`annotate:unmapped`](./reference/annotate.md) to annotate unmapped

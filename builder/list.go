@@ -67,5 +67,9 @@ func (*List) Assign(gen Generator, ctx *MethodContext, assignTo *AssignTo, sourc
 		return result, nil
 	}
 
+	if ctx.Conf.UseEmptySliceOnNil {
+		return result, nil
+	}
+
 	return []jen.Code{jen.If(sourceID.Code.Clone().Op("!=").Nil()).Block(result...)}, nil
 }
