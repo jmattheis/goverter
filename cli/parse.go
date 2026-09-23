@@ -62,8 +62,11 @@ func parseGen(cmd string, args []string) (Command, error) {
 	fs.Usage = func() {}
 
 	var global Strings
+	var globalAfter Strings
 	fs.Var(&global, "global", "")
 	fs.Var(&global, "g", "")
+	fs.Var(&globalAfter, "global-after", "")
+	fs.Var(&globalAfter, "ga", "")
 
 	buildTags := fs.String("build-tags", "goverter", "")
 	outputConstraint := fs.String("output-constraint", "!goverter", "")
@@ -91,6 +94,10 @@ func parseGen(cmd string, args []string) (Command, error) {
 		Global: config.RawLines{
 			Lines:    global,
 			Location: "command line (-g, -global)",
+		},
+		GlobalAfter: config.RawLines{
+			Lines:    globalAfter,
+			Location: "command line (-ga, -global-after)",
 		},
 	}
 	return &Generate{Config: &c}, nil

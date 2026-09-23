@@ -31,7 +31,7 @@ func getPackages(raw *Raw) []string {
 		lookup[filepath.Join(c.PackagePath, "generated")] = struct{}{}
 
 		registerConverterLines(lookup, raw.WorkDir, c.FileName, c.PackagePath, c.Converter)
-		registerConverterLines(lookup, raw.WorkDir, c.FileName, c.PackagePath, raw.Global)
+		registerConverterLines(lookup, raw.WorkDir, c.FileName, c.PackagePath, MergeRawLines(raw.Global, raw.GlobalAfter))
 		for _, m := range c.Methods {
 			registerMethodLines(lookup, c.PackagePath, m)
 		}
