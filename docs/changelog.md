@@ -6,6 +6,12 @@ import GH from './GH.vue';
 
 ## unreleased
 
+## v1.11.1
+
+- Fix go1.27.2 support <GH issue="234" pr="233"/>
+- Increase minimal go version to go1.26 due to breaking changes in x/tools for
+  go1.27.2 <GH issue="234" pr="233"/>
+
 ## v1.11.0
 
 - Add [`useEmptyOnNil`](./reference/useEmptyOnNil.md) to convert `nil` slices/maps to empty slices/maps.
