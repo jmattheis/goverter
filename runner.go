@@ -18,6 +18,8 @@ type GenerateConfig struct {
 	WorkingDir string
 	// Global are the global config commands that will be applied to all converters
 	Global config.RawLines
+	// GlobalAfter are the global config commands that will be applied to all converters after local config.
+	GlobalAfter config.RawLines
 	// BuildTags is a comma separated list passed to -tags when scanning for conversion interfaces.
 	BuildTags string
 	// OutputBuildConstraint will be added as go:build constraints to all files.
@@ -47,10 +49,11 @@ func generateConvertersRaw(c *GenerateConfig) (map[string][]byte, error) {
 	}
 
 	converters, err := config.Parse(&config.Raw{
-		BuildTags:  c.BuildTags,
-		WorkDir:    c.WorkingDir,
-		Converters: rawConverters,
-		Global:     c.Global,
+		BuildTags:   c.BuildTags,
+		WorkDir:     c.WorkingDir,
+		Converters:  rawConverters,
+		Global:      c.Global,
+		GlobalAfter: c.GlobalAfter,
 
 		OuputBuildConstraint: c.OutputBuildConstraint,
 
