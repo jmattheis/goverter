@@ -14,16 +14,49 @@ import (
 
 func New(workDir, buildTags string, paths []string) (*PackageLoader, error) {
 	loader := &PackageLoader{
-		lookup: map[string]*packages.Package{},
-		locals: map[string]map[string]method.LocalOpts{},
+		lookup:    map[string]*packages.Package{},
+		locals:    map[string]map[string]method.LocalOpts{},
+		types:     map[string]*types.Package{},
+		workDir:   workDir,
+		buildTags: buildTags,
 	}
-	err := loader.load(workDir, buildTags, paths)
+	err := loader.load(paths)
 	return loader, err
 }
 
 type PackageLoader struct {
-	lookup map[string]*packages.Package
-	locals map[string]map[string]method.LocalOpts
+	lookup    map[string]*packages.Package
+	locals    map[string]map[string]method.LocalOpts
+	types     map[string]*types.Package
+	workDir   string
+	buildTags string
+}
+
+// Types returns the fully loaded types of the package with the given path, or nil when it
+// cannot be loaded. A package goverter was asked to load is returned as is; any other is
+// loaded once on first use.
+func (g *PackageLoader) Types(path string) *types.Package {
+	if pkg, ok := g.lookup[path]; ok && len(pkg.Errors) == 0 {
+		return pkg.Types
+	}
+	if pkg, ok := g.types[path]; ok {
+		return pkg
+	}
+	pkgs, err := packages.Load(g.config(packages.NeedName|packages.NeedTypes), path)
+	var result *types.Package
+	if err == nil && len(pkgs) == 1 && len(pkgs[0].Errors) == 0 {
+		result = pkgs[0].Types
+	}
+	g.types[path] = result
+	return result
+}
+
+func (g *PackageLoader) config(mode packages.LoadMode) *packages.Config {
+	cfg := &packages.Config{Mode: mode, Dir: g.workDir}
+	if g.buildTags != "" {
+		cfg.BuildFlags = append(cfg.BuildFlags, "-tags", g.buildTags)
+	}
+	return cfg
 }
 
 func (g *PackageLoader) GetMatching(cwd, fullMethod string, opts *method.ParseOpts) ([]*method.Definition, error) {
@@ -169,14 +202,8 @@ func (g *PackageLoader) getOneParsed(pkgName, name string, opts *method.ParseOpt
 }
 
 // loadPackages is used to load extend packages, with caching support.
-func (g *PackageLoader) load(workDir, buildTags string, paths []string) error {
-	packagesCfg := &packages.Config{
-		Mode: packages.NeedName | packages.NeedTypes | packages.NeedTypesInfo | packages.NeedSyntax,
-		Dir:  workDir,
-	}
-	if buildTags != "" {
-		packagesCfg.BuildFlags = append(packagesCfg.BuildFlags, "-tags", buildTags)
-	}
+func (g *PackageLoader) load(paths []string) error {
+	packagesCfg := g.config(packages.NeedName | packages.NeedTypes | packages.NeedTypesInfo | packages.NeedSyntax)
 	pkgs, err := packages.Load(packagesCfg, paths...)
 	if err != nil {
 		// This happens rare, and only if somebody uses advanced package pattern query in a wrong way.

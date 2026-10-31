@@ -1,11 +1,18 @@
 package enum
 
-import "regexp"
+import (
+	"go/types"
+	"regexp"
+)
 
 type Config struct {
 	Unknown  string
 	Enabled  bool
 	Excludes IDPatterns
+	// Package loads the package with the given path in full. Enum detection uses it for a
+	// package known only through another package's export data, whose scope lacks the
+	// constants that make a type an enum.
+	Package func(path string) *types.Package
 }
 
 type IDPattern struct {
