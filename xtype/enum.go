@@ -31,31 +31,8 @@ func loadEnum(t *types.Named, cfg *enum.Config) *Enum {
 		return disabled
 	}
 
-	e, ok := enum.Detect(complete(t, cfg))
+	e, ok := enum.Detect(t)
 	return &Enum{OK: ok, Enum: e}
-}
-
-// complete returns t as declared in its fully loaded package. A package that is only known
-// through the export data of another package is incomplete: its scope holds the objects the
-// other package references, so an enum's constants are missing in part or in full.
-func complete(t *types.Named, cfg *enum.Config) *types.Named {
-	pkg := t.Obj().Pkg()
-	if pkg.Complete() || cfg.Package == nil {
-		return t
-	}
-	full := cfg.Package(pkg.Path())
-	if full == nil {
-		return t
-	}
-	obj, ok := full.Scope().Lookup(t.Obj().Name()).(*types.TypeName)
-	if !ok {
-		return t
-	}
-	named, ok := obj.Type().(*types.Named)
-	if !ok {
-		return t
-	}
-	return named
 }
 
 func (e Enum) SortedMembers() []string {

@@ -143,13 +143,11 @@ func initConverter(ctx *context, rawConverter *RawConverter) (*Converter, error)
 
 		c.typ = interfaceObj.Type()
 		c.Name = rawConverter.InterfaceName + "Impl"
-		c.Enum.Package = ctx.Loader.Types
 		c.inferOutputPackage(ctx)
 		return c, nil
 	}
 
 	c.ConverterConfig = DefaultConfigVariables
-	c.Enum.Package = ctx.Loader.Types
 	c.OutputFile = defaultOutputFile(rawConverter.FileName)
 	c.OutputPackageName = rawConverter.PackageName
 	c.OutputPackagePath = rawConverter.PackagePath
