@@ -171,7 +171,8 @@ func (g *PackageLoader) getOneParsed(pkgName, name string, opts *method.ParseOpt
 // loadPackages is used to load extend packages, with caching support.
 func (g *PackageLoader) load(workDir, buildTags string, paths []string) error {
 	packagesCfg := &packages.Config{
-		Mode: packages.NeedName | packages.NeedTypes | packages.NeedTypesInfo | packages.NeedSyntax,
+		Mode: packages.NeedName | packages.NeedTypes | packages.NeedTypesInfo | packages.NeedSyntax |
+			packages.NeedImports | packages.NeedDeps,
 		Dir:  workDir,
 	}
 	if buildTags != "" {

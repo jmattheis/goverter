@@ -6,6 +6,10 @@ import GH from './GH.vue';
 
 ## unreleased
 
+- Fix enum detection for an enum whose package the converter doesn't import. goverter saw such a
+  package only through another package's export data, without its constants, and converted the
+  enum with a plain cast. <GH issue="236"/>
+
 ## v1.11.1
 
 - Fix go1.27.2 support <GH issue="234" pr="233"/>
